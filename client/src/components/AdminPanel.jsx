@@ -16,6 +16,7 @@ const ROLE_BADGE = {
 export default function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("counselors");
 
   async function load() {
     setLoading(true);
@@ -28,7 +29,10 @@ export default function AdminPanel() {
   }, []);
 
   const pending = users.filter((u) => u.role === "counselor" && !u.approved);
-  const others = users.filter((u) => !(u.role === "counselor" && !u.approved));
+  const filteredUsers =
+    activeTab === "counselors"
+      ? users.filter((u) => u.role === "counselor" || u.role === "admin")
+      : users.filter((u) => u.role === "student");
 
   async function handle(action, id) {
     await action(id);
@@ -37,14 +41,31 @@ export default function AdminPanel() {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
-      <p className="text-teal font-semibold tracking-widest text-xs mb-2">
-        ADMIN
-      </p>
-      <h1 className="font-display text-3xl text-ink mb-6">Manage counselor accounts</h1>
+      <p className="text-teal font-semibold tracking-widest text-xs mb-2">ADMIN</p>
+      <h1 className="font-display text-3xl text-ink mb-6">Manage users</h1>
+
+      <div className="inline-flex rounded-full border border-ink/10 bg-white p-1 mb-8">
+        <button
+          onClick={() => setActiveTab("counselors")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+            activeTab === "counselors" ? "bg-ink text-white" : "text-ink/70 hover:text-ink"
+          }`}
+        >
+          Manage Counselors
+        </button>
+        <button
+          onClick={() => setActiveTab("students")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+            activeTab === "students" ? "bg-ink text-white" : "text-ink/70 hover:text-ink"
+          }`}
+        >
+          Manage Students
+        </button>
+      </div>
 
       {loading && <p className="text-ink/50 text-sm">Loading…</p>}
 
-      {!loading && pending.length > 0 && (
+      {!loading && activeTab === "counselors" && pending.length > 0 && (
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-ink/70 uppercase tracking-wide mb-3">
             Pending approval ({pending.length})
@@ -82,10 +103,10 @@ export default function AdminPanel() {
       {!loading && (
         <div>
           <h2 className="text-sm font-semibold text-ink/70 uppercase tracking-wide mb-3">
-            All accounts
+            {activeTab === "counselors" ? "Counselor and admin accounts" : "Student accounts"}
           </h2>
           <div className="space-y-2">
-            {others.map((u) => (
+            {filteredUsers.map((u) => (
               <div
                 key={u.id}
                 className="bg-white rounded-xl p-4 shadow-sm border border-ink/5 flex items-center justify-between"
