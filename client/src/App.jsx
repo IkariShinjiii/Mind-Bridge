@@ -25,7 +25,7 @@ const TABS_BY_ROLE = {
     { id: "availability", label: "Manage Availability" },
     { id: "appointments", label: "Appointments" },
   ],
-  admin: [{ id: "admin", label: "Manage Counselors" }],
+  admin: [{ id: "admin", label: "Manage Users" }],
 };
 
 function AppContent() {
