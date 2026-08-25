@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAssessments, updateAssessmentStatus } from "../api";
+import Spinner from "./Spinner";
 
 const RISK_STYLES = {
   high: "bg-red-100 text-red-700 border-red-200",
@@ -17,6 +18,7 @@ export default function CounselorDashboard() {
   const [cases, setCases] = useState([]);
   const [filter, setFilter] = useState("flagged");
   const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
 
   async function load() {
     try {
@@ -32,8 +34,14 @@ export default function CounselorDashboard() {
   }, []);
 
   async function markReviewed(id, nextStatus = "reviewed") {
-    await updateAssessmentStatus(id, nextStatus);
-    load();
+    if (updatingId) return;
+    setUpdatingId(id);
+    try {
+      await updateAssessmentStatus(id, nextStatus);
+      load();
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
   const visible = useMemo(() => {
@@ -134,16 +142,32 @@ export default function CounselorDashboard() {
                       {status !== "reviewed" ? (
                         <button
                           onClick={() => markReviewed(item.id, "reviewed")}
-                          className="w-full rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition hover:brightness-110 sm:w-auto"
+                          disabled={updatingId === item.id}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
-                          Mark reviewed
+                          {updatingId === item.id ? (
+                            <>
+                              <Spinner size={14} color="#ffffff" className="text-white" />
+                              <span>Updating…</span>
+                            </>
+                          ) : (
+                            "Mark reviewed"
+                          )}
                         </button>
                       ) : (
                         <button
                           onClick={() => markReviewed(item.id, "open")}
-                          className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium text-ink/80 transition hover:border-ink/40 sm:w-auto"
+                          disabled={updatingId === item.id}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium text-ink/80 transition duration-200 hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
-                          Re-open
+                          {updatingId === item.id ? (
+                            <>
+                              <Spinner size={14} className="text-ink/80" />
+                              <span>Updating…</span>
+                            </>
+                          ) : (
+                            "Re-open"
+                          )}
                         </button>
                       )}
                     </td>

@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { getMyAvailability, addAvailability, removeAvailability } from "../api";
+import Spinner from "./Spinner";
 
 export default function ManageAvailability() {
   const [slots, setSlots] = useState([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [error, setError] = useState("");
+  const [savingSlot, setSavingSlot] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   async function load() {
     setSlots(await getMyAvailability());
@@ -17,10 +20,12 @@ export default function ManageAvailability() {
 
   async function handleAdd(e) {
     e.preventDefault();
-    if (!start || !end) {
+    if (!start || !end || savingSlot) {
       setError("Please choose both a start and end time.");
       return;
     }
+
+    setSavingSlot(true);
     try {
       await addAvailability(start, end);
       setStart("");
@@ -29,12 +34,20 @@ export default function ManageAvailability() {
       load();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSavingSlot(false);
     }
   }
 
   async function handleRemove(id) {
-    await removeAvailability(id);
-    load();
+    if (removingId) return;
+    setRemovingId(id);
+    try {
+      await removeAvailability(id);
+      load();
+    } finally {
+      setRemovingId(null);
+    }
   }
 
   return (
@@ -65,8 +78,19 @@ export default function ManageAvailability() {
             />
           </div>
           <div className="flex items-end">
-            <button type="submit" className="w-full bg-ink text-white rounded-lg px-5 py-2.5 text-sm font-semibold hover:brightness-110">
-              Add slot
+            <button
+              type="submit"
+              disabled={savingSlot}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {savingSlot ? (
+                <>
+                  <Spinner size={14} color="#ffffff" className="text-white" />
+                  <span>Adding…</span>
+                </>
+              ) : (
+                "Add slot"
+              )}
             </button>
           </div>
         </div>
@@ -84,8 +108,19 @@ export default function ManageAvailability() {
               <div className="font-medium text-ink">{new Date(s.start).toLocaleString()}</div>
               <div className="text-sm text-ink/60">to {new Date(s.end).toLocaleString()}</div>
             </div>
-            <button onClick={() => handleRemove(s.id)} className="text-sm text-red-600 hover:underline">
-              Remove
+            <button
+              onClick={() => handleRemove(s.id)}
+              disabled={removingId === s.id}
+              className="inline-flex items-center justify-center gap-2 text-sm text-red-600 transition hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {removingId === s.id ? (
+                <>
+                  <Spinner size={14} color="#dc2626" className="text-red-600" />
+                  <span>Removing…</span>
+                </>
+              ) : (
+                "Remove"
+              )}
             </button>
           </div>
         ))}

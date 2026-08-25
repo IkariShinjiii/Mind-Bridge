@@ -20,6 +20,7 @@ import {
   deactivateUser,
   reactivateUser,
 } from "../api";
+import Spinner from "./Spinner";
 
 const ROLE_BADGE = {
   student: "bg-teal/10 text-teal border-teal/30",
@@ -69,6 +70,8 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("counselors");
   const [auditLogs, setAuditLogs] = useState(defaultAuditLogs);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [exportingCsv, setExportingCsv] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -168,39 +171,52 @@ export default function AdminPanel() {
   }
 
   async function handle(action, id) {
-    await action(id);
-    load();
+    if (actionLoadingId) return;
+    setActionLoadingId(id);
+    try {
+      await action(id);
+      await load();
+    } finally {
+      setActionLoadingId(null);
+    }
   }
 
   function exportCsv() {
-    const rows = assessments.length
-      ? assessments.map((item, index) => ({
-          student_id: `ST-${String(index + 1).padStart(4, "0")}`,
-          risk_level: String(item.riskLevel || "low").toLowerCase(),
-          status: item.status || "open",
-          score: Number.isFinite(item.score) ? item.score : "n/a",
-          created_at: item.createdAt || item.submittedAt || "",
-          reviewed_at: item.reviewedAt || "",
-        }))
-      : [{ student_id: "ST-0000", risk_level: "low", status: "n/a", score: "n/a", created_at: "", reviewed_at: "" }];
+    if (exportingCsv) return;
+    setExportingCsv(true);
 
-    const headers = ["student_id", "risk_level", "status", "score", "created_at", "reviewed_at"];
-    const csv = [
-      headers,
-      ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`)),
-    ]
-      .map((line) => line.join(","))
-      .join("\n");
+    try {
+      const rows = assessments.length
+        ? assessments.map((item, index) => ({
+            student_id: `ST-${String(index + 1).padStart(4, "0")}`,
+            risk_level: String(item.riskLevel || "low").toLowerCase(),
+            status: item.status || "open",
+            score: Number.isFinite(item.score) ? item.score : "n/a",
+            created_at: item.createdAt || item.submittedAt || "",
+            reviewed_at: item.reviewedAt || "",
+          }))
+        : [{ student_id: "ST-0000", risk_level: "low", status: "n/a", score: "n/a", created_at: "", reviewed_at: "" }];
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `mindbridge-compliance-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      const headers = ["student_id", "risk_level", "status", "score", "created_at", "reviewed_at"];
+      const csv = [
+        headers,
+        ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`)),
+      ]
+        .map((line) => line.join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `mindbridge-compliance-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingCsv(false);
+    }
   }
 
   return (
@@ -289,15 +305,31 @@ export default function AdminPanel() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handle(approveCounselor, u.id)}
-                        className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition hover:brightness-110"
+                        disabled={actionLoadingId === u.id}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Approve
+                        {actionLoadingId === u.id ? (
+                          <>
+                            <Spinner size={14} color="#ffffff" className="text-white" />
+                            <span>Approving…</span>
+                          </>
+                        ) : (
+                          "Approve"
+                        )}
                       </button>
                       <button
                         onClick={() => handle(rejectCounselor, u.id)}
-                        className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        disabled={actionLoadingId === u.id}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition duration-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Reject
+                        {actionLoadingId === u.id ? (
+                          <>
+                            <Spinner size={14} color="#dc2626" className="text-red-600" />
+                            <span>Rejecting…</span>
+                          </>
+                        ) : (
+                          "Reject"
+                        )}
                       </button>
                     </div>
                   </div>
@@ -342,13 +374,25 @@ export default function AdminPanel() {
                   {u.role !== "admin" && (
                     <button
                       onClick={() => handle(u.active === false ? reactivateUser : deactivateUser, u.id)}
-                      className={`w-full rounded-lg border px-4 py-2 text-sm font-medium transition sm:w-auto ${
+                      disabled={actionLoadingId === u.id}
+                      className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
                         u.active === false
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                          : "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
+                          : "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-60"
                       }`}
                     >
-                      {u.active === false ? "Reactivate" : "Deactivate"}
+                      {actionLoadingId === u.id ? (
+                        <>
+                          <Spinner
+                            size={14}
+                            color={u.active === false ? "#047857" : "#dc2626"}
+                            className={u.active === false ? "text-emerald-700" : "text-red-600"}
+                          />
+                          <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
+                        </>
+                      ) : (
+                        u.active === false ? "Reactivate" : "Deactivate"
+                      )}
                     </button>
                   )}
                 </div>
@@ -506,9 +550,17 @@ export default function AdminPanel() {
             <button
               type="button"
               onClick={exportCsv}
-              className="rounded-lg bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+              disabled={exportingCsv}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Export CSV
+              {exportingCsv ? (
+                <>
+                  <Spinner size={15} color="#ffffff" className="text-white" />
+                  <span>Exporting…</span>
+                </>
+              ) : (
+                "Export CSV"
+              )}
             </button>
           </div>
         </section>

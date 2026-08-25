@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getSurvey, submitResponse } from "../api";
 import { useAuth } from "../AuthContext.jsx";
+import Spinner from "./Spinner";
 
 const SCALE = [
   { value: 0, label: "Not at all" },
@@ -73,9 +74,16 @@ export default function SurveyForm({ onSubmitted }) {
         <button
           type="submit"
           disabled={!allAnswered || submitting}
-          className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-95 transition"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {submitting ? "Submitting…" : "Submit check-in"}
+          {submitting ? (
+            <>
+              <Spinner size={15} className="text-ink" />
+              <span>Submitting…</span>
+            </>
+          ) : (
+            "Submit check-in"
+          )}
         </button>
       </form>
     </div>

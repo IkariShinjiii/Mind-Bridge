@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { getAvailability, bookAppointment } from "../api";
+import Spinner from "./Spinner";
 
 export default function AppointmentScheduler({ onBooked }) {
   const [slots, setSlots] = useState([]);
   const [selected, setSelected] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState(false);
   const [error, setError] = useState("");
 
   async function load() {
@@ -24,13 +26,16 @@ export default function AppointmentScheduler({ onBooked }) {
   }, []);
 
   async function handleBook() {
-    if (!selected) return;
+    if (!selected || booking) return;
+    setBooking(true);
     try {
       const appt = await bookAppointment(selected);
       setConfirmed(appt);
       setError("");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBooking(false);
     }
   }
 
@@ -78,10 +83,17 @@ export default function AppointmentScheduler({ onBooked }) {
 
       <button
         onClick={handleBook}
-        disabled={!selected}
-        className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-95 transition"
+        disabled={!selected || booking}
+        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Confirm booking
+        {booking ? (
+          <>
+            <Spinner size={15} className="text-ink" />
+            <span>Confirming…</span>
+          </>
+        ) : (
+          "Confirm booking"
+        )}
       </button>
     </div>
   );

@@ -3,6 +3,7 @@ import { useAuth } from "../AuthContext.jsx";
 import { apiUrl, forgotPassword, resetPassword } from "../api";
 import logo from "../assets/mindbridge-logo.png";
 import icon from "../assets/mindbridge-icon.png";
+import Spinner from "./Spinner";
 
 // Glow wraps its icon directly so it's always centered behind it,
 // regardless of where the surrounding content sits vertically.
@@ -167,9 +168,16 @@ export default function Login() {
           type="submit"
           tabIndex={disabled ? -1 : 0}
           disabled={disabled || submitting}
-          className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 hover:brightness-95 transition"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {!disabled && submitting ? "Please wait…" : "Log in"}
+          {submitting && !disabled ? (
+            <>
+              <Spinner size={15} className="text-ink" />
+              <span>Please wait…</span>
+            </>
+          ) : (
+            "Log in"
+          )}
         </button>
       </>
     );
@@ -275,9 +283,16 @@ export default function Login() {
           type="submit"
           tabIndex={disabled ? -1 : 0}
           disabled={disabled || submitting}
-          className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 hover:brightness-95 transition"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {!disabled && submitting ? "Please wait…" : "Create account"}
+          {submitting && !disabled ? (
+            <>
+              <Spinner size={15} className="text-ink" />
+              <span>Please wait…</span>
+            </>
+          ) : (
+            "Create account"
+          )}
         </button>
       </>
     );
@@ -343,9 +358,16 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 hover:brightness-95 transition"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {submitting ? "Sending…" : "Send reset link"}
+                  {submitting ? (
+                    <>
+                      <Spinner size={15} className="text-ink" />
+                      <span>Sending…</span>
+                    </>
+                  ) : (
+                    "Send reset link"
+                  )}
                 </button>
                 <button
                   type="button"
@@ -391,9 +413,16 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-teal text-ink font-semibold rounded-lg py-3 disabled:opacity-40 hover:brightness-95 transition"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {submitting ? "Updating…" : "Update password"}
+                  {submitting ? (
+                    <>
+                      <Spinner size={15} className="text-ink" />
+                      <span>Updating…</span>
+                    </>
+                  ) : (
+                    "Update password"
+                  )}
                 </button>
               </form>
             )}
