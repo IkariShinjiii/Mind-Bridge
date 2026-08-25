@@ -1,4 +1,9 @@
-const BASE = "/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const BASE = `${API_BASE_URL}/api`;
+
+export function apiUrl(path) {
+  return `${BASE}${path}`;
+}
 
 function authHeaders() {
   const token = localStorage.getItem("token");
@@ -6,7 +11,7 @@ function authHeaders() {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(apiUrl(path), {
     ...options,
     headers: {
       "Content-Type": "application/json",

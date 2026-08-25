@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { refreshSession as apiRefreshSession } from "./api";
+import { apiUrl, refreshSession as apiRefreshSession } from "./api";
 
 const AuthContext = createContext(null);
 
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
   async function refreshUser() {
     const t = localStorage.getItem("token");
     if (!t) return;
-    const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${t}` } });
+    const res = await fetch(apiUrl("/auth/me"), { headers: { Authorization: `Bearer ${t}` } });
     if (res.ok) {
       const data = await res.json();
       setUser(data.user);
@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-    fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` } })
+    fetch(apiUrl("/auth/me"), { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
         if (!res.ok) throw new Error("Session expired");
         return res.json();

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import fs from "fs";
@@ -18,8 +19,9 @@ import { sendMail } from "./mailer.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, "data.json");
+const API_BASE_URL = process.env.VITE_API_URL || process.env.APP_URL || "http://localhost:4000";
 // Used to build links in dev-mode emails. Set APP_URL in production.
-const APP_URL = process.env.APP_URL || "http://localhost:5173";
+const APP_URL = process.env.APP_URL || API_BASE_URL;
 
 function readData() {
   if (!fs.existsSync(DATA_FILE)) {
@@ -108,9 +110,7 @@ app.post("/api/auth/register", async (req, res) => {
   // /api/auth/verify-email route below), not the frontend URL above —
   // devLink here points at that backend route so it works without any
   // frontend routing.
-  const devVerifyLink = devLink
-    ? `http://localhost:4000/api/auth/verify-email?token=${verifyToken}`
-    : undefined;
+  const devVerifyLink = devLink ? `${API_BASE_URL}/api/auth/verify-email?token=${verifyToken}` : undefined;
 
   const token = signToken(user);
   res.status(201).json({ token, user: publicUser(user), devVerifyLink });
@@ -192,9 +192,7 @@ app.post("/api/auth/resend-verification", requireAuth, loadCurrentUser, (req, re
     subject: "Verify your Student Wellness account",
     link: `${APP_URL.replace(/\/$/, "")}/verify?token=${user.verifyToken}`,
   });
-  const devVerifyLink = devLink
-    ? `http://localhost:4000/api/auth/verify-email?token=${user.verifyToken}`
-    : undefined;
+  const devVerifyLink = devLink ? `${API_BASE_URL}/api/auth/verify-email?token=${user.verifyToken}` : undefined;
 
   res.json({ message: "Verification email sent.", devVerifyLink });
 });
@@ -457,5 +455,5 @@ app.post("/api/admin/users/:id/reactivate", requireAuth, requireRole("admin"), (
 
 const PORT = 4000;
 app.listen(PORT, () => {
-  console.log(`Wellness API running on http://localhost:${PORT}`);
+  console.log(`Wellness API running on ${API_BASE_URL}`);
 });

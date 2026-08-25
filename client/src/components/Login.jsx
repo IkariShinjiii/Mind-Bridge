@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../AuthContext.jsx";
-import { forgotPassword, resetPassword } from "../api";
+import { apiUrl, forgotPassword, resetPassword } from "../api";
 import logo from "../assets/mindbridge-logo.png";
 import icon from "../assets/mindbridge-icon.png";
 
@@ -62,7 +62,7 @@ export default function Login() {
 
     setSubmitting(true);
 
-    const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
+    const endpoint = mode === "login" ? apiUrl("/auth/login") : apiUrl("/auth/register");
     const body =
       mode === "login"
         ? { email: form.email, password: form.password }
