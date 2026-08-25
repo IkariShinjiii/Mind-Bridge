@@ -36,13 +36,16 @@ export const getSurvey = () => request("/survey");
 export const submitResponse = (answers) =>
   request("/responses", { method: "POST", body: JSON.stringify({ answers }) });
 export const getResponses = () => request("/responses");
+export const getAssessments = () => request("/assessments");
 export const updateResponseStatus = (id, status) =>
   request(`/responses/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
+export const updateAssessmentStatus = (id, status) =>
+  request(`/assessments/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
 
 export const getAvailability = () => request("/availability");
 export const getMyAvailability = () => request("/availability/mine");
-export const addAvailability = (slot) =>
-  request("/availability", { method: "POST", body: JSON.stringify({ slot }) });
+export const addAvailability = (start, end) =>
+  request("/availability", { method: "POST", body: JSON.stringify({ start, end }) });
 export const removeAvailability = (id) =>
   request(`/availability/${id}`, { method: "DELETE" });
 

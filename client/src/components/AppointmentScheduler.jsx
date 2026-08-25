@@ -6,17 +6,32 @@ export default function AppointmentScheduler({ onBooked }) {
   const [selected, setSelected] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function load() {
+    try {
+      const data = await getAvailability();
+      setSlots(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    getAvailability()
-      .then(setSlots)
-      .finally(() => setLoading(false));
+    load();
   }, []);
 
   async function handleBook() {
     if (!selected) return;
-    const appt = await bookAppointment(selected);
-    setConfirmed(appt);
+    try {
+      const appt = await bookAppointment(selected);
+      setConfirmed(appt);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   if (confirmed) {
@@ -25,12 +40,9 @@ export default function AppointmentScheduler({ onBooked }) {
         <h1 className="font-display text-2xl mb-2">You're booked</h1>
         <p className="text-ink/60 mb-6">
           Your session with <strong>{confirmed.counselorName}</strong> is set
-          for <strong>{confirmed.slot}</strong>.
+          for <strong>{new Date(confirmed.start).toLocaleString()}</strong> to <strong>{new Date(confirmed.end).toLocaleString()}</strong>.
         </p>
-        <button
-          onClick={() => onBooked?.()}
-          className="text-sm font-semibold text-ink underline"
-        >
+        <button onClick={() => onBooked?.()} className="text-sm font-semibold text-ink underline">
           View my appointments
         </button>
       </div>
@@ -39,17 +51,13 @@ export default function AppointmentScheduler({ onBooked }) {
 
   return (
     <div className="max-w-md mx-auto py-12 px-6">
-      <p className="text-teal font-semibold tracking-widest text-xs mb-2">
-        BOOK SUPPORT
-      </p>
+      <p className="text-teal font-semibold tracking-widest text-xs mb-2">BOOK SUPPORT</p>
       <h1 className="font-display text-3xl text-ink mb-6">Talk to a counselor</h1>
 
+      {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       {loading && <p className="text-ink/50 text-sm">Loading available times…</p>}
-
       {!loading && slots.length === 0 && (
-        <p className="text-ink/50 text-sm">
-          No open slots right now — please check back soon.
-        </p>
+        <p className="text-ink/50 text-sm">No open slots right now — please check back soon.</p>
       )}
 
       <div className="space-y-2 mb-6">
@@ -58,12 +66,10 @@ export default function AppointmentScheduler({ onBooked }) {
             key={s.id}
             onClick={() => setSelected(s.id)}
             className={`w-full text-left text-sm rounded-lg py-2.5 px-4 border transition ${
-              selected === s.id
-                ? "bg-ink text-white border-ink"
-                : "border-ink/15 hover:border-ink/40"
+              selected === s.id ? "bg-ink text-white border-ink" : "border-ink/15 hover:border-ink/40"
             }`}
           >
-            {s.slot} · with {s.counselorName}
+            {new Date(s.start).toLocaleString()} · {new Date(s.end).toLocaleString()} · with {s.counselorName}
           </button>
         ))}
       </div>

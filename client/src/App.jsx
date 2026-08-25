@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import { useAuth } from "./AuthContext.jsx";
 import Login from "./components/Login.jsx";
 import SurveyForm from "./components/SurveyForm.jsx";
@@ -10,6 +11,7 @@ import AdminPanel from "./components/AdminPanel.jsx";
 import VerifyEmailNotice from "./components/VerifyEmailNotice.jsx";
 import PendingApproval from "./components/PendingApproval.jsx";
 import SessionBanner from "./components/SessionBanner.jsx";
+import Verify from "./pages/Verify.jsx";
 import icon from "./assets/mindbridge-icon.png";
 
 const TABS_BY_ROLE = {
@@ -26,14 +28,10 @@ const TABS_BY_ROLE = {
   admin: [{ id: "admin", label: "Manage Counselors" }],
 };
 
-export default function App() {
-  const { user, loading, logout } = useAuth();
+function AppContent() {
+  const { user, logout } = useAuth();
   const [tab, setTab] = useState(null);
   const [lastResult, setLastResult] = useState(null);
-
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-ink/50">Loading…</div>;
-  }
 
   if (!user) {
     return <Login />;
@@ -125,5 +123,20 @@ export default function App() {
 
       {user.role === "admin" && activeTab === "admin" && <AdminPanel />}
     </div>
+  );
+}
+
+export default function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-ink/50">Loading…</div>;
+  }
+
+  return (
+    <Routes>
+      <Route path="/verify" element={<Verify />} />
+      <Route path="*" element={<AppContent />} />
+    </Routes>
   );
 }

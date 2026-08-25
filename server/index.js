@@ -15,7 +15,8 @@ import {
   requireApproved,
 } from "./auth.js";
 import { generateToken, expiresInHours, isExpired } from "./tokens.js";
-import { sendMail } from "./mailer.js";
+import { sendMail, sendHighRiskAlert } from "./mailer.js";
+import { db } from "./firebase.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = path.join(__dirname, "data.json");
@@ -275,6 +276,20 @@ app.post(
 
     data.responses.unshift(record);
     writeData(data);
+
+    if (result.riskLevel === "high" || result.flaggedForImmediateReview) {
+      sendHighRiskAlert({
+        studentName: req.user.name,
+        studentEmail: req.user.email,
+        riskLevel: result.riskLevel,
+        total: result.total,
+        maxScore: result.maxScore,
+        flaggedForImmediateReview: result.flaggedForImmediateReview,
+      }).catch((err) => {
+        console.error("High-risk alert failed:", err);
+      });
+    }
+
     res.json(record);
   }
 );
@@ -288,6 +303,28 @@ app.get(
   requireApproved,
   (req, res) => {
     res.json(req._data.responses);
+  }
+);
+
+app.get(
+  "/api/assessments",
+  requireAuth,
+  requireRole("counselor"),
+  loadCurrentUser,
+  requireVerified,
+  requireApproved,
+  async (req, res) => {
+    try {
+      if (db && process.env.FIREBASE_PROJECT_ID) {
+        const snapshot = await db.collection("Assessments").orderBy("submittedAt", "desc").get();
+        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        return res.json(items);
+      }
+      return res.json(req._data.responses || []);
+    } catch (error) {
+      console.error("Failed to load Firestore assessments:", error);
+      return res.json(req._data.responses || []);
+    }
   }
 );
 
@@ -309,6 +346,39 @@ app.patch(
   }
 );
 
+app.patch(
+  "/api/assessments/:id",
+  requireAuth,
+  requireRole("counselor"),
+  loadCurrentUser,
+  requireVerified,
+  requireApproved,
+  async (req, res) => {
+    const { status } = req.body;
+    if (!status) return res.status(400).json({ error: "status is required" });
+
+    try {
+      if (db && process.env.FIREBASE_PROJECT_ID) {
+        const ref = db.collection("Assessments").doc(req.params.id);
+        const doc = await ref.get();
+        if (!doc.exists) return res.status(404).json({ error: "Assessment not found" });
+        await ref.update({ status, reviewedAt: new Date().toISOString() });
+        return res.json({ id: doc.id, status, reviewedAt: new Date().toISOString() });
+      }
+
+      const data = req._data;
+      const record = data.responses.find((r) => r.id === req.params.id);
+      if (!record) return res.status(404).json({ error: "Assessment not found" });
+      record.status = status;
+      writeData(data);
+      return res.json(record);
+    } catch (error) {
+      console.error("Failed to update assessment status:", error);
+      return res.status(500).json({ error: "Failed to update assessment status" });
+    }
+  }
+);
+
 /* ---------- APPOINTMENT SCHEDULING ---------- */
 
 app.get("/api/availability", requireAuth, (req, res) => {
@@ -324,16 +394,19 @@ app.post(
   requireVerified,
   requireApproved,
   (req, res) => {
-    const { slot } = req.body;
-    if (!slot) return res.status(400).json({ error: "slot is required" });
+    const { start, end } = req.body;
+    if (!start || !end) return res.status(400).json({ error: "start and end are required" });
 
     const data = req._data;
     const entry = {
       id: Date.now().toString(),
       counselorId: req.user.id,
       counselorName: req.user.name,
-      slot,
+      start,
+      end,
       booked: false,
+      bookedByStudentId: null,
+      bookedByStudentName: null,
     };
     data.availability.unshift(entry);
     writeData(data);
@@ -381,13 +454,17 @@ app.post(
     if (!slot) return res.status(400).json({ error: "That slot is no longer available" });
 
     slot.booked = true;
+    slot.bookedByStudentId = req.user.id;
+    slot.bookedByStudentName = req.user.name;
+
     const appt = {
       id: Date.now().toString(),
       studentId: req.user.id,
       studentName: req.user.name,
       counselorId: slot.counselorId,
       counselorName: slot.counselorName,
-      slot: slot.slot,
+      start: slot.start,
+      end: slot.end,
       status: "confirmed",
     };
     data.appointments.unshift(appt);

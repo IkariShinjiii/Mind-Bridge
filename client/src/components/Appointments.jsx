@@ -34,15 +34,12 @@ export default function Appointments() {
 
       <div className="space-y-2">
         {appointments.map((a) => (
-          <div
-            key={a.id}
-            className="bg-white rounded-xl p-5 shadow-sm border border-ink/5 flex items-center justify-between"
-          >
+          <div key={a.id} className="bg-white rounded-xl p-5 shadow-sm border border-ink/5 flex items-center justify-between">
             <div>
-              <p className="font-medium">
-                {isStudent ? `With ${a.counselorName}` : a.studentName}
+              <p className="font-medium">{isStudent ? `With ${a.counselorName}` : a.studentName}</p>
+              <p className="text-sm text-ink/50">
+                {new Date(a.start).toLocaleString()} to {new Date(a.end).toLocaleString()}
               </p>
-              <p className="text-sm text-ink/50">{a.slot}</p>
             </div>
             <span className="text-xs px-2 py-0.5 rounded-full border bg-emerald-100 text-emerald-700 border-emerald-200 capitalize">
               {a.status}
