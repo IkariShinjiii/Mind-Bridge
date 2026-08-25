@@ -51,11 +51,11 @@ export default function CounselorDashboard() {
   }, [cases, filter]);
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-6">
-      <p className="text-teal font-semibold tracking-widest text-xs mb-2">COUNSELOR VIEW</p>
-      <h1 className="font-display text-3xl text-ink mb-6">Student assessment cases</h1>
+    <div className="max-w-7xl mx-auto px-3 py-8 sm:px-6 sm:py-12">
+      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">COUNSELOR VIEW</p>
+      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-6">Student assessment cases</h1>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="mb-6 flex flex-wrap gap-2">
         {[
           ["flagged", "Flagged"],
           ["open", "Open"],
@@ -67,7 +67,7 @@ export default function CounselorDashboard() {
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`text-sm px-3 py-1.5 rounded-full border ${
+            className={`text-xs sm:text-sm px-3 py-1.5 rounded-full border transition ${
               filter === value ? "bg-ink text-white border-ink" : "border-ink/15 text-ink/70 hover:border-ink/40"
             }`}
           >
@@ -77,20 +77,20 @@ export default function CounselorDashboard() {
       </div>
 
       {loading ? (
-        <p className="text-ink/60">Loading cases…</p>
+        <p className="text-sm text-ink/60">Loading cases…</p>
       ) : visible.length === 0 ? (
-        <p className="text-ink/50 text-sm">No student cases in this view yet.</p>
+        <p className="text-sm text-ink/50">No student cases in this view yet.</p>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-2xl border border-ink/10 shadow-sm">
-          <table className="min-w-full text-left">
-            <thead className="bg-slate-50 text-sm text-ink/70">
+        <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white shadow-sm">
+          <table className="min-w-[700px] w-full text-left text-sm">
+            <thead className="bg-slate-50 text-ink/70">
               <tr>
-                <th className="px-4 py-3 font-semibold">Student</th>
-                <th className="px-4 py-3 font-semibold">Risk</th>
-                <th className="px-4 py-3 font-semibold">Score</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Submitted</th>
-                <th className="px-4 py-3 font-semibold">Action</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Student</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Risk</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Score</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Status</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Submitted</th>
+                <th className="px-3 py-3 font-semibold sm:px-4">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -105,41 +105,43 @@ export default function CounselorDashboard() {
 
                 return (
                   <tr key={item.id} className="border-t border-ink/10 align-top">
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 sm:px-4">
                       <div className="font-medium text-ink">{item.studentName || "Unknown"}</div>
                       <div className="text-xs text-ink/50">{item.studentEmail || item.email || "No email"}</div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${RISK_STYLES[risk]}`}>
-                        {risk}
-                      </span>
-                      {item.flaggedForImmediateReview && (
-                        <span className="mt-2 inline-flex rounded-full border border-red-600 bg-red-600 text-white px-2 py-1 text-[10px] ml-2">
-                          Immediate
+                    <td className="px-3 py-3 sm:px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${RISK_STYLES[risk]}`}>
+                          {risk}
                         </span>
-                      )}
+                        {item.flaggedForImmediateReview && (
+                          <span className="inline-flex rounded-full border border-red-600 bg-red-600 px-2 py-1 text-[10px] font-medium text-white">
+                            Immediate
+                          </span>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-sm text-ink/80">
+                    <td className="px-3 py-3 text-ink/80 sm:px-4">
                       {item.total ?? 0}/{item.maxScore ?? 27}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 sm:px-4">
                       <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${STATUS_STYLES[status] || "bg-slate-100 text-slate-700 border-slate-200"}`}>
                         {status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-ink/70">{submittedAt}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 text-ink/70 sm:px-4">{submittedAt}</td>
+                    <td className="px-3 py-3 sm:px-4">
                       {status !== "reviewed" ? (
                         <button
                           onClick={() => markReviewed(item.id, "reviewed")}
-                          className="bg-ink text-white text-sm rounded-lg px-3 py-2 hover:brightness-110"
+                          className="w-full rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition hover:brightness-110 sm:w-auto"
                         >
                           Mark reviewed
                         </button>
                       ) : (
                         <button
                           onClick={() => markReviewed(item.id, "open")}
-                          className="border border-ink/15 text-ink/80 text-sm rounded-lg px-3 py-2 hover:border-ink/40"
+                          className="w-full rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium text-ink/80 transition hover:border-ink/40 sm:w-auto"
                         >
                           Re-open
                         </button>

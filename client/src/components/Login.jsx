@@ -412,10 +412,10 @@ export default function Login() {
 
       {/* ---------- Mobile: stacked layout, no sliding (a horizontal split doesn't fit a phone screen) ---------- */}
       <div className="relative md:hidden">
-        <div className="relative overflow-hidden bg-gradient-to-b from-ink to-ink2 pt-9 pb-11 px-6">
+        <div className="relative overflow-hidden bg-gradient-to-b from-ink to-ink2 pt-10 pb-12 px-4 sm:px-6">
           <div className="relative flex flex-col items-center text-center">
-            <BrandGlow size="w-36 h-36">
-              <img src={logo} alt="Mind Bridge" className="h-24 w-auto drop-shadow-lg" />
+            <BrandGlow size="w-32 h-32 sm:w-36 sm:h-36">
+              <img src={logo} alt="Mind Bridge" className="h-20 w-auto sm:h-24 drop-shadow-lg" />
             </BrandGlow>
             <p className="text-white/50 text-sm mt-1 max-w-[260px]">
               {mode === "login" ? "A private space to check in with yourself." : "Set up your confidential account."}
@@ -423,9 +423,9 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="flex justify-center px-6 pb-12">
-          <div className="w-full max-w-sm -mt-6 bg-white rounded-2xl shadow-xl shadow-ink/10 border border-ink/5 px-7 pt-8 pb-7 motion-safe:animate-rise">
-            <h2 className="font-display text-xl text-ink mb-6 text-center">
+        <div className="flex justify-center px-4 pb-12 sm:px-6">
+          <div className="w-full max-w-sm -mt-6 bg-white/95 rounded-[26px] shadow-[0_20px_60px_rgba(17,24,39,0.14)] border border-ink/5 px-5 pt-7 pb-6 sm:px-7 sm:pt-8 sm:pb-7 motion-safe:animate-rise">
+            <h2 className="font-display text-xl sm:text-2xl text-ink mb-6 text-center">
               {mode === "login" ? "Welcome back" : "Create an account"}
             </h2>
 
@@ -459,7 +459,7 @@ export default function Login() {
 
       {/* ---------- Desktop: sliding split panel ---------- */}
       <div className="hidden md:flex min-h-screen items-center justify-center px-6 py-10">
-        <div className="relative w-full max-w-3xl rounded-3xl overflow-hidden shadow-2xl bg-white grid grid-cols-2">
+        <div className="relative w-full max-w-3xl rounded-[30px] overflow-hidden shadow-[0_30px_80px_rgba(16,24,40,0.18)] bg-white grid grid-cols-2">
           {/* Login form — lives permanently in the left cell */}
           <div className={`px-10 py-12 flex flex-col justify-center ${overlayOnRight ? "" : "invisible"}`}>
             <h2 className="font-display text-2xl text-ink mb-6">Welcome back</h2>

@@ -38,11 +38,11 @@ export default function ManageAvailability() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-6">
-      <p className="text-teal font-semibold tracking-widest text-xs mb-2">COUNSELOR VIEW</p>
-      <h1 className="font-display text-3xl text-ink mb-6">Manage availability</h1>
+    <div className="max-w-4xl mx-auto px-3 py-8 sm:px-6 sm:py-12">
+      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">COUNSELOR VIEW</p>
+      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-6">Manage availability</h1>
 
-      <form onSubmit={handleAdd} className="bg-white rounded-2xl p-5 shadow-sm border border-ink/10 mb-8">
+      <form onSubmit={handleAdd} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-ink/10 mb-8">
         <div className="grid gap-4 md:grid-cols-3">
           <div>
             <label className="block text-sm font-medium mb-1">Start</label>
@@ -50,7 +50,7 @@ export default function ManageAvailability() {
               type="datetime-local"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5"
+              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm"
               required
             />
           </div>
@@ -60,7 +60,7 @@ export default function ManageAvailability() {
               type="datetime-local"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5"
+              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm"
               required
             />
           </div>
@@ -79,7 +79,7 @@ export default function ManageAvailability() {
 
       <div className="space-y-3">
         {slots.map((s) => (
-          <div key={s.id} className="bg-white rounded-xl px-5 py-4 shadow-sm border border-ink/10 flex items-center justify-between gap-4">
+          <div key={s.id} className="bg-white rounded-xl px-4 py-4 shadow-sm border border-ink/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="font-medium text-ink">{new Date(s.start).toLocaleString()}</div>
               <div className="text-sm text-ink/60">to {new Date(s.end).toLocaleString()}</div>

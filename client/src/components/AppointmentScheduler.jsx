@@ -50,9 +50,9 @@ export default function AppointmentScheduler({ onBooked }) {
   }
 
   return (
-    <div className="max-w-md mx-auto py-12 px-6">
-      <p className="text-teal font-semibold tracking-widest text-xs mb-2">BOOK SUPPORT</p>
-      <h1 className="font-display text-3xl text-ink mb-6">Talk to a counselor</h1>
+    <div className="max-w-lg mx-auto px-3 py-8 sm:px-6 sm:py-12">
+      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">BOOK SUPPORT</p>
+      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-6">Talk to a counselor</h1>
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       {loading && <p className="text-ink/50 text-sm">Loading available times…</p>}
@@ -65,11 +65,13 @@ export default function AppointmentScheduler({ onBooked }) {
           <button
             key={s.id}
             onClick={() => setSelected(s.id)}
-            className={`w-full text-left text-sm rounded-lg py-2.5 px-4 border transition ${
+            className={`w-full text-left text-sm rounded-xl py-3 px-4 border transition ${
               selected === s.id ? "bg-ink text-white border-ink" : "border-ink/15 hover:border-ink/40"
             }`}
           >
-            {new Date(s.start).toLocaleString()} · {new Date(s.end).toLocaleString()} · with {s.counselorName}
+            <div className="font-medium">{new Date(s.start).toLocaleString()}</div>
+            <div className="text-xs opacity-80">to {new Date(s.end).toLocaleString()}</div>
+            <div className="mt-1 text-xs opacity-80">with {s.counselorName}</div>
           </button>
         ))}
       </div>

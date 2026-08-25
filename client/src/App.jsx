@@ -52,42 +52,58 @@ function AppContent() {
     <div className="min-h-screen bg-mist">
       <SessionBanner />
       <header className="bg-ink border-b border-white/10">
-        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0">
-            <img src={icon} alt="" className="h-7 w-7" />
-            <span className="font-display text-white text-base tracking-tight">
-              Mind Bridge
-            </span>
-          </div>
+        <div className="max-w-6xl mx-auto px-3 py-3 sm:px-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <img src={icon} alt="" className="h-7 w-7" />
+                <span className="font-display text-white text-base tracking-tight">
+                  Mind Bridge
+                </span>
+              </div>
 
-          <nav className="flex items-center gap-1">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => { setTab(t.id); setLastResult(null); }}
-                className={`text-sm px-3 py-1.5 rounded-full transition ${
-                  activeTab === t.id && !lastResult
-                    ? "bg-teal text-ink font-semibold"
-                    : "text-white/70 hover:text-white"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-
-            <div className="flex items-center gap-2.5 ml-3 pl-3 border-l border-white/10">
-              <span className="hidden sm:inline text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/15 text-white/60">
-                {user.role}
-              </span>
-              <span className="text-sm text-white/80">{user.name}</span>
-              <button
-                onClick={() => logout()}
-                className="text-sm text-white/50 hover:text-white transition"
-              >
-                Log out
-              </button>
+              <div className="flex items-center gap-2 text-white/80 lg:hidden">
+                <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/15 text-white/60">
+                  {user.role}
+                </span>
+                <button
+                  onClick={() => logout()}
+                  className="text-xs text-white/60 hover:text-white transition"
+                >
+                  Log out
+                </button>
+              </div>
             </div>
-          </nav>
+
+            <nav className="flex flex-wrap items-center gap-1.5 lg:justify-end">
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => { setTab(t.id); setLastResult(null); }}
+                  className={`text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-full transition ${
+                    activeTab === t.id && !lastResult
+                      ? "bg-teal text-ink font-semibold"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+
+              <div className="hidden items-center gap-2.5 ml-2 pl-2 border-l border-white/10 lg:flex">
+                <span className="text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full border border-white/15 text-white/60">
+                  {user.role}
+                </span>
+                <span className="text-sm text-white/80">{user.name}</span>
+                <button
+                  onClick={() => logout()}
+                  className="text-sm text-white/50 hover:text-white transition"
+                >
+                  Log out
+                </button>
+              </div>
+            </nav>
+          </div>
         </div>
       </header>
 
