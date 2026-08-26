@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-mist text-ink font-body;
+html, body, #root {
+  /* Ensure a consistent dark-page background across the app shell */
+  @apply bg-gray-950 text-white;
+  height: 100%;
 }
 
 @layer base {

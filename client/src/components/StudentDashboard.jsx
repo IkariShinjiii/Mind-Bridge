@@ -96,7 +96,7 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#06021a] via-[#0b1330] to-[#0e1630] text-white">
+    <div className="min-h-screen bg-gray-950 text-white">
       {/* Constellation / network background */}
       <div className="absolute inset-0 -z-10 opacity-30 bg-[radial-gradient(ellipse_at_top_left,_#0b1228,_transparent_25%),radial-gradient(ellipse_at_bottom_right,_#001f3a,_transparent_20%)]">
         {/* subtle SVG network */}
