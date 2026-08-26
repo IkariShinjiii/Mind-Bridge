@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -28,7 +28,7 @@ html, body, #root {
     animation: fadeIn 0.45s ease-out both;
   }
   .card-surface {
-    @apply rounded-2xl border border-ink/10 bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md;
+    @apply rounded-2xl border border-white border-opacity-10 bg-gray-900 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md;
   }
   .action-button {
     @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98];
@@ -37,13 +37,13 @@ html, body, #root {
     @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98];
   }
   .panel-shell {
-    @apply animate-fade-up rounded-3xl border border-ink/10 bg-white p-4 shadow-sm transition-all duration-200 ease-out hover:shadow-md sm:p-5;
+    @apply animate-fade-up rounded-3xl border border-white border-opacity-10 bg-gray-900 p-4 shadow-sm transition-all duration-200 ease-out hover:shadow-md sm:p-5;
   }
   .soft-button {
     @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98];
   }
   .soft-card {
-    @apply rounded-2xl border border-ink/10 bg-white shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md;
+    @apply rounded-2xl border border-white border-opacity-10 bg-gray-900 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md;
   }
   .stagger-item {
     animation: fadeUp 0.42s ease-out both;

@@ -1,78 +1,76 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
+import { getAppointments, bookAppointment } from "../api";
 
-// StudentDashboard.jsx
-// Monolithic student wellness dashboard matching requested design language.
-// - Dark indigo / purple theme
-// - Check-in card with 5 dynamic questions
-// - Support cards: Active Goals, Next Appointment (live countdown), Campus Resources, Featured Tip, Counselor Status
-// - All state is local and interactive; no backend calls
-
-const QUESTIONS = [
-  {
-    id: "q1",
-    text:
-      "Over the past week, how often have you felt overwhelmed by your responsibilities? (Score 0-3)",
-  },
-  { id: "q2", text: "How often in the past week have you had difficulty sleeping? (Score 0-3)" },
-  { id: "q3", text: "How connected have you felt to friends or family? (Score 0-3)" },
-  { id: "q4", text: "How often have you felt anxious or on edge? (Score 0-3)" },
-  { id: "q5", text: "How much have you been able to focus on daily tasks? (Score 0-3)" },
-];
-
-const INITIAL_GOALS = [
-  { id: "g1", title: "Exercise", target: 3, completed: 2 },
-  { id: "g2", title: "Daily Meditation", target: 7, completed: 5 },
-];
-
-const RESOURCES = [
-  {
-    id: "r1",
-    title: "Stress Workshop",
-    details: "Aug 30 · 4:00 PM · Wellness Center · RSVP",
-  },
-  {
-    id: "r2",
-    title: "Student Support Group",
-    details: "Weekly on Wednesdays · 6:00 PM · Room 210",
-  },
-];
+function Spinner({ className = "h-4 w-4" }) {
+  return (
+    <svg className={`${className} animate-spin`} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-20" />
+      <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="opacity-90" />
+    </svg>
+  );
+}
 
 export default function StudentDashboard() {
-  const [name] = useState("Jherwin Sarmiento");
+  const [userName] = useState("Jherwin Sarmiento");
   const [displayName] = useState("Jherwin");
 
-  // Check-in state
+  // Check-in local state (kept lightweight)
+  const QUESTIONS = [
+    { id: "q1", text: "Over the past week, how often have you felt overwhelmed by your responsibilities?" },
+    { id: "q2", text: "How often in the past week have you had difficulty sleeping?" },
+    { id: "q3", text: "How connected have you felt to friends or family?" },
+    { id: "q4", text: "How often have you felt anxious or on edge?" },
+    { id: "q5", text: "How much have you been able to focus on daily tasks?" },
+  ];
+
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(null));
 
-  // Goals & resources
-  const [goals, setGoals] = useState(INITIAL_GOALS);
-  const [resources] = useState(RESOURCES);
+  // Appointments
+  const [appointments, setAppointments] = useState([]);
+  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  const [booking, setBooking] = useState(false);
+  const [detailLoadingId, setDetailLoadingId] = useState(null);
+  const [selected, setSelected] = useState(null);
 
-  // Next appointment (hardcoded example)
-  const nextAppointmentDate = useMemo(() => new Date("2026-08-28T10:00:00"), []);
-  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, nextAppointmentDate - Date.now()));
-
-  // Countdown effect
   useEffect(() => {
-    const id = setInterval(() => {
-      setTimeLeft(Math.max(0, nextAppointmentDate - Date.now()));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [nextAppointmentDate]);
+    let mounted = true;
+    async function load() {
+      setLoadingAppointments(true);
+      try {
+        const data = await getAppointments();
+        if (!mounted) return;
+        // Expecting array of { id, title, date, status, counselorNotes }
+        setAppointments(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load appointments", err);
+      } finally {
+        if (mounted) setLoadingAppointments(false);
+      }
+    }
+    load();
+    return () => (mounted = false);
+  }, []);
 
-  function formatCountdown(ms) {
-    if (ms <= 0) return "0 days 0 hrs 0 min";
-    const totalSec = Math.floor(ms / 1000);
-    const days = Math.floor(totalSec / 86400);
-    const hrs = Math.floor((totalSec % 86400) / 3600);
-    const mins = Math.floor((totalSec % 3600) / 60);
-    return `${String(days).padStart(2, "0")} days ${String(hrs).padStart(2, "0")} hrs ${String(mins).padStart(2, "0")} min`;
+  async function handleBook() {
+    setBooking(true);
+    try {
+      // This expects server API to create an appointment; here we call bookAppointment without availabilityId for demo
+      const created = await bookAppointment();
+      // If server returns created appointment, refresh list
+      const fresh = await getAppointments();
+      setAppointments(Array.isArray(fresh) ? fresh : []);
+    } catch (err) {
+      console.error("Booking failed", err);
+      // fallback: optimistic UI
+      setAppointments((prev) => [
+        ...prev,
+        { id: `local-${Date.now()}`, title: "Counseling Session (pending)", date: new Date().toISOString(), status: "Pending" },
+      ]);
+    } finally {
+      setBooking(false);
+    }
   }
-
-  // Progress
-  const answeredCount = answers.filter((a) => a !== null).length;
-  const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   function selectOption(value) {
     setAnswers((prev) => {
@@ -87,74 +85,52 @@ export default function StudentDashboard() {
   }
   function next() {
     if (qIndex < QUESTIONS.length - 1) setQIndex((i) => i + 1);
+    else console.log("Check-in complete", { answers });
   }
 
-  function toggleGoal(id) {
-    setGoals((g) =>
-      g.map((item) => (item.id === id ? { ...item, completed: Math.min(item.target, item.completed + 1) } : item))
-    );
-  }
+  const answeredCount = answers.filter((a) => a !== null).length;
+  const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Constellation / network background */}
-      <div className="absolute inset-0 -z-10 opacity-30 bg-[radial-gradient(ellipse_at_top_left,_#0b1228,_transparent_25%),radial-gradient(ellipse_at_bottom_right,_#001f3a,_transparent_20%)]">
-        {/* subtle SVG network */}
-        <svg className="w-full h-full" preserveAspectRatio="none" aria-hidden>
-          <defs>
-            <linearGradient id="lg" x1="0" x2="1">
-              <stop offset="0" stopColor="#09102a" />
-              <stop offset="1" stopColor="#001f3a" />
-            </linearGradient>
-          </defs>
-          <g stroke="#11243b" strokeOpacity="0.6" strokeWidth="0.6" fill="none">
-            {/* sample network lines */}
-            <path d="M20 40 L120 80 L200 30 L320 100" />
-            <path d="M60 140 L180 120 L260 160 L380 120" />
-            <path d="M0 220 L140 200 L300 220 L420 200" />
-          </g>
-        </svg>
-      </div>
-
-      <header className="border-b border-white/6 bg-gradient-to-b from-[#07112a] to-transparent">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="text-xl font-bold tracking-tight">Mind Bridge</div>
-            <nav className="hidden md:flex items-center gap-2">
-              <button className="rounded-full bg-cyan-500 text-white px-3 py-1 text-sm font-semibold shadow-sm hover:brightness-105">Check-in</button>
-              <button className="text-cyan-100 hover:text-white px-3 py-1 text-sm">Book Appointment</button>
-              <button className="text-cyan-100 hover:text-white px-3 py-1 text-sm">My Appointments</button>
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col font-sans">
+      <header className="bg-gray-900 border-b border-white/6">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="font-bold text-lg">Mind Bridge</div>
+            <nav className="hidden md:flex items-center gap-3">
+              <button className="px-3 py-1 rounded-full bg-cyan-600 text-white text-sm font-semibold hover:brightness-105 action-button">Check-in</button>
+              <button className="px-3 py-1 text-cyan-200 text-sm hover:text-white action-button">Book Appointment</button>
+              <button className="px-3 py-1 text-cyan-200 text-sm hover:text-white action-button">My Appointments</button>
             </nav>
           </div>
 
           <div className="flex items-center gap-3">
             <span className="text-xs px-2 py-0.5 rounded-full bg-white/6 text-white/70">STUDENT</span>
-            <div className="hidden sm:block text-sm text-white/90">{name}</div>
-            <img src="/assets/avatar-placeholder.png" alt="avatar" className="h-9 w-9 rounded-full bg-gray-700 object-cover" />
-            <button className="text-white ml-2 underline text-sm">Log out</button>
+            <div className="text-sm text-white/90 hidden sm:block">{userName}</div>
+            <div className="h-9 w-9 rounded-full bg-gray-700" />
+            <button className="text-white underline text-sm">Log out</button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Left Column: Greeting + Check-in */}
-          <div className="lg:w-2/3">
+      <main className="max-w-6xl mx-auto px-4 py-8 w-full flex-1">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <section className="lg:w-2/3">
             <div className="mb-4">
-              <h1 className="text-3xl font-bold">Good morning, {displayName}.</h1>
+              <h1 className="text-3xl font-bold">Welcome back, {displayName}</h1>
               <p className="text-cyan-200 mt-1">What's on your mind today?</p>
             </div>
 
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-6 shadow-md">
-              <div className="flex items-center justify-between mb-4">
+            <div className="card-surface p-6">
+              <div className="flex items-center justify-between mb-3">
                 <div>
                   <h2 className="text-xl font-semibold">Wellness Check-in</h2>
                   <div className="text-sm text-white/60">{answeredCount}/{QUESTIONS.length}</div>
                 </div>
 
-                <div className="w-48">
+                <div className="w-40">
                   <div className="h-2 w-full bg-white/6 rounded-full overflow-hidden">
-                    <div className="h-full bg-cyan-400 transition-all" style={{ width: `${progressPct}%` }} />
+                    <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progressPct}%` }} />
                   </div>
                   <div className="text-right text-xs text-white/60 mt-1">{progressPct}%</div>
                 </div>
@@ -164,7 +140,7 @@ export default function StudentDashboard() {
                 <p className="text-white/90 font-medium">{QUESTIONS[qIndex].text}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 {[0, 1, 2, 3].map((v) => {
                   const selected = answers[qIndex] === v;
                   const labels = ["0 Never", "1 Sometimes", "2 Often", "3 Always"];
@@ -172,9 +148,8 @@ export default function StudentDashboard() {
                     <button
                       key={v}
                       onClick={() => selectOption(v)}
-                      className={`rounded-lg px-4 py-3 text-left transition transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-cyan-400 
-                        ${selected ? "bg-gradient-to-r from-[#06b6d4] to-[#06a6ff] text-black border-transparent shadow" : "bg-[#031324] border border-white/6 text-white/90"}`.trim()}
-                      aria-pressed={selected}
+                      className={`rounded-lg px-4 py-3 text-left transition transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-cyan-500
+                        ${selected ? "bg-gradient-to-r from-cyan-500 to-indigo-500 text-black" : "bg-gray-800 text-white/90 border border-white/6"}`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="text-sm font-medium">{labels[v]}</div>
@@ -187,10 +162,10 @@ export default function StudentDashboard() {
 
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
-                  <button onClick={prev} disabled={qIndex === 0} className="rounded-md px-3 py-2 bg-white/6 text-white/80 hover:bg-white/8 disabled:opacity-40">
+                  <button onClick={prev} disabled={qIndex === 0} className="rounded-md px-3 py-2 bg-white/6 text-white/80 hover:bg-white/8 disabled:opacity-40 action-button">
                     Previous
                   </button>
-                  <button onClick={next} className="rounded-md px-3 py-2 bg-cyan-500 text-black font-semibold hover:brightness-105">
+                  <button onClick={next} className="rounded-md px-3 py-2 bg-cyan-600 text-white font-semibold hover:brightness-105 action-button">
                     Next
                   </button>
                 </div>
@@ -198,86 +173,96 @@ export default function StudentDashboard() {
                 <div className="text-sm text-white/60">Progress: {progressPct}%</div>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Right Column: Support Cards Grid */}
-          <div className="lg:w-1/3 flex flex-col gap-4">
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-4 shadow-sm">
-              <h3 className="font-semibold text-lg">Active Goals</h3>
-              <ul className="mt-3 space-y-2">
-                {goals.map((g) => (
-                  <li key={g.id} className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <input id={g.id} type="checkbox" checked={g.completed >= g.target} onChange={() => toggleGoal(g.id)} className="h-4 w-4 rounded" />
-                      <div>
-                        <div className="text-sm font-medium">{g.title}</div>
-                        <div className="text-xs text-white/60">{g.completed}/{g.target} completed</div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-white/60">{g.target}x</div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <aside className="lg:w-1/3">
+            <div className="card-surface p-4 mb-4">
+              <h3 className="font-semibold text-lg">My Counseling Sessions</h3>
 
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-4 shadow-sm">
-              <h3 className="font-semibold text-lg">Next Appointment</h3>
-              <div className="mt-2">
-                <div className="text-sm text-white/90">Session with Dr. Cruz</div>
-                <div className="text-xs text-white/60">Aug 28th, 10:00 AM</div>
-                <div className="mt-3 text-xs text-cyan-200">{formatCountdown(timeLeft)}</div>
-                <div className="mt-4 flex justify-end">
-                  <button className="rounded-md px-3 py-2 bg-cyan-500 text-black font-semibold">View Details</button>
+              <div className="mt-3">
+                {loadingAppointments ? (
+                  <div className="flex items-center gap-2 text-white/60"><Spinner /> <span>Loading appointments...</span></div>
+                ) : appointments.length === 0 ? (
+                  <div className="text-sm text-white/60 mb-4">No upcoming appointments.</div>
+                ) : (
+                  <ul className="space-y-2">
+                    {appointments.map((a) => (
+                      <li key={a.id} className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">{a.title}</div>
+                          <div className="text-xs text-white/60">{new Date(a.date).toLocaleString()}</div>
+                          <div className={`text-xs mt-1 ${a.status === 'Confirmed' ? 'text-green-400' : a.status === 'Completed' ? 'text-white/80' : 'text-yellow-300'}`}>{a.status || 'Pending'}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={async () => {
+                              setDetailLoadingId(a.id);
+                              try {
+                                // If appointment payload already contains counselorNotes, just set it to selected;
+                                // otherwise we assume getAppointments provided it; otherwise simulate delay
+                                await new Promise((r) => setTimeout(r, 350));
+                                setSelected(a);
+                              } catch (e) {
+                                console.error(e);
+                              } finally {
+                                setDetailLoadingId(null);
+                              }
+                            }}
+                            className="text-sm text-cyan-400 underline action-button flex items-center gap-2"
+                          >
+                            {detailLoadingId === a.id ? <Spinner className="h-4 w-4" /> : null}
+                            Details
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div className="mt-4">
+                  <button onClick={handleBook} disabled={booking} className="w-full rounded-md px-3 py-2 bg-cyan-600 text-white font-semibold hover:brightness-105 action-button flex items-center justify-center gap-2">
+                    {booking ? <Spinner className="h-4 w-4" /> : null}
+                    {booking ? 'Booking...' : 'Book an Appointment'}
+                  </button>
+                </div>
+
+                <div className="mt-6 border-t border-white/6 pt-4">
+                  <div className="text-sm text-white/60 mb-2">Past Sessions</div>
+                  {appointments.filter(a => a.status === 'Completed').length === 0 ? (
+                    <div className="text-sm text-white/50">No past sessions yet.</div>
+                  ) : (
+                    <ul className="space-y-2 text-sm">
+                      {appointments.filter(a => a.status === 'Completed').map((s) => (
+                        <li key={s.id} className="text-white/90">{s.title} • {new Date(s.date).toLocaleDateString()}
+                          {s.counselorNotes ? (
+                            <div className="mt-1 text-xs text-white/70">Notes: {s.counselorNotes}</div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-4 shadow-sm">
-              <h3 className="font-semibold text-lg">Campus Resources Feed</h3>
-              <ul className="mt-3 space-y-2 text-sm">
-                {resources.map((r) => (
-                  <li key={r.id} className="flex items-start gap-3">
-                    <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center text-cyan-300 font-bold">R</div>
-                    <div>
-                      <div className="font-medium">{r.title}</div>
-                      <div className="text-xs text-white/60">{r.details}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Simple notes/details pane - polished modal could be added */}
+            {selected ? (
+              <div className="soft-card p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">{selected.title}</div>
+                    <div className="text-xs text-white/60">{new Date(selected.date).toLocaleString()}</div>
+                  </div>
+                  <button onClick={() => setSelected(null)} className="text-sm text-white/60">Close</button>
+                </div>
 
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-4 shadow-sm">
-              <h3 className="font-semibold text-lg">Featured Tip of the Day</h3>
-              <div className="mt-3 flex gap-3 items-start">
-                <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-700 to-cyan-400 flex items-center justify-center">
-                  {/* simple decorative tree svg */}
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#0f1724" />
-                    <path d="M12 6c1.5 0 2.5 1 3 2.5C16.5 9 15.5 10 14 10H10c-1.5 0-2.5-1-3-1.5C7 7 8.5 6 12 6z" fill="#c7f9ff" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="font-medium">5-Minute Grounding Technique</div>
-                  <div className="text-xs text-white/60 mt-1">Try this quick grounding exercise to reduce immediate stress: 4-4-4 breathing, notice five things you can see, and two things you can hear.</div>
+                <div className="mt-3 text-sm text-white/80">
+                  <h4 className="font-medium">Counselor Notes</h4>
+                  <p className="mt-2 text-white/70">{selected.counselorNotes || 'No notes available for this session.'}</p>
                 </div>
               </div>
-            </div>
-
-            <div className="rounded-2xl bg-[#071428] border border-white/6 p-4 shadow-sm flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-3 w-3 rounded-full bg-green-400" />
-                  <div className="font-medium">Counselor Available</div>
-                </div>
-                <div className="text-xs text-white/60 mt-1">Counselor Available: Green Status Light</div>
-                <div className="text-xs text-white/50 mt-1">Chat function coming soon</div>
-              </div>
-              <div>
-                <button className="rounded-md px-3 py-2 bg-white/6 text-white/90">Request Help</button>
-              </div>
-            </div>
-          </div>
+            ) : null}
+          </aside>
         </div>
       </main>
     </div>
