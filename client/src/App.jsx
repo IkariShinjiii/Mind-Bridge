@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useAuth } from "./AuthContext.jsx";
 import Login from "./components/Login.jsx";
-import SurveyForm from "./components/SurveyForm.jsx";
+import WellnessCheckIn from "./components/WellnessCheckIn.jsx";
 import CounselorDashboard from "./components/CounselorDashboard.jsx";
 import AppointmentScheduler from "./components/AppointmentScheduler.jsx";
 import ManageAvailability from "./components/ManageAvailability.jsx";
@@ -107,7 +107,7 @@ function AppContent() {
       </header>
 
       {user.role === "student" && activeTab === "survey" && !lastResult && (
-        <SurveyForm onSubmitted={(result) => setLastResult(result)} />
+        <WellnessCheckIn onSubmitted={(result) => setLastResult(result)} />
       )}
 
       {user.role === "student" && lastResult && (
