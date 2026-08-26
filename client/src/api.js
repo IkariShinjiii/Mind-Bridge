@@ -1,8 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-const BASE = `${API_BASE_URL}/api`;
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "";
+const BASE = API_BASE_URL ? `${API_BASE_URL}/api` : "/api";
 
 export function apiUrl(path) {
-  return `${BASE}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${BASE}${normalizedPath}`;
 }
 
 function authHeaders() {
@@ -52,6 +53,8 @@ export const removeAvailability = (id) =>
 export const bookAppointment = (availabilityId) =>
   request("/appointments", { method: "POST", body: JSON.stringify({ availabilityId }) });
 export const getAppointments = () => request("/appointments");
+export const updateAppointment = (id, updates = {}) =>
+  request(`/appointments/${id}`, { method: "PATCH", body: JSON.stringify(updates) });
 
 export const resendVerification = () => request("/auth/resend-verification", { method: "POST" });
 export const forgotPassword = (email) =>

@@ -55,9 +55,9 @@ export default function AppointmentScheduler({ onBooked }) {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-3 py-8 sm:px-6 sm:py-12">
-      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">BOOK SUPPORT</p>
-      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-6">Talk to a counselor</h1>
+    <div className="mx-auto max-w-lg px-3 py-8 animate-fade-up sm:px-6 sm:py-12">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal sm:text-xs">BOOK SUPPORT</p>
+      <h1 className="mb-6 font-display text-2xl text-ink sm:text-3xl">Talk to a counselor</h1>
 
       {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
       {loading && <p className="text-ink/50 text-sm">Loading available times…</p>}
@@ -70,8 +70,8 @@ export default function AppointmentScheduler({ onBooked }) {
           <button
             key={s.id}
             onClick={() => setSelected(s.id)}
-            className={`w-full text-left text-sm rounded-xl py-3 px-4 border transition ${
-              selected === s.id ? "bg-ink text-white border-ink" : "border-ink/15 hover:border-ink/40"
+            className={`action-button w-full rounded-xl border px-4 py-3 text-left text-sm transition-all duration-200 ${
+              selected === s.id ? "border-ink bg-ink text-white shadow-sm" : "border-ink/15 hover:border-ink/40 hover:bg-mist"
             }`}
           >
             <div className="font-medium">{new Date(s.start).toLocaleString()}</div>
@@ -84,7 +84,7 @@ export default function AppointmentScheduler({ onBooked }) {
       <button
         onClick={handleBook}
         disabled={!selected || booking}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+        className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink shadow-sm transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {booking ? (
           <>

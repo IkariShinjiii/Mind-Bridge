@@ -59,9 +59,9 @@ export default function CounselorDashboard() {
   }, [cases, filter]);
 
   return (
-    <div className="max-w-7xl mx-auto px-3 py-8 sm:px-6 sm:py-12">
-      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">COUNSELOR VIEW</p>
-      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-6">Student assessment cases</h1>
+    <div className="mx-auto max-w-7xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal sm:text-xs">COUNSELOR VIEW</p>
+      <h1 className="mb-6 font-display text-2xl text-ink sm:text-3xl">Student assessment cases</h1>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {[
@@ -75,8 +75,8 @@ export default function CounselorDashboard() {
           <button
             key={value}
             onClick={() => setFilter(value)}
-            className={`text-xs sm:text-sm px-3 py-1.5 rounded-full border transition ${
-              filter === value ? "bg-ink text-white border-ink" : "border-ink/15 text-ink/70 hover:border-ink/40"
+            className={`action-button rounded-full border px-3 py-1.5 text-xs transition-all duration-200 sm:text-sm ${
+              filter === value ? "border-ink bg-ink text-white shadow-sm" : "border-ink/15 text-ink/70 hover:border-ink/40 hover:bg-mist"
             }`}
           >
             {label}

@@ -49,9 +49,9 @@ function AppContent() {
   const activeTab = tab || tabs[0]?.id;
 
   return (
-    <div className="min-h-screen bg-mist">
+    <div className="min-h-screen bg-mist animate-fade-up">
       <SessionBanner />
-      <header className="bg-ink border-b border-white/10">
+      <header className="bg-ink border-b border-white/10 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
         <div className="max-w-6xl mx-auto px-3 py-3 sm:px-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center justify-between gap-3">
@@ -80,13 +80,12 @@ function AppContent() {
                 <button
                   key={t.id}
                   onClick={() => { setTab(t.id); setLastResult(null); }}
-                  className={`text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-full transition ${
+                  className={`tab-button text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 rounded-full transition ${
                     activeTab === t.id && !lastResult
-                      ? "bg-teal text-ink font-semibold"
-                      : "text-white/70 hover:text-white"
+                     ? "bg-teal text-ink font-semibold shadow-sm"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
                   }`}
-                >
-                  {t.label}
+                >                  {t.label}
                 </button>
               ))}
 

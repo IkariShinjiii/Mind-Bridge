@@ -168,7 +168,7 @@ export default function Login() {
           type="submit"
           tabIndex={disabled ? -1 : 0}
           disabled={disabled || submitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+          className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting && !disabled ? (
             <>
@@ -283,7 +283,7 @@ export default function Login() {
           type="submit"
           tabIndex={disabled ? -1 : 0}
           disabled={disabled || submitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+          className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting && !disabled ? (
             <>
@@ -358,7 +358,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink shadow-sm transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {submitting ? (
                     <>
@@ -413,7 +413,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink shadow-sm transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {submitting ? (
                     <>

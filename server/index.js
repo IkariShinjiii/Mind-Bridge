@@ -465,7 +465,10 @@ app.post(
       counselorName: slot.counselorName,
       start: slot.start,
       end: slot.end,
-      status: "confirmed",
+      status: "pending",
+      notes: "",
+      notesUpdatedAt: null,
+      createdAt: new Date().toISOString(),
     };
     data.appointments.unshift(appt);
     writeData(data);
@@ -479,7 +482,44 @@ app.get("/api/appointments", requireAuth, (req, res) => {
     req.user.role === "student"
       ? data.appointments.filter((a) => a.studentId === req.user.id)
       : data.appointments.filter((a) => a.counselorId === req.user.id);
-  res.json(mine);
+
+  const sorted = [...mine].sort((a, b) => new Date(a.start) - new Date(b.start));
+  res.json(sorted);
+});
+
+app.patch("/api/appointments/:id", requireAuth, loadCurrentUser, (req, res) => {
+  const data = req._data;
+  const appointment = data.appointments.find((item) => item.id === req.params.id);
+
+  if (!appointment) {
+    return res.status(404).json({ error: "Appointment not found" });
+  }
+
+  const isCounselorOwner = req.user.role === "counselor" && appointment.counselorId === req.user.id;
+  if (!isCounselorOwner) {
+    return res.status(403).json({ error: "You can only update your own appointments" });
+  }
+
+  const { status, notes } = req.body || {};
+  const allowedStatuses = ["pending", "confirmed", "completed"];
+
+  if (status !== undefined) {
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: "Status must be pending, confirmed, or completed" });
+    }
+    appointment.status = status;
+    if (status === "completed" && !appointment.completedAt) {
+      appointment.completedAt = new Date().toISOString();
+    }
+  }
+
+  if (notes !== undefined) {
+    appointment.notes = typeof notes === "string" ? notes.trim() : "";
+    appointment.notesUpdatedAt = new Date().toISOString();
+  }
+
+  writeData(data);
+  res.json(appointment);
 });
 
 /* ---------- ADMIN: manage counselor accounts ---------- */

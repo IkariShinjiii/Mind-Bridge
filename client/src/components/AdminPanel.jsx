@@ -220,7 +220,7 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3 py-8 sm:px-5 lg:px-8">
+    <div className="mx-auto max-w-7xl animate-fade-up px-3 py-8 sm:px-5 lg:px-8">
       <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">ADMIN</p>
@@ -229,16 +229,16 @@ export default function AdminPanel() {
         <div className="inline-flex w-full max-w-md flex-wrap rounded-full border border-ink/10 bg-white p-1 shadow-sm">
           <button
             onClick={() => setActiveTab("counselors")}
-            className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-              activeTab === "counselors" ? "bg-ink text-white" : "text-ink/70 hover:text-ink"
+            className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
+              activeTab === "counselors" ? "bg-ink text-white shadow-sm" : "text-ink/70 hover:text-ink hover:bg-mist"
             }`}
           >
             Manage Counselors
           </button>
           <button
             onClick={() => setActiveTab("students")}
-            className={`flex-1 rounded-full px-3 py-2 text-sm font-medium transition ${
-              activeTab === "students" ? "bg-ink text-white" : "text-ink/70 hover:text-ink"
+            className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
+              activeTab === "students" ? "bg-ink text-white shadow-sm" : "text-ink/70 hover:text-ink hover:bg-mist"
             }`}
           >
             Manage Students
@@ -346,10 +346,11 @@ export default function AdminPanel() {
             </div>
 
             <div className="space-y-2">
-              {filteredUsers.map((u) => (
+              {filteredUsers.map((u, index) => (
                 <div
                   key={u.id}
-                  className="flex flex-col gap-3 rounded-xl border border-ink/10 bg-mist p-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="stagger-item flex flex-col gap-3 rounded-xl border border-ink/10 bg-mist p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                  style={{ animationDelay: `${index * 55}ms` }}
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
                     <div>
@@ -522,8 +523,8 @@ export default function AdminPanel() {
                 </tr>
               </thead>
               <tbody>
-                {auditLogs.map((log) => (
-                  <tr key={log.id} className="border-b border-ink/5 align-top">
+                {auditLogs.map((log, index) => (
+                  <tr key={log.id} className="stagger-item border-b border-ink/5 align-top" style={{ animationDelay: `${index * 35}ms` }}>
                     <td className="py-3 pr-4">{log.actor}</td>
                     <td className="py-3 pr-4">{log.action}</td>
                     <td className="py-3 pr-4">{log.target}</td>

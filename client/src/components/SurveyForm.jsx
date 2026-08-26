@@ -32,11 +32,11 @@ export default function SurveyForm({ onSubmitted }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-3 py-8 sm:px-6 sm:py-12">
-      <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">
+    <div className="mx-auto max-w-3xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal sm:text-xs">
         WEEKLY CHECK-IN
       </p>
-      <h1 className="font-display text-2xl sm:text-3xl text-ink mb-2">
+      <h1 className="mb-2 font-display text-2xl text-ink sm:text-3xl">
         How are you doing, {user?.name?.split(" ")[0]}?
       </h1>
       <p className="text-sm sm:text-base text-ink/60 mb-6 sm:mb-8">
@@ -46,8 +46,8 @@ export default function SurveyForm({ onSubmitted }) {
 
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {questions.map((q, i) => (
-          <div key={q.id} className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-ink/10">
-            <p className="font-medium text-sm sm:text-base mb-3">
+          <div key={q.id} className="card-surface p-4 sm:p-5">
+            <p className="mb-3 text-sm font-medium sm:text-base">
               {i + 1}. {q.text}
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
@@ -58,10 +58,10 @@ export default function SurveyForm({ onSubmitted }) {
                   onClick={() =>
                     setAnswers((prev) => ({ ...prev, [q.id]: opt.value }))
                   }
-                  className={`text-[11px] sm:text-xs rounded-lg py-2.5 px-2 border transition ${
+                  className={`action-button rounded-lg border px-2 py-2.5 text-[11px] transition-all duration-200 sm:text-xs ${
                     answers[q.id] === opt.value
-                      ? "bg-ink text-white border-ink"
-                      : "border-ink/15 hover:border-ink/40"
+                      ? "border-ink bg-ink text-white shadow-sm"
+                      : "border-ink/15 hover:border-ink/40 hover:bg-mist"
                   }`}
                 >
                   {opt.label}
@@ -74,7 +74,7 @@ export default function SurveyForm({ onSubmitted }) {
         <button
           type="submit"
           disabled={!allAnswered || submitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink transition duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+          className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-teal py-3 font-semibold text-ink shadow-sm transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? (
             <>
