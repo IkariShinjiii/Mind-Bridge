@@ -4,6 +4,8 @@ import { apiUrl, forgotPassword, resetPassword } from "../api";
 import logo from "../assets/mindbridge-logo.png";
 import icon from "../assets/mindbridge-icon.png";
 import Spinner from "./Spinner";
+import { auth, provider } from "../firebase.js";
+import { signInWithPopup } from "firebase/auth";
 
 // Glow wraps its icon directly so it's always centered behind it,
 // regardless of where the surrounding content sits vertically.
@@ -122,6 +124,30 @@ export default function Login() {
     }
   }
 
+  // Google Sign-In handler
+  async function handleGoogleSignIn() {
+    setError("");
+    setSubmitting(true);
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      const res = await fetch(apiUrl("/auth/google-signin"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Google sign-in failed");
+
+      login(data.token, data.user);
+    } catch (err) {
+      setError(err.message || "Google sign-in failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   // Rendered as plain function calls (not JSX components) on purpose — a
   // component defined inside another component's body gets recreated on
   // every render, which would make inputs lose focus on every keystroke.
@@ -163,6 +189,28 @@ export default function Login() {
         </div>
 
         {!disabled && error && <p className="text-sm text-red-600">{error}</p>}
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          tabIndex={disabled ? -1 : 0}
+          disabled={disabled || submitting}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink/15 py-3 font-semibold text-ink hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {submitting ? (
+            <>
+              <Spinner size={15} className="text-ink" />
+              <span>Signing in…</span>
+            </>
+          ) : (
+            <>
+              <img src="/google-logo.png" alt="" className="h-4 w-4" />
+              <span>Sign in with Google</span>
+            </>
+          )}
+        </button>
+
+        <div className="text-center my-2 text-ink/40">or</div>
 
         <button
           type="submit"

@@ -46,9 +46,28 @@ app.use(express.json());
 
 // Runs after requireAuth. Loads the full DB record (JWT payload only has
 // id/name/role) so route guards can check emailVerified/approved/active.
-function loadCurrentUser(req, res, next) {
+async function loadCurrentUser(req, res, next) {
   const data = readData();
-  const user = data.users.find((u) => u.id === req.user.id);
+  let user = data.users.find((u) => u.id === req.user.id);
+
+  // If not found locally and Firestore is available, try loading from Firestore
+  if (!user && db) {
+    try {
+      const doc = await db.collection("Users").doc(req.user.id).get();
+      if (doc && doc.exists) {
+        user = { id: doc.id, ...doc.data() };
+        // Mirror the Firestore user into data.json for compatibility
+        data.users = data.users || [];
+        if (!data.users.find((u) => u.id === user.id)) {
+          data.users.push(user);
+          writeData(data);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to load user from Firestore:", err.message);
+    }
+  }
+
   if (!user) return res.status(401).json({ error: "Account no longer exists" });
   if (user.active === false) {
     return res.status(403).json({ error: "This account has been deactivated." });
@@ -69,6 +88,10 @@ app.post("/api/auth/register", async (req, res) => {
   }
   if (!["student", "counselor"].includes(role)) {
     return res.status(400).json({ error: "role must be 'student' or 'counselor'" });
+  }
+  // Enforce institutional email domain for students
+  if (role === "student" && !email.toLowerCase().endsWith("@usa.edu.ph")) {
+    return res.status(400).json({ error: "Student registrations must use an @usa.edu.ph email address" });
   }
   if (password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters" });
@@ -245,10 +268,105 @@ app.post("/api/auth/reset-password", async (req, res) => {
   res.json({ message: "Password updated. You can now log in." });
 });
 
+// Google / Firebase sign-in: accept a client-fetched ID token, verify it with
+// firebase-admin, enforce institutional domain, create or update a local user,
+// and return the app's JWT so the rest of the server flow stays unchanged.
+app.post("/api/auth/google-signin", async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) return res.status(400).json({ error: "idToken is required" });
+
+  if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+    return res.status(500).json({ error: "Firebase not configured on the server" });
+  }
+
+  try {
+    const admin = await import("firebase-admin");
+    // Initialize the admin SDK if it isn't already.
+    if (!(admin.apps && admin.apps.length)) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        }),
+      });
+    }
+
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const email = (decoded.email || "").toLowerCase();
+
+    if (!email.endsWith("@usa.edu.ph")) {
+      return res.status(403).json({ error: "Only @usa.edu.ph accounts are allowed to sign in" });
+    }
+
+    // Map to a local user record in data.json (or create one).
+    const data = readData();
+    let user = data.users.find((u) => (u.email || "").toLowerCase() === email);
+    if (!user) {
+      user = {
+        id: Date.now().toString(),
+        name: decoded.name || email.split("@")[0],
+        email,
+        // No local password when using Google sign-in
+        password: null,
+        role: "student",
+        emailVerified: true,
+        verifyToken: null,
+        verifyTokenExpires: null,
+        resetToken: null,
+        resetTokenExpires: null,
+        approved: true,
+        active: true,
+        createdAt: new Date().toISOString(),
+      };
+      data.users.push(user);
+
+      // If Firestore is configured, create/overwrite the Users document with the
+      // same id so server-side lookups can find it by req.user.id later.
+      if (db) {
+        try {
+          await db.collection("Users").doc(user.id).set({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            emailVerified: user.emailVerified,
+            approved: user.approved,
+            active: user.active,
+            createdAt: user.createdAt,
+          });
+        } catch (err) {
+          console.warn("Failed to write user to Firestore:", err.message);
+        }
+      }
+    } else {
+      // Ensure verified flag is set from provider
+      user.emailVerified = true;
+      // Mirror verification to Firestore if present
+      if (db) {
+        try {
+          await db.collection("Users").doc(user.id).update({ emailVerified: true });
+        } catch (err) {
+          // ignore
+        }
+      }
+    }
+
+    writeData(data);
+
+    const token = signToken(user);
+    res.json({ token, user: publicUser(user) });
+  } catch (err) {
+    console.error("Firebase token verification failed:", err);
+    return res.status(401).json({ error: "Invalid Firebase ID token" });
+  }
+});
+
 /* ---------- WELLNESS SURVEY + AI RISK ASSESSMENT ---------- */
 
 app.get("/api/survey", requireAuth, (req, res) => {
-  res.json({ questions: SURVEY_QUESTIONS });
+  const data = readData();
+  const activeQuestions = data.questionSets && data.questionSets.length ? data.questionSets[0].questions : SURVEY_QUESTIONS;
+  res.json({ questions: activeQuestions });
 });
 
 app.post(
@@ -261,7 +379,8 @@ app.post(
     const { answers } = req.body;
     if (!answers) return res.status(400).json({ error: "answers are required" });
 
-    const result = scoreSurvey(answers);
+    const activeQuestions = req._data && req._data.questionSets && req._data.questionSets.length ? req._data.questionSets[0].questions : SURVEY_QUESTIONS;
+    const result = scoreSurvey(answers, activeQuestions);
     const data = req._data;
 
     const record = {
@@ -523,6 +642,44 @@ app.patch("/api/appointments/:id", requireAuth, loadCurrentUser, (req, res) => {
 });
 
 /* ---------- ADMIN: manage counselor accounts ---------- */
+
+// Admin-managed dynamic question sets (stored in data.json unless Firestore is configured)
+app.get("/api/admin/question-sets", requireAuth, requireRole("admin"), (req, res) => {
+  const data = readData();
+  res.json(data.questionSets || []);
+});
+
+app.post("/api/admin/question-sets", requireAuth, requireRole("admin"), (req, res) => {
+  const { name, questions } = req.body;
+  if (!name || !Array.isArray(questions)) return res.status(400).json({ error: "name and questions array are required" });
+  const data = readData();
+  data.questionSets = data.questionSets || [];
+  const set = { id: Date.now().toString(), name, questions };
+  data.questionSets.unshift(set);
+  writeData(data);
+  res.status(201).json(set);
+});
+
+app.put("/api/admin/question-sets/:id", requireAuth, requireRole("admin"), (req, res) => {
+  const { name, questions } = req.body;
+  const data = readData();
+  data.questionSets = data.questionSets || [];
+  const set = data.questionSets.find((s) => s.id === req.params.id);
+  if (!set) return res.status(404).json({ error: "Not found" });
+  if (name) set.name = name;
+  if (Array.isArray(questions)) set.questions = questions;
+  writeData(data);
+  res.json(set);
+});
+
+app.delete("/api/admin/question-sets/:id", requireAuth, requireRole("admin"), (req, res) => {
+  const data = readData();
+  data.questionSets = data.questionSets || [];
+  const before = data.questionSets.length;
+  data.questionSets = data.questionSets.filter((s) => s.id !== req.params.id);
+  writeData(data);
+  res.json({ deleted: before !== data.questionSets.length });
+});
 
 app.get("/api/admin/users", requireAuth, requireRole("admin"), (req, res) => {
   const data = readData();
