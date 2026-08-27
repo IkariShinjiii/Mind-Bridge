@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { getMyAvailability, addAvailability, removeAvailability } from "../api";
 import Spinner from "./Spinner";
 
-function safeFormatDate(dateStr) {
-  if (!dateStr) return "N/A";
-  const date = new Date(dateStr);
-  return Number.isNaN(date.getTime()) ? dateStr : date.toLocaleString();
+function safeFormatDate(val) {
+  if (!val) return null;
+  // If it's already a formatted string or time, return it directly
+  if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
+  const date = new Date(val);
+  return Number.isNaN(date.getTime()) ? val : date.toLocaleString();
 }
 
 export default function ManageAvailability() {
@@ -17,7 +19,8 @@ export default function ManageAvailability() {
   const [removingId, setRemovingId] = useState(null);
 
   async function load() {
-    setSlots(await getMyAvailability());
+    const data = await getMyAvailability();
+    setSlots(Array.isArray(data) ? data : []);
   }
 
   useEffect(() => {
@@ -108,28 +111,34 @@ export default function ManageAvailability() {
       )}
 
       <div className="space-y-3">
-        {slots.map((s) => (
-          <div key={s.id} className="rounded-xl border border-gray-800 bg-gray-900 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
-            <div>
-              <div className="font-medium text-white">{safeFormatDate(s.start)}</div>
-              <div className="text-sm text-gray-400">to {safeFormatDate(s.end)}</div>
+        {slots.map((s) => {
+          // Fallback checks for different property names saved in Firestore
+          const startTime = safeFormatDate(s.start || s.date || s.time);
+          const endTime = safeFormatDate(s.end || s.to);
+
+          return (
+            <div key={s.id} className="rounded-xl border border-gray-800 bg-gray-900 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+              <div>
+                <div className="font-medium text-white">{startTime}</div>
+                {endTime && <div className="text-sm text-gray-400">to {endTime}</div>}
+              </div>
+              <button
+                onClick={() => handleRemove(s.id)}
+                disabled={removingId === s.id}
+                className="inline-flex items-center justify-center gap-2 text-sm text-red-400 transition hover:text-red-300 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {removingId === s.id ? (
+                  <>
+                    <Spinner size={14} color="#ef4444" className="text-red-400" />
+                    <span>Removing…</span>
+                  </>
+                ) : (
+                  "Remove"
+                )}
+              </button>
             </div>
-            <button
-              onClick={() => handleRemove(s.id)}
-              disabled={removingId === s.id}
-              className="inline-flex items-center justify-center gap-2 text-sm text-red-400 transition hover:text-red-300 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {removingId === s.id ? (
-                <>
-                  <Spinner size={14} color="#ef4444" className="text-red-400" />
-                  <span>Removing…</span>
-                </>
-              ) : (
-                "Remove"
-              )}
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
