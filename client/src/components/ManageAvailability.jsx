@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { getMyAvailability, addAvailability, removeAvailability } from "../api";
 import Spinner from "./Spinner";
 
+function safeFormatDate(dateStr) {
+  if (!dateStr) return "N/A";
+  const date = new Date(dateStr);
+  return Number.isNaN(date.getTime()) ? dateStr : date.toLocaleString();
+}
+
 export default function ManageAvailability() {
   const [slots, setSlots] = useState([]);
   const [start, setStart] = useState("");
@@ -105,8 +111,8 @@ export default function ManageAvailability() {
         {slots.map((s) => (
           <div key={s.id} className="rounded-xl border border-gray-800 bg-gray-900 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
             <div>
-              <div className="font-medium text-white">{new Date(s.start).toLocaleString()}</div>
-              <div className="text-sm text-gray-400">to {new Date(s.end).toLocaleString()}</div>
+              <div className="font-medium text-white">{safeFormatDate(s.start)}</div>
+              <div className="text-sm text-gray-400">to {safeFormatDate(s.end)}</div>
             </div>
             <button
               onClick={() => handleRemove(s.id)}
