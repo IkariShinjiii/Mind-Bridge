@@ -46,7 +46,6 @@ export const bookAppointment = async (slot) => {
   const uid = getCurrentUserId();
   const authUser = getAuth().currentUser;
   
-  // If a specific slot from the counselor is passed, use its details
   if (slot) {
     return await addDoc(collection(db, "appointments"), {
       studentId: uid,
@@ -61,7 +60,6 @@ export const bookAppointment = async (slot) => {
     });
   }
 
-  // Fallback default booking if no slot object is provided
   return await addDoc(collection(db, "appointments"), {
     studentId: uid,
     studentName: authUser?.displayName || "Student",
@@ -75,10 +73,19 @@ export const bookAppointment = async (slot) => {
 export const getAppointments = async () => {
   const uid = getCurrentUserId();
   if (!uid) return [];
-  // Fetches only the appointments belonging to this specific student
   const q = query(collection(db, "appointments"), where("studentId", "==", uid));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// Added so counselors can view all student bookings
+export const getAllAppointments = async () => {
+  const snapshot = await getDocs(collection(db, "appointments"));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateAppointmentStatus = async (id, status) => {
+  return await updateDoc(doc(db, "appointments", id), { status });
 };
 
 // --- COUNSELOR AVAILABILITY ---

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getAssessments, updateAssessmentStatus } from "../api";
+import { getAssessments, updateAssessmentStatus, getAllAppointments, updateAppointmentStatus } from "../api";
 import Spinner from "./Spinner";
 import ManageAvailability from "./ManageAvailability";
 
@@ -17,14 +17,19 @@ const STATUS_STYLES = {
 
 export default function CounselorDashboard() {
   const [cases, setCases] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState("flagged");
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
   async function load() {
     try {
-      const data = await getAssessments();
-      setCases(Array.isArray(data) ? data : []);
+      const [assessmentData, appointmentData] = await Promise.all([
+        getAssessments(),
+        getAllAppointments().catch(() => [])
+      ]);
+      setCases(Array.isArray(assessmentData) ? assessmentData : []);
+      setAppointments(Array.isArray(appointmentData) ? appointmentData : []);
     } finally {
       setLoading(false);
     }
@@ -45,6 +50,15 @@ export default function CounselorDashboard() {
     }
   }
 
+  async function handleApproveAppointment(id) {
+    try {
+      await updateAppointmentStatus(id, "Confirmed");
+      load();
+    } catch (err) {
+      console.error("Failed to approve appointment", err);
+    }
+  }
+
   const visible = useMemo(() => {
     return cases.filter((item) => {
       const risk = item.riskLevel || "low";
@@ -60,16 +74,52 @@ export default function CounselorDashboard() {
   }, [cases, filter]);
 
   return (
-    <div className="mx-auto max-w-7xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12 space-y-8">
+    <div className="mx-auto max-w-7xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12 space-y-12">
       <div>
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400 sm:text-xs">COUNSELOR VIEW</p>
-        <h1 className="mb-6 font-display text-2xl text-white sm:text-3xl">Student assessment cases</h1>
+        <h1 className="mb-6 font-display text-2xl text-white sm:text-3xl">Counselor Control Center</h1>
 
-        {/* Manage Availability Component Integrated Here */}
-        <div className="mb-8">
+        {/* Manage Availability Component */}
+        <div className="mb-10">
           <ManageAvailability />
         </div>
 
+        {/* Incoming Student Appointments Queue */}
+        <div className="mb-10 rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-white mb-4">Student Appointment Requests</h2>
+          {appointments.length === 0 ? (
+            <p className="text-sm text-gray-500">No student appointment requests yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {appointments.map((apt) => (
+                <div key={apt.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-4 gap-3">
+                  <div>
+                    <div className="font-medium text-white">{apt.studentName || "Student"} - {apt.title}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {apt.start ? new Date(apt.start).toLocaleString() : (apt.date ? new Date(apt.date).toLocaleString() : "Pending time")}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-400 border border-amber-500/20">
+                      {apt.status || "Pending Review"}
+                    </span>
+                    {apt.status !== "Confirmed" && (
+                      <button
+                        onClick={() => handleApproveAppointment(apt.id)}
+                        className="rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors"
+                      >
+                        Approve
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Assessment Cases Section */}
+        <h2 className="text-xl font-semibold text-white mb-4">Student assessment cases</h2>
         <div className="mb-6 flex flex-wrap gap-2">
           {[
             ["flagged", "Flagged"],
