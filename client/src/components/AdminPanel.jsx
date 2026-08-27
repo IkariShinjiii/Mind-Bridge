@@ -60,8 +60,7 @@ const defaultAuditLogs = [
 const formatDateTime = (value) => {
   if (!value) return "—";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
 export default function AdminPanel() {
@@ -77,10 +76,10 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       const [allUsers, assessmentData] = await Promise.all([
-        getAdminUsers(),
+        getAdminUsers().catch(() => []),
         getAssessments().catch(() => []),
       ]);
-      setUsers(allUsers);
+      setUsers(Array.isArray(allUsers) ? allUsers : []);
       setAssessments(Array.isArray(assessmentData) ? assessmentData : []);
       setAuditLogs(buildAuditLogs(allUsers, assessmentData || []));
     } catch (error) {
@@ -100,7 +99,7 @@ export default function AdminPanel() {
   const filteredUsers =
     activeTab === "counselors"
       ? users.filter((u) => u.role === "counselor" || u.role === "admin")
-      : users.filter((u) => u.role === "student");
+      : users.filter((u) => u.role === "student" || !u.role);
 
   const analytics = useMemo(() => {
     const distinctStudents = new Set(
@@ -121,7 +120,7 @@ export default function AdminPanel() {
 
     return {
       totalAssessments: assessments.length,
-      totalStudents: distinctStudents,
+      totalStudents: distinctStudents || users.filter((u) => u.role === "student" || !u.role).length,
       totalCounselors: users.filter((u) => u.role === "counselor" && u.approved && u.active !== false).length,
       pendingApprovals: pending.length,
       highRiskCases: priorityQueue.length,
@@ -148,7 +147,7 @@ export default function AdminPanel() {
         id: `user-${user.id}`,
         actor: user.role === "admin" ? "Admin" : "Counselor",
         action: user.active === false ? "Account deactivation reviewed" : "User access reviewed",
-        target: user.name || "System account",
+        target: user.name || user.email || "System account",
         timestamp: new Date().toISOString(),
         outcome: user.active === false ? "Deactivated" : "Verified",
       });
@@ -191,7 +190,7 @@ export default function AdminPanel() {
             student_id: `ST-${String(index + 1).padStart(4, "0")}`,
             risk_level: String(item.riskLevel || "low").toLowerCase(),
             status: item.status || "open",
-            score: Number.isFinite(item.score) ? item.score : "n/a",
+            score: Number.isFinite(item.total) ? item.total : "n/a",
             created_at: item.createdAt || item.submittedAt || "",
             reviewed_at: item.reviewedAt || "",
           }))
@@ -281,7 +280,7 @@ export default function AdminPanel() {
       </section>
 
       {loading ? (
-        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6 text-sm text-gray-500 shadow-sm">Loading…</div>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6 text-sm text-gray-500 shadow-sm">Loading admin data…</div>
       ) : (
         <>
           {activeTab === "counselors" && pending.length > 0 && (
@@ -299,7 +298,7 @@ export default function AdminPanel() {
                     className="flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-white">{u.name}</p>
+                      <p className="font-medium text-white">{u.name || "Unnamed Counselor"}</p>
                       <p className="text-sm text-gray-400">{u.email}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -345,64 +344,64 @@ export default function AdminPanel() {
               </h2>
             </div>
 
-            <div className="space-y-2">
-              {filteredUsers.map((u, index) => (
-                <div
-                  key={u.id}
-                  className="stagger-item flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-800/50 p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
-                  style={{ animationDelay: `${index * 55}ms` }}
-                >
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
-                    <div>
-                      <p className="font-medium text-white">{u.name}</p>
-                      <p className="text-sm text-gray-400">{u.email}</p>
+            {filteredUsers.length === 0 ? (
+              <p className="text-sm text-gray-500 py-4">No accounts found in this category.</p>
+            ) : (
+              <div className="space-y-2">
+                {filteredUsers.map((u, index) => (
+                  <div
+                    key={u.id}
+                    className="stagger-item flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-800/50 p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                    style={{ animationDelay: `${index * 55}ms` }}
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
+                      <div>
+                        <p className="font-medium text-white">{u.name || "User"}</p>
+                        <p className="text-sm text-gray-400">{u.email}</p>
+                      </div>
+                      <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize ${ROLE_BADGE[u.role || "student"]}`}>
+                        {u.role || "student"}
+                      </span>
+                      {u.active === false && (
+                        <span className="inline-flex w-fit rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
+                          Deactivated
+                        </span>
+                      )}
                     </div>
-                    <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize ${ROLE_BADGE[u.role]}`}>
-                      {u.role}
-                    </span>
-                    {!u.emailVerified && (
-                      <span className="inline-flex w-fit rounded-full border border-gray-700 bg-gray-800 px-2 py-0.5 text-[10px] font-semibold text-gray-400">
-                        Unverified
-                      </span>
-                    )}
-                    {u.active === false && (
-                      <span className="inline-flex w-fit rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
-                        Deactivated
-                      </span>
+
+                    {u.role !== "admin" && (
+                      <button
+                        onClick={() => handle(u.active === false ? reactivateUser : deactivateUser, u.id)}
+                        disabled={actionLoadingId === u.id}
+                        className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
+                          u.active === false
+                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
+                            : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
+                        }`}
+                      >
+                        {actionLoadingId === u.id ? (
+                          <>
+                            <Spinner
+                              size={14}
+                              color={u.active === false ? "#10b981" : "#ef4444"}
+                              className={u.active === false ? "text-emerald-400" : "text-red-400"}
+                            />
+                            <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
+                          </>
+                        ) : (
+                          u.active === false ? "Reactivate" : "Deactivate"
+                        )}
+                      </button>
                     )}
                   </div>
-
-                  {u.role !== "admin" && (
-                    <button
-                      onClick={() => handle(u.active === false ? reactivateUser : deactivateUser, u.id)}
-                      disabled={actionLoadingId === u.id}
-                      className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
-                        u.active === false
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
-                          : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
-                      }`}
-                    >
-                      {actionLoadingId === u.id ? (
-                        <>
-                          <Spinner
-                            size={14}
-                            color={u.active === false ? "#10b981" : "#ef4444"}
-                            className={u.active === false ? "text-emerald-400" : "text-red-400"}
-                          />
-                          <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
-                        </>
-                      ) : (
-                        u.active === false ? "Reactivate" : "Deactivate"
-                      )}
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         </>
       )}
 
+      {/* Analytics & Audit Logs Section */}
       <div className="mt-8 space-y-6">
         <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -474,35 +473,7 @@ export default function AdminPanel() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
-          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">PRIORITY</p>
-              <h2 className="font-display text-2xl text-white">High-risk support queue</h2>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {analytics.priorityQueue.length === 0 ? (
-              <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4 text-sm text-gray-400">
-                No active high-risk cases at the moment.
-              </div>
-            ) : (
-              analytics.priorityQueue.slice(0, 5).map((item, index) => (
-                <div key={item.id || index} className="flex flex-col gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="font-medium text-white">Case #{String(index + 1).padStart(3, "0")}</div>
-                    <div className="text-sm text-gray-400">
-                      {item.status || "Open"} • {item.riskLevel || "High"} risk
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-500">{formatDateTime(item.createdAt || item.submittedAt)}</div>
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-
+        {/* Audit Logs */}
         <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -541,6 +512,7 @@ export default function AdminPanel() {
           </div>
         </section>
 
+        {/* Export Section */}
         <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
