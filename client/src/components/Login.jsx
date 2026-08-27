@@ -1,6 +1,7 @@
 ﻿import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
+import icon from "../assets/mindbridge-icon.png";
 
 function GoogleIcon() {
   return (
@@ -55,12 +56,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white">
-      <div className="bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-gray-800">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white auth-page auth-card-enter-right">
+      <div className="bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-gray-800 transform transition-all duration-300 hover:shadow-[0_18px_40px_rgba(6,182,212,0.12)]">
         <div className="w-full md:w-1/2 p-8 bg-gray-900">
-          <div className="mb-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge</p>
-            <h2 className="text-2xl font-semibold text-white mt-2">Welcome back</h2>
+          <div className="mb-6 flex items-center gap-3">
+            <img src={icon} alt="Mind Bridge logo" className="h-9 w-9 rounded-lg object-cover" />
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge</p>
+              <h2 className="text-2xl font-semibold text-white mt-1">Welcome back</h2>
+            </div>
           </div>
           <p className="text-sm text-gray-300 mb-6">Log in to continue to your student dashboard</p>
 
@@ -127,7 +131,13 @@ export default function Login() {
           <div className="max-w-xs">
             <h3 className="text-xl font-semibold text-white mb-2">New here?</h3>
             <p className="text-sm text-white/80 mb-6">Create an account to book counseling sessions, track your wellness, and get support from counselors.</p>
-            <button className="border-2 border-gray-600 hover:border-gray-400 text-white px-8 py-2 rounded-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">Sign up</button>
+            <button
+              type="button"
+              onClick={() => navigate("/signup")}
+              className="border-2 border-gray-600 hover:border-gray-400 text-white px-8 py-2 rounded-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              Sign up
+            </button>
           </div>
         </div>
       </div>
