@@ -1,7 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { getAppointments, bookAppointment } from "../api";
 import { useAuth } from "../AuthContext.jsx";
-import DashboardLayout from "./DashboardLayout";
 
 function Spinner({ className = "h-4 w-4" }) {
   return (
@@ -13,7 +12,7 @@ function Spinner({ className = "h-4 w-4" }) {
 }
 
 export default function StudentDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth(); // Removed logout here since the Layout handles it now
   const userName = user?.name || "Student";
   const displayName = userName.split(" ")[0] || "Student";
 
@@ -91,7 +90,7 @@ export default function StudentDashboard() {
   const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   return (
-    <DashboardLayout userName={userName} role={user?.role || "student"} onLogout={logout}>
+    <>
       <div className="flex flex-col gap-6 lg:flex-row">
         <section className="lg:w-2/3">
           <div className="mb-4">
@@ -208,6 +207,6 @@ export default function StudentDashboard() {
           )}
         </aside>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
