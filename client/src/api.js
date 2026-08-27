@@ -1,68 +1,63 @@
-﻿const API_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "";
-const BASE = API_BASE_URL ? `${API_BASE_URL}/api` : "/api";
+﻿import { collection, getDocs, addDoc, updateDoc, doc, query, where } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { db } from "./firebase"; 
 
-export function apiUrl(path) {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${BASE}${normalizedPath}`;
-}
+// Helper to get the currently logged-in user
+const getCurrentUserId = () => getAuth().currentUser?.uid;
 
-function authHeaders() {
-  const token = localStorage.getItem("token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+// --- USERS (ADMIN PANEL) ---
+export const getAdminUsers = async () => {
+  const snapshot = await getDocs(collection(db, "users"));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
-async function safeJson(res) {
-  const txt = await res.text();
-  try {
-    return txt ? JSON.parse(txt) : {};
-  } catch (e) {
-    return { raw: txt };
-  }
-}
+export const approveCounselor = (id) => updateDoc(doc(db, "users", id), { approved: true });
+export const rejectCounselor = (id) => updateDoc(doc(db, "users", id), { approved: false });
+export const deactivateUser = (id) => updateDoc(doc(db, "users", id), { active: false });
+export const reactivateUser = (id) => updateDoc(doc(db, "users", id), { active: true });
 
-async function request(path, options = {}) {
-  const res = await fetch(apiUrl(path), {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-      ...options.headers,
-    },
+// --- ASSESSMENTS / SURVEYS ---
+export const submitResponse = async (answers) => {
+  const uid = getCurrentUserId();
+  const totalScore = answers.reduce((sum, val) => sum + (val || 0), 0);
+  const riskLevel = totalScore >= 10 ? "high" : totalScore >= 5 ? "medium" : "low";
+
+  return await addDoc(collection(db, "assessments"), {
+    studentId: uid,
+    answers,
+    total: totalScore,
+    maxScore: answers.length * 3,
+    riskLevel,
+    status: "open",
+    createdAt: new Date().toISOString()
   });
+};
 
-  const data = await safeJson(res);
+export const getAssessments = async () => {
+  const snapshot = await getDocs(collection(db, "assessments"));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
-  if (res.status === 401 && localStorage.getItem("token")) {
-    window.dispatchEvent(new CustomEvent("auth:unauthorized"));
-  }
+export const updateAssessmentStatus = (id, status) => 
+  updateDoc(doc(db, "assessments", id), { status, reviewedAt: new Date().toISOString() });
 
-  if (!res.ok) throw new Error(data.error || data.message || `Request failed (${res.status})`);
-  return data;
-}
+// --- APPOINTMENTS ---
+export const bookAppointment = async () => {
+  const uid = getCurrentUserId();
+  return await addDoc(collection(db, "appointments"), {
+    studentId: uid,
+    title: "Counseling Session",
+    status: "Pending Review",
+    date: new Date(Date.now() + 86400000).toISOString(), // Mocks a date 1 day from now
+    createdAt: new Date().toISOString()
+  });
+};
 
-export const getSurvey = () => request("/survey");
-export const submitResponse = (answers) => request("/responses", { method: "POST", body: JSON.stringify({ answers }) });
-export const getResponses = () => request("/responses");
-export const getAssessments = () => request("/assessments");
-export const updateResponseStatus = (id, status) => request(`/responses/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
-export const updateAssessmentStatus = (id, status) => request(`/assessments/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
-
-export const getAvailability = () => request("/availability");
-export const getMyAvailability = () => request("/availability/mine");
-export const addAvailability = (start, end) => request("/availability", { method: "POST", body: JSON.stringify({ start, end }) });
-export const removeAvailability = (id) => request(`/availability/${id}`, { method: "DELETE" });
-
-export const bookAppointment = (availabilityId) => request("/appointments", { method: "POST", body: JSON.stringify({ availabilityId }) });
-export const getAppointments = () => request("/appointments");
-export const updateAppointment = (id, updates = {}) => request(`/appointments/${id}`, { method: "PATCH", body: JSON.stringify(updates) });
-
-export const resendVerification = () => request("/auth/resend-verification", { method: "POST" });
-export const forgotPassword = (email) => request("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
-export const resetPassword = (token, password) => request("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, password }) });
-export const refreshSession = () => request("/auth/refresh", { method: "POST" });
-
-export const getAdminUsers = () => request("/admin/users");
-export const approveCounselor = (id) => request(`/admin/users/${id}/approve`, { method: "POST" });
-export const rejectCounselor = (id) => request(`/admin/users/${id}/reject`, { method: "POST" });
-export const deactivateUser = (id) => request(`/admin/users/${id}/deactivate`, { method: "POST" });
-export const reactivateUser = (id) => request(`/admin/users/${id}/reactivate`, { method: "POST" });
+export const getAppointments = async () => {
+  const uid = getCurrentUserId();
+  if (!uid) return [];
+  // Fetches only the appointments belonging to this specific student
+  const q = query(collection(db, "appointments"), where("studentId", "==", uid));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};

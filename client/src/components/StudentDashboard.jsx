@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { getAppointments, bookAppointment } from "../api";
+import { getAppointments, bookAppointment, submitResponse } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 
 function Spinner({ className = "h-4 w-4" }) {
@@ -12,12 +12,9 @@ function Spinner({ className = "h-4 w-4" }) {
 }
 
 export default function StudentDashboard() {
-  // Fixed the mismatch: we now pull currentUser and userData properly
   const { currentUser, userData } = useAuth(); 
-  
-  // Checks Firestore first, then Google, then falls back
   const userName = userData?.name || currentUser?.displayName || "Student";
-  const displayName = userName.split(" ")[0] || "Student"; // Gets just the first name for the welcome text
+  const displayName = userName.split(" ")[0] || "Student";
 
   const QUESTIONS = [
     { id: "q1", text: "Over the past week, how often have you felt overwhelmed by your responsibilities?" },
@@ -29,10 +26,12 @@ export default function StudentDashboard() {
 
   const [qIndex, setQIndex] = useState(0);
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(null));
+  const [surveyCompleted, setSurveyCompleted] = useState(false);
+  const [submittingSurvey, setSubmittingSurvey] = useState(false);
+  
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [booking, setBooking] = useState(false);
-  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -55,161 +54,151 @@ export default function StudentDashboard() {
   async function handleBook() {
     setBooking(true);
     try {
-      const created = await bookAppointment();
+      await bookAppointment();
       const fresh = await getAppointments();
       setAppointments(Array.isArray(fresh) ? fresh : []);
-      if (created) {
-        setSelected(created);
-      }
     } catch (err) {
       console.error("Booking failed", err);
-      setAppointments((prev) => [
-        ...prev,
-        { id: `local-${Date.now()}`, title: "Counseling Session (pending)", date: new Date().toISOString(), status: "Pending" },
-      ]);
     } finally {
       setBooking(false);
     }
   }
 
   function selectOption(value) {
-    setAnswers((prev) => {
-      const copy = [...prev];
-      copy[qIndex] = value;
-      return copy;
-    });
+    const copy = [...answers];
+    copy[qIndex] = value;
+    setAnswers(copy);
   }
 
-  function prev() {
-    setQIndex((i) => Math.max(0, i - 1));
-  }
-
-  function next() {
-    if (qIndex < QUESTIONS.length - 1) setQIndex((i) => i + 1);
-    else console.log("Check-in complete", { answers });
+  async function handleNext() {
+    if (qIndex < QUESTIONS.length - 1) {
+      setQIndex(qIndex + 1);
+    } else {
+      setSubmittingSurvey(true);
+      try {
+        await submitResponse(answers);
+        setSurveyCompleted(true);
+      } catch (error) {
+        console.error("Failed to submit survey", error);
+      } finally {
+        setSubmittingSurvey(false);
+      }
+    }
   }
 
   const answeredCount = answers.filter((a) => a !== null).length;
   const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   return (
-    <>
-      <div className="flex flex-col gap-6 lg:flex-row">
-        <section className="lg:w-2/3">
-          <div className="mb-4">
-            <h1 className="text-3xl font-bold">Welcome back, {displayName}</h1>
-            <p className="mt-1 text-cyan-200">What&apos;s on your mind today?</p>
+    <div className="flex flex-col gap-6 lg:flex-row animate-fade-up">
+      <section className="lg:w-2/3 flex flex-col gap-6">
+        <div>
+          <h1 className="text-3xl font-bold">Welcome back, {displayName}</h1>
+          <p className="mt-1 text-cyan-200">What&apos;s on your mind today?</p>
+        </div>
+
+        {/* MOVED FROM HOMEPAGE: The Quick Info Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+            <div className="text-xs text-gray-400 uppercase tracking-wider">Mood check</div>
+            <div className="mt-2 text-xl font-semibold text-white">Balanced</div>
+          </div>
+          <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+            <div className="text-xs text-gray-400 uppercase tracking-wider">Next session</div>
+            <div className="mt-2 text-xl font-semibold text-white">
+              {appointments.length > 0 ? new Date(appointments[0].date).toLocaleDateString() : "None"}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+            <div className="text-xs text-gray-400 uppercase tracking-wider">Counselor note</div>
+            <div className="mt-2 text-sm text-gray-300">Keep practicing those breathing exercises!</div>
+          </div>
+        </div>
+
+        {/* WELLNESS SURVEY */}
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Wellness Check-in</h2>
+            {!surveyCompleted && <div className="text-sm text-gray-500">{answeredCount}/{QUESTIONS.length}</div>}
           </div>
 
-          <div className="card-surface p-6">
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">Wellness Check-in</h2>
-                <div className="text-sm text-white/60">{answeredCount}/{QUESTIONS.length}</div>
-              </div>
-
-              <div className="w-40">
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/6">
-                  <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progressPct}%` }} />
-                </div>
-                <div className="mt-1 text-right text-xs text-white/60">{progressPct}%</div>
-              </div>
+          {surveyCompleted ? (
+            <div className="py-8 text-center border border-dashed border-gray-700 rounded-xl bg-gray-800/50">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400">✓</div>
+              <h3 className="text-lg font-medium text-white">Check-in Complete</h3>
+              <p className="mt-1 text-sm text-gray-400">Your counselor has been updated. Thanks for checking in!</p>
             </div>
-
-            <div className="mb-4">
-              <p className="font-medium text-white/90">{QUESTIONS[qIndex].text}</p>
-            </div>
-
-            <div className="mb-4 grid grid-cols-2 gap-3">
-              {[0, 1, 2, 3].map((value) => {
-                const isSelected = answers[qIndex] === value;
-                const labels = ["0 Never", "1 Sometimes", "2 Often", "3 Always"];
-                return (
-                  <button
-                    key={value}
-                    onClick={() => selectOption(value)}
-                    className={`rounded-lg px-4 py-3 text-left transition transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
-                      isSelected ? "bg-gradient-to-r from-cyan-500 to-indigo-500 text-black" : "border border-white/6 bg-gray-800 text-white/90"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
+          ) : (
+            <>
+              <div className="mb-4 w-full h-2 overflow-hidden rounded-full bg-gray-800">
+                <div className="h-full bg-cyan-500 transition-all duration-300" style={{ width: `${progressPct}%` }} />
+              </div>
+              <div className="mb-5"><p className="text-lg font-medium text-gray-200">{QUESTIONS[qIndex].text}</p></div>
+              <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[0, 1, 2, 3].map((value) => {
+                  const isSelected = answers[qIndex] === value;
+                  const labels = ["0 - Never", "1 - Sometimes", "2 - Often", "3 - Always"];
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => selectOption(value)}
+                      className={`rounded-xl px-4 py-3 text-left transition transform focus:outline-none ${
+                        isSelected ? "bg-cyan-600 border-cyan-500 text-white" : "border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      }`}
+                    >
                       <div className="text-sm font-medium">{labels[value]}</div>
-                      <div className="text-xs text-white/50">Score {value}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
-                <button onClick={prev} disabled={qIndex === 0} className="rounded-md bg-white/6 px-3 py-2 text-white/80 transition hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-40">
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex justify-between">
+                <button onClick={() => setQIndex(Math.max(0, qIndex - 1))} disabled={qIndex === 0} className="rounded-lg px-4 py-2 text-sm text-gray-400 hover:bg-gray-800 disabled:opacity-30">
                   Previous
                 </button>
-                <button onClick={next} className="rounded-md bg-cyan-600 px-3 py-2 font-semibold text-white transition hover:brightness-105">
-                  {qIndex === QUESTIONS.length - 1 ? "Finish" : "Next"}
+                <button 
+                  onClick={handleNext} 
+                  disabled={answers[qIndex] === null || submittingSurvey} 
+                  className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:opacity-50"
+                >
+                  {submittingSurvey ? <Spinner color="#fff" /> : (qIndex === QUESTIONS.length - 1 ? "Submit" : "Next")}
                 </button>
               </div>
-
-              <div className="text-sm text-white/60">Progress: {progressPct}%</div>
-            </div>
-          </div>
-        </section>
-
-        <aside className="lg:w-1/3">
-          <div className="card-surface mb-4 p-4">
-            <h3 className="text-lg font-semibold">My Counseling Sessions</h3>
-
-            <div className="mt-3">
-              {loadingAppointments ? (
-                <div className="flex items-center gap-2 text-white/60"><Spinner /> <span>Loading appointments...</span></div>
-              ) : appointments.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-white/10 bg-gray-900/60 p-3 text-sm text-white/60">
-                  No appointments yet.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {appointments.slice(0, 3).map((appointment) => (
-                    <button
-                      key={appointment.id || appointment._id}
-                      type="button"
-                      onClick={() => setSelected(appointment)}
-                      className="w-full rounded-xl border border-white/6 bg-gray-900/60 p-3 text-left transition hover:border-cyan-500/50 hover:bg-gray-900"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium text-white">{appointment.title || "Counseling Session"}</div>
-                        <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] uppercase tracking-wide text-cyan-200">{appointment.status || "Scheduled"}</span>
-                      </div>
-                      <div className="mt-2 text-xs text-white/60">{appointment.date ? new Date(appointment.date).toLocaleDateString() : "Date pending"}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="button"
-              disabled={booking}
-              onClick={handleBook}
-              className="mt-4 w-full rounded-lg bg-cyan-600 px-4 py-2.5 font-medium text-white transition hover:brightness-110 disabled:opacity-70"
-            >
-              {booking ? "Booking..." : "Book appointment"}
-            </button>
-          </div>
-
-          {selected && (
-            <div className="card-surface p-4">
-              <h3 className="text-lg font-semibold">Session Details</h3>
-              <div className="mt-3 space-y-2 text-sm text-white/75">
-                <div><span className="text-white/50">Topic:</span> {selected.title || "Counseling Session"}</div>
-                <div><span className="text-white/50">Date:</span> {selected.date ? new Date(selected.date).toLocaleString() : "Pending"}</div>
-                <div><span className="text-white/50">Status:</span> {selected.status || "Pending"}</div>
-                {selected.counselorNotes ? <div><span className="text-white/50">Notes:</span> {selected.counselorNotes}</div> : null}
-              </div>
-            </div>
+            </>
           )}
-        </aside>
-      </div>
-    </>
+        </div>
+      </section>
+
+      <aside className="lg:w-1/3">
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5 shadow-sm">
+          <h3 className="text-lg font-semibold mb-4">My Counseling Sessions</h3>
+          <div className="space-y-3">
+            {loadingAppointments ? (
+              <div className="flex items-center gap-2 text-gray-400"><Spinner /> Loading...</div>
+            ) : appointments.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-700 p-4 text-center text-sm text-gray-500">
+                No upcoming appointments.
+              </div>
+            ) : (
+              appointments.map((apt) => (
+                <div key={apt.id} className="rounded-xl border border-gray-800 bg-gray-800/50 p-3">
+                  <div className="flex justify-between items-start">
+                    <div className="font-medium text-white">{apt.title}</div>
+                    <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] uppercase tracking-wide text-cyan-400">{apt.status}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-400">{new Date(apt.date).toLocaleDateString()}</div>
+                </div>
+              ))
+            )}
+          </div>
+          <button
+            onClick={handleBook}
+            disabled={booking}
+            className="mt-5 w-full rounded-xl bg-gray-800 border border-gray-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 hover:border-gray-600 disabled:opacity-70"
+          >
+            {booking ? "Requesting..." : "Request new appointment"}
+          </button>
+        </div>
+      </aside>
+    </div>
   );
 }
