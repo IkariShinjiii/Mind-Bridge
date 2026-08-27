@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { getAppointments, bookAppointment, submitResponse } from "../api";
+import { getAppointments, bookAppointment, submitResponse, getAvailability } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 
 function Spinner({ className = "h-4 w-4" }) {
@@ -31,7 +31,12 @@ export default function StudentDashboard() {
   
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const [booking, setBooking] = useState(false);
+  
+  // Modal & Slot Booking States
+  const [showModal, setShowModal] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -51,16 +56,31 @@ export default function StudentDashboard() {
     return () => (mounted = false);
   }, []);
 
-  async function handleBook() {
-    setBooking(true);
+  async function openBookingModal() {
+    setShowModal(true);
+    setLoadingSlots(true);
     try {
-      await bookAppointment();
+      const slots = await getAvailability();
+      // Filter out slots that are already booked
+      setAvailableSlots(slots.filter(s => !s.isBooked));
+    } catch (err) {
+      console.error("Failed to fetch availability", err);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }
+
+  async function handleBookSlot(slot) {
+    setBookingId(slot.id);
+    try {
+      await bookAppointment(slot);
       const fresh = await getAppointments();
       setAppointments(Array.isArray(fresh) ? fresh : []);
+      setShowModal(false);
     } catch (err) {
       console.error("Booking failed", err);
     } finally {
-      setBooking(false);
+      setBookingId(null);
     }
   }
 
@@ -90,14 +110,14 @@ export default function StudentDashboard() {
   const progressPct = Math.round((answeredCount / QUESTIONS.length) * 100);
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row animate-fade-up">
+    <div className="flex flex-col gap-6 lg:flex-row animate-fade-up relative">
       <section className="lg:w-2/3 flex flex-col gap-6">
         <div>
           <h1 className="text-3xl font-bold">Welcome back, {displayName}</h1>
           <p className="mt-1 text-cyan-200">What&apos;s on your mind today?</p>
         </div>
 
-        {/* MOVED FROM HOMEPAGE: The Quick Info Cards */}
+        {/* Quick Info Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
             <div className="text-xs text-gray-400 uppercase tracking-wider">Mood check</div>
@@ -106,7 +126,7 @@ export default function StudentDashboard() {
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
             <div className="text-xs text-gray-400 uppercase tracking-wider">Next session</div>
             <div className="mt-2 text-xl font-semibold text-white">
-              {appointments.length > 0 ? new Date(appointments[0].date).toLocaleDateString() : "None"}
+              {appointments.length > 0 ? new Date(appointments[0].start || appointments[0].date).toLocaleDateString() : "None"}
             </div>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
@@ -182,23 +202,64 @@ export default function StudentDashboard() {
               appointments.map((apt) => (
                 <div key={apt.id} className="rounded-xl border border-gray-800 bg-gray-800/50 p-3">
                   <div className="flex justify-between items-start">
-                    <div className="font-medium text-white">{apt.title}</div>
-                    <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] uppercase tracking-wide text-cyan-400">{apt.status}</span>
+                    <div className="font-medium text-white">{apt.title || "Counseling Session"}</div>
+                    <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] uppercase tracking-wide text-cyan-400">{apt.status || "Pending"}</span>
                   </div>
-                  <div className="mt-1 text-xs text-gray-400">{new Date(apt.date).toLocaleDateString()}</div>
+                  <div className="mt-1 text-xs text-gray-400">
+                    {apt.start ? new Date(apt.start).toLocaleString() : (apt.date ? new Date(apt.date).toLocaleString() : "Scheduled")}
+                  </div>
                 </div>
               ))
             )}
           </div>
           <button
-            onClick={handleBook}
-            disabled={booking}
-            className="mt-5 w-full rounded-xl bg-gray-800 border border-gray-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 hover:border-gray-600 disabled:opacity-70"
+            onClick={openBookingModal}
+            className="mt-5 w-full rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-cyan-500 shadow-sm"
           >
-            {booking ? "Requesting..." : "Request new appointment"}
+            Book appointment
           </button>
         </div>
       </aside>
+
+      {/* BOOKING MODAL FOR LIVE COUNSELOR SLOTS */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-xl animate-fade-up">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Select Available Counselor Slot</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white text-lg">✕</button>
+            </div>
+
+            {loadingSlots ? (
+              <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2"><Spinner /> Loading available slots...</div>
+            ) : availableSlots.length === 0 ? (
+              <div className="py-8 text-center text-gray-500 border border-dashed border-gray-800 rounded-xl">
+                No open counselor time slots found at the moment. Please check back later.
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                {availableSlots.map((slot) => (
+                  <div key={slot.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-4">
+                    <div>
+                      <div className="text-sm font-medium text-white">Counselor: {slot.counselorName || "Assigned Counselor"}</div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {new Date(slot.start).toLocaleString()} to {new Date(slot.end).toLocaleString()}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleBookSlot(slot)}
+                      disabled={bookingId === slot.id}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                    >
+                      {bookingId === slot.id ? <Spinner /> : "Book Slot"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

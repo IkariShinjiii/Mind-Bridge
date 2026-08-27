@@ -42,13 +42,32 @@ export const updateAssessmentStatus = (id, status) =>
   updateDoc(doc(db, "assessments", id), { status, reviewedAt: new Date().toISOString() });
 
 // --- APPOINTMENTS ---
-export const bookAppointment = async () => {
+export const bookAppointment = async (slot) => {
   const uid = getCurrentUserId();
+  const authUser = getAuth().currentUser;
+  
+  // If a specific slot from the counselor is passed, use its details
+  if (slot) {
+    return await addDoc(collection(db, "appointments"), {
+      studentId: uid,
+      studentName: authUser?.displayName || "Student",
+      counselorId: slot.counselorId,
+      counselorName: slot.counselorName,
+      title: `Session with ${slot.counselorName || "Counselor"}`,
+      start: slot.start,
+      end: slot.end,
+      status: "Pending Review",
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  // Fallback default booking if no slot object is provided
   return await addDoc(collection(db, "appointments"), {
     studentId: uid,
+    studentName: authUser?.displayName || "Student",
     title: "Counseling Session",
     status: "Pending Review",
-    date: new Date(Date.now() + 86400000).toISOString(), // Mocks a date 1 day from now
+    date: new Date(Date.now() + 86400000).toISOString(),
     createdAt: new Date().toISOString()
   });
 };
@@ -76,14 +95,14 @@ export const getMyAvailability = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const addAvailability = async (date, time) => {
+export const addAvailability = async (start, end) => {
   const uid = getCurrentUserId();
   const authUser = getAuth().currentUser;
   return await addDoc(collection(db, "availability"), {
     counselorId: uid,
     counselorName: authUser?.displayName || "Counselor",
-    date,
-    time,
+    start,
+    end,
     isBooked: false,
     createdAt: new Date().toISOString()
   });
