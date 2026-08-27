@@ -52,28 +52,28 @@ export default function ManageAvailability() {
 
   return (
     <div className="mx-auto max-w-4xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal sm:text-xs">COUNSELOR VIEW</p>
-      <h1 className="mb-6 font-display text-2xl text-ink sm:text-3xl">Manage availability</h1>
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400 sm:text-xs">COUNSELOR VIEW</p>
+      <h1 className="mb-6 font-display text-2xl text-white sm:text-3xl">Manage availability</h1>
 
-      <form onSubmit={handleAdd} className="mb-8 rounded-2xl border border-ink/10 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md sm:p-5">
+      <form onSubmit={handleAdd} className="mb-8 rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm transition-all duration-200 hover:border-gray-700 sm:p-5">
         <div className="grid gap-4 md:grid-cols-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Start</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">Start</label>
             <input
               type="datetime-local"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm"
+              className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">End</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">End</label>
             <input
               type="datetime-local"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm"
+              className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-cyan-500 focus:outline-none"
               required
             />
           </div>
@@ -81,7 +81,7 @@ export default function ManageAvailability() {
             <button
               type="submit"
               disabled={savingSlot}
-              className="action-button inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              className="action-button inline-flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {savingSlot ? (
                 <>
@@ -94,28 +94,28 @@ export default function ManageAvailability() {
             </button>
           </div>
         </div>
-        {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
+        {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
       </form>
 
       {slots.length === 0 && (
-        <p className="text-ink/50 text-sm">You haven't added any open slots yet.</p>
+        <p className="text-gray-500 text-sm">You haven't added any open slots yet.</p>
       )}
 
       <div className="space-y-3">
         {slots.map((s) => (
-          <div key={s.id} className="card-surface flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div key={s.id} className="rounded-xl border border-gray-800 bg-gray-900 flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
             <div>
-              <div className="font-medium text-ink">{new Date(s.start).toLocaleString()}</div>
-              <div className="text-sm text-ink/60">to {new Date(s.end).toLocaleString()}</div>
+              <div className="font-medium text-white">{new Date(s.start).toLocaleString()}</div>
+              <div className="text-sm text-gray-400">to {new Date(s.end).toLocaleString()}</div>
             </div>
             <button
               onClick={() => handleRemove(s.id)}
               disabled={removingId === s.id}
-              className="inline-flex items-center justify-center gap-2 text-sm text-red-600 transition hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 text-sm text-red-400 transition hover:text-red-300 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
             >
               {removingId === s.id ? (
                 <>
-                  <Spinner size={14} color="#dc2626" className="text-red-600" />
+                  <Spinner size={14} color="#ef4444" className="text-red-400" />
                   <span>Removing…</span>
                 </>
               ) : (
