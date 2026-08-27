@@ -16,14 +16,14 @@ export function AuthProvider({ children }) {
       if (user) {
         setCurrentUser(user);
         try {
-          const userDoc = await getDoc(doc(db, "Users", user.uid));
+          const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
             console.log("Firestore Data Found for User:", data); // Debug log!
             setUserRole(data.role || "student");
             setUserData(data);
           } else {
-            console.error(`No document found in 'Users' collection for UID: ${user.uid}`); // Debug log!
+            console.error(`No document found in 'users' collection for UID: ${user.uid}`); // Debug log!
             setUserRole("student");
           }
         } catch (error) {
