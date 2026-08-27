@@ -1,6 +1,9 @@
 ﻿import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../AuthContext.jsx";
+import { auth, db } from "../firebase";
 import icon from "../assets/mindbridge-icon.png";
 
 function GoogleIcon() {
@@ -30,6 +33,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -37,19 +41,39 @@ export default function Login() {
     const email = String(form.get("email") || "").trim();
     const password = String(form.get("password") || "").trim();
 
-    if (!email || !password) return;
+    if (!email || !password) {
+      setErrorMessage("Please enter both your email and password.");
+      return;
+    }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
-      login("demo-token", {
-        id: "demo-student",
-        name: "Jherwin Sarmiento",
-        email,
-        role: "student",
-        emailVerified: true,
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const userDoc = await getDoc(doc(db, "Users", credential.user.uid));
+
+      if (!userDoc.exists()) {
+        throw new Error("No profile found for this account.");
+      }
+
+      const profile = userDoc.data();
+      const role = (profile.role || "student").toLowerCase();
+      const profileName = profile.name || profile.displayName || credential.user.displayName || email.split("@")[0];
+
+      login(credential.user.accessToken, {
+        id: credential.user.uid,
+        name: profileName,
+        email: credential.user.email,
+        role,
+        emailVerified: credential.user.emailVerified,
       });
-      navigate("/student/dashboard", { replace: true });
+
+      if (role === "admin") navigate("/admin/dashboard", { replace: true });
+      else if (role === "counselor") navigate("/counselor/dashboard", { replace: true });
+      else navigate("/student/dashboard", { replace: true });
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to sign in. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -67,6 +91,10 @@ export default function Login() {
             </div>
           </div>
           <p className="text-sm text-gray-300 mb-6">Log in to continue to your student dashboard</p>
+
+          {errorMessage ? (
+            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{errorMessage}</div>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
