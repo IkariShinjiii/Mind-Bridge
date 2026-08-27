@@ -23,9 +23,9 @@ import {
 import Spinner from "./Spinner";
 
 const ROLE_BADGE = {
-  student: "bg-teal/10 text-teal border-teal/30",
-  counselor: "bg-amber-100 text-amber-700 border-amber-200",
-  admin: "bg-ink/10 text-ink border-ink/20",
+  student: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  counselor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  admin: "bg-purple-500/10 text-purple-400 border-purple-500/20",
 };
 
 const CHART_COLORS = ["#1fbf9f", "#f5b84c", "#ef5d5d"];
@@ -223,14 +223,14 @@ export default function AdminPanel() {
     <div className="mx-auto max-w-7xl animate-fade-up px-3 py-8 sm:px-5 lg:px-8">
       <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-teal font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">ADMIN</p>
-          <h1 className="font-display text-2xl sm:text-3xl text-ink">Mind Bridge Administration</h1>
+          <p className="text-cyan-400 font-semibold tracking-[0.2em] text-[10px] sm:text-xs mb-2">ADMIN</p>
+          <h1 className="font-display text-2xl sm:text-3xl text-white">Mind Bridge Administration</h1>
         </div>
-        <div className="inline-flex w-full max-w-md flex-wrap rounded-full border border-ink/10 bg-white p-1 shadow-sm">
+        <div className="inline-flex w-full max-w-md flex-wrap rounded-full border border-gray-800 bg-gray-900 p-1 shadow-sm">
           <button
             onClick={() => setActiveTab("counselors")}
             className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
-              activeTab === "counselors" ? "bg-ink text-white shadow-sm" : "text-ink/70 hover:text-ink hover:bg-mist"
+              activeTab === "counselors" ? "bg-cyan-600 text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-gray-800"
             }`}
           >
             Manage Counselors
@@ -238,7 +238,7 @@ export default function AdminPanel() {
           <button
             onClick={() => setActiveTab("students")}
             className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
-              activeTab === "students" ? "bg-ink text-white shadow-sm" : "text-ink/70 hover:text-ink hover:bg-mist"
+              activeTab === "students" ? "bg-cyan-600 text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-gray-800"
             }`}
           >
             Manage Students
@@ -247,47 +247,47 @@ export default function AdminPanel() {
       </header>
 
       <section className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-ink/55">Students</p>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Students</p>
           <div className="mt-3 flex items-end justify-between">
-            <span className="font-display text-3xl text-ink">{analytics.totalStudents}</span>
-            <span className="rounded-full bg-teal/10 px-2 py-1 text-[10px] font-semibold text-teal">Tracked</span>
+            <span className="font-display text-3xl text-white">{analytics.totalStudents}</span>
+            <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] font-semibold text-cyan-400">Tracked</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-ink/55">Counselors</p>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Counselors</p>
           <div className="mt-3 flex items-end justify-between">
-            <span className="font-display text-3xl text-ink">{analytics.totalCounselors}</span>
-            <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-700">Active</span>
+            <span className="font-display text-3xl text-white">{analytics.totalCounselors}</span>
+            <span className="rounded-full bg-amber-500/10 px-2 py-1 text-[10px] font-semibold text-amber-400">Active</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-ink/55">Pending</p>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Pending</p>
           <div className="mt-3 flex items-end justify-between">
-            <span className="font-display text-3xl text-ink">{analytics.pendingApprovals}</span>
-            <span className="rounded-full bg-ink/5 px-2 py-1 text-[10px] font-semibold text-ink/70">Review</span>
+            <span className="font-display text-3xl text-white">{analytics.pendingApprovals}</span>
+            <span className="rounded-full bg-gray-800 px-2 py-1 text-[10px] font-semibold text-gray-400">Review</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-ink/55">High-risk</p>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">High-risk</p>
           <div className="mt-3 flex items-end justify-between">
-            <span className="font-display text-3xl text-ink">{analytics.highRiskCases}</span>
-            <span className="rounded-full bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700">Priority</span>
+            <span className="font-display text-3xl text-white">{analytics.highRiskCases}</span>
+            <span className="rounded-full bg-red-500/10 px-2 py-1 text-[10px] font-semibold text-red-400">Priority</span>
           </div>
         </div>
       </section>
 
       {loading ? (
-        <div className="rounded-2xl border border-ink/10 bg-white p-6 text-sm text-ink/50 shadow-sm">Loading…</div>
+        <div className="rounded-2xl border border-gray-800 bg-gray-900 p-6 text-sm text-gray-500 shadow-sm">Loading…</div>
       ) : (
         <>
           {activeTab === "counselors" && pending.length > 0 && (
-            <section className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <section className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 shadow-sm">
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-400">
                   Pending approval ({pending.length})
                 </h2>
               </div>
@@ -296,17 +296,17 @@ export default function AdminPanel() {
                 {pending.map((u) => (
                   <div
                     key={u.id}
-                    className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-ink">{u.name}</p>
-                      <p className="text-sm text-ink/55">{u.email}</p>
+                      <p className="font-medium text-white">{u.name}</p>
+                      <p className="text-sm text-gray-400">{u.email}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handle(approveCounselor, u.id)}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {actionLoadingId === u.id ? (
                           <>
@@ -320,11 +320,11 @@ export default function AdminPanel() {
                       <button
                         onClick={() => handle(rejectCounselor, u.id)}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition duration-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 transition duration-200 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {actionLoadingId === u.id ? (
                           <>
-                            <Spinner size={14} color="#dc2626" className="text-red-600" />
+                            <Spinner size={14} color="#ef4444" className="text-red-400" />
                             <span>Rejecting…</span>
                           </>
                         ) : (
@@ -338,9 +338,9 @@ export default function AdminPanel() {
             </section>
           )}
 
-          <section className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm sm:p-5">
+          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-ink/70">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
                 {activeTab === "counselors" ? "Counselor and admin accounts" : "Student accounts"}
               </h2>
             </div>
@@ -349,24 +349,24 @@ export default function AdminPanel() {
               {filteredUsers.map((u, index) => (
                 <div
                   key={u.id}
-                  className="stagger-item flex flex-col gap-3 rounded-xl border border-ink/10 bg-mist p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                  className="stagger-item flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-800/50 p-3 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
                   style={{ animationDelay: `${index * 55}ms` }}
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
                     <div>
-                      <p className="font-medium text-ink">{u.name}</p>
-                      <p className="text-sm text-ink/55">{u.email}</p>
+                      <p className="font-medium text-white">{u.name}</p>
+                      <p className="text-sm text-gray-400">{u.email}</p>
                     </div>
                     <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize ${ROLE_BADGE[u.role]}`}>
                       {u.role}
                     </span>
                     {!u.emailVerified && (
-                      <span className="inline-flex w-fit rounded-full border border-ink/10 bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink/50">
+                      <span className="inline-flex w-fit rounded-full border border-gray-700 bg-gray-800 px-2 py-0.5 text-[10px] font-semibold text-gray-400">
                         Unverified
                       </span>
                     )}
                     {u.active === false && (
-                      <span className="inline-flex w-fit rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                      <span className="inline-flex w-fit rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
                         Deactivated
                       </span>
                     )}
@@ -378,16 +378,16 @@ export default function AdminPanel() {
                       disabled={actionLoadingId === u.id}
                       className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
                         u.active === false
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-60"
-                          : "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-60"
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
+                          : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
                       }`}
                     >
                       {actionLoadingId === u.id ? (
                         <>
                           <Spinner
                             size={14}
-                            color={u.active === false ? "#047857" : "#dc2626"}
-                            className={u.active === false ? "text-emerald-700" : "text-red-600"}
+                            color={u.active === false ? "#10b981" : "#ef4444"}
+                            className={u.active === false ? "text-emerald-400" : "text-red-400"}
                           />
                           <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
                         </>
@@ -404,30 +404,30 @@ export default function AdminPanel() {
       )}
 
       <div className="mt-8 space-y-6">
-        <section className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm sm:p-6">
+        <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-teal font-semibold tracking-[0.18em] text-[10px]">ANALYTICS</p>
-              <h2 className="font-display text-2xl text-ink">System-Wide Analytics Dashboard</h2>
+              <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">ANALYTICS</p>
+              <h2 className="font-display text-2xl text-white">System-Wide Analytics Dashboard</h2>
             </div>
-            <div className="text-sm text-ink/60">
+            <div className="text-sm text-gray-400">
               <div>{analytics.totalAssessments} total assessments</div>
               <div>{analytics.totalStudents} students tracked</div>
             </div>
           </div>
 
           <div className="mb-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-ink/10 bg-mist p-4">
-              <div className="text-[10px] uppercase tracking-[0.16em] text-ink/55">Low risk</div>
-              <div className="mt-2 font-display text-3xl text-ink">{analytics.riskCounts.low}</div>
+            <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Low risk</div>
+              <div className="mt-2 font-display text-3xl text-white">{analytics.riskCounts.low}</div>
             </div>
-            <div className="rounded-xl border border-ink/10 bg-mist p-4">
-              <div className="text-[10px] uppercase tracking-[0.16em] text-ink/55">Medium risk</div>
-              <div className="mt-2 font-display text-3xl text-ink">{analytics.riskCounts.medium}</div>
+            <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">Medium risk</div>
+              <div className="mt-2 font-display text-3xl text-white">{analytics.riskCounts.medium}</div>
             </div>
-            <div className="rounded-xl border border-ink/10 bg-mist p-4">
-              <div className="text-[10px] uppercase tracking-[0.16em] text-ink/55">High risk</div>
-              <div className="mt-2 font-display text-3xl text-ink">{analytics.riskCounts.high}</div>
+            <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-gray-500">High risk</div>
+              <div className="mt-2 font-display text-3xl text-white">{analytics.riskCounts.high}</div>
             </div>
           </div>
 
@@ -435,10 +435,10 @@ export default function AdminPanel() {
             <div className="h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e7e7e7" />
-                  <XAxis dataKey="name" stroke="#556" tickLine={false} axisLine={false} />
-                  <YAxis allowDecimals={false} stroke="#556" tickLine={false} axisLine={false} />
-                  <Tooltip cursor={{ fill: "rgba(31,191,159,0.08)" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="name" stroke="#9ca3af" tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} stroke="#9ca3af" tickLine={false} axisLine={false} />
+                  <Tooltip cursor={{ fill: "rgba(31,191,159,0.08)" }} contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }} />
                   <Legend />
                   <Bar dataKey="value" name="Assessments" radius={[8, 8, 0, 0]}>
                     {analytics.chartData.map((entry, index) => (
@@ -466,7 +466,7 @@ export default function AdminPanel() {
                       <Cell key={`cell-${entry.name}`} fill={entry.color || CHART_COLORS[index]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -474,47 +474,47 @@ export default function AdminPanel() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm sm:p-6">
+        <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-teal font-semibold tracking-[0.18em] text-[10px]">PRIORITY</p>
-              <h2 className="font-display text-2xl text-ink">High-risk support queue</h2>
+              <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">PRIORITY</p>
+              <h2 className="font-display text-2xl text-white">High-risk support queue</h2>
             </div>
           </div>
 
           <div className="space-y-2">
             {analytics.priorityQueue.length === 0 ? (
-              <div className="rounded-xl border border-ink/10 bg-mist p-4 text-sm text-ink/60">
+              <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4 text-sm text-gray-400">
                 No active high-risk cases at the moment.
               </div>
             ) : (
               analytics.priorityQueue.slice(0, 5).map((item, index) => (
-                <div key={item.id || index} className="flex flex-col gap-2 rounded-xl border border-red-200 bg-red-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div key={item.id || index} className="flex flex-col gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="font-medium text-ink">Case #{String(index + 1).padStart(3, "0")}</div>
-                    <div className="text-sm text-ink/60">
+                    <div className="font-medium text-white">Case #{String(index + 1).padStart(3, "0")}</div>
+                    <div className="text-sm text-gray-400">
                       {item.status || "Open"} • {item.riskLevel || "High"} risk
                     </div>
                   </div>
-                  <div className="text-sm text-ink/60">{formatDateTime(item.createdAt || item.submittedAt)}</div>
+                  <div className="text-sm text-gray-500">{formatDateTime(item.createdAt || item.submittedAt)}</div>
                 </div>
               ))
             )}
           </div>
         </section>
 
-        <section className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm sm:p-6">
+        <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-teal font-semibold tracking-[0.18em] text-[10px]">AUDIT</p>
-              <h2 className="font-display text-2xl text-ink">Audit Logs / Activity Tracking</h2>
+              <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">AUDIT</p>
+              <h2 className="font-display text-2xl text-white">Audit Logs / Activity Tracking</h2>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-ink/10 text-ink/60">
+                <tr className="border-b border-gray-800 text-gray-400">
                   <th className="min-w-[100px] py-3 pr-4 font-medium">Actor</th>
                   <th className="min-w-[180px] py-3 pr-4 font-medium">Action</th>
                   <th className="min-w-[150px] py-3 pr-4 font-medium">Target</th>
@@ -524,13 +524,13 @@ export default function AdminPanel() {
               </thead>
               <tbody>
                 {auditLogs.map((log, index) => (
-                  <tr key={log.id} className="stagger-item border-b border-ink/5 align-top" style={{ animationDelay: `${index * 35}ms` }}>
-                    <td className="py-3 pr-4">{log.actor}</td>
-                    <td className="py-3 pr-4">{log.action}</td>
-                    <td className="py-3 pr-4">{log.target}</td>
-                    <td className="py-3 pr-4">{formatDateTime(log.timestamp)}</td>
+                  <tr key={log.id} className="stagger-item border-b border-gray-800/50 align-top" style={{ animationDelay: `${index * 35}ms` }}>
+                    <td className="py-3 pr-4 text-gray-300">{log.actor}</td>
+                    <td className="py-3 pr-4 text-gray-300">{log.action}</td>
+                    <td className="py-3 pr-4 text-gray-300">{log.target}</td>
+                    <td className="py-3 pr-4 text-gray-400">{formatDateTime(log.timestamp)}</td>
                     <td className="py-3">
-                      <span className="inline-flex rounded-full border border-ink/10 bg-mist px-2 py-1 text-[11px] font-medium">
+                      <span className="inline-flex rounded-full border border-gray-700 bg-gray-800 px-2 py-1 text-[11px] font-medium text-gray-300">
                         {log.outcome}
                       </span>
                     </td>
@@ -541,18 +541,18 @@ export default function AdminPanel() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-ink/10 bg-white p-4 shadow-sm sm:p-6">
+        <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-teal font-semibold tracking-[0.18em] text-[10px]">EXPORT</p>
-              <h2 className="font-display text-2xl text-ink">Data Exporting</h2>
-              <p className="mt-1 text-sm text-ink/60">Export an anonymized assessment compliance report as CSV.</p>
+              <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">EXPORT</p>
+              <h2 className="font-display text-2xl text-white">Data Exporting</h2>
+              <p className="mt-1 text-sm text-gray-400">Export an anonymized assessment compliance report as CSV.</p>
             </div>
             <button
               type="button"
               onClick={exportCsv}
               disabled={exportingCsv}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {exportingCsv ? (
                 <>

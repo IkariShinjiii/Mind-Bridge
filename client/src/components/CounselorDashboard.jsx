@@ -3,15 +3,15 @@ import { getAssessments, updateAssessmentStatus } from "../api";
 import Spinner from "./Spinner";
 
 const RISK_STYLES = {
-  high: "bg-red-100 text-red-700 border-red-200",
-  medium: "bg-amber-100 text-amber-700 border-amber-200",
-  low: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  high: "bg-red-500/10 text-red-400 border-red-500/20",
+  medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
 };
 
 const STATUS_STYLES = {
-  open: "bg-slate-100 text-slate-700 border-slate-200",
-  reviewed: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  escalated: "bg-red-100 text-red-700 border-red-200",
+  open: "bg-gray-800 text-gray-300 border-gray-700",
+  reviewed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  escalated: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
 export default function CounselorDashboard() {
@@ -60,8 +60,8 @@ export default function CounselorDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-3 py-8 animate-fade-up sm:px-6 sm:py-12">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal sm:text-xs">COUNSELOR VIEW</p>
-      <h1 className="mb-6 font-display text-2xl text-ink sm:text-3xl">Student assessment cases</h1>
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-400 sm:text-xs">COUNSELOR VIEW</p>
+      <h1 className="mb-6 font-display text-2xl text-white sm:text-3xl">Student assessment cases</h1>
 
       <div className="mb-6 flex flex-wrap gap-2">
         {[
@@ -76,7 +76,7 @@ export default function CounselorDashboard() {
             key={value}
             onClick={() => setFilter(value)}
             className={`action-button rounded-full border px-3 py-1.5 text-xs transition-all duration-200 sm:text-sm ${
-              filter === value ? "border-ink bg-ink text-white shadow-sm" : "border-ink/15 text-ink/70 hover:border-ink/40 hover:bg-mist"
+              filter === value ? "border-cyan-500 bg-cyan-600 text-white shadow-sm" : "border-gray-700 text-gray-400 hover:border-gray-500 hover:bg-gray-800"
             }`}
           >
             {label}
@@ -85,13 +85,13 @@ export default function CounselorDashboard() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-ink/60">Loading cases…</p>
+        <p className="text-sm text-gray-400">Loading cases…</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-ink/50">No student cases in this view yet.</p>
+        <p className="text-sm text-gray-500">No student cases in this view yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-ink/10 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900 shadow-sm">
           <table className="min-w-[700px] w-full text-left text-sm">
-            <thead className="bg-slate-50 text-ink/70">
+            <thead className="bg-gray-800/50 text-gray-400">
               <tr>
                 <th className="px-3 py-3 font-semibold sm:px-4">Student</th>
                 <th className="px-3 py-3 font-semibold sm:px-4">Risk</th>
@@ -112,10 +112,10 @@ export default function CounselorDashboard() {
                     : "Unknown";
 
                 return (
-                  <tr key={item.id} className="border-t border-ink/10 align-top">
+                  <tr key={item.id} className="border-t border-gray-800 align-top">
                     <td className="px-3 py-3 sm:px-4">
-                      <div className="font-medium text-ink">{item.studentName || "Unknown"}</div>
-                      <div className="text-xs text-ink/50">{item.studentEmail || item.email || "No email"}</div>
+                      <div className="font-medium text-white">{item.studentName || "Unknown"}</div>
+                      <div className="text-xs text-gray-500">{item.studentEmail || item.email || "No email"}</div>
                     </td>
                     <td className="px-3 py-3 sm:px-4">
                       <div className="flex flex-wrap items-center gap-2">
@@ -123,27 +123,27 @@ export default function CounselorDashboard() {
                           {risk}
                         </span>
                         {item.flaggedForImmediateReview && (
-                          <span className="inline-flex rounded-full border border-red-600 bg-red-600 px-2 py-1 text-[10px] font-medium text-white">
+                          <span className="inline-flex rounded-full border border-red-500 bg-red-600 px-2 py-1 text-[10px] font-medium text-white">
                             Immediate
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-ink/80 sm:px-4">
+                    <td className="px-3 py-3 text-gray-300 sm:px-4">
                       {item.total ?? 0}/{item.maxScore ?? 27}
                     </td>
                     <td className="px-3 py-3 sm:px-4">
-                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${STATUS_STYLES[status] || "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                      <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs ${STATUS_STYLES[status] || "bg-gray-800 text-gray-300 border-gray-700"}`}>
                         {status}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-ink/70 sm:px-4">{submittedAt}</td>
+                    <td className="px-3 py-3 text-gray-400 sm:px-4">{submittedAt}</td>
                     <td className="px-3 py-3 sm:px-4">
                       {status !== "reviewed" ? (
                         <button
                           onClick={() => markReviewed(item.id, "reviewed")}
                           disabled={updatingId === item.id}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           {updatingId === item.id ? (
                             <>
@@ -158,11 +158,11 @@ export default function CounselorDashboard() {
                         <button
                           onClick={() => markReviewed(item.id, "open")}
                           disabled={updatingId === item.id}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-ink/15 px-3 py-2 text-sm font-medium text-ink/80 transition duration-200 hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-sm font-medium text-gray-300 transition duration-200 hover:border-gray-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           {updatingId === item.id ? (
                             <>
-                              <Spinner size={14} className="text-ink/80" />
+                              <Spinner size={14} className="text-gray-400" />
                               <span>Updating…</span>
                             </>
                           ) : (
