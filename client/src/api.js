@@ -1,4 +1,4 @@
-﻿import { collection, getDocs, addDoc, updateDoc, doc, query, where } from "firebase/firestore";
+﻿import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase"; 
 
@@ -60,4 +60,35 @@ export const getAppointments = async () => {
   const q = query(collection(db, "appointments"), where("studentId", "==", uid));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+// --- COUNSELOR AVAILABILITY ---
+export const getAvailability = async () => {
+  const snapshot = await getDocs(collection(db, "availability"));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getMyAvailability = async () => {
+  const uid = getCurrentUserId();
+  if (!uid) return [];
+  const q = query(collection(db, "availability"), where("counselorId", "==", uid));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const addAvailability = async (date, time) => {
+  const uid = getCurrentUserId();
+  const authUser = getAuth().currentUser;
+  return await addDoc(collection(db, "availability"), {
+    counselorId: uid,
+    counselorName: authUser?.displayName || "Counselor",
+    date,
+    time,
+    isBooked: false,
+    createdAt: new Date().toISOString()
+  });
+};
+
+export const removeAvailability = async (id) => {
+  return await deleteDoc(doc(db, "availability", id));
 };
