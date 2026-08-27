@@ -4,15 +4,14 @@ import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
 
 export default function DashboardLayout({ children }) {
-  // Pull the real user data and logout function straight from your context!
-  const { currentUser, userRole, logout } = useAuth();
+  // Added userData here to pull from your Firestore database!
+  const { currentUser, userRole, userData, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Dynamically grab the name from their Google profile, fallback to "Student" if loading
-  const safeName = currentUser?.displayName || "Student";
+  // Now it checks Firestore FIRST, then Google, then falls back to "Student"
+  const safeName = userData?.name || currentUser?.displayName || "Student";
   const safeRole = (userRole || "student").toUpperCase();
 
-  // Proper logout handler
   const handleLogout = async () => {
     try {
       await logout();
@@ -35,7 +34,6 @@ export default function DashboardLayout({ children }) {
           <nav className="hidden items-center gap-4 text-sm text-gray-300 md:flex">
             <Link to="/" className="transition hover:text-white">Home</Link>
             
-            {/* Dynamic Routing based on Firestore Role */}
             {userRole === "admin" && (
               <Link to="/admin/dashboard" className="transition hover:text-cyan-400 font-semibold">Admin Panel</Link>
             )}
@@ -54,7 +52,6 @@ export default function DashboardLayout({ children }) {
               {safeRole}
             </span>
             <div className="hidden text-sm text-gray-200 sm:block">{safeName}</div>
-            {/* You can replace this gradient with currentUser?.photoURL later if you want their Google profile pic! */}
             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600" />
           </div>
 

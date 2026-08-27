@@ -12,9 +12,12 @@ function Spinner({ className = "h-4 w-4" }) {
 }
 
 export default function StudentDashboard() {
-  const { user } = useAuth(); // Removed logout here since the Layout handles it now
-  const userName = user?.name || "Student";
-  const displayName = userName.split(" ")[0] || "Student";
+  // Fixed the mismatch: we now pull currentUser and userData properly
+  const { currentUser, userData } = useAuth(); 
+  
+  // Checks Firestore first, then Google, then falls back
+  const userName = userData?.name || currentUser?.displayName || "Student";
+  const displayName = userName.split(" ")[0] || "Student"; // Gets just the first name for the welcome text
 
   const QUESTIONS = [
     { id: "q1", text: "Over the past week, how often have you felt overwhelmed by your responsibilities?" },
