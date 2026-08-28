@@ -1,9 +1,8 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { useAuth } from "../AuthContext.jsx";
-import { auth, db } from "../firebase";
+import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db, provider } from "../firebase";
 import icon from "../assets/mindbridge-icon.png";
 
 function GoogleIcon() {
@@ -29,10 +28,25 @@ function GoogleIcon() {
   );
 }
 
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+      <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
+    </svg>
+  );
+}
+
+function navigateByRole(role, navigate) {
+  if (role === "admin") navigate("/admin/dashboard", { replace: true });
+  else if (role === "counselor") navigate("/counselor/dashboard", { replace: true });
+  else navigate("/student/dashboard", { replace: true });
+}
+
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e) {
@@ -51,31 +65,70 @@ export default function Login() {
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, "Users", credential.user.uid));
+      const userDoc = await getDoc(doc(db, "users", credential.user.uid));
 
       if (!userDoc.exists()) {
         throw new Error("No profile found for this account.");
       }
 
       const profile = userDoc.data();
+      if (profile.active === false) {
+        throw new Error("This account has been deactivated. Contact an administrator.");
+      }
+
       const role = (profile.role || "student").toLowerCase();
-      const profileName = profile.name || profile.displayName || credential.user.displayName || email.split("@")[0];
-
-      login(credential.user.accessToken, {
-        id: credential.user.uid,
-        name: profileName,
-        email: credential.user.email,
-        role,
-        emailVerified: credential.user.emailVerified,
-      });
-
-      if (role === "admin") navigate("/admin/dashboard", { replace: true });
-      else if (role === "counselor") navigate("/counselor/dashboard", { replace: true });
-      else navigate("/student/dashboard", { replace: true });
+      navigateByRole(role, navigate);
     } catch (error) {
       setErrorMessage(error.message || "Unable to sign in. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    setErrorMessage("");
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        // New user via Google — enforce institutional email domain
+        if (!user.email?.toLowerCase().endsWith("@usa.edu.ph")) {
+          await signOut(auth);
+          setErrorMessage("Google Sign-In is only available for @usa.edu.ph accounts. Please use your school email.");
+          return;
+        }
+        // Create a new student profile in Firestore
+        await setDoc(userRef, {
+          name: user.displayName || user.email.split("@")[0],
+          email: user.email,
+          role: "student",
+          emailVerified: true,
+          approved: true,
+          active: true,
+          createdAt: serverTimestamp(),
+        });
+        navigate("/student/dashboard", { replace: true });
+      } else {
+        // Existing user — sign in normally
+        const profile = userDoc.data();
+        if (profile.active === false) {
+          await signOut(auth);
+          throw new Error("This account has been deactivated. Contact an administrator.");
+        }
+        const role = (profile.role || "student").toLowerCase();
+        navigateByRole(role, navigate);
+      }
+    } catch (error) {
+      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+        setErrorMessage(error.message || "Google sign-in failed. Please try again.");
+      }
+    } finally {
+      setIsGoogleLoading(false);
     }
   }
 
@@ -90,7 +143,7 @@ export default function Login() {
               <h2 className="text-2xl font-semibold text-white mt-1">Welcome back</h2>
             </div>
           </div>
-          <p className="text-sm text-gray-300 mb-6">Log in to continue to your student dashboard</p>
+          <p className="text-sm text-gray-300 mb-6">Log in to continue to your dashboard</p>
 
           {errorMessage ? (
             <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{errorMessage}</div>
@@ -132,23 +185,20 @@ export default function Login() {
             <div className="space-y-3 pt-2">
               <button
                 type="button"
-                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3"
+                onClick={handleGoogleSignIn}
+                disabled={isGoogleLoading || isSubmitting}
+                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <GoogleIcon />
-                <span>Continue with Google</span>
+                {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
+                <span>{isGoogleLoading ? "Signing in..." : "Continue with Google"}</span>
               </button>
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isGoogleLoading}
                 className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
               >
-                {isSubmitting && (
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                    <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
-                  </svg>
-                )}
+                {isSubmitting && <Spinner />}
                 {isSubmitting ? "Signing in..." : "Log in"}
               </button>
             </div>
