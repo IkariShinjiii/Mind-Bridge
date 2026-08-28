@@ -1,23 +1,26 @@
+import React from "react";
 import { useAuth } from "../AuthContext.jsx";
+import icon from "../assets/mindbridge-icon.png";
 
 export default function PendingApproval() {
   const { logout } = useAuth();
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-mist via-[#eef1f8] to-[#e8f5f1] px-4 py-8 sm:px-6">
-      <div className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-teal/10 blur-3xl" />
-      <div className="absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-ink/10 blur-3xl" />
-
-      <div className="animate-fade-up relative w-full max-w-md rounded-[30px] border border-ink/5 bg-white/95 p-6 text-center shadow-[0_20px_60px_rgba(17,24,39,0.12)] transition-all duration-200 hover:shadow-[0_24px_70px_rgba(17,24,39,0.16)] sm:p-8">
-        <p className="mb-3 text-[10px] font-semibold tracking-[0.2em] text-teal sm:text-xs">ACCOUNT PENDING</p>
-        <h1 className="mb-3 font-display text-2xl text-ink sm:text-3xl">Waiting on admin approval</h1>
-        <p className="mb-6 text-sm text-ink/60 sm:text-base">
-          Your counselor account has been created, but an administrator needs to approve it before you can view
-          student check-ins. This keeps confidential wellness data limited to verified staff.
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white">
+      <div className="bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl p-8 border border-gray-800 text-center animate-fade-up">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/20 text-2xl">
+          ⏳
+        </div>
+        <p className="text-xs uppercase tracking-[0.2em] text-amber-400 font-semibold mb-1">
+          Account Pending Approval
+        </p>
+        <h1 className="text-2xl font-bold text-white mb-3">Waiting on Admin Review</h1>
+        <p className="text-sm text-gray-300 mb-6 leading-relaxed">
+          Your Counselor account has been registered, but an Administrator needs to verify and approve your account before you can access confidential student check-ins and appointments.
         </p>
         <button
           onClick={() => logout()}
-          className="soft-button rounded-lg border border-ink/15 px-4 py-2.5 text-sm font-medium text-ink hover:border-ink/40 hover:bg-mist"
+          className="w-full rounded-xl border border-gray-700 bg-gray-800 py-2.5 text-sm font-medium text-gray-200 hover:bg-gray-700 hover:text-white transition"
         >
           Log out
         </button>

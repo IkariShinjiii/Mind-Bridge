@@ -17,20 +17,42 @@ export const deactivateUser = (id) => updateDoc(doc(db, "users", id), { active: 
 export const reactivateUser = (id) => updateDoc(doc(db, "users", id), { active: true });
 
 // --- ASSESSMENTS / SURVEYS ---
-export const submitResponse = async (answers) => {
-  const uid = getCurrentUserId();
-  const totalScore = answers.reduce((sum, val) => sum + (val || 0), 0);
-  const riskLevel = totalScore >= 10 ? "high" : totalScore >= 5 ? "medium" : "low";
+export const submitResponse = async (answers, { questions = [], flaggedForImmediateReview = false } = {}) => {
+  const authUser = getAuth().currentUser;
+  const uid = authUser?.uid;
+  
+  const totalScore = answers.reduce((sum, val) => sum + (Number(val) || 0), 0);
+  const maxScore = (questions.length || answers.length || 7) * 3;
+  
+  let riskLevel = "low";
+  if (flaggedForImmediateReview || totalScore >= maxScore * 0.6) {
+    riskLevel = "high";
+  } else if (totalScore >= maxScore * 0.3) {
+    riskLevel = "medium";
+  }
 
-  return await addDoc(collection(db, "assessments"), {
-    studentId: uid,
+  const payload = {
+    studentId: uid || "anonymous",
+    studentName: authUser?.displayName || authUser?.email?.split("@")[0] || "Student",
+    studentEmail: authUser?.email || "No email",
     answers,
+    questionSummary: questions.map((q, idx) => ({
+      id: q.id || `q${idx + 1}`,
+      text: q.text,
+      score: answers[idx] ?? null,
+      isCrisisItem: !!q.isCrisisItem
+    })),
     total: totalScore,
-    maxScore: answers.length * 3,
+    maxScore,
     riskLevel,
+    flaggedForImmediateReview: !!flaggedForImmediateReview,
     status: "open",
+    counselorNotes: "",
     createdAt: new Date().toISOString()
-  });
+  };
+
+  const docRef = await addDoc(collection(db, "assessments"), payload);
+  return { id: docRef.id, ...payload };
 };
 
 export const getAssessments = async () => {
@@ -38,8 +60,19 @@ export const getAssessments = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-export const updateAssessmentStatus = (id, status) => 
-  updateDoc(doc(db, "assessments", id), { status, reviewedAt: new Date().toISOString() });
+export const getMyAssessments = async () => {
+  const uid = getCurrentUserId();
+  if (!uid) return [];
+  const q = query(collection(db, "assessments"), where("studentId", "==", uid));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateAssessmentStatus = (id, status, counselorNotes) => {
+  const updates = { status, reviewedAt: new Date().toISOString() };
+  if (counselorNotes !== undefined) updates.counselorNotes = counselorNotes;
+  return updateDoc(doc(db, "assessments", id), updates);
+};
 
 // --- APPOINTMENTS ---
 export const bookAppointment = async (slot) => {
@@ -47,11 +80,21 @@ export const bookAppointment = async (slot) => {
   const authUser = getAuth().currentUser;
   
   if (slot) {
+    // If a specific slot was booked, mark the slot as booked
+    if (slot.id) {
+      try {
+        await updateDoc(doc(db, "availability", slot.id), { isBooked: true });
+      } catch (err) {
+        console.warn("Notice: availability slot status not updated", err);
+      }
+    }
+
     return await addDoc(collection(db, "appointments"), {
       studentId: uid,
-      studentName: authUser?.displayName || "Student",
+      studentName: authUser?.displayName || authUser?.email?.split("@")[0] || "Student",
+      studentEmail: authUser?.email || "",
       counselorId: slot.counselorId,
-      counselorName: slot.counselorName,
+      counselorName: slot.counselorName || "Assigned Counselor",
       title: `Session with ${slot.counselorName || "Counselor"}`,
       start: slot.start,
       end: slot.end,
@@ -62,7 +105,8 @@ export const bookAppointment = async (slot) => {
 
   return await addDoc(collection(db, "appointments"), {
     studentId: uid,
-    studentName: authUser?.displayName || "Student",
+    studentName: authUser?.displayName || authUser?.email?.split("@")[0] || "Student",
+    studentEmail: authUser?.email || "",
     title: "Counseling Session",
     status: "Pending Review",
     date: new Date(Date.now() + 86400000).toISOString(),

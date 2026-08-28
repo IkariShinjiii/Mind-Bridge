@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import icon from "../assets/mindbridge-icon.png";
 
@@ -33,16 +33,14 @@ export default function HomePage() {
             to="/login"
             className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-cyan-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-500 hover:scale-105"
           >
-            Access Portal
+            Log in to Portal
           </Link>
-          <a
-            href="https://github.com" 
-            target="_blank" 
-            rel="noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-gray-700 bg-gray-800/50 px-8 py-3.5 text-sm font-semibold text-white transition-all hover:border-gray-500 hover:bg-gray-800 hover:scale-105"
+          <Link
+            to="/signup"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-gray-700 bg-gray-800/80 px-8 py-3.5 text-sm font-semibold text-white transition-all hover:border-cyan-500 hover:text-cyan-300 hover:scale-105"
           >
-            View Documentation
-          </a>
+            Create Student Account
+          </Link>
         </div>
 
         <div className="mt-20 grid grid-cols-1 gap-6 sm:grid-cols-3 text-left">
