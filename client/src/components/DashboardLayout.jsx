@@ -44,6 +44,9 @@ export default function DashboardLayout({ children }) {
   const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
   const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
 
+  // Check if we should display the Google profile picture
+  const showGoogleAvatar = userData?.useGoogleAvatar && currentUser?.photoURL;
+
   const isLinkActive = (path) => location.pathname === path;
 
   return (
@@ -51,7 +54,7 @@ export default function DashboardLayout({ children }) {
       {/* Top Navbar */}
       <header className="border-b border-gray-800/80 bg-gray-900/90 backdrop-blur-md sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          
+
           {/* LEFT: Logo & Branding */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
             <div className="flex items-center gap-1.5">
@@ -130,13 +133,23 @@ export default function DashboardLayout({ children }) {
               {safeRole}
             </span>
             <div className="hidden text-sm font-medium text-gray-200 sm:block max-w-[130px] truncate">{safeName}</div>
-            
-            <button 
+
+            <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${currentGradient} text-xs font-bold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-transform hover:scale-105`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full overflow-hidden ${showGoogleAvatar ? 'bg-gray-900' : `bg-gradient-to-br ${currentGradient}`
+                } text-xs font-bold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-transform hover:scale-105`}
               aria-label="Open user menu"
             >
-              {userInitials}
+              {showGoogleAvatar ? (
+                <img
+                  src={currentUser.photoURL}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                userInitials
+              )}
             </button>
 
             {/* Dropdown Menu */}
@@ -201,9 +214,8 @@ export default function DashboardLayout({ children }) {
             <>
               <Link
                 to="/student/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${
-                  isLinkActive("/student/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/student/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">📊</span>
                 <span className="text-[10px] tracking-tight">Dashboard</span>
@@ -211,9 +223,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${
-                  isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">📅</span>
                 <span className="text-[10px] tracking-tight">Appointments</span>
@@ -221,9 +232,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/resources"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${
-                  isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">🆘</span>
                 <span className="text-[10px] tracking-tight">Resources</span>
@@ -231,9 +241,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${
-                  isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">⚙️</span>
                 <span className="text-[10px] tracking-tight">Settings</span>
@@ -245,9 +254,8 @@ export default function DashboardLayout({ children }) {
             <>
               <Link
                 to="/counselor/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/counselor/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/counselor/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">📋</span>
                 <span className="text-[10px] tracking-tight">Triage</span>
@@ -255,9 +263,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">📅</span>
                 <span className="text-[10px] tracking-tight">Appointments</span>
@@ -265,9 +272,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">⚙️</span>
                 <span className="text-[10px] tracking-tight">Settings</span>
@@ -279,9 +285,8 @@ export default function DashboardLayout({ children }) {
             <>
               <Link
                 to="/admin/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/admin/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/admin/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">🛡️</span>
                 <span className="text-[10px] tracking-tight">Admin</span>
@@ -289,9 +294,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">📅</span>
                 <span className="text-[10px] tracking-tight">Appointments</span>
@@ -299,9 +303,8 @@ export default function DashboardLayout({ children }) {
 
               <Link
                 to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${
-                  isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                }`}
+                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
+                  }`}
               >
                 <span className="text-base">⚙️</span>
                 <span className="text-[10px] tracking-tight">Settings</span>
