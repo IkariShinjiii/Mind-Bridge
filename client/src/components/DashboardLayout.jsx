@@ -59,9 +59,8 @@ export default function DashboardLayout({ children }) {
               <span className="h-4 w-px bg-gray-700" />
               <img src={icon} alt="Mind Bridge logo" className="h-7 w-7 rounded-lg object-cover transition-transform group-hover:scale-105 shadow-sm" />
             </div>
-            <div className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            <div className="text-lg font-bold tracking-tight text-white">
               <span>Mind Bridge</span>
-              <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase font-semibold">USA</span>
             </div>
           </Link>
 
