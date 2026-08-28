@@ -4,6 +4,7 @@ import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/a
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../firebase";
 import icon from "../assets/mindbridge-icon.png";
+import usaLogo from "../assets/usa-logo.png";
 
 function GoogleIcon() {
   return (
@@ -137,10 +138,14 @@ export default function Login() {
       <div className="bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-gray-800 transform transition-all duration-300 hover:shadow-[0_18px_40px_rgba(6,182,212,0.12)]">
         <div className="w-full md:w-1/2 p-8 bg-gray-900">
           <div className="mb-6 flex items-center gap-3">
-            <img src={icon} alt="Mind Bridge logo" className="h-9 w-9 rounded-lg object-cover" />
+            <div className="flex items-center gap-2">
+              <img src={usaLogo} alt="University of San Agustin seal" className="h-9 w-auto object-contain" />
+              <span className="h-5 w-px bg-gray-700" />
+              <img src={icon} alt="Mind Bridge logo" className="h-9 w-9 rounded-lg object-cover" />
+            </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge</p>
-              <h2 className="text-2xl font-semibold text-white mt-1">Welcome back</h2>
+              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge • USA</p>
+              <h2 className="text-2xl font-semibold text-white mt-0.5">Welcome back</h2>
             </div>
           </div>
           <p className="text-sm text-gray-300 mb-6">Log in to continue to your dashboard</p>

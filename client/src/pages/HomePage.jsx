@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import icon from "../assets/mindbridge-icon.png";
+import usaLogo from "../assets/usa-logo.png";
 
 export default function HomePage() {
   return (
@@ -15,7 +16,9 @@ export default function HomePage() {
         
         {/* Top Institutional Badge */}
         <div className="mb-6 flex justify-center">
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-gray-800 bg-gray-900/90 px-4 py-1.5 shadow-xl backdrop-blur-md">
+          <div className="inline-flex items-center gap-3 rounded-full border border-gray-800 bg-gray-900/90 px-4 py-2 shadow-xl backdrop-blur-md">
+            <img src={usaLogo} alt="University of San Agustin seal" className="h-6 w-auto object-contain shadow-sm" />
+            <span className="h-3.5 w-px bg-gray-700" />
             <img src={icon} alt="Mind Bridge logo" className="h-5 w-5 rounded-md object-cover shadow-sm" />
             <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
               University of San Agustin • Mind Bridge

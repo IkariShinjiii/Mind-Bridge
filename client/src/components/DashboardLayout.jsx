@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
+import usaLogo from "../assets/usa-logo.png";
 
 export default function DashboardLayout({ children }) {
   const { currentUser, userRole, userData, logout } = useAuth();
@@ -53,7 +54,11 @@ export default function DashboardLayout({ children }) {
           
           {/* LEFT: Logo & Branding */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <img src={icon} alt="Mind Bridge logo" className="h-8 w-8 rounded-lg object-cover transition-transform group-hover:scale-105 shadow-sm" />
+            <div className="flex items-center gap-1.5">
+              <img src={usaLogo} alt="University of San Agustin seal" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />
+              <span className="h-4 w-px bg-gray-700" />
+              <img src={icon} alt="Mind Bridge logo" className="h-7 w-7 rounded-lg object-cover transition-transform group-hover:scale-105 shadow-sm" />
+            </div>
             <div className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
               <span>Mind Bridge</span>
               <span className="hidden sm:inline-block text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase font-semibold">USA</span>
