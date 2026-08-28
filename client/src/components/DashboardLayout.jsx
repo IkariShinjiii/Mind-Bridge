@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
 
 export default function DashboardLayout({ children }) {
   const { currentUser, userRole, userData, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -42,6 +43,8 @@ export default function DashboardLayout({ children }) {
   const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
   const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
 
+  const isLinkActive = (path) => location.pathname === path;
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="border-b border-white/10 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
@@ -49,17 +52,76 @@ export default function DashboardLayout({ children }) {
           
           {/* LEFT: Logo */}
           <div className="flex items-center gap-3 justify-self-start">
-            <img src={icon} alt="Mind Bridge logo" className="h-8 w-8 rounded-md object-cover" />
-            <div className="text-lg font-semibold tracking-tight hidden sm:block">Mind Bridge</div>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img src={icon} alt="Mind Bridge logo" className="h-8 w-8 rounded-md object-cover transition-transform group-hover:scale-105" />
+              <div className="text-lg font-semibold tracking-tight hidden sm:block text-white">Mind Bridge</div>
+            </Link>
           </div>
 
           {/* CENTER: Navigation Links */}
           <nav className="hidden items-center justify-center gap-6 text-sm text-gray-300 md:flex justify-self-center">
-            <Link to="/" className="transition hover:text-white">Home</Link>
-            {userRole === "admin" && <Link to="/admin/dashboard" className="transition hover:text-cyan-400 font-semibold">Admin Panel</Link>}
-            {userRole === "counselor" && <Link to="/counselor/dashboard" className="transition hover:text-cyan-400 font-semibold">Counselor Dashboard</Link>}
-            {userRole === "student" && <Link to="/student/dashboard" className="transition hover:text-cyan-400">Dashboard</Link>}
-            <Link to="/settings" className="transition hover:text-cyan-400">Settings</Link>
+            {userRole === "admin" && (
+              <>
+                <Link
+                  to="/admin/dashboard"
+                  className={`transition ${isLinkActive("/admin/dashboard") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Admin Panel
+                </Link>
+                <Link
+                  to="/appointments"
+                  className={`transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Appointments
+                </Link>
+              </>
+            )}
+
+            {userRole === "counselor" && (
+              <>
+                <Link
+                  to="/counselor/dashboard"
+                  className={`transition ${isLinkActive("/counselor/dashboard") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/appointments"
+                  className={`transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Appointments
+                </Link>
+                <Link
+                  to="/resources"
+                  className={`transition ${isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Crisis Resources
+                </Link>
+              </>
+            )}
+
+            {userRole === "student" && (
+              <>
+                <Link
+                  to="/student/dashboard"
+                  className={`transition ${isLinkActive("/student/dashboard") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/appointments"
+                  className={`transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Appointments
+                </Link>
+                <Link
+                  to="/resources"
+                  className={`transition ${isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
+                >
+                  Crisis Resources
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* RIGHT: User Profile & Dropdown */}

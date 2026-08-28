@@ -9,6 +9,8 @@ import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import UserSettings from "./components/UserSettings";
+import Appointments from "./components/Appointments";
+import CrisisResources from "./components/CrisisResources";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/DashboardLayout";
 import icon from "./assets/mindbridge-icon.png";
@@ -126,6 +128,22 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/appointments"
+          element={
+            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+              <Appointments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resources"
+          element={
+            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+              <CrisisResources />
             </ProtectedRoute>
           }
         />
