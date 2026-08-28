@@ -54,6 +54,7 @@ export default function UserSettings() {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [avatarGradient, setAvatarGradient] = useState("cyan");
+  const [useGoogleAvatar, setUseGoogleAvatar] = useState(false);
 
   // Password fields
   const [currentPassword, setCurrentPassword] = useState("");
@@ -113,6 +114,7 @@ export default function UserSettings() {
           setPhone(data.phone || "");
           setBio(data.bio || "");
           setAvatarGradient(data.avatarGradient || "cyan");
+          if (data.useGoogleAvatar !== undefined) setUseGoogleAvatar(data.useGoogleAvatar);
           if (data.notifications) setNotifications((prev) => ({ ...prev, ...data.notifications }));
           if (data.privacy) setPrivacy((prev) => ({ ...prev, ...data.privacy }));
           if (data.emergencyContact) setEmergencyContact((prev) => ({ ...prev, ...data.emergencyContact }));
@@ -176,6 +178,7 @@ export default function UserSettings() {
         phone,
         bio,
         avatarGradient,
+        useGoogleAvatar,
         updatedAt: new Date().toISOString(),
       });
       await refreshUserData();
@@ -370,11 +373,10 @@ export default function UserSettings() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${
-            feedback.type === "success"
+          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${feedback.type === "success"
               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
               : "border-rose-500/30 bg-rose-500/10 text-rose-300"
-          }`}
+            }`}
         >
           {feedback.type === "success" ? "✓ " : "⚠️ "} {feedback.message}
         </div>
@@ -396,11 +398,10 @@ export default function UserSettings() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all ${
-                      isActive
+                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all ${isActive
                         ? "bg-cyan-600 text-white shadow-md shadow-cyan-900/30 font-semibold"
                         : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
-                    }`}
+                      }`}
                   >
                     <span className="text-sm sm:text-base">{tab.icon}</span>
                     <span>{tab.label}</span>
@@ -429,22 +430,59 @@ export default function UserSettings() {
                       Profile Avatar & Color Accent
                     </label>
                     <div className="flex flex-wrap items-center gap-4">
+
+                      {/* Current Selected Avatar Preview */}
                       <div
-                        className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${currentGradientClass} text-lg sm:text-xl font-bold text-white shadow-lg`}
+                        className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl overflow-hidden shadow-lg ${!useGoogleAvatar ? `bg-gradient-to-br ${currentGradientClass}` : 'bg-gray-900'
+                          }`}
                       >
-                        {userInitials}
+                        {useGoogleAvatar && currentUser?.photoURL ? (
+                          <img
+                            src={currentUser.photoURL}
+                            alt="Profile"
+                            className="h-full w-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <span className="text-lg sm:text-xl font-bold text-white">{userInitials}</span>
+                        )}
                       </div>
-                      <div className="flex flex-wrap gap-2">
+
+                      {/* Avatar Selection Choices */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Option 1: Use Google Avatar (Only shows if they have one) */}
+                        {currentUser?.photoURL && (
+                          <button
+                            type="button"
+                            onClick={() => setUseGoogleAvatar(true)}
+                            className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full overflow-hidden transition-all ${useGoogleAvatar
+                                ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110"
+                                : "opacity-70 hover:opacity-100"
+                              }`}
+                            title="Use Google Profile Picture"
+                          >
+                            <img
+                              src={currentUser.photoURL}
+                              alt="Google"
+                              className="h-full w-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          </button>
+                        )}
+
+                        {/* Gradients */}
                         {AVATAR_GRADIENTS.map((g) => (
                           <button
                             type="button"
                             key={g.id}
-                            onClick={() => setAvatarGradient(g.id)}
-                            className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br ${g.class} transition-all ${
-                              avatarGradient === g.id
+                            onClick={() => {
+                              setAvatarGradient(g.id);
+                              setUseGoogleAvatar(false);
+                            }}
+                            className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br ${g.class} transition-all ${!useGoogleAvatar && avatarGradient === g.id
                                 ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110"
                                 : "opacity-70 hover:opacity-100"
-                            }`}
+                              }`}
                             title={g.name}
                           />
                         ))}
@@ -940,19 +978,17 @@ export default function UserSettings() {
                           key={goal}
                           type="button"
                           onClick={() => handleToggleGoal(goal)}
-                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs sm:text-sm transition-all ${
-                            isSelected
+                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs sm:text-sm transition-all ${isSelected
                               ? "border-cyan-500 bg-cyan-950/40 text-cyan-200 shadow-sm"
                               : "border-gray-800 bg-gray-950/40 text-gray-300 hover:border-gray-700 hover:text-white"
-                          }`}
+                            }`}
                         >
                           <span className="font-medium pr-2">{goal}</span>
                           <span
-                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs font-bold ${
-                              isSelected
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs font-bold ${isSelected
                                 ? "bg-cyan-500 text-gray-950"
                                 : "border border-gray-700 text-transparent"
-                            }`}
+                              }`}
                           >
                             ✓
                           </span>
@@ -1055,13 +1091,12 @@ export default function UserSettings() {
 
                             <div className="flex items-center gap-2 self-start sm:self-center">
                               <span
-                                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
-                                  isConfirmed
+                                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${isConfirmed
                                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                     : isPending
-                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                    : "bg-gray-800 text-gray-300 border border-gray-700"
-                                }`}
+                                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                      : "bg-gray-800 text-gray-300 border border-gray-700"
+                                  }`}
                               >
                                 {status}
                               </span>

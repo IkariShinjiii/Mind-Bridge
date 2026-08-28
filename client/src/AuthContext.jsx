@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // user object automatically includes user.photoURL from Google!
         setCurrentUser(user);
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -23,7 +24,7 @@ export function AuthProvider({ children }) {
             setUserRole(data.role || "student");
             setUserData(data);
           } else {
-            console.error(`No document found in 'users' collection for UID: ${user.uid}`); // Debug log!
+            console.error(`No document found in 'users' collection for UID: ${user.uid}`);
             setUserRole("student");
           }
         } catch (error) {
