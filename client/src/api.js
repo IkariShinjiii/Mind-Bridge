@@ -57,7 +57,37 @@ export const submitResponse = async (answers, { questions = [], flaggedForImmedi
 
 export const getAssessments = async () => {
   const snapshot = await getDocs(collection(db, "assessments"));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const assessments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  try {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const usersMap = {};
+    usersSnap.forEach(u => {
+      usersMap[u.id] = u.data();
+    });
+
+    return assessments.map(item => {
+      const userProfile = item.studentId ? usersMap[item.studentId] : null;
+      let finalName = item.studentName;
+      let finalEmail = item.studentEmail;
+
+      if ((!finalName || finalName === "Unknown" || finalName === "Student") && userProfile?.name) {
+        finalName = userProfile.name;
+      }
+      if ((!finalEmail || finalEmail === "No email" || finalEmail === "No email provided") && userProfile?.email) {
+        finalEmail = userProfile.email;
+      }
+
+      return {
+        ...item,
+        studentName: finalName || "Student",
+        studentEmail: finalEmail || "Institutional email",
+      };
+    });
+  } catch (err) {
+    console.warn("Could not enrich assessment names", err);
+    return assessments;
+  }
 };
 
 export const getMyAssessments = async () => {
@@ -78,6 +108,25 @@ export const updateAssessmentStatus = (id, status, counselorNotes) => {
 export const bookAppointment = async (slot) => {
   const uid = getCurrentUserId();
   const authUser = getAuth().currentUser;
+
+  let realName = authUser?.displayName;
+  let realEmail = authUser?.email;
+
+  if (uid) {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const udata = userDoc.data();
+        if (udata.name) realName = udata.name;
+        if (udata.email) realEmail = udata.email;
+      }
+    } catch (e) {
+      console.warn("Could not fetch user name for booking", e);
+    }
+  }
+
+  const studentName = realName || authUser?.email?.split("@")[0] || "Student";
+  const studentEmail = realEmail || authUser?.email || "";
   
   if (slot) {
     // If a specific slot was booked, mark the slot as booked
@@ -91,8 +140,8 @@ export const bookAppointment = async (slot) => {
 
     return await addDoc(collection(db, "appointments"), {
       studentId: uid,
-      studentName: authUser?.displayName || authUser?.email?.split("@")[0] || "Student",
-      studentEmail: authUser?.email || "",
+      studentName,
+      studentEmail,
       counselorId: slot.counselorId,
       counselorName: slot.counselorName || "Assigned Counselor",
       title: `Session with ${slot.counselorName || "Counselor"}`,
@@ -105,8 +154,8 @@ export const bookAppointment = async (slot) => {
 
   return await addDoc(collection(db, "appointments"), {
     studentId: uid,
-    studentName: authUser?.displayName || authUser?.email?.split("@")[0] || "Student",
-    studentEmail: authUser?.email || "",
+    studentName,
+    studentEmail,
     title: "Counseling Session",
     status: "Pending Review",
     date: new Date(Date.now() + 86400000).toISOString(),
@@ -122,10 +171,40 @@ export const getAppointments = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// Added so counselors can view all student bookings
+// Added so counselors can view all student bookings with enriched student names
 export const getAllAppointments = async () => {
   const snapshot = await getDocs(collection(db, "appointments"));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  try {
+    const usersSnap = await getDocs(collection(db, "users"));
+    const usersMap = {};
+    usersSnap.forEach(u => {
+      usersMap[u.id] = u.data();
+    });
+
+    return appointments.map(apt => {
+      const userProfile = apt.studentId ? usersMap[apt.studentId] : null;
+      let finalName = apt.studentName;
+      let finalEmail = apt.studentEmail;
+
+      if ((!finalName || finalName === "Student") && userProfile?.name) {
+        finalName = userProfile.name;
+      }
+      if (!finalEmail && userProfile?.email) {
+        finalEmail = userProfile.email;
+      }
+
+      return {
+        ...apt,
+        studentName: finalName || "Student",
+        studentEmail: finalEmail || "",
+      };
+    });
+  } catch (err) {
+    console.warn("Could not enrich appointment names", err);
+    return appointments;
+  }
 };
 
 export const updateAppointmentStatus = async (id, status) => {

@@ -91,12 +91,6 @@ export default function DashboardLayout({ children }) {
                 >
                   Appointments
                 </Link>
-                <Link
-                  to="/resources"
-                  className={`transition ${isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "hover:text-white"}`}
-                >
-                  Crisis Resources
-                </Link>
               </>
             )}
 
