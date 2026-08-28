@@ -939,7 +939,7 @@ export default function StudentDashboard() {
         <ConfidentialChatModal
           isOpen={chatOpen}
           onClose={() => setChatOpen(false)}
-          recipientId={assignedCounselorId}
+          studentId={currentUser?.uid}
           recipientName={assignedCounselorName}
           recipientRole="counselor"
         />

@@ -1,4 +1,4 @@
-import { collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase"; 
 
@@ -283,29 +283,44 @@ export const assignCounselorToStudent = async (studentId, counselorId, counselor
 };
 
 // --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---
-export const getMessages = async (threadId) => {
-  if (!threadId) return [];
+// Real-time synchronization tied directly to the student's ID
+export const listenToStudentMessages = (studentId, onUpdate, onError) => {
+  if (!studentId) return () => {};
   try {
     const q = query(
       collection(db, "messages"),
-      where("threadId", "==", threadId)
+      where("studentId", "==", studentId)
     );
-    const snapshot = await getDocs(q);
-    const msgs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    // Sort in memory by timestamp
-    return msgs.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const msgs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        msgs.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+        onUpdate(msgs);
+      },
+      (err) => {
+        console.error("Firestore onSnapshot message error:", err);
+        if (onError) onError(err);
+      }
+    );
   } catch (err) {
-    console.error("Failed to load messages", err);
-    return [];
+    console.error("Failed to subscribe to messages", err);
+    return () => {};
   }
 };
 
-export const sendMessage = async (threadId, { senderId, senderName, senderRole, text }) => {
-  if (!threadId || !text?.trim()) return null;
+export const sendStudentMessage = async ({
+  studentId,
+  senderId,
+  senderName,
+  senderRole,
+  text,
+}) => {
+  if (!studentId || !text?.trim()) return null;
   const payload = {
-    threadId,
+    studentId,
     senderId: senderId || getCurrentUserId(),
-    senderName: senderName || "User",
+    senderName: senderName || (senderRole === "counselor" ? "Counselor" : "Student"),
     senderRole: senderRole || "student",
     text: text.trim(),
     timestamp: new Date().toISOString(),

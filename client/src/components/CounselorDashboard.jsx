@@ -517,7 +517,7 @@ export default function CounselorDashboard() {
         <ConfidentialChatModal
           isOpen={Boolean(chatStudent)}
           onClose={() => setChatStudent(null)}
-          recipientId={chatStudent.id}
+          studentId={chatStudent.id}
           recipientName={chatStudent.name}
           recipientRole="student"
         />
