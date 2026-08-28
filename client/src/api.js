@@ -272,3 +272,44 @@ export const saveUserSettings = async (uid, data) => {
   if (!targetUid) throw new Error("No authenticated user");
   return await updateDoc(doc(db, "users", targetUid), data);
 };
+
+// --- COUNSELOR-STUDENT ASSIGNMENT ---
+export const assignCounselorToStudent = async (studentId, counselorId, counselorName) => {
+  return await updateDoc(doc(db, "users", studentId), {
+    assignedCounselorId: counselorId || null,
+    assignedCounselorName: counselorName || null,
+    assignedAt: counselorId ? new Date().toISOString() : null,
+  });
+};
+
+// --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---
+export const getMessages = async (threadId) => {
+  if (!threadId) return [];
+  try {
+    const q = query(
+      collection(db, "messages"),
+      where("threadId", "==", threadId)
+    );
+    const snapshot = await getDocs(q);
+    const msgs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Sort in memory by timestamp
+    return msgs.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+  } catch (err) {
+    console.error("Failed to load messages", err);
+    return [];
+  }
+};
+
+export const sendMessage = async (threadId, { senderId, senderName, senderRole, text }) => {
+  if (!threadId || !text?.trim()) return null;
+  const payload = {
+    threadId,
+    senderId: senderId || getCurrentUserId(),
+    senderName: senderName || "User",
+    senderRole: senderRole || "student",
+    text: text.trim(),
+    timestamp: new Date().toISOString(),
+  };
+  const docRef = await addDoc(collection(db, "messages"), payload);
+  return { id: docRef.id, ...payload };
+};

@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getAssessments, updateAssessmentStatus, getAllAppointments, updateAppointmentStatus, getUserSettings } from "../api";
+import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
 import ManageAvailability from "./ManageAvailability";
+import ConfidentialChatModal from "./ConfidentialChatModal";
 
 const RISK_STYLES = {
   high: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -16,10 +18,12 @@ const STATUS_STYLES = {
 };
 
 export default function CounselorDashboard() {
+  const { currentUser } = useAuth();
   const [cases, setCases] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [activeTab, setActiveTab] = useState("triage"); // triage | availability
   const [filter, setFilter] = useState("flagged");
+  const [assignedOnly, setAssignedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
@@ -29,6 +33,7 @@ export default function CounselorDashboard() {
   const [loadingContact, setLoadingContact] = useState(false);
   const [counselorNoteInput, setCounselorNoteInput] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [chatStudent, setChatStudent] = useState(null);
 
   async function load() {
     try {
@@ -109,6 +114,12 @@ export default function CounselorDashboard() {
 
   const visibleCases = useMemo(() => {
     return cases.filter((item) => {
+      if (assignedOnly && currentUser?.uid) {
+        if (item.assignedCounselorId && item.assignedCounselorId !== currentUser.uid) {
+          return false;
+        }
+      }
+
       const risk = item.riskLevel || "low";
       const isFlagged = item.flaggedForImmediateReview || risk === "high";
 
@@ -120,7 +131,7 @@ export default function CounselorDashboard() {
       if (filter === "medium") return risk === "medium";
       return true;
     });
-  }, [cases, filter]);
+  }, [cases, filter, assignedOnly, currentUser?.uid]);
 
   return (
     <div className="mx-auto max-w-7xl animate-fade-up space-y-8">
@@ -196,28 +207,41 @@ export default function CounselorDashboard() {
       {activeTab === "triage" && (
         <div className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-2">
-              {[
-                ["flagged", "🚨 Flagged / Urgent"],
-                ["open", "Open Cases"],
-                ["reviewed", "Reviewed"],
-                ["escalated", "Escalated"],
-                ["high", "High Risk"],
-                ["medium", "Medium Risk"],
-                ["all", "All Submissions"],
-              ].map(([value, label]) => (
-                <button
-                  key={value}
-                  onClick={() => setFilter(value)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs transition font-medium ${
-                    filter === value
-                      ? "bg-cyan-600 text-white shadow-sm font-semibold"
-                      : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  ["flagged", "🚨 Flagged / Urgent"],
+                  ["open", "Open Cases"],
+                  ["reviewed", "Reviewed"],
+                  ["escalated", "Escalated"],
+                  ["high", "High Risk"],
+                  ["medium", "Medium Risk"],
+                  ["all", "All Submissions"],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setFilter(value)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs transition font-medium ${
+                      filter === value
+                        ? "bg-cyan-600 text-white shadow-sm font-semibold"
+                        : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setAssignedOnly(!assignedOnly)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition border ${
+                  assignedOnly
+                    ? "border-cyan-500 bg-cyan-500/20 text-cyan-300 shadow-sm"
+                    : "border-gray-800 bg-gray-900 text-gray-400 hover:text-white"
+                }`}
+              >
+                {assignedOnly ? "✓ My Assigned Students" : "Filter: My Assigned"}
+              </button>
             </div>
 
             <span className="text-xs text-gray-400">
@@ -460,16 +484,43 @@ export default function CounselorDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end pt-4 border-t border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-800">
+              {activeCase.studentId && activeCase.studentId !== "anonymous" && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setChatStudent({
+                      id: activeCase.studentId,
+                      name: activeCase.studentName || "Student",
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition shadow-md"
+                >
+                  <span>💬</span>
+                  <span>Open Confidential Chat</span>
+                </button>
+              )}
+
               <button
                 onClick={() => setActiveCase(null)}
-                className="rounded-xl border border-gray-700 px-5 py-2 text-xs font-medium text-gray-300 hover:bg-gray-800 transition"
+                className="rounded-xl border border-gray-700 px-5 py-2 text-xs font-medium text-gray-300 hover:bg-gray-800 transition ml-auto"
               >
                 Close Inspector
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Confidential Chat Modal */}
+      {chatStudent && (
+        <ConfidentialChatModal
+          isOpen={Boolean(chatStudent)}
+          onClose={() => setChatStudent(null)}
+          recipientId={chatStudent.id}
+          recipientName={chatStudent.name}
+          recipientRole="student"
+        />
       )}
     </div>
   );

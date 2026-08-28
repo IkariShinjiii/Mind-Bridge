@@ -19,6 +19,7 @@ import {
 } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
+import ConfidentialChatModal from "./ConfidentialChatModal";
 
 // Safely formats dates to prevent the "Invalid Date" error
 function safeFormatDate(val) {
@@ -116,6 +117,9 @@ export default function StudentDashboard() {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+
+  // Confidential Chat State
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -280,6 +284,12 @@ export default function StudentDashboard() {
   // Gauge Percentage
   const gaugePct = latestScore !== null ? Math.min(100, Math.round((latestScore / maxScore) * 100)) : 0;
 
+  // Assigned Counselor info
+  const assignedCounselorId =
+    userData?.assignedCounselorId || appointments[0]?.counselorId || "general_counselor";
+  const assignedCounselorName =
+    userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Guidance Counselor";
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row animate-fade-up relative">
       <section className="lg:w-2/3 flex flex-col gap-6">
@@ -367,6 +377,7 @@ export default function StudentDashboard() {
             )}
           </div>
 
+          {/* Next Appointment Card */}
           <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm flex flex-col justify-between">
             <div>
               <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">
@@ -386,24 +397,29 @@ export default function StudentDashboard() {
             </div>
           </div>
 
+          {/* Assigned Counselor Card */}
           <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">
-                Confidential Support
+              <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold flex items-center justify-between">
+                <span>Guidance Counselor</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold uppercase">
+                  Assigned
+                </span>
               </div>
-              <div className="mt-2 text-xs text-gray-300 line-clamp-2 leading-relaxed">
-                {appointments[0]?.counselorName
-                  ? `Assigned counselor: ${appointments[0].counselorName}`
-                  : "USA Guidance Counseling services are 100% confidential and free."}
+              <div className="mt-2 font-semibold text-white text-sm truncate">
+                {assignedCounselorName}
+              </div>
+              <div className="mt-0.5 text-[11px] text-gray-400">
+                100% confidential student channel
               </div>
             </div>
-            <Link
-              to="/resources"
-              className="mt-2 text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+            <button
+              onClick={() => setChatOpen(true)}
+              className="mt-2 text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 self-start"
             >
-              <span>View Crisis Resources</span>
+              <span>💬 Message Counselor</span>
               <span>→</span>
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -916,6 +932,17 @@ export default function StudentDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED COUNSELOR) */}
+      {chatOpen && (
+        <ConfidentialChatModal
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          recipientId={assignedCounselorId}
+          recipientName={assignedCounselorName}
+          recipientRole="counselor"
+        />
       )}
     </div>
   );

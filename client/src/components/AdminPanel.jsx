@@ -19,6 +19,7 @@ import {
   rejectCounselor,
   deactivateUser,
   reactivateUser,
+  assignCounselorToStudent,
 } from "../api";
 import Spinner from "./Spinner";
 
@@ -96,6 +97,24 @@ export default function AdminPanel() {
   }, []);
 
   const pending = users.filter((u) => u.role === "counselor" && !u.approved);
+  const approvedCounselors = useMemo(() => {
+    return users.filter((u) => u.role === "counselor" && u.approved && u.active !== false);
+  }, [users]);
+
+  async function handleAssignCounselor(studentId, counselorId) {
+    const counselor = approvedCounselors.find((c) => c.id === counselorId);
+    const counselorName = counselor ? counselor.name || counselor.email : null;
+    setActionLoadingId(studentId);
+    try {
+      await assignCounselorToStudent(studentId, counselorId || null, counselorName);
+      await load();
+    } catch (err) {
+      console.error("Failed to assign counselor", err);
+    } finally {
+      setActionLoadingId(null);
+    }
+  }
+
   const filteredUsers =
     activeTab === "counselors"
       ? users.filter((u) => u.role === "counselor" || u.role === "admin")
@@ -369,30 +388,51 @@ export default function AdminPanel() {
                       )}
                     </div>
 
-                    {u.role !== "admin" && (
-                      <button
-                        onClick={() => handle(u.active === false ? reactivateUser : deactivateUser, u.id)}
-                        disabled={actionLoadingId === u.id}
-                        className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
-                          u.active === false
-                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
-                            : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
-                        }`}
-                      >
-                        {actionLoadingId === u.id ? (
-                          <>
-                            <Spinner
-                              size={14}
-                              color={u.active === false ? "#10b981" : "#ef4444"}
-                              className={u.active === false ? "text-emerald-400" : "text-red-400"}
-                            />
-                            <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
-                          </>
-                        ) : (
-                          u.active === false ? "Reactivate" : "Deactivate"
-                        )}
-                      </button>
-                    )}
+                    <div className="flex flex-wrap items-center gap-3">
+                      {activeTab === "students" && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-gray-400 text-[11px]">Counselor:</span>
+                          <select
+                            value={u.assignedCounselorId || ""}
+                            onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
+                            disabled={actionLoadingId === u.id}
+                            className="rounded-lg border border-gray-700 bg-gray-900 px-2.5 py-1 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                          >
+                            <option value="">Unassigned</option>
+                            {approvedCounselors.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name || c.email}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {u.role !== "admin" && (
+                        <button
+                          onClick={() => handle(u.active === false ? reactivateUser : deactivateUser, u.id)}
+                          disabled={actionLoadingId === u.id}
+                          className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition duration-200 sm:w-auto ${
+                            u.active === false
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-60"
+                              : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-60"
+                          }`}
+                        >
+                          {actionLoadingId === u.id ? (
+                            <>
+                              <Spinner
+                                size={14}
+                                color={u.active === false ? "#10b981" : "#ef4444"}
+                                className={u.active === false ? "text-emerald-400" : "text-red-400"}
+                              />
+                              <span>{u.active === false ? "Reactivating…" : "Deactivating…"}</span>
+                            </>
+                          ) : (
+                            u.active === false ? "Reactivate" : "Deactivate"
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
