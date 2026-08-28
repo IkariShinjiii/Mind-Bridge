@@ -142,6 +142,7 @@ export const bookAppointment = async (slot) => {
       studentId: uid,
       studentName,
       studentEmail,
+      slotId: slot.id || null,
       counselorId: slot.counselorId,
       counselorName: slot.counselorName || "Assigned Counselor",
       title: `Session with ${slot.counselorName || "Counselor"}`,
@@ -156,6 +157,7 @@ export const bookAppointment = async (slot) => {
     studentId: uid,
     studentName,
     studentEmail,
+    slotId: null,
     title: "Counseling Session",
     status: "Pending Review",
     date: new Date(Date.now() + 86400000).toISOString(),
@@ -207,8 +209,23 @@ export const getAllAppointments = async () => {
   }
 };
 
-export const updateAppointmentStatus = async (id, status) => {
-  return await updateDoc(doc(db, "appointments", id), { status });
+export const updateAppointmentStatus = async (id, status, extraData = {}) => {
+  const updates = { 
+    status, 
+    updatedAt: new Date().toISOString(),
+    ...extraData 
+  };
+
+  // If slot was linked and is being declined or cancelled, free up availability slot
+  if ((status === "Declined" || status === "Cancelled") && extraData.slotId) {
+    try {
+      await updateDoc(doc(db, "availability", extraData.slotId), { isBooked: false });
+    } catch (err) {
+      console.warn("Could not unbook slot", err);
+    }
+  }
+
+  return await updateDoc(doc(db, "appointments", id), updates);
 };
 
 // --- COUNSELOR AVAILABILITY ---

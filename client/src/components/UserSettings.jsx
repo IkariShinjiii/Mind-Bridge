@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
 import {
   updateProfile,
   updatePassword,
@@ -346,34 +346,23 @@ export default function UserSettings() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up">
       {/* Header Bar */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-800 pb-5">
+      <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4 sm:pb-5">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white transition-colors"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white transition shadow-sm"
             title="Go Back"
+            aria-label="Go Back"
           >
             ←
           </button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
               Account & Profile Settings
             </h1>
-            <p className="text-sm text-cyan-200/80">
-              Manage your personal information, privacy preferences, and wellness settings.
+            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+              Manage personal profile, notifications, and confidentiality preferences.
             </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${currentGradientClass} text-sm font-bold text-white shadow-md`}>
-            {userInitials}
-          </div>
-          <div>
-            <div className="text-sm font-semibold text-white">{name || "User"}</div>
-            <div className="text-xs uppercase tracking-wider text-cyan-400 font-medium">
-              {userRole || "student"}
-            </div>
           </div>
         </div>
       </div>
@@ -381,7 +370,7 @@ export default function UserSettings() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-sm font-medium transition-all ${
+          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${
             feedback.type === "success"
               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
               : "border-rose-500/30 bg-rose-500/10 text-rose-300"
@@ -392,30 +381,28 @@ export default function UserSettings() {
       )}
 
       {loading ? (
-        <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-12 text-gray-400">
-          <div className="flex items-center gap-3">
-            <Spinner size={22} className="text-cyan-400" />
-            <span>Loading your settings...</span>
-          </div>
+        <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
+          <Spinner size={20} className="text-cyan-400" />
+          <span className="text-sm">Loading your settings...</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          {/* Sidebar Tabs (Desktop) / Scrollable Pills (Mobile) */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+          {/* Sidebar Tabs (Desktop) / Smooth Horizontal Scroll Pills (Mobile) */}
           <div className="md:col-span-1">
-            <div className="flex flex-row overflow-x-auto gap-2 rounded-2xl border border-gray-800 bg-gray-900/80 p-2 md:flex-col md:overflow-visible">
+            <div className="flex flex-row overflow-x-auto gap-1.5 rounded-2xl border border-gray-800 bg-gray-900/90 p-1.5 md:flex-col md:overflow-visible scrollbar-none">
               {navTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-all ${
+                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-cyan-600 text-white shadow-md shadow-cyan-900/20"
-                        : "text-gray-400 hover:bg-gray-800/80 hover:text-gray-200"
+                        ? "bg-cyan-600 text-white shadow-md shadow-cyan-900/30 font-semibold"
+                        : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
                     }`}
                   >
-                    <span className="text-base">{tab.icon}</span>
+                    <span className="text-sm sm:text-base">{tab.icon}</span>
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -425,25 +412,25 @@ export default function UserSettings() {
 
           {/* Tab Content Panel */}
           <div className="md:col-span-3">
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-6 sm:p-8 shadow-xl">
+            <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 sm:p-6 md:p-8 shadow-xl">
               {/* TAB 1: PROFILE INFO */}
               {activeTab === "profile" && (
-                <form onSubmit={handleSaveProfile} className="space-y-6">
+                <form onSubmit={handleSaveProfile} className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Profile Information</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Information</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       Update your account details and choose how you appear in Mind Bridge.
                     </p>
                   </div>
 
                   {/* Avatar & Color Picker */}
                   <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">
                       Profile Avatar & Color Accent
                     </label>
                     <div className="flex flex-wrap items-center gap-4">
                       <div
-                        className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${currentGradientClass} text-xl font-bold text-white shadow-lg transition-transform hover:scale-105`}
+                        className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${currentGradientClass} text-lg sm:text-xl font-bold text-white shadow-lg`}
                       >
                         {userInitials}
                       </div>
@@ -453,7 +440,7 @@ export default function UserSettings() {
                             type="button"
                             key={g.id}
                             onClick={() => setAvatarGradient(g.id)}
-                            className={`h-8 w-8 rounded-full bg-gradient-to-br ${g.class} transition-all ${
+                            className={`h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-br ${g.class} transition-all ${
                               avatarGradient === g.id
                                 ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110"
                                 : "opacity-70 hover:opacity-100"
@@ -467,7 +454,7 @@ export default function UserSettings() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Full Name
                       </label>
                       <input
@@ -476,24 +463,24 @@ export default function UserSettings() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your full name"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Email Address <span className="text-xs text-gray-500">(Institutional)</span>
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                        Email Address <span className="text-[10px] text-gray-500">(Institutional)</span>
                       </label>
                       <input
                         type="email"
                         value={currentUser?.email || ""}
                         disabled
-                        className="w-full rounded-xl border border-gray-800 bg-gray-950/60 px-4 py-2.5 text-gray-400 cursor-not-allowed text-sm"
+                        className="w-full rounded-xl border border-gray-800 bg-gray-950/60 px-3.5 py-2.5 text-gray-400 cursor-not-allowed text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Phone Number
                       </label>
                       <input
@@ -501,30 +488,30 @@ export default function UserSettings() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+63 912 345 6789"
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Account Role
                       </label>
-                      <div className="flex h-[42px] items-center rounded-xl border border-gray-800 bg-gray-950/60 px-4 text-sm text-cyan-300 font-semibold uppercase tracking-wider">
+                      <div className="flex h-[42px] items-center rounded-xl border border-gray-800 bg-gray-950/60 px-3.5 text-xs sm:text-sm text-cyan-300 font-semibold uppercase tracking-wider">
                         {userRole || "student"}
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                      About / Bio <span className="text-xs text-gray-500">(Optional note for counselors)</span>
+                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      About / Bio <span className="text-[10px] text-gray-500">(Optional note for counselors)</span>
                     </label>
                     <textarea
                       rows={3}
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Share brief context about your degree program, current year level, or anything you'd like your counselors to know..."
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                      placeholder="Share brief context about your program, year level, or anything you'd like counselors to know..."
+                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                     />
                   </div>
 
@@ -532,9 +519,9 @@ export default function UserSettings() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                     >
-                      {saving && <Spinner size={16} />}
+                      {saving && <Spinner size={14} />}
                       {saving ? "Saving Changes..." : "Save Profile"}
                     </button>
                   </div>
@@ -543,10 +530,10 @@ export default function UserSettings() {
 
               {/* TAB 2: SECURITY & PASSWORD */}
               {activeTab === "password" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Security & Password</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Security & Password</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       Keep your Mind Bridge account safe with a strong, distinct password.
                     </p>
                   </div>
@@ -559,7 +546,7 @@ export default function UserSettings() {
                       <h3 className="text-base font-semibold text-white">
                         Google Authenticated Account
                       </h3>
-                      <p className="mt-1 text-sm text-gray-300 max-w-md mx-auto">
+                      <p className="mt-1 text-xs sm:text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
                         Your account is linked with your Google login (<strong>{currentUser?.email}</strong>).
                         Password changes and 2-Factor Authentication are managed directly in your Google Security settings.
                       </p>
@@ -567,7 +554,7 @@ export default function UserSettings() {
                   ) : (
                     <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                           Current Password
                         </label>
                         <input
@@ -576,12 +563,12 @@ export default function UserSettings() {
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="••••••••"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                           New Password
                         </label>
                         <input
@@ -590,12 +577,12 @@ export default function UserSettings() {
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="At least 6 characters"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                           Confirm New Password
                         </label>
                         <input
@@ -604,7 +591,7 @@ export default function UserSettings() {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Confirm new password"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                         />
                       </div>
 
@@ -612,9 +599,9 @@ export default function UserSettings() {
                         <button
                           type="submit"
                           disabled={passwordLoading}
-                          className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                         >
-                          {passwordLoading && <Spinner size={16} />}
+                          {passwordLoading && <Spinner size={14} />}
                           {passwordLoading ? "Updating Password..." : "Update Password"}
                         </button>
                       </div>
@@ -625,21 +612,21 @@ export default function UserSettings() {
 
               {/* TAB 3: NOTIFICATIONS */}
               {activeTab === "notifications" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Notification Preferences</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Notification Preferences</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       Choose which updates, reminders, and alerts you wish to receive.
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Appointment Reminders
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
                           Receive notifications 24 hours and 1 hour before scheduled counseling sessions.
                         </div>
                       </div>
@@ -652,16 +639,16 @@ export default function UserSettings() {
                             appointmentReminders: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500"
+                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Weekly Wellness Check-in Nudge
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
                           Gentle reminders to take your 2-minute weekly wellness check-in survey.
                         </div>
                       </div>
@@ -674,16 +661,16 @@ export default function UserSettings() {
                             wellnessNudges: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500"
+                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Counselor Updates & Notes
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
                           Notifications when your assigned counselor reviews your survey or posts notes.
                         </div>
                       </div>
@@ -696,16 +683,16 @@ export default function UserSettings() {
                             counselorMessages: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500"
+                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Urgent Support & Crisis Hotlines Alert
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
                           Direct resources and hotline prompts during elevated distress signals.
                         </div>
                       </div>
@@ -718,7 +705,7 @@ export default function UserSettings() {
                             emergencyAlerts: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500"
+                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
                       />
                     </div>
                   </div>
@@ -728,9 +715,9 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSaveNotifications}
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                     >
-                      {saving && <Spinner size={16} />}
+                      {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Preferences"}
                     </button>
                   </div>
@@ -739,21 +726,21 @@ export default function UserSettings() {
 
               {/* TAB 4: PRIVACY & CONFIDENTIALITY */}
               {activeTab === "privacy" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Privacy & Confidentiality</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Privacy & Confidentiality</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       Your mental health data is protected under strict confidentiality protocols.
                     </p>
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Counselor Check-in Access
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 leading-relaxed">
                           Allow registered University Counselors to review your check-in trends to personalize guidance and offer proactive appointments.
                         </div>
                       </div>
@@ -770,12 +757,12 @@ export default function UserSettings() {
                       />
                     </div>
 
-                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-4">
+                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-sm">
+                        <div className="font-medium text-white text-xs sm:text-sm">
                           Anonymized Institutional Research
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 leading-relaxed">
                           Permit stripped, fully anonymized aggregate statistics to help the university improve overall student mental health programs.
                         </div>
                       </div>
@@ -792,12 +779,12 @@ export default function UserSettings() {
                       />
                     </div>
 
-                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 sm:p-4">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-amber-300">
                         <span>ℹ️</span>
                         <span>Confidentiality Notice</span>
                       </div>
-                      <p className="mt-1 text-xs text-amber-200/80 leading-relaxed">
+                      <p className="mt-1 text-[11px] sm:text-xs text-amber-200/80 leading-relaxed">
                         In accordance with the Philippine Mental Health Act (RA 11036) and institutional ethics policies, student disclosures remain strictly confidential between you and the University Guidance Office, except in clear, imminent threats to life or safety.
                       </p>
                     </div>
@@ -808,9 +795,9 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSavePrivacy}
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                     >
-                      {saving && <Spinner size={16} />}
+                      {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Privacy Settings"}
                     </button>
                   </div>
@@ -819,17 +806,17 @@ export default function UserSettings() {
 
               {/* TAB 5: EMERGENCY CONTACT (Student Only) */}
               {activeTab === "emergency" && (
-                <form onSubmit={handleSaveEmergencyContact} className="space-y-6">
+                <form onSubmit={handleSaveEmergencyContact} className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Emergency Contact</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Emergency Contact</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       Designate a trusted individual (parent, guardian, close friend) to be reached in extreme emergencies.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Contact Full Name
                       </label>
                       <input
@@ -840,12 +827,12 @@ export default function UserSettings() {
                         }
                         placeholder="e.g. Maria Santos"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Relationship
                       </label>
                       <select
@@ -856,7 +843,7 @@ export default function UserSettings() {
                             relationship: e.target.value,
                           })
                         }
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       >
                         <option value="Parent">Parent</option>
                         <option value="Guardian">Legal Guardian</option>
@@ -868,7 +855,7 @@ export default function UserSettings() {
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
                         Primary Mobile / Phone
                       </label>
                       <input
@@ -879,13 +866,13 @@ export default function UserSettings() {
                         }
                         placeholder="+63 912 345 6789"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                        Alternate Contact / Landline <span className="text-xs text-gray-500">(Optional)</span>
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                        Alternate Contact / Landline <span className="text-[10px] text-gray-500">(Optional)</span>
                       </label>
                       <input
                         type="tel"
@@ -897,14 +884,14 @@ export default function UserSettings() {
                           })
                         }
                         placeholder="+63 (033) 337-xxxx"
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                      Special Medical / Response Notes <span className="text-xs text-gray-500">(Optional)</span>
+                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      Special Medical / Response Notes <span className="text-[10px] text-gray-500">(Optional)</span>
                     </label>
                     <textarea
                       rows={2}
@@ -912,8 +899,8 @@ export default function UserSettings() {
                       onChange={(e) =>
                         setEmergencyContact({ ...emergencyContact, notes: e.target.value })
                       }
-                      placeholder="e.g. Speaks Hiligaynon, lives nearby on campus dorm, has asthma inhaler..."
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                      placeholder="e.g. Speaks Hiligaynon, lives nearby on campus dorm, has asthma..."
+                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                     />
                   </div>
 
@@ -921,9 +908,9 @@ export default function UserSettings() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                     >
-                      {saving && <Spinner size={16} />}
+                      {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Emergency Contact"}
                     </button>
                   </div>
@@ -932,11 +919,11 @@ export default function UserSettings() {
 
               {/* TAB 6: WELLNESS GOALS (Student Only) */}
               {activeTab === "goals" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div>
-                      <h2 className="text-xl font-semibold text-white">Personal Wellness Goals</h2>
-                      <p className="text-sm text-gray-400">
+                      <h2 className="text-lg sm:text-xl font-semibold text-white">Personal Wellness Goals</h2>
+                      <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                         Pick up to 5 focus areas to track your emotional and personal growth.
                       </p>
                     </div>
@@ -953,7 +940,7 @@ export default function UserSettings() {
                           key={goal}
                           type="button"
                           onClick={() => handleToggleGoal(goal)}
-                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-sm transition-all ${
+                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs sm:text-sm transition-all ${
                             isSelected
                               ? "border-cyan-500 bg-cyan-950/40 text-cyan-200 shadow-sm"
                               : "border-gray-800 bg-gray-950/40 text-gray-300 hover:border-gray-700 hover:text-white"
@@ -981,11 +968,11 @@ export default function UserSettings() {
                       value={customGoal}
                       onChange={(e) => setCustomGoal(e.target.value)}
                       placeholder="Add custom wellness goal..."
-                      className="flex-1 rounded-xl border border-gray-700 bg-gray-800/80 px-4 py-2 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-sm"
+                      className="flex-1 rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
                     />
                     <button
                       type="submit"
-                      className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+                      className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-xs sm:text-sm font-medium text-white hover:bg-gray-700 transition-colors"
                     >
                       + Add
                     </button>
@@ -996,9 +983,9 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSaveGoals}
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
                     >
-                      {saving && <Spinner size={16} />}
+                      {saving && <Spinner size={14} />}
                       {saving ? "Saving Goals..." : "Save Focus Goals"}
                     </button>
                   </div>
@@ -1007,16 +994,16 @@ export default function UserSettings() {
 
               {/* TAB 7: SESSION HISTORY & NOTES (Student Only) */}
               {activeTab === "sessions" && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Counseling Session Records</h2>
-                    <p className="text-sm text-gray-400">
+                    <h2 className="text-lg sm:text-xl font-semibold text-white">Counseling Session Records</h2>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
                       View your appointment history and guidance logs with school counselors.
                     </p>
                   </div>
 
                   {loadingApts ? (
-                    <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+                    <div className="flex items-center justify-center py-10 text-gray-400 gap-2 text-xs sm:text-sm">
                       <Spinner size={18} className="text-cyan-400" />
                       <span>Loading your session records...</span>
                     </div>
@@ -1025,8 +1012,8 @@ export default function UserSettings() {
                       <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800/60 text-xl">
                         📅
                       </div>
-                      <h3 className="text-base font-medium text-white">No Sessions Found</h3>
-                      <p className="mt-1 text-sm text-gray-400 max-w-sm mx-auto">
+                      <h3 className="text-sm sm:text-base font-medium text-white">No Sessions Found</h3>
+                      <p className="mt-1 text-xs sm:text-sm text-gray-400 max-w-sm mx-auto">
                         You haven't booked any counseling sessions yet. You can book a confidential slot from your dashboard anytime.
                       </p>
                       <button
@@ -1037,7 +1024,7 @@ export default function UserSettings() {
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       {appointmentsList.map((apt) => {
                         const status = apt.status || "Pending Review";
                         const isConfirmed = status.toLowerCase().includes("confirm");
@@ -1046,10 +1033,10 @@ export default function UserSettings() {
                         return (
                           <div
                             key={apt.id}
-                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-gray-800 bg-gray-950/60 p-4 transition-all hover:border-gray-700"
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4 transition-all hover:border-gray-700 text-xs sm:text-sm"
                           >
                             <div>
-                              <div className="font-semibold text-white text-base">
+                              <div className="font-semibold text-white">
                                 {apt.title || "Counseling Session"}
                               </div>
                               <div className="mt-1 text-xs text-gray-400">
@@ -1068,7 +1055,7 @@ export default function UserSettings() {
 
                             <div className="flex items-center gap-2 self-start sm:self-center">
                               <span
-                                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
+                                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
                                   isConfirmed
                                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                     : isPending

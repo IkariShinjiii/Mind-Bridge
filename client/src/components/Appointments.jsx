@@ -1,5 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { getAppointments, getAllAppointments, updateAppointmentStatus, bookAppointment, getAvailability } from "../api";
+import {
+  getAppointments,
+  getAllAppointments,
+  updateAppointmentStatus,
+  bookAppointment,
+  getAvailability,
+} from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
 
@@ -7,26 +13,58 @@ function safeFormatDate(val) {
   if (!val) return "Not specified";
   if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
   const date = new Date(val);
-  return Number.isNaN(date.getTime()) ? val : date.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  return Number.isNaN(date.getTime())
+    ? val
+    : date.toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 }
 
+const DECLINE_PRESETS = [
+  "Schedule conflict with guidance department event",
+  "Selected slot is no longer available",
+  "Please select another available appointment slot",
+  "Referred to University Health Services (UHS)",
+  "Walk-in consultation recommended instead",
+];
+
+const CANCELLATION_PRESETS = [
+  "Student requested cancellation",
+  "Counselor on urgent administrative duty",
+  "Emergency campus wellness response",
+  "Unable to attend scheduled session",
+];
+
 export default function Appointments() {
-  const { currentUser, userRole, userData } = useAuth();
+  const { currentUser, userRole } = useAuth();
   const isCounselor = userRole === "counselor" || userRole === "admin";
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState(null);
+  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   // Booking Modal State (for students)
   const [showModal, setShowModal] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingId, setBookingId] = useState(null);
+
+  // Action Modal State (Decline, Cancel, Reschedule)
+  const [actionModal, setActionModal] = useState(null); // { type: 'decline' | 'cancel' | 'reschedule', apt: {...} }
+  const [actionReason, setActionReason] = useState("");
+  const [rescheduleStart, setRescheduleStart] = useState("");
+  const [rescheduleEnd, setRescheduleEnd] = useState("");
+  const [actionSubmitting, setActionSubmitting] = useState(false);
+
+  const showFeedback = (type, message) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: "", message: "" });
+    }, 4000);
+  };
 
   async function loadData() {
     setLoading(true);
@@ -45,13 +83,15 @@ export default function Appointments() {
     loadData();
   }, [userRole]);
 
-  async function handleStatusUpdate(id, nextStatus) {
+  async function handleQuickStatusUpdate(id, nextStatus) {
     setUpdatingId(id);
     try {
       await updateAppointmentStatus(id, nextStatus);
+      showFeedback("success", `Appointment marked as ${nextStatus}.`);
       await loadData();
     } catch (err) {
       console.error("Failed to update status", err);
+      showFeedback("error", "Failed to update appointment status.");
     } finally {
       setUpdatingId(null);
     }
@@ -74,12 +114,93 @@ export default function Appointments() {
     setBookingId(slot.id);
     try {
       await bookAppointment(slot);
+      showFeedback("success", "Appointment requested successfully!");
       await loadData();
       setShowModal(false);
     } catch (err) {
       console.error("Booking error", err);
+      showFeedback("error", "Could not book appointment.");
     } finally {
       setBookingId(null);
+    }
+  }
+
+  // Open Decline / Cancel / Reschedule Modal
+  function openActionModal(type, apt) {
+    setActionModal({ type, apt });
+    setActionReason("");
+    if (type === "reschedule") {
+      // Default to existing start date or tomorrow
+      const currentStart = apt.start || apt.date;
+      if (currentStart) {
+        try {
+          const d = new Date(currentStart);
+          setRescheduleStart(d.toISOString().slice(0, 16));
+        } catch {
+          setRescheduleStart("");
+        }
+      }
+      if (apt.end) {
+        try {
+          const dEnd = new Date(apt.end);
+          setRescheduleEnd(dEnd.toISOString().slice(0, 16));
+        } catch {
+          setRescheduleEnd("");
+        }
+      }
+    }
+  }
+
+  function closeActionModal() {
+    setActionModal(null);
+    setActionReason("");
+    setRescheduleStart("");
+    setRescheduleEnd("");
+  }
+
+  // Submit Decline, Cancel, or Reschedule
+  async function handleActionSubmit(e) {
+    e.preventDefault();
+    if (!actionModal) return;
+    const { type, apt } = actionModal;
+
+    setActionSubmitting(true);
+    try {
+      if (type === "decline") {
+        await updateAppointmentStatus(apt.id, "Declined", {
+          slotId: apt.slotId,
+          declineReason: actionReason.trim() || "Declined by guidance counselor",
+          counselorNote: actionReason.trim(),
+        });
+        showFeedback("success", "Appointment declined and student notified.");
+      } else if (type === "cancel") {
+        await updateAppointmentStatus(apt.id, "Cancelled", {
+          slotId: apt.slotId,
+          cancellationReason: actionReason.trim() || "Cancelled",
+          cancelledBy: isCounselor ? "counselor" : "student",
+        });
+        showFeedback("success", "Appointment cancelled successfully.");
+      } else if (type === "reschedule") {
+        if (!rescheduleStart) {
+          showFeedback("error", "Please select a new appointment date & time.");
+          setActionSubmitting(false);
+          return;
+        }
+        await updateAppointmentStatus(apt.id, "Rescheduled", {
+          start: new Date(rescheduleStart).toISOString(),
+          end: rescheduleEnd ? new Date(rescheduleEnd).toISOString() : null,
+          rescheduleReason: actionReason.trim() || "Rescheduled by counselor",
+          counselorNote: actionReason.trim(),
+        });
+        showFeedback("success", "Appointment rescheduled and updated.");
+      }
+      await loadData();
+      closeActionModal();
+    } catch (err) {
+      console.error("Action error:", err);
+      showFeedback("error", "Failed to process appointment request.");
+    } finally {
+      setActionSubmitting(false);
     }
   }
 
@@ -88,7 +209,10 @@ export default function Appointments() {
       const status = (apt.status || "Pending Review").toLowerCase();
       if (filter === "confirmed") return status.includes("confirm");
       if (filter === "pending") return status.includes("pending");
-      if (filter === "completed") return status.includes("complete");
+      if (filter === "rescheduled") return status.includes("reschedul");
+      if (filter === "completed") return status.includes("complet");
+      if (filter === "cancelled_declined")
+        return status.includes("cancel") || status.includes("declin");
       return true;
     });
   }, [appointments, filter]);
@@ -106,7 +230,7 @@ export default function Appointments() {
           </h1>
           <p className="text-sm text-gray-400 mt-1">
             {isCounselor
-              ? "Review incoming student appointment requests and track counseling sessions."
+              ? "Review, confirm, reschedule, or manage confidential counseling sessions with students."
               : "Manage and book confidential counseling sessions with University guidance counselors."}
           </p>
         </div>
@@ -122,20 +246,35 @@ export default function Appointments() {
         )}
       </div>
 
+      {/* Global Feedback Banner */}
+      {feedback.message && (
+        <div
+          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${
+            feedback.type === "success"
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+              : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+          }`}
+        >
+          {feedback.type === "success" ? "✓ " : "⚠️ "} {feedback.message}
+        </div>
+      )}
+
       {/* Filter Tabs */}
       <div className="mb-6 flex flex-wrap gap-2">
         {[
           ["all", "All Sessions"],
           ["pending", "Pending Review"],
           ["confirmed", "Confirmed"],
+          ["rescheduled", "Rescheduled"],
           ["completed", "Completed"],
+          ["cancelled_declined", "Declined / Cancelled"],
         ].map(([val, label]) => (
           <button
             key={val}
             onClick={() => setFilter(val)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
               filter === val
-                ? "bg-cyan-600 text-white shadow-sm"
+                ? "bg-cyan-600 text-white shadow-sm font-semibold"
                 : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
             }`}
           >
@@ -148,7 +287,7 @@ export default function Appointments() {
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
           <Spinner size={20} className="text-cyan-400" />
-          <span>Loading appointment records...</span>
+          <span className="text-sm">Loading appointment records...</span>
         </div>
       ) : filteredAppointments.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-800 bg-gray-900/40 p-12 text-center">
@@ -171,77 +310,174 @@ export default function Appointments() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {filteredAppointments.map((apt) => {
             const status = apt.status || "Pending Review";
-            const isConfirmed = status.toLowerCase().includes("confirm");
-            const isPending = status.toLowerCase().includes("pending");
+            const statusLower = status.toLowerCase();
+            const isConfirmed = statusLower.includes("confirm");
+            const isPending = statusLower.includes("pending");
+            const isRescheduled = statusLower.includes("reschedul");
+            const isCompleted = statusLower.includes("complet");
+            const isDeclined = statusLower.includes("declin");
+            const isCancelled = statusLower.includes("cancel");
 
             return (
               <div
                 key={apt.id}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-gray-800 bg-gray-900/90 p-5 transition hover:border-gray-700 shadow-sm"
+                className="flex flex-col gap-3 rounded-2xl border border-gray-800 bg-gray-900/90 p-4 sm:p-5 transition hover:border-gray-700 shadow-sm"
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-white text-base">
-                      {apt.title || "Counseling Session"}
-                    </h3>
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider ${
-                        isConfirmed
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : isPending
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-gray-800 text-gray-300 border border-gray-700"
-                      }`}
-                    >
-                      {status}
-                    </span>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold text-white text-base">
+                        {apt.title || "Counseling Session"}
+                      </h3>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
+                          isConfirmed
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : isPending
+                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            : isRescheduled
+                            ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                            : isCompleted
+                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                            : isDeclined
+                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            : isCancelled
+                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                            : "bg-gray-800 text-gray-300 border border-gray-700"
+                        }`}
+                      >
+                        {status}
+                      </span>
+                    </div>
+
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
+                      <div>
+                        {isCounselor ? "Student:" : "Counselor:"}{" "}
+                        <span className="text-gray-200 font-medium">
+                          {isCounselor
+                            ? apt.studentName || "Student"
+                            : apt.counselorName || "Assigned Counselor"}
+                        </span>
+                      </div>
+                      {apt.studentEmail && (
+                        <div>
+                          Email: <span className="text-cyan-300 font-mono">{apt.studentEmail}</span>
+                        </div>
+                      )}
+                      <div>
+                        Time:{" "}
+                        <span className="text-cyan-300 font-medium">
+                          {safeFormatDate(apt.start || apt.date)}
+                          {apt.end ? ` - ${safeFormatDate(apt.end)}` : ""}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
-                    <div>
-                      {isCounselor ? "Student:" : "Counselor:"}{" "}
-                      <span className="text-gray-200 font-medium">
-                        {isCounselor ? (apt.studentName || "Student") : (apt.counselorName || "Assigned Counselor")}
-                      </span>
-                    </div>
-                    {apt.studentEmail && (
-                      <div>
-                        Email: <span className="text-cyan-300 font-mono">{apt.studentEmail}</span>
-                      </div>
+                  {/* ACTION BUTTONS */}
+                  <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+                    {isCounselor ? (
+                      <>
+                        {/* Pending Review Actions */}
+                        {isPending && (
+                          <>
+                            <button
+                              onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
+                              disabled={updatingId === apt.id}
+                              className="rounded-xl bg-cyan-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-500 transition disabled:opacity-50"
+                            >
+                              {updatingId === apt.id ? "Confirming…" : "✓ Confirm"}
+                            </button>
+                            <button
+                              onClick={() => openActionModal("reschedule", apt)}
+                              className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+                            >
+                              🗓️ Reschedule
+                            </button>
+                            <button
+                              onClick={() => openActionModal("decline", apt)}
+                              className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition"
+                            >
+                              ✕ Decline
+                            </button>
+                          </>
+                        )}
+
+                        {/* Confirmed / Rescheduled Actions */}
+                        {(isConfirmed || isRescheduled) && (
+                          <>
+                            <button
+                              onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
+                              disabled={updatingId === apt.id}
+                              className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50"
+                            >
+                              {updatingId === apt.id ? "Updating…" : "✓ Mark Completed"}
+                            </button>
+                            <button
+                              onClick={() => openActionModal("reschedule", apt)}
+                              className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+                            >
+                              🗓️ Reschedule
+                            </button>
+                            <button
+                              onClick={() => openActionModal("cancel", apt)}
+                              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/20 transition"
+                            >
+                              ✕ Cancel
+                            </button>
+                          </>
+                        )}
+
+                        {/* Completed or Cancelled notes */}
+                        {(isCompleted || isDeclined || isCancelled) && (
+                          <span className="text-xs text-gray-500 italic">Archived session</span>
+                        )}
+                      </>
+                    ) : (
+                      /* Student Actions */
+                      <>
+                        {(isPending || isConfirmed || isRescheduled) && (
+                          <button
+                            onClick={() => openActionModal("cancel", apt)}
+                            className="rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/10 hover:border-red-500/30 transition"
+                          >
+                            Cancel Booking
+                          </button>
+                        )}
+                      </>
                     )}
-                    <div>
-                      Time:{" "}
-                      <span className="text-cyan-300 font-medium">
-                        {safeFormatDate(apt.start || apt.date)}
-                        {apt.end ? ` - ${safeFormatDate(apt.end)}` : ""}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
-                {isCounselor && (
-                  <div className="flex items-center gap-2 self-start sm:self-center">
-                    {status !== "Confirmed" && (
-                      <button
-                        onClick={() => handleStatusUpdate(apt.id, "Confirmed")}
-                        disabled={updatingId === apt.id}
-                        className="rounded-xl bg-cyan-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-cyan-500 transition disabled:opacity-50"
-                      >
-                        {updatingId === apt.id ? "Updating…" : "Confirm"}
-                      </button>
-                    )}
-                    {status !== "Completed" && (
-                      <button
-                        onClick={() => handleStatusUpdate(apt.id, "Completed")}
-                        disabled={updatingId === apt.id}
-                        className="rounded-xl border border-gray-700 bg-gray-800 px-3.5 py-1.5 text-xs font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition disabled:opacity-50"
-                      >
-                        Mark Completed
-                      </button>
-                    )}
+                {/* CALLOUT NOTES / REASONS */}
+                {apt.declineReason && (
+                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-200">
+                    <span className="font-semibold text-rose-300">Decline Reason:</span>{" "}
+                    {apt.declineReason}
+                  </div>
+                )}
+
+                {apt.cancellationReason && (
+                  <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
+                    <span className="font-semibold text-red-300">Cancellation Reason:</span>{" "}
+                    {apt.cancellationReason}
+                  </div>
+                )}
+
+                {apt.rescheduleReason && (
+                  <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 p-3 text-xs text-purple-200">
+                    <span className="font-semibold text-purple-300">Reschedule Note:</span>{" "}
+                    {apt.rescheduleReason}
+                  </div>
+                )}
+
+                {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
+                  <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-xs text-cyan-200">
+                    <span className="font-semibold text-cyan-300">Counselor Note:</span>{" "}
+                    {apt.counselorNote}
                   </div>
                 )}
               </div>
@@ -250,7 +486,7 @@ export default function Appointments() {
         </div>
       )}
 
-      {/* BOOKING MODAL */}
+      {/* STUDENT BOOKING MODAL */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
           <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
@@ -259,16 +495,22 @@ export default function Appointments() {
                 <h3 className="text-lg font-bold text-white">Select Available Counselor Slot</h3>
                 <p className="text-xs text-gray-400">Choose a confidential time slot</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white text-xl">✕</button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-white text-xl"
+              >
+                ✕
+              </button>
             </div>
 
             {loadingSlots ? (
-              <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2">
-                <Spinner /> Loading open counselor slots...
+              <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                <Spinner size={18} /> Loading open counselor slots...
               </div>
             ) : availableSlots.length === 0 ? (
-              <div className="py-8 text-center text-gray-500 border border-dashed border-gray-800 rounded-xl p-4">
-                No open counselor slots available right now. Please check back soon or visit the Guidance Office.
+              <div className="py-8 text-center text-gray-400 border border-dashed border-gray-800 rounded-xl p-4 text-xs sm:text-sm">
+                No open counselor slots available right now. Please check back soon or visit the
+                University Guidance Office directly.
               </div>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
@@ -277,12 +519,15 @@ export default function Appointments() {
                   const endTime = safeFormatDate(slot.end || slot.to);
 
                   return (
-                    <div key={slot.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-4">
+                    <div
+                      key={slot.id}
+                      className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-3.5 sm:p-4 text-xs sm:text-sm"
+                    >
                       <div>
-                        <div className="text-sm font-medium text-white">
+                        <div className="font-medium text-white">
                           Counselor: {slot.counselorName || "Assigned Counselor"}
                         </div>
-                        <div className="text-xs text-cyan-300 mt-0.5 font-medium">
+                        <div className="text-cyan-300 mt-0.5 font-medium text-xs">
                           {startTime} {endTime ? `to ${endTime}` : ""}
                         </div>
                       </div>
@@ -291,7 +536,7 @@ export default function Appointments() {
                         disabled={bookingId === slot.id}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
                       >
-                        {bookingId === slot.id ? <Spinner /> : "Book Slot"}
+                        {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
                       </button>
                     </div>
                   );
@@ -307,6 +552,158 @@ export default function Appointments() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}
+      {actionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
+          <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-white">
+                  {actionModal.type === "decline" && "Decline Counseling Request"}
+                  {actionModal.type === "cancel" && "Cancel Appointment"}
+                  {actionModal.type === "reschedule" && "Reschedule Counseling Session"}
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Student:{" "}
+                  <span className="text-gray-200 font-medium">
+                    {actionModal.apt.studentName || "Student"}
+                  </span>{" "}
+                  ({safeFormatDate(actionModal.apt.start || actionModal.apt.date)})
+                </p>
+              </div>
+              <button onClick={closeActionModal} className="text-gray-400 hover:text-white text-xl">
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleActionSubmit} className="space-y-4">
+              {/* Reschedule Date & Time Inputs */}
+              {actionModal.type === "reschedule" && (
+                <div className="space-y-3 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1">
+                      New Start Date & Time
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={rescheduleStart}
+                      onChange={(e) => setRescheduleStart(e.target.value)}
+                      required
+                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 mb-1">
+                      New End Date & Time <span className="text-[10px] text-gray-500">(Optional)</span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={rescheduleEnd}
+                      onChange={(e) => setRescheduleEnd(e.target.value)}
+                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Presets for Decline or Cancel */}
+              {actionModal.type === "decline" && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                    Quick Reason Presets:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DECLINE_PRESETS.map((preset) => (
+                      <button
+                        type="button"
+                        key={preset}
+                        onClick={() => setActionReason(preset)}
+                        className="rounded-lg border border-gray-800 bg-gray-800/60 px-2.5 py-1 text-[11px] text-gray-300 hover:border-gray-700 hover:text-white transition"
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {actionModal.type === "cancel" && isCounselor && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                    Quick Reason Presets:
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {CANCELLATION_PRESETS.map((preset) => (
+                      <button
+                        type="button"
+                        key={preset}
+                        onClick={() => setActionReason(preset)}
+                        className="rounded-lg border border-gray-800 bg-gray-800/60 px-2.5 py-1 text-[11px] text-gray-300 hover:border-gray-700 hover:text-white transition"
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes / Reason Textarea */}
+              <div>
+                <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                  {actionModal.type === "reschedule"
+                    ? "Reschedule Explanation / Note to Student:"
+                    : actionModal.type === "decline"
+                    ? "Decline Explanation to Student:"
+                    : "Cancellation Reason:"}
+                </label>
+                <textarea
+                  rows={3}
+                  value={actionReason}
+                  onChange={(e) => setActionReason(e.target.value)}
+                  placeholder={
+                    actionModal.type === "reschedule"
+                      ? "e.g. Moved 30 minutes later due to faculty guidance assembly..."
+                      : actionModal.type === "decline"
+                      ? "e.g. Please choose another slot on Wednesday afternoon..."
+                      : "e.g. Conflict with examination schedule..."
+                  }
+                  className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="mt-5 flex justify-end gap-2 pt-3 border-t border-gray-800">
+                <button
+                  type="button"
+                  onClick={closeActionModal}
+                  disabled={actionSubmitting}
+                  className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-medium text-gray-400 hover:bg-gray-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionSubmitting}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2 text-xs font-semibold text-white transition ${
+                    actionModal.type === "decline"
+                      ? "bg-rose-600 hover:bg-rose-500"
+                      : actionModal.type === "cancel"
+                      ? "bg-red-600 hover:bg-red-500"
+                      : "bg-purple-600 hover:bg-purple-500"
+                  } disabled:opacity-50`}
+                >
+                  {actionSubmitting && <Spinner size={14} />}
+                  {actionModal.type === "decline" && "Confirm Decline"}
+                  {actionModal.type === "cancel" && "Confirm Cancellation"}
+                  {actionModal.type === "reschedule" && "Confirm Reschedule"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
