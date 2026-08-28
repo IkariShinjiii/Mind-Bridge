@@ -44,8 +44,8 @@ export default function DashboardLayout({ children }) {
   const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
   const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
 
-  // Check if we should display the Google profile picture
-  const showGoogleAvatar = userData?.useGoogleAvatar && currentUser?.photoURL;
+  // Check if we should display the Google profile picture (Defaults to true if undefined)
+  const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
 
   const isLinkActive = (path) => location.pathname === path;
 
