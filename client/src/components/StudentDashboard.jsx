@@ -11,6 +11,14 @@ function Spinner({ className = "h-4 w-4" }) {
   );
 }
 
+// Safely formats dates to prevent the "Invalid Date" error
+function safeFormatDate(val) {
+  if (!val) return null;
+  if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
+  const date = new Date(val);
+  return Number.isNaN(date.getTime()) ? val : date.toLocaleString();
+}
+
 export default function StudentDashboard() {
   const { currentUser, userData } = useAuth(); 
   const userName = userData?.name || currentUser?.displayName || "Student";
@@ -126,7 +134,7 @@ export default function StudentDashboard() {
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
             <div className="text-xs text-gray-400 uppercase tracking-wider">Next session</div>
             <div className="mt-2 text-xl font-semibold text-white">
-              {appointments.length > 0 ? new Date(appointments[0].start || appointments[0].date).toLocaleDateString() : "None"}
+              {appointments.length > 0 ? safeFormatDate(appointments[0].start || appointments[0].date) : "None"}
             </div>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm">
@@ -206,7 +214,7 @@ export default function StudentDashboard() {
                     <span className="rounded-full bg-cyan-500/10 px-2 py-1 text-[10px] uppercase tracking-wide text-cyan-400">{apt.status || "Pending"}</span>
                   </div>
                   <div className="mt-1 text-xs text-gray-400">
-                    {apt.start ? new Date(apt.start).toLocaleString() : (apt.date ? new Date(apt.date).toLocaleString() : "Scheduled")}
+                    {safeFormatDate(apt.start || apt.date) || "Scheduled"}
                   </div>
                 </div>
               ))
@@ -238,23 +246,29 @@ export default function StudentDashboard() {
               </div>
             ) : (
               <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                {availableSlots.map((slot) => (
-                  <div key={slot.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-4">
-                    <div>
-                      <div className="text-sm font-medium text-white">Counselor: {slot.counselorName || "Assigned Counselor"}</div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {new Date(slot.start).toLocaleString()} to {new Date(slot.end).toLocaleString()}
+                {availableSlots.map((slot) => {
+                  // Use our helper to grab the right properties without throwing invalid dates
+                  const startTime = safeFormatDate(slot.start || slot.date || slot.time);
+                  const endTime = safeFormatDate(slot.end || slot.to);
+
+                  return (
+                    <div key={slot.id} className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-4">
+                      <div>
+                        <div className="text-sm font-medium text-white">Counselor: {slot.counselorName || "Assigned Counselor"}</div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {startTime || "Unknown Time"} {endTime ? `to ${endTime}` : ""}
+                        </div>
                       </div>
+                      <button
+                        onClick={() => handleBookSlot(slot)}
+                        disabled={bookingId === slot.id}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                      >
+                        {bookingId === slot.id ? <Spinner /> : "Book Slot"}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleBookSlot(slot)}
-                      disabled={bookingId === slot.id}
-                      className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
-                    >
-                      {bookingId === slot.id ? <Spinner /> : "Book Slot"}
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
