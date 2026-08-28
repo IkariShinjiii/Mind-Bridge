@@ -1,4 +1,4 @@
-﻿import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase"; 
 
@@ -117,4 +117,18 @@ export const addAvailability = async (start, end) => {
 
 export const removeAvailability = async (id) => {
   return await deleteDoc(doc(db, "availability", id));
+};
+
+// --- USER PROFILE & SETTINGS ---
+export const getUserSettings = async (uid) => {
+  const targetUid = uid || getCurrentUserId();
+  if (!targetUid) return null;
+  const userDoc = await getDoc(doc(db, "users", targetUid));
+  return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } : null;
+};
+
+export const saveUserSettings = async (uid, data) => {
+  const targetUid = uid || getCurrentUserId();
+  if (!targetUid) throw new Error("No authenticated user");
+  return await updateDoc(doc(db, "users", targetUid), data);
 };

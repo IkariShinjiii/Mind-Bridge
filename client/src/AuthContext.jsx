@@ -41,10 +41,24 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  const refreshUserData = async () => {
+    if (!auth.currentUser) return;
+    try {
+      const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setUserRole(data.role || "student");
+        setUserData(data);
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  };
+
   const logout = () => signOut(auth);
 
   return (
-    <AuthContext.Provider value={{ currentUser, userRole, userData, loading, logout }}>
+    <AuthContext.Provider value={{ currentUser, userRole, userData, loading, logout, refreshUserData }}>
       {children}
     </AuthContext.Provider>
   );

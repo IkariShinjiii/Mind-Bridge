@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAppointments, bookAppointment, submitResponse, getAvailability } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 
@@ -226,6 +227,45 @@ export default function StudentDashboard() {
           >
             Book appointment
           </button>
+        </div>
+
+        {/* My Wellness Focus Goals */}
+        <div className="mt-5 rounded-2xl border border-gray-800 bg-gray-900 p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-white flex items-center gap-1.5">
+              <span>🎯</span>
+              <span>My Wellness Goals</span>
+            </h3>
+            <Link
+              to="/settings"
+              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              Edit
+            </Link>
+          </div>
+
+          {Array.isArray(userData?.wellnessGoals) && userData.wellnessGoals.length > 0 ? (
+            <div className="space-y-2">
+              {userData.wellnessGoals.map((goal, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-2 rounded-xl border border-gray-800 bg-gray-800/40 p-2.5 text-xs text-gray-200"
+                >
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold">
+                    ✓
+                  </span>
+                  <span className="truncate">{goal}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-gray-800 p-3.5 text-center text-xs text-gray-500">
+              No goals set yet.{" "}
+              <Link to="/settings" className="text-cyan-400 hover:underline">
+                Set goals in Settings
+              </Link>
+            </div>
+          )}
         </div>
       </aside>
 

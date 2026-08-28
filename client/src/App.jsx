@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Link, Navigate, Routes, Route } from "react-router-dom";
 import { useAuth } from "./AuthContext.jsx";
 
@@ -8,6 +8,7 @@ import CounselorDashboard from "./components/CounselorDashboard";
 import AdminPanel from "./components/AdminPanel";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import UserSettings from "./components/UserSettings";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/DashboardLayout";
 import icon from "./assets/mindbridge-icon.png";
@@ -125,6 +126,14 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminPanel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+              <UserSettings />
             </ProtectedRoute>
           }
         />

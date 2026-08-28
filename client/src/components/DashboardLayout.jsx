@@ -32,6 +32,16 @@ export default function DashboardLayout({ children }) {
     }
   };
 
+  const gradientMap = {
+    cyan: "from-cyan-500 to-blue-600",
+    purple: "from-purple-500 to-indigo-600",
+    emerald: "from-emerald-500 to-teal-600",
+    amber: "from-amber-500 to-orange-600",
+    rose: "from-rose-500 to-pink-600",
+  };
+  const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
+  const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="border-b border-white/10 bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
@@ -49,6 +59,7 @@ export default function DashboardLayout({ children }) {
             {userRole === "admin" && <Link to="/admin/dashboard" className="transition hover:text-cyan-400 font-semibold">Admin Panel</Link>}
             {userRole === "counselor" && <Link to="/counselor/dashboard" className="transition hover:text-cyan-400 font-semibold">Counselor Dashboard</Link>}
             {userRole === "student" && <Link to="/student/dashboard" className="transition hover:text-cyan-400">Dashboard</Link>}
+            <Link to="/settings" className="transition hover:text-cyan-400">Settings</Link>
           </nav>
 
           {/* RIGHT: User Profile & Dropdown */}
@@ -60,21 +71,35 @@ export default function DashboardLayout({ children }) {
             
             <button 
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-transform hover:scale-105"
-            />
+              className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${currentGradient} text-xs font-bold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-transform hover:scale-105`}
+              aria-label="Open user settings menu"
+            >
+              {userInitials}
+            </button>
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute right-0 top-12 mt-2 w-48 origin-top-right rounded-xl border border-gray-800 bg-gray-900 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="px-4 py-2 border-b border-gray-800 sm:hidden">
-                  <p className="text-sm font-medium text-white">{safeName}</p>
-                  <p className="text-xs text-gray-400">{safeRole}</p>
+              <div className="absolute right-0 top-12 mt-2 w-52 origin-top-right rounded-xl border border-gray-800 bg-gray-900 py-1.5 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50 animate-fade-up">
+                <div className="px-4 py-2 border-b border-gray-800">
+                  <p className="text-sm font-medium text-white truncate">{safeName}</p>
+                  <p className="text-xs text-gray-400">{currentUser?.email || safeRole}</p>
                 </div>
-                <button onClick={() => setDropdownOpen(false)} className="block w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
-                  Account Settings
+                <button
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    navigate("/settings");
+                  }}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                >
+                  <span>⚙️</span>
+                  <span>Account Settings</span>
                 </button>
-                <button onClick={handleLogout} className="block w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors">
-                  Log out
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-400 hover:bg-gray-800 hover:text-red-300 transition-colors border-t border-gray-800/60"
+                >
+                  <span>🚪</span>
+                  <span>Log out</span>
                 </button>
               </div>
             )}
