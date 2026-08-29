@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { listenToStudentMessages, sendStudentMessage } from "../api";
 import { useAuth } from "../AuthContext.jsx";
+import { X, Lock, AlertTriangle, Send } from "lucide-react";
 
 function formatTime(val) {
   if (!val) return "";
@@ -225,10 +226,7 @@ export default function ConfidentialChatModal({
                 className="shrink-0 h-11 w-11 rounded-xl flex items-center justify-center text-gray-400 hover:bg-white/[0.08] hover:text-white transition interactive-tap"
                 aria-label="Close chat"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+                <X className="h-5 w-5" />
               </button>
             </div>
 
@@ -241,13 +239,13 @@ export default function ConfidentialChatModal({
                 </div>
               ) : error ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-center px-6">
-                  <div className="text-2xl">⚠️</div>
+                  <AlertTriangle className="h-8 w-8 text-red-400" />
                   <p className="text-sm font-medium text-red-300">{error}</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center gap-3 px-6">
-                  <div className="h-14 w-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-2xl shadow-inner border border-cyan-500/20">
-                    🔒
+                  <div className="h-14 w-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center shadow-inner border border-cyan-500/20">
+                    <Lock className="h-6 w-6 text-cyan-400" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">Confidential Counseling Thread</p>
@@ -387,9 +385,7 @@ export default function ConfidentialChatModal({
                 {sending ? (
                   <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
                 ) : (
-                  <svg className="h-5 w-5 translate-x-0.5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
-                  </svg>
+                  <Send className="h-5 w-5 translate-x-0.5" />
                 )}
               </button>
             </form>
