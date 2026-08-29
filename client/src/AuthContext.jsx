@@ -20,9 +20,10 @@ export function AuthProvider({ children }) {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
-            console.log("Firestore Data Found for User:", data); // Debug log!
-            setUserRole(data.role || "student");
-            setUserData(data);
+            const role = (data.role || "student").toLowerCase();
+            const normalizedRole = role === "counselor" ? "admin" : role;
+            setUserRole(normalizedRole);
+            setUserData({ ...data, role: normalizedRole });
           } else {
             console.error(`No document found in 'users' collection for UID: ${user.uid}`);
             setUserRole("student");
@@ -48,8 +49,10 @@ export function AuthProvider({ children }) {
       const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
       if (userDoc.exists()) {
         const data = userDoc.data();
-        setUserRole(data.role || "student");
-        setUserData(data);
+        const role = (data.role || "student").toLowerCase();
+        const normalizedRole = role === "counselor" ? "admin" : role;
+        setUserRole(normalizedRole);
+        setUserData({ ...data, role: normalizedRole });
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);

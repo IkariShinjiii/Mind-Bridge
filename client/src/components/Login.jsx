@@ -39,8 +39,7 @@ function Spinner() {
 }
 
 function navigateByRole(role, navigate) {
-  if (role === "admin") navigate("/admin/dashboard", { replace: true });
-  else if (role === "counselor") navigate("/counselor/dashboard", { replace: true });
+  if (role === "admin" || role === "counselor") navigate("/admin/dashboard", { replace: true });
   else navigate("/student/dashboard", { replace: true });
 }
 

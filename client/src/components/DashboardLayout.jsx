@@ -10,10 +10,10 @@ import {
   ShieldCheck,
   LogOut,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
-import usaLogo from "../assets/usa-logo.png";
 
 export default function DashboardLayout({ children }) {
   const { currentUser, userRole, userData, logout } = useAuth();
@@ -69,28 +69,20 @@ export default function DashboardLayout({ children }) {
       <header className="sticky top-0 z-40 w-full shrink-0 border-b border-white/[0.08] bg-gray-950/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
-          {/* Logo & Branding */}
-          <Link to="/" className="flex items-center gap-3 group shrink-0 interactive-tap">
-            <div className="flex items-center gap-2">
-              <img 
-                src={usaLogo} 
-                alt="University of San Agustin seal" 
-                className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
-              />
-              <span className="h-4 w-px bg-gray-700/80" />
-              <img 
-                src={icon} 
-                alt="Mind Bridge logo" 
-                className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" 
-              />
-            </div>
+          {/* Logo & Branding - Flush Left */}
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0 interactive-tap">
+            <img 
+              src={icon} 
+              alt="Mind Bridge logo" 
+              className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" 
+            />
             <span className="text-lg font-bold tracking-tight text-white">
               Mind Bridge
             </span>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden items-center gap-1.5 md:flex">
+          {/* Desktop Navigation Links - Centered */}
+          <nav className="hidden items-center justify-center gap-1.5 md:flex flex-1 mx-4">
             {userRole === "student" && (
               <>
                 <NavLink to="/student/dashboard" active={isLinkActive("/student/dashboard")}>
@@ -105,37 +97,35 @@ export default function DashboardLayout({ children }) {
               </>
             )}
 
-            {userRole === "counselor" && (
+            {(userRole === "admin" || userRole === "counselor") && (
               <>
-                <NavLink to="/counselor/dashboard" active={isLinkActive("/counselor/dashboard")}>
+                <NavLink
+                  to="/admin/dashboard"
+                  active={location.pathname === "/admin/dashboard" && !location.search.includes("tab=accounts")}
+                >
                   Dashboard
                 </NavLink>
                 <NavLink to="/appointments" active={isLinkActive("/appointments")}>
-                  Schedule & Slots
+                  Schedule & Appointments
                 </NavLink>
-              </>
-            )}
-
-            {userRole === "admin" && (
-              <>
-                <NavLink to="/admin/dashboard" active={isLinkActive("/admin/dashboard")}>
-                  Admin Panel
-                </NavLink>
-                <NavLink to="/appointments" active={isLinkActive("/appointments")}>
-                  All Appointments
+                <NavLink
+                  to="/admin/dashboard?tab=accounts"
+                  active={location.pathname === "/admin/dashboard" && location.search.includes("tab=accounts")}
+                >
+                  Manage Accounts & Assignments
                 </NavLink>
               </>
             )}
           </nav>
 
-          {/* User Profile & Dropdown Trigger */}
-          <div className="relative flex items-center gap-3" ref={dropdownRef}>
+          {/* User Profile & Dropdown Trigger - Flush Right */}
+          <div className="relative flex items-center gap-3 shrink-0" ref={dropdownRef}>
             <div className="hidden flex-col items-end text-right sm:flex">
               <span className="text-xs font-semibold text-white truncate max-w-[130px]">
                 {safeName}
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-teal-400">
-                {safeRole}
+                {(userRole === "admin" || userRole === "counselor") ? "STAFF / ADMIN" : safeRole}
               </span>
             </div>
 
@@ -243,18 +233,21 @@ export default function DashboardLayout({ children }) {
             </>
           )}
 
-          {userRole === "counselor" && (
+          {(userRole === "admin" || userRole === "counselor") && (
             <>
-              <MobileNavItem to="/counselor/dashboard" icon={ClipboardList} label="Triage" active={isLinkActive("/counselor/dashboard")} />
+              <MobileNavItem
+                to="/admin/dashboard"
+                icon={LayoutDashboard}
+                label="Dashboard"
+                active={location.pathname === "/admin/dashboard" && !location.search.includes("tab=accounts")}
+              />
               <MobileNavItem to="/appointments" icon={Calendar} label="Schedule" active={isLinkActive("/appointments")} />
-              <MobileNavItem to="/settings" icon={Settings} label="Settings" active={isLinkActive("/settings")} />
-            </>
-          )}
-
-          {userRole === "admin" && (
-            <>
-              <MobileNavItem to="/admin/dashboard" icon={ShieldCheck} label="Admin" active={isLinkActive("/admin/dashboard")} />
-              <MobileNavItem to="/appointments" icon={Calendar} label="Bookings" active={isLinkActive("/appointments")} />
+              <MobileNavItem
+                to="/admin/dashboard?tab=accounts"
+                icon={Users}
+                label="Accounts"
+                active={location.pathname === "/admin/dashboard" && location.search.includes("tab=accounts")}
+              />
               <MobileNavItem to="/settings" icon={Settings} label="Settings" active={isLinkActive("/settings")} />
             </>
           )}

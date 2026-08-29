@@ -38,11 +38,19 @@ export function requireAuth(req, res, next) {
 }
 
 export function requireRole(role) {
+  const allowed = Array.isArray(role) ? role : [role];
   return (req, res, next) => {
-    if (req.user.role !== role) {
-      return res.status(403).json({ error: `Requires ${role} role` });
+    const userRole = req.user?.role;
+    const isStaff = userRole === "admin" || userRole === "counselor";
+    const allowsStaff = allowed.includes("admin") || allowed.includes("counselor");
+
+    if (allowsStaff && isStaff) {
+      return next();
     }
-    next();
+    if (allowed.includes(userRole)) {
+      return next();
+    }
+    return res.status(403).json({ error: `Requires ${Array.isArray(role) ? role.join(" or ") : role} role` });
   };
 }
 

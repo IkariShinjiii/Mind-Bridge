@@ -69,7 +69,7 @@ export default function ConfidentialChatModal({
 
   const currentUserId = currentUser?.uid;
   const currentUserName =
-    userData?.name || currentUser?.displayName || (userRole === "counselor" ? "Counselor" : "Student");
+    userData?.name || currentUser?.displayName || (userRole === "student" ? "Student" : "Staff Counselor");
 
   // The student IS the thread anchor — works for both sides
   const threadStudentId = studentId || (userRole === "student" ? currentUserId : null);
@@ -150,7 +150,7 @@ export default function ConfidentialChatModal({
   }
 
   const grouped = groupByDay(messages);
-  const isCounselorView = userRole === "counselor";
+  const isCounselorView = userRole === "counselor" || userRole === "admin";
 
   const quickRepliesStudent = [
     "Thank you for reviewing my check-in.",

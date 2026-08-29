@@ -36,10 +36,8 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     const redirectPath =
-      userRole === "admin"
+      userRole === "admin" || userRole === "counselor"
         ? "/admin/dashboard"
-        : userRole === "counselor"
-        ? "/counselor/dashboard"
         : "/student/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
@@ -63,10 +61,8 @@ function PublicOnlyRoute({ children }) {
 
   if (currentUser) {
     const redirectPath =
-      userRole === "admin"
+      userRole === "admin" || userRole === "counselor"
         ? "/admin/dashboard"
-        : userRole === "counselor"
-        ? "/counselor/dashboard"
         : "/student/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
@@ -145,11 +141,7 @@ export default function App() {
         />
         <Route
           path="/counselor/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["counselor"]}>
-              <CounselorDashboard />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/admin/dashboard" replace />}
         />
         <Route
           path="/admin/dashboard"
@@ -162,7 +154,7 @@ export default function App() {
         <Route
           path="/appointments"
           element={
-            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+            <ProtectedRoute allowedRoles={["student", "admin"]}>
               <Appointments />
             </ProtectedRoute>
           }
@@ -170,7 +162,7 @@ export default function App() {
         <Route
           path="/resources"
           element={
-            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+            <ProtectedRoute allowedRoles={["student", "admin"]}>
               <CrisisResources />
             </ProtectedRoute>
           }
@@ -178,7 +170,7 @@ export default function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute allowedRoles={["student", "counselor", "admin"]}>
+            <ProtectedRoute allowedRoles={["student", "admin"]}>
               <UserSettings />
             </ProtectedRoute>
           }
