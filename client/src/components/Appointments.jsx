@@ -8,6 +8,7 @@ import {
 } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
+import Modal from "./ui/Modal";
 
 function safeFormatDate(val) {
   if (!val) return "Not specified";
@@ -487,226 +488,211 @@ export default function Appointments() {
       )}
 
       {/* STUDENT BOOKING MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
-          <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
-              <div>
-                <h3 className="text-lg font-bold text-white">Select Available Counselor Slot</h3>
-                <p className="text-xs text-gray-400">Choose a confidential time slot</p>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-white text-xl"
-              >
-                ✕
-              </button>
-            </div>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Select Available Counselor Slot"
+        description="Choose a confidential time slot with an assigned university guidance counselor."
+        maxWidth="max-w-lg"
+        footer={
+          <button
+            type="button"
+            onClick={() => setShowModal(false)}
+            className="min-h-[44px] rounded-xl border border-gray-700 px-5 text-xs font-medium text-gray-400 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
+          >
+            Cancel
+          </button>
+        }
+      >
+        {loadingSlots ? (
+          <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2 text-xs sm:text-sm">
+            <Spinner size={18} /> Loading open counselor slots...
+          </div>
+        ) : availableSlots.length === 0 ? (
+          <div className="py-8 text-center text-gray-400 border border-dashed border-white/10 rounded-2xl p-4 text-xs sm:text-sm">
+            No open counselor slots available right now. Please check back soon or visit the
+            University Guidance Office directly.
+          </div>
+        ) : (
+          <div className="space-y-3 custom-scrollbar">
+            {availableSlots.map((slot) => {
+              const startTime = safeFormatDate(slot.start || slot.date || slot.time);
+              const endTime = safeFormatDate(slot.end || slot.to);
 
-            {loadingSlots ? (
-              <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <Spinner size={18} /> Loading open counselor slots...
-              </div>
-            ) : availableSlots.length === 0 ? (
-              <div className="py-8 text-center text-gray-400 border border-dashed border-gray-800 rounded-xl p-4 text-xs sm:text-sm">
-                No open counselor slots available right now. Please check back soon or visit the
-                University Guidance Office directly.
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                {availableSlots.map((slot) => {
-                  const startTime = safeFormatDate(slot.start || slot.date || slot.time);
-                  const endTime = safeFormatDate(slot.end || slot.to);
-
-                  return (
-                    <div
-                      key={slot.id}
-                      className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-3.5 sm:p-4 text-xs sm:text-sm"
-                    >
-                      <div>
-                        <div className="font-medium text-white">
-                          Counselor: {slot.counselorName || "Assigned Counselor"}
-                        </div>
-                        <div className="text-cyan-300 mt-0.5 font-medium text-xs">
-                          {startTime} {endTime ? `to ${endTime}` : ""}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleBookSlot(slot)}
-                        disabled={bookingId === slot.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
-                      >
-                        {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
-                      </button>
+              return (
+                <div
+                  key={slot.id}
+                  className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-gray-800/50 p-3.5 sm:p-4 text-xs sm:text-sm hover:border-cyan-500/30 transition"
+                >
+                  <div className="pr-2">
+                    <div className="font-medium text-white">
+                      Counselor: {slot.counselorName || "Assigned Counselor"}
                     </div>
-                  );
-                })}
+                    <div className="text-cyan-400 mt-0.5 font-medium text-xs">
+                      {startTime} {endTime ? `to ${endTime}` : ""}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleBookSlot(slot)}
+                    disabled={bookingId === slot.id}
+                    className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 interactive-tap shrink-0"
+                  >
+                    {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Modal>
+
+      {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}
+      <Modal
+        isOpen={Boolean(actionModal)}
+        onClose={closeActionModal}
+        title={
+          actionModal?.type === "decline"
+            ? "Decline Counseling Request"
+            : actionModal?.type === "cancel"
+            ? "Cancel Appointment"
+            : "Reschedule Counseling Session"
+        }
+        description={
+          actionModal?.apt
+            ? `Student: ${actionModal.apt.studentName || "Student"} (${safeFormatDate(
+                actionModal.apt.start || actionModal.apt.date
+              )})`
+            : undefined
+        }
+        maxWidth="max-w-lg"
+      >
+        {actionModal && (
+          <form onSubmit={handleActionSubmit} className="space-y-4">
+            {/* Reschedule Date & Time Inputs */}
+            {actionModal.type === "reschedule" && (
+              <div className="space-y-3 rounded-2xl border border-white/[0.08] bg-gray-950/60 p-3.5">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    New Start Date & Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={rescheduleStart}
+                    onChange={(e) => setRescheduleStart(e.target.value)}
+                    required
+                    className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-h-[44px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                    New End Date & Time <span className="text-[10px] text-gray-500">(Optional)</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={rescheduleEnd}
+                    onChange={(e) => setRescheduleEnd(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-h-[44px]"
+                  />
+                </div>
               </div>
             )}
 
-            <div className="mt-5 flex justify-end pt-3 border-t border-gray-800">
+            {/* Quick Presets for Decline or Cancel */}
+            {actionModal.type === "decline" && (
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Quick Reason Presets:
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {DECLINE_PRESETS.map((preset) => (
+                    <button
+                      type="button"
+                      key={preset}
+                      onClick={() => setActionReason(preset)}
+                      className="min-h-[36px] rounded-xl border border-white/10 bg-gray-800/80 px-2.5 py-1 text-[11px] text-gray-300 hover:border-cyan-500/40 hover:text-white transition interactive-tap"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {actionModal.type === "cancel" && isCounselor && (
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Quick Reason Presets:
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {CANCELLATION_PRESETS.map((preset) => (
+                    <button
+                      type="button"
+                      key={preset}
+                      onClick={() => setActionReason(preset)}
+                      className="min-h-[36px] rounded-xl border border-white/10 bg-gray-800/80 px-2.5 py-1 text-[11px] text-gray-300 hover:border-cyan-500/40 hover:text-white transition interactive-tap"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Notes / Reason Textarea */}
+            <div>
+              <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                {actionModal.type === "reschedule"
+                  ? "Reschedule Explanation / Note to Student:"
+                  : actionModal.type === "decline"
+                  ? "Decline Explanation to Student:"
+                  : "Cancellation Reason:"}
+              </label>
+              <textarea
+                rows={3}
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                placeholder={
+                  actionModal.type === "reschedule"
+                    ? "e.g. Moved 30 minutes later due to faculty guidance assembly..."
+                    : actionModal.type === "decline"
+                    ? "e.g. Please choose another slot on Wednesday afternoon..."
+                    : "e.g. Conflict with examination schedule..."
+                }
+                className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="mt-5 flex justify-end gap-2 pt-3 border-t border-white/[0.08]">
               <button
-                onClick={() => setShowModal(false)}
-                className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-medium text-gray-400 hover:bg-gray-800 transition"
+                type="button"
+                onClick={closeActionModal}
+                disabled={actionSubmitting}
+                className="min-h-[44px] rounded-xl border border-gray-700 px-4 text-xs font-medium text-gray-400 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
               >
                 Cancel
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}
-      {actionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
-          <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  {actionModal.type === "decline" && "Decline Counseling Request"}
-                  {actionModal.type === "cancel" && "Cancel Appointment"}
-                  {actionModal.type === "reschedule" && "Reschedule Counseling Session"}
-                </h3>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Student:{" "}
-                  <span className="text-gray-200 font-medium">
-                    {actionModal.apt.studentName || "Student"}
-                  </span>{" "}
-                  ({safeFormatDate(actionModal.apt.start || actionModal.apt.date)})
-                </p>
-              </div>
-              <button onClick={closeActionModal} className="text-gray-400 hover:text-white text-xl">
-                ✕
+              <button
+                type="submit"
+                disabled={actionSubmitting}
+                className={`min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl px-5 text-xs font-semibold text-white transition interactive-tap ${
+                  actionModal.type === "decline"
+                    ? "bg-rose-600 hover:bg-rose-500"
+                    : actionModal.type === "cancel"
+                    ? "bg-red-600 hover:bg-red-500"
+                    : "bg-purple-600 hover:bg-purple-500"
+                } disabled:opacity-50`}
+              >
+                {actionSubmitting && <Spinner size={14} />}
+                {actionModal.type === "decline" && "Confirm Decline"}
+                {actionModal.type === "cancel" && "Confirm Cancellation"}
+                {actionModal.type === "reschedule" && "Confirm Reschedule"}
               </button>
             </div>
-
-            <form onSubmit={handleActionSubmit} className="space-y-4">
-              {/* Reschedule Date & Time Inputs */}
-              {actionModal.type === "reschedule" && (
-                <div className="space-y-3 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-300 mb-1">
-                      New Start Date & Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={rescheduleStart}
-                      onChange={(e) => setRescheduleStart(e.target.value)}
-                      required
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-300 mb-1">
-                      New End Date & Time <span className="text-[10px] text-gray-500">(Optional)</span>
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={rescheduleEnd}
-                      onChange={(e) => setRescheduleEnd(e.target.value)}
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Presets for Decline or Cancel */}
-              {actionModal.type === "decline" && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                    Quick Reason Presets:
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {DECLINE_PRESETS.map((preset) => (
-                      <button
-                        type="button"
-                        key={preset}
-                        onClick={() => setActionReason(preset)}
-                        className="rounded-lg border border-gray-800 bg-gray-800/60 px-2.5 py-1 text-[11px] text-gray-300 hover:border-gray-700 hover:text-white transition"
-                      >
-                        {preset}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {actionModal.type === "cancel" && isCounselor && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                    Quick Reason Presets:
-                  </label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {CANCELLATION_PRESETS.map((preset) => (
-                      <button
-                        type="button"
-                        key={preset}
-                        onClick={() => setActionReason(preset)}
-                        className="rounded-lg border border-gray-800 bg-gray-800/60 px-2.5 py-1 text-[11px] text-gray-300 hover:border-gray-700 hover:text-white transition"
-                      >
-                        {preset}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Notes / Reason Textarea */}
-              <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1.5">
-                  {actionModal.type === "reschedule"
-                    ? "Reschedule Explanation / Note to Student:"
-                    : actionModal.type === "decline"
-                    ? "Decline Explanation to Student:"
-                    : "Cancellation Reason:"}
-                </label>
-                <textarea
-                  rows={3}
-                  value={actionReason}
-                  onChange={(e) => setActionReason(e.target.value)}
-                  placeholder={
-                    actionModal.type === "reschedule"
-                      ? "e.g. Moved 30 minutes later due to faculty guidance assembly..."
-                      : actionModal.type === "decline"
-                      ? "e.g. Please choose another slot on Wednesday afternoon..."
-                      : "e.g. Conflict with examination schedule..."
-                  }
-                  className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
-                />
-              </div>
-
-              {/* Buttons */}
-              <div className="mt-5 flex justify-end gap-2 pt-3 border-t border-gray-800">
-                <button
-                  type="button"
-                  onClick={closeActionModal}
-                  disabled={actionSubmitting}
-                  className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-medium text-gray-400 hover:bg-gray-800 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={actionSubmitting}
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2 text-xs font-semibold text-white transition ${
-                    actionModal.type === "decline"
-                      ? "bg-rose-600 hover:bg-rose-500"
-                      : actionModal.type === "cancel"
-                      ? "bg-red-600 hover:bg-red-500"
-                      : "bg-purple-600 hover:bg-purple-500"
-                  } disabled:opacity-50`}
-                >
-                  {actionSubmitting && <Spinner size={14} />}
-                  {actionModal.type === "decline" && "Confirm Decline"}
-                  {actionModal.type === "cancel" && "Confirm Cancellation"}
-                  {actionModal.type === "reschedule" && "Confirm Reschedule"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }

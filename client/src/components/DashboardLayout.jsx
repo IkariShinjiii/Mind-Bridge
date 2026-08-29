@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
 import usaLogo from "../assets/usa-logo.png";
@@ -13,6 +14,10 @@ export default function DashboardLayout({ children }) {
 
   const safeName = userData?.name || currentUser?.displayName || "Student";
   const safeRole = (userRole || "student").toUpperCase();
+  const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
+
+  // Check if we should display the Google profile picture (Defaults to true if undefined)
+  const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -42,102 +47,91 @@ export default function DashboardLayout({ children }) {
     rose: "from-rose-500 to-pink-600",
   };
   const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
-  const userInitials = (safeName || "U").slice(0, 2).toUpperCase();
-
-  // Check if we should display the Google profile picture (Defaults to true if undefined)
-  const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
 
   const isLinkActive = (path) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="border-b border-gray-800/80 bg-gray-900/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
+      {/* ── Fixed Viewport Mesh Background ── */}
+      <div className="app-mesh-bg" aria-hidden="true" />
 
-          {/* LEFT: Logo & Branding */}
-          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="flex items-center gap-1.5">
-              <img src={usaLogo} alt="University of San Agustin seal" className="h-7 w-auto object-contain transition-transform group-hover:scale-105" />
-              <span className="h-4 w-px bg-gray-700" />
-              <img src={icon} alt="Mind Bridge logo" className="h-7 w-7 rounded-lg object-cover transition-transform group-hover:scale-105 shadow-sm" />
+      {/* ── Desktop & Tablet Header Bar ── */}
+      <header className="sticky top-0 z-40 w-full shrink-0 border-b border-white/[0.08] bg-gray-950/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          
+          {/* Logo & Branding */}
+          <Link to="/" className="flex items-center gap-3 group shrink-0 interactive-tap">
+            <div className="flex items-center gap-2">
+              <img 
+                src={usaLogo} 
+                alt="University of San Agustin seal" 
+                className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
+              />
+              <span className="h-4 w-px bg-gray-700/80" />
+              <img 
+                src={icon} 
+                alt="Mind Bridge logo" 
+                className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" 
+              />
             </div>
-            <div className="text-lg font-bold tracking-tight text-white">
-              <span>Mind Bridge</span>
-            </div>
+            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              Mind Bridge
+            </span>
           </Link>
 
-          {/* CENTER: Desktop Navigation Links */}
-          <nav className="hidden items-center justify-center gap-6 text-sm text-gray-300 md:flex">
-            {userRole === "admin" && (
+          {/* Desktop Navigation Links */}
+          <nav className="hidden items-center gap-1.5 md:flex">
+            {userRole === "student" && (
               <>
-                <Link
-                  to="/admin/dashboard"
-                  className={`transition-colors py-1 ${isLinkActive("/admin/dashboard") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
-                  Admin Panel
-                </Link>
-                <Link
-                  to="/appointments"
-                  className={`transition-colors py-1 ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
+                <NavLink to="/student/dashboard" active={isLinkActive("/student/dashboard")}>
+                  Dashboard
+                </NavLink>
+                <NavLink to="/appointments" active={isLinkActive("/appointments")}>
                   Appointments
-                </Link>
+                </NavLink>
+                <NavLink to="/resources" active={isLinkActive("/resources")}>
+                  Crisis Resources
+                </NavLink>
               </>
             )}
 
             {userRole === "counselor" && (
               <>
-                <Link
-                  to="/counselor/dashboard"
-                  className={`transition-colors py-1 ${isLinkActive("/counselor/dashboard") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/appointments"
-                  className={`transition-colors py-1 ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
+                <NavLink to="/counselor/dashboard" active={isLinkActive("/counselor/dashboard")}>
+                  Triage Dashboard
+                </NavLink>
+                <NavLink to="/appointments" active={isLinkActive("/appointments")}>
                   Appointments
-                </Link>
+                </NavLink>
               </>
             )}
 
-            {userRole === "student" && (
+            {userRole === "admin" && (
               <>
-                <Link
-                  to="/student/dashboard"
-                  className={`transition-colors py-1 ${isLinkActive("/student/dashboard") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/appointments"
-                  className={`transition-colors py-1 ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
+                <NavLink to="/admin/dashboard" active={isLinkActive("/admin/dashboard")}>
+                  Admin Panel
+                </NavLink>
+                <NavLink to="/appointments" active={isLinkActive("/appointments")}>
                   Appointments
-                </Link>
-                <Link
-                  to="/resources"
-                  className={`transition-colors py-1 ${isLinkActive("/resources") ? "text-cyan-400 font-semibold border-b-2 border-cyan-400" : "hover:text-white"}`}
-                >
-                  Crisis Resources
-                </Link>
+                </NavLink>
               </>
             )}
           </nav>
 
-          {/* RIGHT: User Profile & Dropdown */}
-          <div className="flex items-center gap-2.5 sm:gap-3 relative shrink-0" ref={dropdownRef}>
-            <span className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cyan-300 font-semibold hidden sm:block">
-              {safeRole}
-            </span>
-            <div className="hidden text-sm font-medium text-gray-200 sm:block max-w-[130px] truncate">{safeName}</div>
+          {/* User Profile & Dropdown */}
+          <div className="relative flex items-center gap-3" ref={dropdownRef}>
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <span className="text-xs font-semibold text-gray-200 max-w-[130px] truncate">
+                {safeName}
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400">
+                {safeRole}
+              </span>
+            </div>
 
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className={`flex h-9 w-9 items-center justify-center rounded-full overflow-hidden ${showGoogleAvatar ? 'bg-gray-900' : `bg-gradient-to-br ${currentGradient}`
-                } text-xs font-bold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-transform hover:scale-105`}
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-gray-900/90 shadow-md transition-all hover:border-cyan-500/50 hover:bg-gray-800 interactive-tap overflow-hidden"
               aria-label="Open user menu"
             >
               {showGoogleAvatar ? (
@@ -148,171 +142,144 @@ export default function DashboardLayout({ children }) {
                   referrerPolicy="no-referrer"
                 />
               ) : (
-                userInitials
+                <div className={`h-full w-full flex items-center justify-center text-xs font-bold text-white bg-gradient-to-br ${currentGradient}`}>
+                  {userInitials}
+                </div>
               )}
             </button>
 
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-              <div className="absolute right-0 top-12 mt-1.5 w-56 origin-top-right rounded-2xl border border-gray-800 bg-gray-900/95 backdrop-blur-md p-1.5 shadow-2xl ring-1 ring-black/10 focus:outline-none z-50 animate-fade-up">
-                <div className="px-3.5 py-2.5 border-b border-gray-800/80">
-                  <p className="text-sm font-semibold text-white truncate">{safeName}</p>
-                  <p className="text-xs text-gray-400 truncate">{currentUser?.email || safeRole}</p>
-                </div>
+            {/* Dropdown Card */}
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute right-0 top-14 w-60 origin-top-right rounded-2xl border border-white/10 bg-gray-900/95 p-2 shadow-2xl backdrop-blur-2xl z-50"
+                >
+                  <div className="border-b border-white/[0.08] px-3 py-2.5">
+                    <p className="text-sm font-semibold text-white truncate">{safeName}</p>
+                    <p className="text-xs text-gray-400 truncate">{currentUser?.email || safeRole}</p>
+                  </div>
 
-                <div className="py-1">
-                  <button
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      navigate("/settings");
-                    }}
-                    className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-xs font-medium text-gray-200 hover:bg-gray-800 hover:text-white rounded-xl transition-colors"
-                  >
-                    <span>⚙️</span>
-                    <span>Account Settings</span>
-                  </button>
-
-                  {userRole === "student" && (
+                  <div className="py-1.5 space-y-1">
                     <button
                       onClick={() => {
                         setDropdownOpen(false);
-                        navigate("/resources");
+                        navigate("/settings");
                       }}
-                      className="flex md:hidden w-full items-center gap-2.5 px-3.5 py-2 text-left text-xs font-medium text-gray-200 hover:bg-gray-800 hover:text-white rounded-xl transition-colors"
+                      className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-gray-200 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
                     >
-                      <span>🆘</span>
-                      <span>Crisis Resources</span>
+                      <span className="text-base">⚙️</span>
+                      <span>Account Settings</span>
                     </button>
-                  )}
-                </div>
 
-                <div className="pt-1 border-t border-gray-800/80">
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-colors"
-                  >
-                    <span>🚪</span>
-                    <span>Log out</span>
-                  </button>
-                </div>
-              </div>
-            )}
+                    {userRole === "student" && (
+                      <button
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          navigate("/resources");
+                        }}
+                        className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-gray-200 hover:bg-white/[0.06] hover:text-white md:hidden transition interactive-tap"
+                      >
+                        <span className="text-base">🆘</span>
+                        <span>Crisis Resources</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="border-t border-white/[0.08] pt-1.5">
+                    <button
+                      onClick={handleLogout}
+                      className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition interactive-tap"
+                    >
+                      <span className="text-base">🚪</span>
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-6xl px-3.5 py-6 sm:px-6 sm:py-8 lg:px-8 pb-24 md:pb-12 flex-1">
-        {children}
+      {/* ── Scroll-Isolated Inner Content ── */}
+      <main className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3.5 py-6 sm:px-6 sm:py-8 lg:px-8 pb-28 md:pb-12">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="mx-auto max-w-6xl w-full"
+        >
+          {children}
+        </motion.div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar (< md) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden border-t border-gray-800/90 bg-gray-950/90 backdrop-blur-lg px-2 py-1.5 shadow-2xl">
-        <div className="flex items-center justify-around">
+      {/* ── Mobile Bottom Navigation Bar (< md) ── */}
+      <nav 
+        className="fixed bottom-0 left-0 right-0 z-40 block border-t border-white/[0.08] bg-gray-950/90 backdrop-blur-2xl md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 6px)" }}
+      >
+        <div className="flex h-16 items-center justify-around px-2">
           {userRole === "student" && (
             <>
-              <Link
-                to="/student/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/student/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">📊</span>
-                <span className="text-[10px] tracking-tight">Dashboard</span>
-              </Link>
-
-              <Link
-                to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">📅</span>
-                <span className="text-[10px] tracking-tight">Appointments</span>
-              </Link>
-
-              <Link
-                to="/resources"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/resources") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">🆘</span>
-                <span className="text-[10px] tracking-tight">Resources</span>
-              </Link>
-
-              <Link
-                to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">⚙️</span>
-                <span className="text-[10px] tracking-tight">Settings</span>
-              </Link>
+              <MobileNavItem to="/student/dashboard" icon="📊" label="Dashboard" active={isLinkActive("/student/dashboard")} />
+              <MobileNavItem to="/appointments" icon="📅" label="Booking" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/resources" icon="🆘" label="Resources" active={isLinkActive("/resources")} />
+              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
 
           {userRole === "counselor" && (
             <>
-              <Link
-                to="/counselor/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/counselor/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">📋</span>
-                <span className="text-[10px] tracking-tight">Triage</span>
-              </Link>
-
-              <Link
-                to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">📅</span>
-                <span className="text-[10px] tracking-tight">Appointments</span>
-              </Link>
-
-              <Link
-                to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">⚙️</span>
-                <span className="text-[10px] tracking-tight">Settings</span>
-              </Link>
+              <MobileNavItem to="/counselor/dashboard" icon="📋" label="Triage" active={isLinkActive("/counselor/dashboard")} />
+              <MobileNavItem to="/appointments" icon="📅" label="Schedule" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
 
           {userRole === "admin" && (
             <>
-              <Link
-                to="/admin/dashboard"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/admin/dashboard") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">🛡️</span>
-                <span className="text-[10px] tracking-tight">Admin</span>
-              </Link>
-
-              <Link
-                to="/appointments"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/appointments") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">📅</span>
-                <span className="text-[10px] tracking-tight">Appointments</span>
-              </Link>
-
-              <Link
-                to="/settings"
-                className={`flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition ${isLinkActive("/settings") ? "text-cyan-400 font-semibold" : "text-gray-400 hover:text-gray-200"
-                  }`}
-              >
-                <span className="text-base">⚙️</span>
-                <span className="text-[10px] tracking-tight">Settings</span>
-              </Link>
+              <MobileNavItem to="/admin/dashboard" icon="🛡️" label="Admin" active={isLinkActive("/admin/dashboard")} />
+              <MobileNavItem to="/appointments" icon="📅" label="Bookings" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
         </div>
       </nav>
     </div>
+  );
+}
+
+function NavLink({ to, active, children }) {
+  return (
+    <Link
+      to={to}
+      className={`min-h-[44px] flex items-center px-4 rounded-xl text-sm font-medium transition-all interactive-tap ${
+        active
+          ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm"
+          : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function MobileNavItem({ to, icon, label, active }) {
+  return (
+    <Link
+      to={to}
+      className={`flex min-h-[44px] min-w-[58px] flex-col items-center justify-center rounded-xl px-2 py-1 text-center transition-all interactive-tap ${
+        active ? "text-cyan-400" : "text-gray-400 hover:text-gray-200"
+      }`}
+    >
+      <span className="text-lg leading-none">{icon}</span>
+      <span className="mt-1 text-[10px] font-semibold tracking-tight">{label}</span>
+      {active && <div className="mt-0.5 h-1 w-4 rounded-full bg-cyan-400" />}
+    </Link>
   );
 }
