@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Lock,
+  Bell,
+  Shield,
+  HeartPulse,
+  Target,
+  ClipboardList,
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { useAuth } from "../AuthContext.jsx";
 import { auth } from "../firebase";
 import {
@@ -12,11 +25,11 @@ import { getUserSettings, saveUserSettings, getAppointments } from "../api";
 import Spinner from "./Spinner";
 
 const AVATAR_GRADIENTS = [
-  { id: "cyan", name: "Cyan Breeze", class: "from-cyan-500 to-blue-600" },
-  { id: "purple", name: "Purple Twilight", class: "from-purple-500 to-indigo-600" },
-  { id: "emerald", name: "Emerald Forest", class: "from-emerald-500 to-teal-600" },
-  { id: "amber", name: "Amber Glow", class: "from-amber-500 to-orange-600" },
-  { id: "rose", name: "Rose Petal", class: "from-rose-500 to-pink-600" },
+  { id: "cyan", name: "Ocean Breeze", class: "from-teal-500 to-cyan-600" },
+  { id: "purple", name: "Dusk Slate", class: "from-indigo-500 to-slate-700" },
+  { id: "emerald", name: "Emerald Forest", class: "from-emerald-500 to-teal-700" },
+  { id: "amber", name: "Warm Amber", class: "from-amber-500 to-orange-600" },
+  { id: "rose", name: "Soft Rose", class: "from-rose-500 to-pink-600" },
 ];
 
 const PRESET_GOALS = [
@@ -342,13 +355,13 @@ export default function UserSettings() {
   const isStudent = (userRole || "student") === "student";
 
   const navTabs = [
-    { id: "profile", label: "Profile Info", icon: "👤", show: true },
-    { id: "password", label: "Security & Password", icon: "🔒", show: true },
-    { id: "notifications", label: "Notifications", icon: "🔔", show: true },
-    { id: "privacy", label: "Privacy & Data", icon: "🛡️", show: true },
-    { id: "emergency", label: "Emergency Contact", icon: "🆘", show: isStudent },
-    { id: "goals", label: "Wellness Goals", icon: "🎯", show: isStudent },
-    { id: "sessions", label: "Session History", icon: "📋", show: isStudent },
+    { id: "profile", label: "Profile Info", icon: User, show: true },
+    { id: "password", label: "Security & Password", icon: Lock, show: true },
+    { id: "notifications", label: "Notifications", icon: Bell, show: true },
+    { id: "privacy", label: "Privacy & Data", icon: Shield, show: true },
+    { id: "emergency", label: "Emergency Contact", icon: HeartPulse, show: isStudent },
+    { id: "goals", label: "Wellness Goals", icon: Target, show: isStudent },
+    { id: "sessions", label: "Session History", icon: ClipboardList, show: isStudent },
   ].filter((t) => t.show);
 
   return (
@@ -358,14 +371,14 @@ export default function UserSettings() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white transition shadow-sm"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white transition shadow-sm interactive-tap"
             title="Go Back"
             aria-label="Go Back"
           >
-            ←
+            <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl">
+            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl font-display">
               Account & Profile Settings
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
@@ -378,18 +391,23 @@ export default function UserSettings() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${feedback.type === "success"
+          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${feedback.type === "success"
             ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
             : "border-rose-500/30 bg-rose-500/10 text-rose-300"
             }`}
         >
-          {feedback.type === "success" ? "✓ " : "⚠️ "} {feedback.message}
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+          )}
+          <span>{feedback.message}</span>
         </div>
       )}
 
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-          <Spinner size={20} className="text-cyan-400" />
+          <Spinner size={20} className="text-teal-400" />
           <span className="text-sm">Loading your settings...</span>
         </div>
       ) : (
@@ -399,16 +417,17 @@ export default function UserSettings() {
             <div className="flex flex-row overflow-x-auto gap-1.5 rounded-2xl border border-gray-800 bg-gray-900/90 p-1.5 md:flex-col md:overflow-visible scrollbar-none">
               {navTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
+                const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all ${isActive
-                      ? "bg-cyan-600 text-white shadow-md shadow-cyan-900/30 font-semibold"
+                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all interactive-tap ${isActive
+                      ? "bg-teal-600 text-white shadow-md shadow-teal-900/30 font-semibold"
                       : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
                       }`}
                   >
-                    <span className="text-sm sm:text-base">{tab.icon}</span>
+                    <Icon className="h-4 w-4 shrink-0" />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -991,7 +1010,7 @@ export default function UserSettings() {
                           <span className="font-medium pr-2">{goal}</span>
                           <span
                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs font-bold ${isSelected
-                              ? "bg-cyan-500 text-gray-950"
+                              ? "bg-teal-400 text-teal-950"
                               : "border border-gray-700 text-transparent"
                               }`}
                           >
@@ -1050,8 +1069,8 @@ export default function UserSettings() {
                     </div>
                   ) : appointmentsList.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-gray-800 p-8 text-center text-gray-400">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800/60 text-xl">
-                        📅
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800/60 text-teal-400">
+                        <Calendar className="h-6 w-6" />
                       </div>
                       <h3 className="text-sm sm:text-base font-medium text-white">No Sessions Found</h3>
                       <p className="mt-1 text-xs sm:text-sm text-gray-400 max-w-sm mx-auto">
@@ -1059,7 +1078,7 @@ export default function UserSettings() {
                       </p>
                       <button
                         onClick={() => navigate("/student/dashboard")}
-                        className="mt-4 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition-colors"
+                        className="mt-4 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors interactive-tap"
                       >
                         Go to Dashboard to Book
                       </button>

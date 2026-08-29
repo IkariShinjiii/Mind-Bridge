@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { Calendar, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import {
   getAppointments,
   getAllAppointments,
@@ -239,9 +240,9 @@ export default function Appointments() {
         {!isCounselor && (
           <button
             onClick={openBookingModal}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-cyan-500 hover:scale-[1.01] active:scale-[0.99] self-start sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-teal-500 hover:scale-[1.01] active:scale-[0.99] self-start sm:self-auto interactive-tap"
           >
-            <span>📅</span>
+            <Plus className="h-4 w-4" />
             <span>Book New Appointment</span>
           </button>
         )}
@@ -250,13 +251,18 @@ export default function Appointments() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all ${
+          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${
             feedback.type === "success"
               ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
               : "border-rose-500/30 bg-rose-500/10 text-rose-300"
           }`}
         >
-          {feedback.type === "success" ? "✓ " : "⚠️ "} {feedback.message}
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+          )}
+          <span>{feedback.message}</span>
         </div>
       )}
 
@@ -275,7 +281,7 @@ export default function Appointments() {
             onClick={() => setFilter(val)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
               filter === val
-                ? "bg-cyan-600 text-white shadow-sm font-semibold"
+                ? "bg-teal-600 text-white shadow-sm font-semibold"
                 : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
             }`}
           >
@@ -287,13 +293,13 @@ export default function Appointments() {
       {/* Content */}
       {loading ? (
         <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-          <Spinner size={20} className="text-cyan-400" />
+          <Spinner size={20} className="text-teal-400" />
           <span className="text-sm">Loading appointment records...</span>
         </div>
       ) : filteredAppointments.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-800 bg-gray-900/40 p-12 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800 text-2xl">
-            📅
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800 text-teal-400">
+            <Calendar className="h-7 w-7" />
           </div>
           <h3 className="text-base font-semibold text-white">No Appointments Found</h3>
           <p className="mt-1 text-sm text-gray-400 max-w-md mx-auto">
@@ -304,7 +310,7 @@ export default function Appointments() {
           {!isCounselor && (
             <button
               onClick={openBookingModal}
-              className="mt-5 rounded-xl bg-cyan-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-cyan-500 transition"
+              className="mt-5 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-500 transition interactive-tap"
             >
               Book Counselor Session
             </button>

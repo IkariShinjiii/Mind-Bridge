@@ -1,6 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard,
+  Calendar,
+  LifeBuoy,
+  Settings,
+  ClipboardList,
+  ShieldCheck,
+  LogOut,
+  AlertCircle,
+} from "lucide-react";
 import { useAuth } from "../AuthContext.jsx";
 import icon from "../assets/mindbridge-icon.png";
 import usaLogo from "../assets/usa-logo.png";
@@ -40,13 +50,13 @@ export default function DashboardLayout({ children }) {
   };
 
   const gradientMap = {
-    cyan: "from-cyan-500 to-blue-600",
-    purple: "from-purple-500 to-indigo-600",
-    emerald: "from-emerald-500 to-teal-600",
+    cyan: "from-teal-500 to-cyan-600",
+    purple: "from-indigo-500 to-slate-700",
+    emerald: "from-emerald-500 to-teal-700",
     amber: "from-amber-500 to-orange-600",
     rose: "from-rose-500 to-pink-600",
   };
-  const currentGradient = gradientMap[userData?.avatarGradient] || "from-cyan-500 to-blue-600";
+  const currentGradient = gradientMap[userData?.avatarGradient] || "from-teal-500 to-cyan-600";
 
   const isLinkActive = (path) => location.pathname === path;
 
@@ -74,7 +84,7 @@ export default function DashboardLayout({ children }) {
                 className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" 
               />
             </div>
-            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <span className="text-lg font-bold tracking-tight text-white">
               Mind Bridge
             </span>
           </Link>
@@ -98,10 +108,10 @@ export default function DashboardLayout({ children }) {
             {userRole === "counselor" && (
               <>
                 <NavLink to="/counselor/dashboard" active={isLinkActive("/counselor/dashboard")}>
-                  Triage Dashboard
+                  Dashboard
                 </NavLink>
                 <NavLink to="/appointments" active={isLinkActive("/appointments")}>
-                  Appointments
+                  Schedule & Slots
                 </NavLink>
               </>
             )}
@@ -112,27 +122,27 @@ export default function DashboardLayout({ children }) {
                   Admin Panel
                 </NavLink>
                 <NavLink to="/appointments" active={isLinkActive("/appointments")}>
-                  Appointments
+                  All Appointments
                 </NavLink>
               </>
             )}
           </nav>
 
-          {/* User Profile & Dropdown */}
+          {/* User Profile & Dropdown Trigger */}
           <div className="relative flex items-center gap-3" ref={dropdownRef}>
-            <div className="hidden sm:flex flex-col items-end text-right">
-              <span className="text-xs font-semibold text-gray-200 max-w-[130px] truncate">
+            <div className="hidden flex-col items-end text-right sm:flex">
+              <span className="text-xs font-semibold text-white truncate max-w-[130px]">
                 {safeName}
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-teal-400">
                 {safeRole}
               </span>
             </div>
 
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-gray-900/90 shadow-md transition-all hover:border-cyan-500/50 hover:bg-gray-800 interactive-tap overflow-hidden"
-              aria-label="Open user menu"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/[0.12] bg-gray-900 shadow-md transition hover:border-teal-400 overflow-hidden interactive-tap"
+              aria-label="User Profile Menu"
             >
               {showGoogleAvatar ? (
                 <img
@@ -171,7 +181,7 @@ export default function DashboardLayout({ children }) {
                       }}
                       className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-gray-200 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
                     >
-                      <span className="text-base">⚙️</span>
+                      <Settings className="h-4 w-4 text-gray-400" />
                       <span>Account Settings</span>
                     </button>
 
@@ -183,7 +193,7 @@ export default function DashboardLayout({ children }) {
                         }}
                         className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-gray-200 hover:bg-white/[0.06] hover:text-white md:hidden transition interactive-tap"
                       >
-                        <span className="text-base">🆘</span>
+                        <AlertCircle className="h-4 w-4 text-rose-400" />
                         <span>Crisis Resources</span>
                       </button>
                     )}
@@ -194,7 +204,7 @@ export default function DashboardLayout({ children }) {
                       onClick={handleLogout}
                       className="flex h-11 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition interactive-tap"
                     >
-                      <span className="text-base">🚪</span>
+                      <LogOut className="h-4 w-4 text-rose-400" />
                       <span>Sign Out</span>
                     </button>
                   </div>
@@ -205,8 +215,8 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
-      {/* ── Scroll-Isolated Inner Content ── */}
-      <main className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3.5 py-6 sm:px-6 sm:py-8 lg:px-8 pb-28 md:pb-12">
+      {/* ── Scrollable Body Area ── */}
+      <main className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar px-3.5 py-6 sm:px-6 lg:px-8 pb-24 md:pb-8">
         <motion.div
           key={location.pathname}
           initial={{ opacity: 0, y: 10 }}
@@ -226,26 +236,26 @@ export default function DashboardLayout({ children }) {
         <div className="flex h-16 items-center justify-around px-2">
           {userRole === "student" && (
             <>
-              <MobileNavItem to="/student/dashboard" icon="📊" label="Dashboard" active={isLinkActive("/student/dashboard")} />
-              <MobileNavItem to="/appointments" icon="📅" label="Booking" active={isLinkActive("/appointments")} />
-              <MobileNavItem to="/resources" icon="🆘" label="Resources" active={isLinkActive("/resources")} />
-              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
+              <MobileNavItem to="/student/dashboard" icon={LayoutDashboard} label="Dashboard" active={isLinkActive("/student/dashboard")} />
+              <MobileNavItem to="/appointments" icon={Calendar} label="Booking" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/resources" icon={LifeBuoy} label="Resources" active={isLinkActive("/resources")} />
+              <MobileNavItem to="/settings" icon={Settings} label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
 
           {userRole === "counselor" && (
             <>
-              <MobileNavItem to="/counselor/dashboard" icon="📋" label="Triage" active={isLinkActive("/counselor/dashboard")} />
-              <MobileNavItem to="/appointments" icon="📅" label="Schedule" active={isLinkActive("/appointments")} />
-              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
+              <MobileNavItem to="/counselor/dashboard" icon={ClipboardList} label="Triage" active={isLinkActive("/counselor/dashboard")} />
+              <MobileNavItem to="/appointments" icon={Calendar} label="Schedule" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/settings" icon={Settings} label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
 
           {userRole === "admin" && (
             <>
-              <MobileNavItem to="/admin/dashboard" icon="🛡️" label="Admin" active={isLinkActive("/admin/dashboard")} />
-              <MobileNavItem to="/appointments" icon="📅" label="Bookings" active={isLinkActive("/appointments")} />
-              <MobileNavItem to="/settings" icon="⚙️" label="Settings" active={isLinkActive("/settings")} />
+              <MobileNavItem to="/admin/dashboard" icon={ShieldCheck} label="Admin" active={isLinkActive("/admin/dashboard")} />
+              <MobileNavItem to="/appointments" icon={Calendar} label="Bookings" active={isLinkActive("/appointments")} />
+              <MobileNavItem to="/settings" icon={Settings} label="Settings" active={isLinkActive("/settings")} />
             </>
           )}
         </div>
@@ -260,7 +270,7 @@ function NavLink({ to, active, children }) {
       to={to}
       className={`min-h-[44px] flex items-center px-4 rounded-xl text-sm font-medium transition-all interactive-tap ${
         active
-          ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm"
+          ? "bg-teal-500/10 text-teal-300 border border-teal-500/20 shadow-sm"
           : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
       }`}
     >
@@ -269,17 +279,17 @@ function NavLink({ to, active, children }) {
   );
 }
 
-function MobileNavItem({ to, icon, label, active }) {
+function MobileNavItem({ to, icon: Icon, label, active }) {
   return (
     <Link
       to={to}
       className={`flex min-h-[44px] min-w-[58px] flex-col items-center justify-center rounded-xl px-2 py-1 text-center transition-all interactive-tap ${
-        active ? "text-cyan-400" : "text-gray-400 hover:text-gray-200"
+        active ? "text-teal-400" : "text-gray-400 hover:text-gray-200"
       }`}
     >
-      <span className="text-lg leading-none">{icon}</span>
+      <Icon className="h-5 w-5" />
       <span className="mt-1 text-[10px] font-semibold tracking-tight">{label}</span>
-      {active && <div className="mt-0.5 h-1 w-4 rounded-full bg-cyan-400" />}
+      {active && <div className="mt-0.5 h-1 w-4 rounded-full bg-teal-400" />}
     </Link>
   );
 }

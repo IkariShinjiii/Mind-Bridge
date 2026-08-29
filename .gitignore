@@ -9,6 +9,9 @@
 /client/dist/
 /client/build/
 
+# local data storage
+server/data.json
+
 # Logs
 *.log
 npm-debug.log*

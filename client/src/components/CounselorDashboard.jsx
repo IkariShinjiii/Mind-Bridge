@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { ClipboardList, Calendar, AlertCircle, X, FileText, CheckCircle2 } from "lucide-react";
 import { getAssessments, updateAssessmentStatus, getAllAppointments, updateAppointmentStatus, getUserSettings } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
@@ -180,25 +181,25 @@ export default function CounselorDashboard() {
       <div className="flex items-center gap-2 border-b border-gray-800 pb-3">
         <button
           onClick={() => setActiveTab("triage")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition interactive-tap ${
             activeTab === "triage"
-              ? "bg-cyan-600 text-white shadow-sm"
+              ? "bg-teal-600 text-white shadow-sm"
               : "text-gray-400 hover:bg-gray-800 hover:text-white"
           }`}
         >
-          <span>📋</span>
+          <ClipboardList className="h-4 w-4" />
           <span>Student Assessment Cases & Triage</span>
         </button>
 
         <button
           onClick={() => setActiveTab("availability")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition interactive-tap ${
             activeTab === "availability"
-              ? "bg-cyan-600 text-white shadow-sm"
+              ? "bg-teal-600 text-white shadow-sm"
               : "text-gray-400 hover:bg-gray-800 hover:text-white"
           }`}
         >
-          <span>🗓️</span>
+          <Calendar className="h-4 w-4" />
           <span>Manage My Availability</span>
         </button>
       </div>
@@ -210,7 +211,7 @@ export default function CounselorDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex flex-wrap gap-1.5">
                 {[
-                  ["flagged", "🚨 Flagged / Urgent"],
+                  ["flagged", "Flagged / Urgent"],
                   ["open", "Open Cases"],
                   ["reviewed", "Reviewed"],
                   ["escalated", "Escalated"],
@@ -223,7 +224,7 @@ export default function CounselorDashboard() {
                     onClick={() => setFilter(value)}
                     className={`rounded-full px-3.5 py-1.5 text-xs transition font-medium ${
                       filter === value
-                        ? "bg-cyan-600 text-white shadow-sm font-semibold"
+                        ? "bg-teal-600 text-white shadow-sm font-semibold"
                         : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
                     }`}
                   >
@@ -234,9 +235,9 @@ export default function CounselorDashboard() {
 
               <button
                 onClick={() => setAssignedOnly(!assignedOnly)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition border ${
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition border interactive-tap ${
                   assignedOnly
-                    ? "border-cyan-500 bg-cyan-500/20 text-cyan-300 shadow-sm"
+                    ? "border-teal-500 bg-teal-500/20 text-teal-300 shadow-sm"
                     : "border-gray-800 bg-gray-900 text-gray-400 hover:text-white"
                 }`}
               >
@@ -251,7 +252,7 @@ export default function CounselorDashboard() {
 
           {loading ? (
             <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-              <Spinner size={20} className="text-cyan-400" />
+              <Spinner size={20} className="text-teal-400" />
               <span>Loading student assessment records...</span>
             </div>
           ) : visibleCases.length === 0 ? (
@@ -294,7 +295,7 @@ export default function CounselorDashboard() {
                             </span>
                             {item.flaggedForImmediateReview && (
                               <span className="inline-flex items-center gap-1 rounded-full border border-red-500 bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider animate-pulse">
-                                <span>⚠️</span> Immediate
+                                <AlertCircle className="h-3 w-3" /> Immediate
                               </span>
                             )}
                           </div>
@@ -312,7 +313,7 @@ export default function CounselorDashboard() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => openCaseInspector(item)}
-                              className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs font-medium text-cyan-300 hover:border-cyan-500 hover:text-white transition"
+                              className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs font-medium text-teal-300 hover:border-teal-500 hover:text-white transition interactive-tap"
                             >
                               Inspect Case
                             </button>
@@ -320,7 +321,7 @@ export default function CounselorDashboard() {
                               <button
                                 onClick={() => markReviewed(item.id, "reviewed")}
                                 disabled={updatingId === item.id}
-                                className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-500 transition disabled:opacity-60"
+                                className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-500 transition disabled:opacity-60 interactive-tap"
                               >
                                 {updatingId === item.id ? "Updating…" : "Mark Reviewed"}
                               </button>
@@ -328,7 +329,7 @@ export default function CounselorDashboard() {
                               <button
                                 onClick={() => markReviewed(item.id, "open")}
                                 disabled={updatingId === item.id}
-                                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-400 hover:border-gray-500 hover:text-white transition disabled:opacity-60"
+                                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-400 hover:border-gray-500 hover:text-white transition disabled:opacity-60 interactive-tap"
                               >
                                 {updatingId === item.id ? "Updating…" : "Re-open"}
                               </button>
@@ -371,14 +372,15 @@ export default function CounselorDashboard() {
                   )}
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  Email: <span className="text-cyan-300 font-mono">{activeCase.studentEmail}</span> • Submitted: {new Date(activeCase.createdAt || activeCase.submittedAt || Date.now()).toLocaleString()}
+                  Email: <span className="text-teal-300 font-mono">{activeCase.studentEmail}</span> • Submitted: {new Date(activeCase.createdAt || activeCase.submittedAt || Date.now()).toLocaleString()}
                 </p>
               </div>
               <button
                 onClick={() => setActiveCase(null)}
-                className="text-gray-400 hover:text-white text-xl p-1"
+                className="text-gray-400 hover:text-white text-xl p-1 interactive-tap"
+                aria-label="Close"
               >
-                ✕
+                <X className="h-5 w-5" />
               </button>
             </div>
 

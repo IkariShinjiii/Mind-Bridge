@@ -87,15 +87,12 @@ function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3 group interactive-tap">
           <img src={icon} alt="Mind Bridge logo" className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" />
-          <div className="text-lg font-bold tracking-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <div className="text-lg font-bold tracking-tight text-white">
             Mind Bridge
           </div>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
-          <Link to="/" className="text-gray-400 hover:text-white transition px-3 py-1.5 rounded-xl hover:bg-white/[0.04]">
-            Home
-          </Link>
-          <Link to="/login" className="min-h-[40px] flex items-center rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20 transition interactive-tap">
+          <Link to="/login" className="min-h-[40px] flex items-center rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-xs font-semibold text-teal-300 hover:bg-teal-500/20 transition interactive-tap">
             Sign In
           </Link>
         </nav>
@@ -113,12 +110,12 @@ export default function App() {
         <Route
           path="/"
           element={
-            <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950">
+            <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
               <div className="app-mesh-bg" aria-hidden="true" />
               <Navbar />
-              <main className="relative mx-auto flex w-full max-w-6xl flex-1 overflow-y-auto custom-scrollbar px-4 py-8 sm:px-6 lg:px-8">
+              <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
                 <HomePage />
-              </main>
+              </div>
             </div>
           }
         />

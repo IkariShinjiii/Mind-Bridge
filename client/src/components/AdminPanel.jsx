@@ -248,7 +248,9 @@ export default function AdminPanel() {
           <button
             onClick={() => setActiveTab("counselors")}
             className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
-              activeTab === "counselors" ? "bg-cyan-600 text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-gray-800"
+              activeTab === "counselors"
+                ? "bg-teal-500 text-teal-950 font-semibold shadow-sm"
+                : "text-slate-400 hover:text-white hover:bg-gray-800"
             }`}
           >
             Manage Counselors
@@ -256,7 +258,9 @@ export default function AdminPanel() {
           <button
             onClick={() => setActiveTab("students")}
             className={`tab-button flex-1 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 ease-out ${
-              activeTab === "students" ? "bg-cyan-600 text-white shadow-sm" : "text-gray-400 hover:text-white hover:bg-gray-800"
+              activeTab === "students"
+                ? "bg-teal-500 text-teal-950 font-semibold shadow-sm"
+                : "text-slate-400 hover:text-white hover:bg-gray-800"
             }`}
           >
             Manage Students

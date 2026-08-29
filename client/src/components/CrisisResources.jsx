@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PhoneCall, HeartHandshake, Building2, Calendar } from "lucide-react";
 
 export default function CrisisResources() {
   const [breathingState, setBreathingState] = useState("idle"); // idle | inhale | hold | exhale
@@ -30,10 +31,10 @@ export default function CrisisResources() {
     <div className="mx-auto max-w-5xl animate-fade-up space-y-10">
       {/* Header */}
       <div className="border-b border-gray-800 pb-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold mb-1">
+        <p className="text-xs uppercase tracking-[0.2em] text-teal-400 font-semibold mb-1">
           Support & Safety Network
         </p>
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl font-display">
           Mental Health & Crisis Resources
         </h1>
         <p className="text-sm text-gray-400 mt-1">
@@ -50,14 +51,16 @@ export default function CrisisResources() {
               <span className="text-xs font-bold uppercase tracking-wider bg-red-600/80 text-white px-2.5 py-0.5 rounded-full">
                 24/7 Nationwide Toll-Free
               </span>
-              <span className="text-xl">📞</span>
+              <div className="h-9 w-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                <PhoneCall className="h-5 w-5 text-rose-400" />
+              </div>
             </div>
             <h3 className="text-lg font-bold text-white mb-1">NCMH Crisis Hotline</h3>
             <p className="text-xs text-gray-300 mb-4">
               National Center for Mental Health free psychiatric & crisis counseling support.
             </p>
           </div>
-          <div className="space-y-1.5 pt-3 border-t border-red-500/20 text-xs font-mono text-cyan-300">
+          <div className="space-y-1.5 pt-3 border-t border-red-500/20 text-xs font-mono text-teal-300">
             <div>• Toll-Free: <strong className="text-white font-bold text-sm">1553</strong></div>
             <div>• Globe/TM: <strong className="text-white font-bold text-sm">0917-899-8727</strong></div>
             <div>• Smart/Sun/TNT: <strong className="text-white font-bold text-sm">0966-351-4518</strong></div>
@@ -65,20 +68,22 @@ export default function CrisisResources() {
         </div>
 
         {/* Hopeline PH */}
-        <div className="rounded-2xl border border-cyan-500/30 bg-cyan-950/20 p-6 flex flex-col justify-between">
+        <div className="rounded-2xl border border-teal-500/30 bg-teal-950/20 p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider bg-cyan-600/80 text-white px-2.5 py-0.5 rounded-full">
+              <span className="text-xs font-bold uppercase tracking-wider bg-teal-600/80 text-white px-2.5 py-0.5 rounded-full">
                 24/7 Crisis & Suicide Prevention
               </span>
-              <span className="text-xl">🤝</span>
+              <div className="h-9 w-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                <HeartHandshake className="h-5 w-5 text-teal-400" />
+              </div>
             </div>
             <h3 className="text-lg font-bold text-white mb-1">Hopeline Philippines</h3>
             <p className="text-xs text-gray-300 mb-4">
               24/7 suicide prevention and emotional crisis support hotline in the Philippines.
             </p>
           </div>
-          <div className="space-y-1.5 pt-3 border-t border-cyan-500/20 text-xs font-mono text-cyan-300">
+          <div className="space-y-1.5 pt-3 border-t border-teal-500/20 text-xs font-mono text-teal-300">
             <div>• Mobile: <strong className="text-white font-bold text-sm">0917-558-4673</strong></div>
             <div>• Smart: <strong className="text-white font-bold text-sm">0918-873-4673</strong></div>
             <div>• PLDT Landline: <strong className="text-white font-bold text-sm">(02) 8804-4673</strong></div>
@@ -89,12 +94,12 @@ export default function CrisisResources() {
       {/* University of San Agustin Guidance Center Section */}
       <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-6 sm:p-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl">
-            🏛️
+          <div className="h-10 w-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-teal-400" />
           </div>
           <div>
             <h3 className="text-lg font-bold text-white">University of San Agustin Guidance Center</h3>
-            <p className="text-xs text-cyan-300">Center for Guidance & Counseling Services (CGCS)</p>
+            <p className="text-xs text-teal-300">Center for Guidance & Counseling Services (CGCS)</p>
           </div>
         </div>
 
@@ -115,9 +120,9 @@ export default function CrisisResources() {
 
         <Link
           to="/appointments"
-          className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-cyan-500 transition shadow-md"
+          className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-500 transition shadow-md interactive-tap"
         >
-          <span>📅</span>
+          <Calendar className="h-4 w-4" />
           <span>Book an On-Campus Counseling Session</span>
         </Link>
       </div>

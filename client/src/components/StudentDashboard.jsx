@@ -1,6 +1,18 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
+  Activity,
+  HeartPulse,
+  Sprout,
+  Sparkles,
+  Calendar,
+  TrendingUp,
+  BarChart2,
+  Target,
+  MessageSquare,
+  ArrowRight,
+} from "lucide-react";
+import {
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -291,19 +303,22 @@ export default function StudentDashboard() {
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Guidance Counselor";
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row animate-fade-up relative">
-      <section className="lg:w-2/3 flex flex-col gap-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Welcome back, {displayName}
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-cyan-200/80">
-            How are you feeling today? Take a quick confidential check-in.
-          </p>
-        </div>
+    <div className="space-y-6 animate-fade-up relative">
+      {/* Top Welcome Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+          Welcome back, {displayName}
+        </h1>
+        <p className="mt-1 text-xs sm:text-sm text-cyan-200/80">
+          How are you feeling today? Take a quick confidential check-in.
+        </p>
+      </div>
 
-        {/* Quick Info Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+      {/* Main 2-Column Dashboard Grid */}
+      <div className="flex flex-col gap-6 lg:flex-row items-start">
+        <section className="lg:w-2/3 flex flex-col gap-6 w-full">
+          {/* Quick Info Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
           {/* Gauge / Status Card */}
           <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div>
@@ -415,10 +430,11 @@ export default function StudentDashboard() {
             </div>
             <button
               onClick={() => setChatOpen(true)}
-              className="mt-2 text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 self-start"
+              className="mt-2 text-[11px] font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1.5 self-start interactive-tap"
             >
-              <span>💬 Message Counselor</span>
-              <span>→</span>
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span>Message Counselor</span>
+              <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </div>
@@ -427,14 +443,16 @@ export default function StudentDashboard() {
         <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 sm:p-6 shadow-xl">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <span className="text-xl">🌿</span>
+              <div className="h-8 w-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-teal-400" />
+              </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold text-white">Wellness Check-in</h2>
                 <p className="text-xs text-gray-400">Validated PHQ-9 & GAD-7 screening • Takes ~1 min</p>
               </div>
             </div>
             {!surveyCompleted && (
-              <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+              <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
                 {answeredCount}/{SCREENING_QUESTIONS.length}
               </div>
             )}
@@ -452,8 +470,14 @@ export default function StudentDashboard() {
                     : "border-emerald-500/30 bg-emerald-500/10"
                 }`}
               >
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-900/90 text-2xl shadow-inner">
-                  {lastSubmission?.riskLevel === "high" ? "❤️‍🩹" : lastSubmission?.riskLevel === "medium" ? "🌱" : "✨"}
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-900/90 shadow-inner">
+                  {lastSubmission?.riskLevel === "high" ? (
+                    <HeartPulse className="h-7 w-7 text-rose-400" />
+                  ) : lastSubmission?.riskLevel === "medium" ? (
+                    <Sprout className="h-7 w-7 text-amber-400" />
+                  ) : (
+                    <Sparkles className="h-7 w-7 text-emerald-400" />
+                  )}
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-white">
                   {lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
@@ -474,19 +498,19 @@ export default function StudentDashboard() {
                 {(lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview) && (
                   <div className="mt-5 rounded-xl border border-red-500/30 bg-gray-950/90 p-4 text-left">
                     <div className="flex items-center gap-2 text-red-400 font-semibold text-xs sm:text-sm mb-2">
-                      <span>🆘</span>
+                      <HeartPulse className="h-4 w-4 text-red-400 shrink-0" />
                       <span>Immediate Crisis Support Resources (Free & 24/7)</span>
                     </div>
                     <ul className="space-y-1.5 text-xs text-gray-300">
                       <li>
                         • <strong>NCMH National Crisis Hotline:</strong> Dial{" "}
-                        <span className="text-cyan-300 font-mono font-semibold">1553</span> (Toll-Free) or{" "}
-                        <span className="text-cyan-300 font-mono">0917-899-8727</span>
+                        <span className="text-teal-300 font-mono font-semibold">1553</span> (Toll-Free) or{" "}
+                        <span className="text-teal-300 font-mono">0917-899-8727</span>
                       </li>
                       <li>
                         • <strong>Hopeline Philippines:</strong>{" "}
-                        <span className="text-cyan-300 font-mono">0917-558-4673</span> /{" "}
-                        <span className="text-cyan-300 font-mono">(02) 8804-4673</span>
+                        <span className="text-teal-300 font-mono">0917-558-4673</span> /{" "}
+                        <span className="text-teal-300 font-mono">(02) 8804-4673</span>
                       </li>
                       <li>
                         • <strong>USA Center for Guidance & Counseling:</strong> Inquire directly through Mind Bridge or visit the Guidance Office.
@@ -498,9 +522,9 @@ export default function StudentDashboard() {
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={openBookingModal}
-                    className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-cyan-500 shadow-md"
+                    className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-teal-500 shadow-md interactive-tap"
                   >
-                    <span>📅</span>
+                    <Calendar className="h-4 w-4 shrink-0" />
                     <span>Book Counselor Session</span>
                   </button>
                   <button
@@ -589,7 +613,9 @@ export default function StudentDashboard() {
           <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-lg">📈</span>
+                <div className="h-8 w-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-teal-400" />
+                </div>
                 <h3 className="text-base sm:text-lg font-bold text-white">
                   My Wellness Distress Trend
                 </h3>
@@ -605,7 +631,7 @@ export default function StudentDashboard() {
                   onClick={() => setTrendView("chart")}
                   className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${
                     trendView === "chart"
-                      ? "bg-cyan-600 text-white shadow-sm"
+                      ? "bg-teal-600 text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
@@ -615,7 +641,7 @@ export default function StudentDashboard() {
                   onClick={() => setTrendView("table")}
                   className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${
                     trendView === "table"
-                      ? "bg-cyan-600 text-white shadow-sm"
+                      ? "bg-teal-600 text-white shadow-sm"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
@@ -632,7 +658,7 @@ export default function StudentDashboard() {
           ) : chartData.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-800 p-8 text-center text-gray-400">
               <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-800/60 text-lg">
-                📊
+                <BarChart2 className="h-5 w-5 text-gray-400" />
               </div>
               <p className="text-xs sm:text-sm font-medium text-white">No Check-in Data Yet</p>
               <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
@@ -667,8 +693,8 @@ export default function StudentDashboard() {
                   >
                     <defs>
                       <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
@@ -695,7 +721,7 @@ export default function StudentDashboard() {
                             <div className="rounded-xl border border-gray-700 bg-gray-900 p-3 shadow-xl text-xs">
                               <div className="font-semibold text-white">{data.fullDate || data.formattedDate}</div>
                               <div className="mt-1 flex items-center gap-2">
-                                <span className="text-cyan-300 font-bold text-sm">
+                                <span className="text-teal-300 font-bold text-sm">
                                   Score: {data.score} / {data.max}
                                 </span>
                                 <span
@@ -721,7 +747,7 @@ export default function StudentDashboard() {
                     <Area
                       type="monotone"
                       dataKey="score"
-                      stroke="#06b6d4"
+                      stroke="#2dd4bf"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#scoreGradient)"
@@ -742,7 +768,7 @@ export default function StudentDashboard() {
                   <div>
                     <span className="font-medium text-white">{safeFormatDate(item.createdAt)}</span>
                     <span className="ml-2 text-gray-400">
-                      Score: <strong className="text-cyan-300">{item.total}</strong> / {item.maxScore || 21}
+                      Score: <strong className="text-teal-300">{item.total}</strong> / {item.maxScore || 21}
                     </span>
                   </div>
                   <span
@@ -764,16 +790,16 @@ export default function StudentDashboard() {
       </section>
 
       {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
-      <aside className="lg:w-1/3 space-y-5">
+      <aside className="lg:w-1/3 space-y-6 w-full">
         <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 shadow-xl">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <span>📅</span>
+              <Calendar className="h-5 w-5 text-teal-400" />
               <span>Counseling Sessions</span>
             </h3>
             <Link
               to="/appointments"
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition"
+              className="text-xs text-teal-400 hover:text-teal-300 font-medium transition"
             >
               View all
             </Link>
@@ -811,7 +837,7 @@ export default function StudentDashboard() {
                     {safeFormatDate(apt.start || apt.date) || "Scheduled"}
                   </div>
                   {apt.counselorName && (
-                    <div className="mt-0.5 text-cyan-300/90 font-medium">
+                    <div className="mt-0.5 text-teal-300/90 font-medium">
                       With {apt.counselorName}
                     </div>
                   )}
@@ -822,7 +848,7 @@ export default function StudentDashboard() {
 
           <button
             onClick={openBookingModal}
-            className="mt-4 w-full rounded-xl bg-cyan-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-cyan-500 shadow-md"
+            className="mt-4 w-full rounded-xl bg-teal-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-teal-500 shadow-md interactive-tap"
           >
             + Book Counseling Slot
           </button>
@@ -831,13 +857,13 @@ export default function StudentDashboard() {
         {/* My Wellness Focus Goals */}
         <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 shadow-xl">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-1.5">
-              <span>🎯</span>
+            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <Target className="h-5 w-5 text-sky-400" />
               <span>My Wellness Goals</span>
             </h3>
             <Link
               to="/settings"
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+              className="text-xs text-teal-400 hover:text-teal-300 transition-colors font-medium"
             >
               Edit in Settings
             </Link>
@@ -867,6 +893,7 @@ export default function StudentDashboard() {
           )}
         </div>
       </aside>
+    </div>
 
       {/* BOOKING MODAL FOR LIVE COUNSELOR SLOTS */}
       {showModal && (
