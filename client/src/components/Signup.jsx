@@ -13,23 +13,12 @@ import usaLogo from "../assets/usa-logo.png";
 
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-      <path
-        fill="#EA4335"
-        d="M12 10.2v3.9h5.4c-.2 1.3-1.5 3.9-5.4 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 4 1.5l2.7-2.6C16.8 3.2 14.7 2.4 12 2.4 6.9 2.4 2.8 6.5 2.8 11.6S6.9 20.8 12 20.8c6.9 0 11.5-4.8 11.5-11.6 0-.8-.1-1.3-.2-1.9H12Z"
-      />
-      <path
-        fill="#34A853"
-        d="M3.8 7.2l3.5 2.6c1-1.9 3-3.2 5.7-3.2 1.9 0 3.2.8 4 1.5l2.7-2.6C16.8 3.2 14.7 2.4 12 2.4 8.3 2.4 5.2 4.6 3.8 7.2Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M3.8 16c1.6 2.7 4.8 4.6 8.2 4.6 2.5 0 4.7-.9 6.3-2.5l-2.9-2.5c-.8.5-1.9.9-3.4.9-2.5 0-4.7-1.7-5.4-4l-3.4 2.6C2.7 13.5 3.8 16 3.8 16Z"
-      />
-      <path
-        fill="#4285F4"
-        d="M12 21.2c2.4 0 4.4-.8 5.9-2.1l-2.8-2.4c-.8.6-1.9 1.1-3.1 1.1-2.9 0-5.3-2.3-5.4-5.2L2.7 9c-1.3 2.6-1.2 5.7.2 8.2C4.1 19.5 7.7 21.2 12 21.2Z"
-      />
+    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+      <path fill="none" d="M0 0h48v48H0z" />
     </svg>
   );
 }
@@ -91,8 +80,8 @@ export default function Signup() {
         error.code === "auth/email-already-in-use"
           ? "An account with that email already exists. Try logging in instead."
           : error.code === "auth/weak-password"
-          ? "Password must be at least 6 characters."
-          : error.message || "Unable to create account. Please try again.";
+            ? "Password must be at least 6 characters."
+            : error.message || "Unable to create account. Please try again.";
       setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
@@ -173,7 +162,7 @@ export default function Signup() {
 
           <div className="relative flex items-center gap-3 mb-4">
             <div className="flex-1 border-t border-gray-700" />
-            <span className="text-xs text-gray-500 flex-shrink-0">or sign up with email</span>
+            <span className="text-xs text-gray-500 flex-shrink-0">or sign up with school email</span>
             <div className="flex-1 border-t border-gray-700" />
           </div>
 
