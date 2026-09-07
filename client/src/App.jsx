@@ -12,8 +12,12 @@ import Signup from "./components/Signup";
 import UserSettings from "./components/UserSettings";
 import Appointments from "./components/Appointments";
 import CrisisResources from "./components/CrisisResources";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import CookiePolicy from "./pages/CookiePolicy";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/DashboardLayout";
+import CookieConsent from "./components/CookieConsent";
 import icon from "./assets/mindbridge-icon.png";
 
 function ProtectedRoute({ children, allowedRoles }) {
@@ -102,6 +106,7 @@ export default function App() {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
+      <CookieConsent />
       <Routes location={location} key={location.pathname}>
         <Route
           path="/"
@@ -175,6 +180,33 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/privacy-policy" element={
+          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
+            <div className="app-mesh-bg" aria-hidden="true" />
+            <Navbar />
+            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+              <PrivacyPolicy />
+            </div>
+          </div>
+        } />
+        <Route path="/terms" element={
+          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
+            <div className="app-mesh-bg" aria-hidden="true" />
+            <Navbar />
+            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+              <TermsAndConditions />
+            </div>
+          </div>
+        } />
+        <Route path="/cookie-policy" element={
+          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
+            <div className="app-mesh-bg" aria-hidden="true" />
+            <Navbar />
+            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+              <CookiePolicy />
+            </div>
+          </div>
+        } />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>

@@ -133,38 +133,16 @@ export default function Signup() {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white auth-page auth-card-enter-left">
       <div className="bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-800 transform transition-all duration-300 hover:shadow-[0_18px_40px_rgba(6,182,212,0.12)]">
         <div className="p-8">
-          <div className="mb-6 flex items-center justify-center gap-3">
-            <div className="flex items-center gap-2">
-              <img src={usaLogo} alt="University of San Agustin seal" className="h-9 w-auto object-contain" />
-              <span className="h-5 w-px bg-gray-700" />
-              <img src={icon} alt="Mind Bridge logo" className="h-9 w-9 rounded-lg object-cover" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge • USA</p>
-              <h2 className="text-2xl font-semibold text-white mt-0.5">Create account</h2>
-            </div>
+          <div className="mb-6 text-center">
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge • USA</p>
+            <h2 className="text-2xl font-semibold text-white mt-0.5">Create account</h2>
           </div>
 
           {errorMessage ? (
             <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{errorMessage}</div>
           ) : null}
 
-          {/* Google Sign-Up */}
-          <button
-            type="button"
-            onClick={handleGoogleSignUp}
-            disabled={isGoogleLoading || isSubmitting}
-            className="w-full mb-4 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
-            <span>{isGoogleLoading ? "Signing up..." : "Sign up with Google"}</span>
-          </button>
 
-          <div className="relative flex items-center gap-3 mb-4">
-            <div className="flex-1 border-t border-gray-700" />
-            <span className="text-xs text-gray-500 flex-shrink-0">or sign up with school email</span>
-            <div className="flex-1 border-t border-gray-700" />
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -203,14 +181,49 @@ export default function Signup() {
               />
             </div>
 
+            <div className="relative flex items-center gap-3 my-6">
+              <div className="flex-1 border-t border-gray-700" />
+              <span className="text-xs text-gray-500 flex-shrink-0">or sign up with Google</span>
+              <div className="flex-1 border-t border-gray-700" />
+            </div>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={handleGoogleSignUp}
+                disabled={isGoogleLoading || isSubmitting}
+                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
+                <span>{isGoogleLoading ? "Signing up..." : "Sign up with Google"}</span>
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={isSubmitting || isGoogleLoading}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+              className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 !mt-6"
             >
               {isSubmitting && <Spinner />}
               {isSubmitting ? "Creating account..." : "Create account"}
             </button>
+
+            <div className="flex items-start gap-2 pt-2">
+              <div className="flex h-5 items-center">
+                <input
+                  id="consent"
+                  name="consent"
+                  type="checkbox"
+                  required
+                  className="h-4 w-4 rounded border-gray-700 bg-gray-900 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900"
+                />
+              </div>
+              <div className="text-xs text-gray-400 text-left">
+                <label htmlFor="consent">
+                  I agree to the <a href="/terms" className="text-cyan-400 hover:underline">Terms & Conditions</a> and <a href="/privacy-policy" className="text-cyan-400 hover:underline">Privacy Policy</a>. I consent to the collection and processing of my data as outlined.
+                </label>
+              </div>
+            </div>
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-300">

@@ -498,7 +498,7 @@ export default function Appointments() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         title="Select Available Counselor Slot"
-        description="Choose a confidential time slot with an assigned university guidance counselor."
+        description="Choose a confidential time slot with an assigned university guidance counselor. By booking, you consent to the collection and processing of your appointment details for counseling purposes."
         maxWidth="max-w-lg"
         footer={
           <button

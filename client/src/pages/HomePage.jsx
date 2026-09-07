@@ -77,11 +77,11 @@ export default function HomePage() {
             <div className="mt-1 text-[11px] text-gray-400 font-medium">Dual-Scale Item Bank</div>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-4 text-center backdrop-blur-sm">
-            <div className="text-2xl sm:text-3xl font-extrabold text-white">100%</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-white">Secure</div>
             <div className="mt-1 text-[11px] text-gray-400 font-medium">Confidential & Encrypted</div>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-4 text-center backdrop-blur-sm">
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400">Instant</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400">Automated</div>
             <div className="mt-1 text-[11px] text-gray-400 font-medium">Crisis Safety Flagging</div>
           </div>
           <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-4 text-center backdrop-blur-sm">
@@ -211,8 +211,21 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-16 border-t border-gray-900 pt-6 text-center text-xs text-gray-500">
-        <p>© {new Date().getFullYear()} Mind Bridge. University of San Agustin Guidance & Counseling Ecosystem.</p>
+      <footer className="mt-16 border-t border-gray-900 pt-10 pb-6 text-center text-xs text-gray-500">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 px-4">
+          <div className="text-left">
+            <h4 className="text-gray-300 font-semibold mb-2">University of San Agustin - Guidance Services</h4>
+            <p>General Luna Street, City Proper, Iloilo City, Philippines, 5000</p>
+            <p>Phone: 0951 189 6559 | Email: <a href="mailto:guidance@usa.edu.ph" className="hover:text-teal-400 transition-colors">guidance@usa.edu.ph</a></p>
+            <p>Messenger: USA- Guidance Services and Testing Center</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-gray-400">
+            <Link to="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-teal-400 transition-colors">Terms & Conditions</Link>
+            <Link to="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</Link>
+          </div>
+        </div>
+        <p className="mt-8">© {new Date().getFullYear()} Mind Bridge. University of San Agustin Guidance & Counseling Ecosystem.</p>
       </footer>
     </div>
   );

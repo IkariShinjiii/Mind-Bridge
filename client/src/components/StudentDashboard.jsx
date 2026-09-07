@@ -449,6 +449,7 @@ export default function StudentDashboard() {
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold text-white">Wellness Check-in</h2>
                 <p className="text-xs text-gray-400">Validated PHQ-9 & GAD-7 screening • Takes ~1 min</p>
+                <p className="text-[10px] text-gray-500 mt-1 max-w-sm">By participating, you consent to the collection and processing of your wellness data for triage and support purposes.</p>
               </div>
             </div>
             {!surveyCompleted && (
