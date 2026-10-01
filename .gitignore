@@ -15,3 +15,7 @@ server/data.json
 # Logs
 *.log
 npm-debug.log*
+# Local env + Vite temp files
+.env.local
+.env.*.local
+vite.config.js.timestamp-*

@@ -1,17 +1,16 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Link, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./AuthContext.jsx";
 
 import HomePage from "./pages/HomePage";
-import StudentDashboard from "./components/StudentDashboard";
-import CounselorDashboard from "./components/CounselorDashboard";
-import AdminPanel from "./components/AdminPanel";
+const StudentDashboard = lazy(() => import("./components/StudentDashboard"));
+const AdminPanel = lazy(() => import("./components/AdminPanel"));
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-import UserSettings from "./components/UserSettings";
-import Appointments from "./components/Appointments";
-import CrisisResources from "./components/CrisisResources";
+const UserSettings = lazy(() => import("./components/UserSettings"));
+const Appointments = lazy(() => import("./components/Appointments"));
+const CrisisResources = lazy(() => import("./components/CrisisResources"));
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import CookiePolicy from "./pages/CookiePolicy";
@@ -107,6 +106,7 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <CookieConsent />
+      <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="h-8 w-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" /></div>}>
       <Routes location={location} key={location.pathname}>
         <Route
           path="/"
@@ -209,6 +209,7 @@ export default function App() {
         } />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      </Suspense>
     </div>
   );
 }

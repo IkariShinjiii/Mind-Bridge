@@ -1,0 +1,73 @@
+rules_version = '2';
+// DRAFT - review against your data, then test in the Firebase Rules Playground
+// before deploying. Derived from the reads/writes in client/src/api.js,
+// Signup.jsx and Login.jsx.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function isActive() { return signedIn() && hasProfile() && me().get('active', true) != false; }
+    function isAdmin() { return isActive() && me().get('role', 'student') == 'admin'; }
+    // counselors must be approved by an admin before they get staff access
+    function isStaff() {
+      return isActive() && (me().get('role', 'student') == 'admin' || (me().get('role', 'student') == 'counselor' && me().get('approved', false) == true));
+    }
+    function touchesOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
+
+    match /users/{uid} {
+      // Staff need to read student profiles (names, emails, assignments).
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff());
+
+      // Self-signup always creates an active student profile - never a role.
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.role == 'student'
+        && request.resource.data.approved == true
+        && request.resource.data.active == true;
+
+      // Users edit their own settings but not role/approval/active/assignment.
+      allow update: if signedIn() && (
+        (request.auth.uid == uid
+          && !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['role', 'approved', 'active', 'assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
+        || isAdmin()
+        || (isStaff() && touchesOnly(['assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
+      );
+      allow delete: if false;
+    }
+
+    match /assessments/{id} {
+      allow create: if isActive() && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.status == 'open';
+      allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
+      allow update: if isStaff();
+      allow delete: if false;
+    }
+
+    match /appointments/{id} {
+      allow create: if isActive() && request.resource.data.studentId == request.auth.uid;
+      allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
+      allow update: if isStaff()
+        || (isActive() && resource.data.studentId == request.auth.uid && touchesOnly(['status', 'updatedAt']));
+      allow delete: if false;
+    }
+
+    match /availability/{id} {
+      allow read: if isActive();
+      allow create: if isStaff() && request.resource.data.counselorId == request.auth.uid;
+      // Students may only flip isBooked when booking a slot.
+      allow update: if isStaff() || (isActive() && touchesOnly(['isBooked']));
+      allow delete: if isStaff() && resource.data.counselorId == request.auth.uid;
+    }
+
+    match /messages/{id} {
+      allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
+      allow create: if isActive() && request.resource.data.senderId == request.auth.uid
+        && (request.resource.data.studentId == request.auth.uid || isStaff());
+      allow update, delete: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
