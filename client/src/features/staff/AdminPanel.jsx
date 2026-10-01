@@ -711,6 +711,7 @@ export default function AdminPanel() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
+                        type="button"
                         onClick={() => handleAccountAction(approveCounselor, u.id, "Staff account approved.")}
                         disabled={actionLoadingId === u.id}
                         className="mb-btn mb-btn-solid !px-4 text-sm"
@@ -719,6 +720,7 @@ export default function AdminPanel() {
                         Approve
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleAccountAction(rejectCounselor, u.id, "Staff request rejected.")}
                         disabled={actionLoadingId === u.id}
                         className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
@@ -796,6 +798,7 @@ export default function AdminPanel() {
                         )}
 
                         <button
+                          type="button"
                           onClick={() =>
                             handleAccountAction(
                               deactivated ? reactivateUser : deactivateUser,

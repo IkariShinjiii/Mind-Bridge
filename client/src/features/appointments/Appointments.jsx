@@ -476,19 +476,23 @@ export default function Appointments() {
                         {isPending && (
                           <>
                             <button
+                              type="button"
                               onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
                               disabled={busy}
                               className="mb-btn mb-btn-solid !px-4 text-sm"
                             >
+                              {busy && <Spinner size={16} />}
                               {busy ? "Confirming…" : "Confirm"}
                             </button>
                             <button
+                              type="button"
                               onClick={() => openActionModal("reschedule", apt)}
                               className="mb-btn mb-btn-line !px-4 text-sm"
                             >
                               Reschedule
                             </button>
                             <button
+                              type="button"
                               onClick={() => openActionModal("decline", apt)}
                               className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
                             >
@@ -499,19 +503,23 @@ export default function Appointments() {
                         {(isConfirmed || isRescheduled) && (
                           <>
                             <button
+                              type="button"
                               onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
                               disabled={busy}
                               className="mb-btn mb-btn-solid !px-4 text-sm"
                             >
+                              {busy && <Spinner size={16} />}
                               {busy ? "Updating…" : "Mark completed"}
                             </button>
                             <button
+                              type="button"
                               onClick={() => openActionModal("reschedule", apt)}
                               className="mb-btn mb-btn-line !px-4 text-sm"
                             >
                               Reschedule
                             </button>
                             <button
+                              type="button"
                               onClick={() => openActionModal("cancel", apt)}
                               className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
                             >
@@ -526,6 +534,7 @@ export default function Appointments() {
                     ) : (
                       (isPending || isConfirmed || isRescheduled) && (
                         <button
+                          type="button"
                           onClick={() => openActionModal("cancel", apt)}
                           className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
                         >

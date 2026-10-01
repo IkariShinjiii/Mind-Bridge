@@ -802,7 +802,7 @@ export default function UserSettings() {
                     <p className="mx-auto mt-1 max-w-[45ch] text-[color:var(--mb-muted)]">
                       You haven't booked a session. You can book a confidential time whenever you're ready.
                     </p>
-                    <button onClick={() => navigate("/appointments")} className="mb-btn mb-btn-solid mt-4">
+                    <button type="button" onClick={() => navigate("/appointments")} className="mb-btn mb-btn-solid mt-4">
                       Book a counselor
                     </button>
                   </div>

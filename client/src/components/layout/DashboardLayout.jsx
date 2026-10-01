@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../ui/PublicShell";
+import Spinner from "../ui/Spinner";
 import { avatarColor } from "../../lib/avatar";
 import icon from "../../assets/mindbridge-icon.png";
 
@@ -23,6 +24,7 @@ export default function DashboardLayout({ children }) {
   const location = useLocation();
   const [theme, toggleTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const menuRef = useRef(null);
   const menuButtonRef = useRef(null);
   const mainRef = useRef(null);
@@ -97,11 +99,14 @@ export default function DashboardLayout({ children }) {
   }, [location.pathname]);
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
     try {
       await logout();
       navigate("/login");
     } catch (error) {
       console.error("Failed to log out", error);
+      setLoggingOut(false);
     }
   };
 
@@ -199,9 +204,11 @@ export default function DashboardLayout({ children }) {
                   type="button"
                   role="menuitem"
                   onClick={handleLogout}
+                  disabled={loggingOut}
                   className="flex min-h-[44px] w-full items-center gap-3 rounded px-3 font-bold text-[color:var(--mb-error-ink)] hover:bg-[color:var(--mb-error-bg)]"
                 >
-                  <LogOut className="h-5 w-5" aria-hidden="true" /> Sign out
+                  {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
+                  {loggingOut ? "Signing out…" : "Sign out"}
                 </button>
               </div>
             )}

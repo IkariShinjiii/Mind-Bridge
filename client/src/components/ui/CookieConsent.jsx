@@ -29,10 +29,11 @@ export default function CookieConsent() {
           </Link>
         </p>
         <div className="flex shrink-0 items-center gap-3">
-          <button onClick={handleAccept} className="mb-btn mb-btn-solid">
+          <button type="button" onClick={handleAccept} className="mb-btn mb-btn-solid">
             Accept and continue
           </button>
           <button
+            type="button"
             onClick={() => setIsVisible(false)}
             className="mb-btn mb-btn-line !px-3"
             aria-label="Dismiss cookie notice"
