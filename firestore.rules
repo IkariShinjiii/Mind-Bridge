@@ -49,7 +49,9 @@ service cloud.firestore {
       allow create: if isActive() && request.resource.data.studentId == request.auth.uid;
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       allow update: if isStaff()
-        || (isActive() && resource.data.studentId == request.auth.uid && touchesOnly(['status', 'updatedAt']));
+        || (isActive() && resource.data.studentId == request.auth.uid
+            && touchesOnly(['status', 'updatedAt', 'cancellationReason', 'cancelledBy'])
+            && request.resource.data.status == 'Cancelled');
       allow delete: if false;
     }
 
