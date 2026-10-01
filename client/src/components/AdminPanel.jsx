@@ -40,7 +40,7 @@ import Modal from "./ui/Modal";
 import ManageAvailability from "./ManageAvailability";
 import ConfidentialChatModal from "./ConfidentialChatModal";
 
-import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, defaultAuditLogs, formatDateTime, buildAuditLogs, downloadAssessmentsCsv } from "./admin/adminUtils";
+import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, formatDateTime, downloadAssessmentsCsv } from "./admin/adminUtils";
 
 
 // Destructive outline button: overrides the hover fill of .mb-btn-line
@@ -123,7 +123,6 @@ export default function AdminPanel() {
   const [accountSubTab, setAccountSubTab] = useState("staff");
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [exportingCsv, setExportingCsv] = useState(false);
-  const [auditLogs, setAuditLogs] = useState(defaultAuditLogs);
   const [notice, setNotice] = useState({ type: "", message: "" });
 
   const showNotice = (type, message) => {
@@ -142,7 +141,6 @@ export default function AdminPanel() {
       setUsers(Array.isArray(allUsers) ? allUsers : []);
       setAssessments(Array.isArray(assessmentData) ? assessmentData : []);
       setAppointments(Array.isArray(appointmentData) ? appointmentData : []);
-      setAuditLogs(buildAuditLogs(allUsers || [], assessmentData || []));
     } catch (error) {
       console.error("Failed to load admin data", error);
     } finally {
@@ -606,43 +604,6 @@ export default function AdminPanel() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </section>
-
-          {/* Activity log */}
-          <section aria-labelledby="audit-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
-            <h2 id="audit-heading" className="mb-4 text-2xl font-bold text-[color:var(--mb-ink)]">
-              Activity log
-            </h2>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left">
-                <caption className="sr-only">Recent staff and system activity</caption>
-                <thead>
-                  <tr className="border-b-2 border-[color:var(--mb-line)] text-[color:var(--mb-ink)]">
-                    <th scope="col" className="min-w-[110px] py-3 pr-4 font-bold">Actor</th>
-                    <th scope="col" className="min-w-[200px] py-3 pr-4 font-bold">Action</th>
-                    <th scope="col" className="min-w-[160px] py-3 pr-4 font-bold">Target</th>
-                    <th scope="col" className="min-w-[180px] py-3 pr-4 font-bold">Time</th>
-                    <th scope="col" className="py-3 font-bold">Outcome</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {auditLogs.map((log) => (
-                    <tr key={log.id} className="border-b border-[color:var(--mb-line)] align-top">
-                      <td className="py-3 pr-4">{log.actor}</td>
-                      <td className="py-3 pr-4">{log.action}</td>
-                      <td className="py-3 pr-4">{log.target}</td>
-                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{formatDateTime(log.timestamp)}</td>
-                      <td className="py-3">
-                        <span className="inline-flex rounded border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2 py-0.5 text-sm font-bold">
-                          {log.outcome}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
           </section>
 

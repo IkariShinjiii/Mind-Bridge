@@ -19,68 +19,11 @@ export const ROLE_BADGE = {
 // Low, medium, high. CSS variables so the chart follows the light/dark theme.
 export const CHART_COLORS = ["var(--mb-safe)", "var(--mb-warn)", "var(--mb-urgent)"];
 
-export const defaultAuditLogs = [
-  {
-    id: "system-seed-1",
-    actor: "System",
-    action: "Nightly compliance sync",
-    target: "Wellness program",
-    timestamp: new Date().toISOString(),
-    outcome: "Completed",
-  },
-  {
-    id: "system-seed-2",
-    actor: "Staff Admin",
-    action: "Reviewed counselor onboarding",
-    target: "Staff approvals",
-    timestamp: new Date(Date.now() - 3600000).toISOString(),
-    outcome: "Approved",
-  },
-  {
-    id: "system-seed-3",
-    actor: "Staff Admin",
-    action: "Escalated high-risk assessment",
-    target: "Student support queue",
-    timestamp: new Date(Date.now() - 7200000).toISOString(),
-    outcome: "Flagged",
-  },
-];
-
 export const formatDateTime = (value) => {
   if (!value) return "—";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
-
-export function buildAuditLogs(allUsers, assessmentData) {
-  const entries = [];
-
-  allUsers.slice(0, 4).forEach((user) => {
-    entries.push({
-      id: `user-${user.id}`,
-      actor: "Staff Admin",
-      action: user.active === false ? "Account deactivation reviewed" : "User access reviewed",
-      target: user.name || user.email || "System account",
-      timestamp: new Date().toISOString(),
-      outcome: user.active === false ? "Deactivated" : "Verified",
-    });
-  });
-
-  if (Array.isArray(assessmentData)) {
-    assessmentData.slice(0, 5).forEach((assessment, index) => {
-      entries.push({
-        id: `assessment-${assessment.id || index}`,
-        actor: "Staff Admin",
-        action: "Assessment reviewed",
-        target: `Case ${String(index + 1).padStart(3, "0")}`,
-        timestamp: assessment.reviewedAt || assessment.createdAt || new Date().toISOString(),
-        outcome: assessment.status || "Open",
-      });
-    });
-  }
-
-  return entries.length > 0 ? entries : defaultAuditLogs;
-}
 
 export function downloadAssessmentsCsv(assessments) {
   const rows = assessments.length
