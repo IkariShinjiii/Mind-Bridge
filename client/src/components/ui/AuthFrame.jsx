@@ -21,40 +21,8 @@ export function Spinner() {
   );
 }
 
-/**
- * Labelled text input with an optional hint and an inline error. When `error` is set the input is
- * marked invalid and the message is linked to it for screen readers.
- */
-export function Field({ id, label, hint, error, ...props }) {
-  const describedBy = [error ? `${id}-error` : null, hint ? `${id}-hint` : null].filter(Boolean).join(" ") || undefined;
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block font-bold">
-        {label}
-        {props.required && <span aria-hidden="true"> *</span>}
-      </label>
-      <input
-        id={id}
-        name={id}
-        className="mb-field"
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        {...props}
-        style={error ? { borderColor: "var(--mb-urgent)" } : undefined}
-      />
-      {error ? (
-        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
-          {error}
-        </p>
-      ) : null}
-      {hint ? (
-        <p id={`${id}-hint`} className="mt-1 text-sm text-[color:var(--mb-muted)]">
-          {hint}
-        </p>
-      ) : null}
-    </div>
-  );
-}
+// Labelled text input used by the auth forms; same component as the rest of the app.
+export { default as Field } from "./Input";
 
 // Signage-style frame: a teal plate states where you are, the form sits on a plain surface beside it.
 export default function AuthFrame({ title, intro, children, footer }) {

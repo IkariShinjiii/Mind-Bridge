@@ -112,10 +112,13 @@
 }
 .mb-btn:active { transform: translateY(1px); }
 .mb-btn-solid { background: var(--mb-panel); color: var(--mb-panel-ink); }
-.mb-btn-solid:hover { background: color-mix(in srgb, var(--mb-panel) 85%, black); }
-.mb[data-theme="dark"] .mb-btn-solid:hover { background: color-mix(in srgb, var(--mb-panel) 85%, white); }
+.mb-btn-solid:hover, .mb-btn-solid[data-force-hover] { background: color-mix(in srgb, var(--mb-panel) 85%, black); }
+.mb[data-theme="dark"] .mb-btn-solid:hover, .mb[data-theme="dark"] .mb-btn-solid[data-force-hover] { background: color-mix(in srgb, var(--mb-panel) 85%, white); }
 .mb-btn-line { background: transparent; color: var(--mb-ink); border-color: var(--mb-ink); }
-.mb-btn-line:hover { background: var(--mb-ink); color: var(--mb-ground); }
+.mb-btn-line:hover, .mb-btn-line[data-force-hover] { background: var(--mb-ink); color: var(--mb-ground); }
+.mb-btn-danger { background: var(--mb-urgent-solid); color: #fff; border-color: var(--mb-urgent-solid); }
+.mb-btn-danger:hover, .mb-btn-danger[data-force-hover] { background: color-mix(in srgb, var(--mb-urgent-solid) 85%, black); border-color: color-mix(in srgb, var(--mb-urgent-solid) 85%, black); }
+/* data-force-hover exists so Storybook can show the hover state; the app never sets it */
 .mb-btn:disabled { opacity: .6; cursor: not-allowed; }
 
 /* Skip link: first tab stop, visible only when focused */
@@ -132,7 +135,7 @@
   border: 2px solid var(--mb-field-line); border-radius: 6px;
 }
 .mb-field::placeholder { color: var(--mb-muted); opacity: .85; }
-.mb-field:hover { border-color: var(--mb-ink); }
+.mb-field:hover, .mb-field[data-force-hover] { border-color: var(--mb-ink); }
 .mb-field:focus { border-color: var(--mb-panel); }
 .mb[data-theme="dark"] .mb-field:focus { border-color: var(--mb-focus); }
 .mb-field:-webkit-autofill { -webkit-text-fill-color: var(--mb-ink); box-shadow: 0 0 0 40px var(--mb-surface) inset; }
