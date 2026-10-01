@@ -1,6 +1,7 @@
 import { collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { db } from "./firebase"; 
+import { db } from "./firebase";
+import { scoreAnswers } from "./scoring";
 
 // Helper to get the currently logged-in user
 const getCurrentUserId = () => getAuth().currentUser?.uid;
@@ -21,15 +22,11 @@ export const submitResponse = async (answers, { questions = [], flaggedForImmedi
   const authUser = getAuth().currentUser;
   const uid = authUser?.uid;
   
-  const totalScore = answers.reduce((sum, val) => sum + (Number(val) || 0), 0);
-  const maxScore = (questions.length || answers.length || 7) * 3;
-  
-  let riskLevel = "low";
-  if (flaggedForImmediateReview || totalScore >= maxScore * 0.6) {
-    riskLevel = "high";
-  } else if (totalScore >= maxScore * 0.3) {
-    riskLevel = "medium";
-  }
+  const scored = scoreAnswers(answers, questions);
+  const totalScore = scored.total;
+  const maxScore = scored.maxScore;
+  const riskLevel = flaggedForImmediateReview ? "high" : scored.riskLevel;
+  flaggedForImmediateReview = flaggedForImmediateReview || scored.flaggedForImmediateReview;
 
   const payload = {
     studentId: uid || "anonymous",
