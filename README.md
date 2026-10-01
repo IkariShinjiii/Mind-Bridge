@@ -262,6 +262,8 @@ written and tested but **not deployed yet**.
 
 ## Documentation
 
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): system diagram, data model, security model, scaling
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): Vercel and Firebase deployment, rollback, troubleshooting
 - [`docs/API.md`](docs/API.md): backend operations, roles and expected outcomes
 - [`PRODUCT.md`](PRODUCT.md): product purpose, users and constraints
 - [`DESIGN.md`](DESIGN.md): design system and tokens
