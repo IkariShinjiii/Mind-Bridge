@@ -131,7 +131,10 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({ type: "", message: "" });
+  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({
+    type: "",
+    message: "",
+  });
 
   // Booking Modal State (for students)
   const [showModal, setShowModal] = useState(false);
@@ -140,7 +143,7 @@ export default function Appointments() {
   const [bookingId, setBookingId] = useState<string | null>(null);
 
   // Action Modal State (Decline, Cancel, Reschedule)
-  const [actionModal, setActionModal] = useState<ActionModalState | null>(null); 
+  const [actionModal, setActionModal] = useState<ActionModalState | null>(null);
   const [actionReason, setActionReason] = useState("");
   const [rescheduleStart, setRescheduleStart] = useState("");
   const [rescheduleEnd, setRescheduleEnd] = useState("");
@@ -253,7 +256,9 @@ export default function Appointments() {
 
     const parsed = validate(
       appointmentActionSchema,
-      type === "reschedule" ? { type, reason: actionReason, start: rescheduleStart, end: rescheduleEnd } : { type, reason: actionReason }
+      type === "reschedule"
+        ? { type, reason: actionReason, start: rescheduleStart, end: rescheduleEnd }
+        : { type, reason: actionReason },
     );
     if (!parsed.ok) {
       setActionError(parsed.error.userMessage);
@@ -309,12 +314,12 @@ export default function Appointments() {
 
   const filteredAppointments = useMemo(
     () => appointments.filter((apt) => matchesFilter(apt, filter)),
-    [appointments, filter]
+    [appointments, filter],
   );
 
   const counts = useMemo(
     () => Object.fromEntries(FILTERS.map(([val]) => [val, appointments.filter((a) => matchesFilter(a, val)).length])),
-    [appointments]
+    [appointments],
   );
 
   return (
@@ -404,8 +409,8 @@ export default function Appointments() {
             {isCounselor
               ? "No appointment requests match this filter."
               : filter === "all"
-              ? "You have no appointments. Pick a counselor and a time that works for you."
-              : "You have no appointments in this category."}
+                ? "You have no appointments. Pick a counselor and a time that works for you."
+                : "You have no appointments in this category."}
           </p>
           {!isCounselor && filter === "all" && (
             <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-5">
@@ -478,15 +483,25 @@ export default function Appointments() {
 
                   {/* Reasons and notes: always labelled in words */}
                   <div className="mt-3 space-y-2">
-                    {apt.declineReason && <Note tone="urgent" label="Declined because">{apt.declineReason}</Note>}
+                    {apt.declineReason && (
+                      <Note tone="urgent" label="Declined because">
+                        {apt.declineReason}
+                      </Note>
+                    )}
                     {apt.cancellationReason && (
-                      <Note tone="urgent" label="Cancelled because">{apt.cancellationReason}</Note>
+                      <Note tone="urgent" label="Cancelled because">
+                        {apt.cancellationReason}
+                      </Note>
                     )}
                     {apt.rescheduleReason && (
-                      <Note tone="violet" label="Rescheduled because">{apt.rescheduleReason}</Note>
+                      <Note tone="violet" label="Rescheduled because">
+                        {apt.rescheduleReason}
+                      </Note>
                     )}
                     {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
-                      <Note tone="brand" label="Counselor note">{apt.counselorNote}</Note>
+                      <Note tone="brand" label="Counselor note">
+                        {apt.counselorNote}
+                      </Note>
                     )}
                   </div>
 
@@ -601,13 +616,13 @@ export default function Appointments() {
           actionModal?.type === "decline"
             ? "Decline this request"
             : actionModal?.type === "cancel"
-            ? "Cancel this appointment"
-            : "Reschedule this session"
+              ? "Cancel this appointment"
+              : "Reschedule this session"
         }
         description={
           actionModal?.apt
             ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${formatDateTime(
-                actionModal.apt.start || actionModal.apt.date
+                actionModal.apt.start || actionModal.apt.date,
               )}`
             : undefined
         }
@@ -679,8 +694,8 @@ export default function Appointments() {
                 {actionModal.type === "reschedule"
                   ? "Note to the student"
                   : actionModal.type === "decline"
-                  ? "Explanation for the student"
-                  : "Reason for cancelling"}
+                    ? "Explanation for the student"
+                    : "Reason for cancelling"}
                 {actionModal.type === "decline" && <span aria-hidden="true"> *</span>}
               </label>
               <textarea
@@ -693,8 +708,8 @@ export default function Appointments() {
                   actionModal.type === "reschedule"
                     ? "e.g. Moved 30 minutes later because of a faculty assembly"
                     : actionModal.type === "decline"
-                    ? "e.g. Please choose another slot on Wednesday afternoon"
-                    : "e.g. Conflict with my exam schedule"
+                      ? "e.g. Please choose another slot on Wednesday afternoon"
+                      : "e.g. Conflict with my exam schedule"
                 }
                 className="mb-field"
               />

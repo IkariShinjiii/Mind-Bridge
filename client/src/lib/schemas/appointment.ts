@@ -30,7 +30,8 @@ export const timeWindowSchema = (now: Date = new Date()) =>
     .superRefine((v, ctx) => {
       const s = new Date(v.start);
       const startOk = v.start !== "" && !Number.isNaN(s.getTime());
-      if (startOk && s < now) ctx.addIssue({ code: "custom", path: ["start"], message: "The start time is in the past." });
+      if (startOk && s < now)
+        ctx.addIssue({ code: "custom", path: ["start"], message: "The start time is in the past." });
       const e = new Date(v.end);
       const endOk = v.end !== "" && !Number.isNaN(e.getTime());
       if (startOk && s >= now && endOk && e <= s) {

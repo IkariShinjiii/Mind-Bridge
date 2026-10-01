@@ -28,14 +28,12 @@ export interface ScoreResult {
  */
 export function scoreAnswers(
   answers: ReadonlyArray<number | string | null | undefined>,
-  questions: ReadonlyArray<QuestionLike> = []
+  questions: ReadonlyArray<QuestionLike> = [],
 ): ScoreResult {
   const count = questions.length || answers.length;
   const total: number = answers.reduce<number>((sum, v) => sum + (Number(v) || 0), 0);
   const maxScore = count * 3;
-  const flaggedForImmediateReview = questions.some(
-    (q, i) => Boolean(q.isCrisisItem) && Number(answers[i]) > 0
-  );
+  const flaggedForImmediateReview = questions.some((q, i) => Boolean(q.isCrisisItem) && Number(answers[i]) > 0);
 
   let riskLevel: RiskLevel = "low";
   if (flaggedForImmediateReview || total >= maxScore * 0.6) riskLevel = "high";

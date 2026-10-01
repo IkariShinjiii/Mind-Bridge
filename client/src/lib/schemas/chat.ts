@@ -8,6 +8,10 @@ export const chatMessageSchema = z.object({
   senderId: z.string().optional(),
   senderName: z.string().optional(),
   senderRole: z.enum(["student", "counselor", "admin"]).optional(),
-  text: z.string().trim().min(1, "Type a message first.").max(MESSAGE_MAX_LENGTH, `Messages can be at most ${MESSAGE_MAX_LENGTH} characters.`),
+  text: z
+    .string()
+    .trim()
+    .min(1, "Type a message first.")
+    .max(MESSAGE_MAX_LENGTH, `Messages can be at most ${MESSAGE_MAX_LENGTH} characters.`),
 });
 export type ChatMessageInput = z.infer<typeof chatMessageSchema>;

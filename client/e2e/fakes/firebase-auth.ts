@@ -108,7 +108,10 @@ export const EmailAuthProvider = {
   credential: (email: string, password: string) => ({ email, password }),
 };
 
-export async function reauthenticateWithCredential(user: { uid: string }, credential: { password: string }): Promise<void> {
+export async function reauthenticateWithCredential(
+  user: { uid: string },
+  credential: { password: string },
+): Promise<void> {
   const account = Object.values(load().accounts).find((a) => a.uid === user.uid);
   if (!account || account.password !== credential.password) {
     throw authError("auth/invalid-credential", "Firebase: Error (auth/invalid-credential).");

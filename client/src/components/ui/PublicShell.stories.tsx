@@ -30,11 +30,21 @@ const Page = () => (
   </div>
 );
 
-export const Default: Story = { render: () => <PublicShell><Page /></PublicShell> };
+export const Default: Story = {
+  render: () => (
+    <PublicShell>
+      <Page />
+    </PublicShell>
+  ),
+};
 
 export const WithoutAuthLinks: Story = {
   name: "Without login and signup links",
-  render: () => <PublicShell showAuthLinks={false}><Page /></PublicShell>,
+  render: () => (
+    <PublicShell showAuthLinks={false}>
+      <Page />
+    </PublicShell>
+  ),
 };
 
 export const BrandSizes: Story = {

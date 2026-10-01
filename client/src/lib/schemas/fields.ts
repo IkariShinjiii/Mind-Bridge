@@ -23,7 +23,7 @@ export const loginEmail = z.preprocess(
     .string()
     .trim()
     .min(1, "Enter your email.")
-    .refine((v) => v === "" || isEmail(v), "That does not look like an email address.")
+    .refine((v) => v === "" || isEmail(v), "That does not look like an email address."),
 );
 
 export const schoolEmail = z.preprocess(
@@ -32,7 +32,10 @@ export const schoolEmail = z.preprocess(
     .string()
     .trim()
     .min(1, "Enter your school email.")
-    .refine((v) => v === "" || isSchoolEmail(v), `Student registrations must use an ${SCHOOL_EMAIL_DOMAIN} email address.`)
+    .refine(
+      (v) => v === "" || isSchoolEmail(v),
+      `Student registrations must use an ${SCHOOL_EMAIL_DOMAIN} email address.`,
+    ),
 );
 
 /** A new password. Not trimmed: spaces count as characters. */
@@ -41,7 +44,10 @@ export const newPassword = z.preprocess(
   z
     .string()
     .min(1, "Choose a password.")
-    .refine((v) => v === "" || v.length >= MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`)
+    .refine(
+      (v) => v === "" || v.length >= MIN_PASSWORD_LENGTH,
+      `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
+    ),
 );
 
 export const phone = (requiredMessage: string, invalidMessage: string) =>
@@ -51,13 +57,25 @@ export const phone = (requiredMessage: string, invalidMessage: string) =>
       .string()
       .trim()
       .min(1, requiredMessage)
-      .refine((v) => v === "" || isPhone(v), invalidMessage)
+      .refine((v) => v === "" || isPhone(v), invalidMessage),
   );
 
 /** A phone number that may be left blank. */
 export const optionalPhone = (invalidMessage: string) =>
-  z.preprocess(orEmpty, z.string().trim().refine((v) => v === "" || isPhone(v), invalidMessage));
+  z.preprocess(
+    orEmpty,
+    z
+      .string()
+      .trim()
+      .refine((v) => v === "" || isPhone(v), invalidMessage),
+  );
 
 /** A date/time the form gave us as a string; must parse. */
 export const dateTimeString = (message: string) =>
-  z.preprocess(orEmpty, z.string().min(1, message).refine((v) => v === "" || !Number.isNaN(new Date(v).getTime()), message));
+  z.preprocess(
+    orEmpty,
+    z
+      .string()
+      .min(1, message)
+      .refine((v) => v === "" || !Number.isNaN(new Date(v).getTime()), message),
+  );

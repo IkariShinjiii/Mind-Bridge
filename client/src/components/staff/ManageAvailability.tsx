@@ -99,7 +99,7 @@ export default function ManageAvailability() {
         const tb = slotWhen(b).start?.getTime() ?? Infinity;
         return ta - tb;
       }),
-    [slots]
+    [slots],
   );
   const openCount = slots.filter((s) => !s.isBooked).length;
 
@@ -168,8 +168,13 @@ export default function ManageAvailability() {
           </h2>
           {!loading && !loadError && (
             <p className="text-[color:var(--mb-muted)]">
-              <span className="font-display text-lg font-bold tabular-nums text-[color:var(--mb-ink)]">{openCount}</span>{" "}
-              open, <span className="font-display text-lg font-bold tabular-nums text-[color:var(--mb-ink)]">{slots.length - openCount}</span>{" "}
+              <span className="font-display text-lg font-bold tabular-nums text-[color:var(--mb-ink)]">
+                {openCount}
+              </span>{" "}
+              open,{" "}
+              <span className="font-display text-lg font-bold tabular-nums text-[color:var(--mb-ink)]">
+                {slots.length - openCount}
+              </span>{" "}
               booked
             </p>
           )}
@@ -216,7 +221,9 @@ export default function ManageAvailability() {
                     <div>
                       <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
                         {sStart ? formatTime(sStart) : "Time not set"}
-                        {sEnd && <span className="font-normal text-[color:var(--mb-muted)]"> to {formatTime(sEnd)}</span>}
+                        {sEnd && (
+                          <span className="font-normal text-[color:var(--mb-muted)]"> to {formatTime(sEnd)}</span>
+                        )}
                       </p>
                       <p
                         className={`mt-1 inline-block rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${

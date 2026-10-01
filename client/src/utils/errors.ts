@@ -67,7 +67,7 @@ export class AppError extends Error implements AppErrorShape {
   constructor(
     code: ErrorCode,
     userMessage: string,
-    options: { message?: string; sourceCode?: string; fieldErrors?: Record<string, string>; cause?: unknown } = {}
+    options: { message?: string; sourceCode?: string; fieldErrors?: Record<string, string>; cause?: unknown } = {},
   ) {
     super(options.message ?? userMessage, options.cause === undefined ? undefined : { cause: options.cause });
     this.name = "AppError";

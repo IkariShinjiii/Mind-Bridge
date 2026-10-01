@@ -14,7 +14,12 @@ const config: StorybookConfig = {
     resolve: {
       ...config.resolve,
       alias: [
-        ...(Array.isArray(config.resolve?.alias) ? config.resolve.alias : Object.entries(config.resolve?.alias ?? {}).map(([find, replacement]) => ({ find, replacement: String(replacement) }))),
+        ...(Array.isArray(config.resolve?.alias)
+          ? config.resolve.alias
+          : Object.entries(config.resolve?.alias ?? {}).map(([find, replacement]) => ({
+              find,
+              replacement: String(replacement),
+            }))),
         { find: /^firebase\/app$/, replacement: fake("firebase-app") },
         { find: /^firebase\/auth$/, replacement: fake("firebase-auth") },
         { find: /^firebase\/firestore$/, replacement: fake("firebase-firestore") },

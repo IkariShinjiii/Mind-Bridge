@@ -53,7 +53,13 @@ describe("checkInSchema", () => {
 });
 
 describe("bookingSlotSchema", () => {
-  const slot = { id: "s1", counselorId: "c1", counselorName: "Dr. Cruz", start: "2026-10-05T09:00", end: "2026-10-05T10:00" };
+  const slot = {
+    id: "s1",
+    counselorId: "c1",
+    counselorName: "Dr. Cruz",
+    start: "2026-10-05T09:00",
+    end: "2026-10-05T10:00",
+  };
   it("accepts a complete slot", () => {
     expect(validate(bookingSlotSchema, slot).ok).toBe(true);
   });
@@ -61,7 +67,9 @@ describe("bookingSlotSchema", () => {
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, id: "" })).toHaveProperty("id");
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, counselorId: undefined })).toHaveProperty("counselorId");
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, start: "nope" })).toHaveProperty("start");
-    expect(fieldErrorsOf(bookingSlotSchema, { ...slot, end: "2026-10-05T08:00" })).toEqual({ end: "The end time must be after the start time." });
+    expect(fieldErrorsOf(bookingSlotSchema, { ...slot, end: "2026-10-05T08:00" })).toEqual({
+      end: "The end time must be after the start time.",
+    });
   });
 });
 
@@ -72,8 +80,12 @@ describe("timeWindowSchema", () => {
     expect(validate(schema, { start: "2026-10-03T09:00", end: "2026-10-03T10:00" }).ok).toBe(true);
   });
   it("reports a past start and a reversed end separately", () => {
-    expect(fieldErrorsOf(schema, { start: "2026-10-01T09:00", end: "2026-10-01T10:00" })).toEqual({ start: "The start time is in the past." });
-    expect(fieldErrorsOf(schema, { start: "2026-10-03T10:00", end: "2026-10-03T09:00" })).toEqual({ end: "The end time must be after the start time." });
+    expect(fieldErrorsOf(schema, { start: "2026-10-01T09:00", end: "2026-10-01T10:00" })).toEqual({
+      start: "The start time is in the past.",
+    });
+    expect(fieldErrorsOf(schema, { start: "2026-10-03T10:00", end: "2026-10-03T09:00" })).toEqual({
+      end: "The end time must be after the start time.",
+    });
   });
 });
 
@@ -87,8 +99,12 @@ describe("appointmentActionSchema", () => {
     expect(validate(appointmentActionSchema, { type: "cancel", reason: "" }).ok).toBe(true);
   });
   it("needs a start time to reschedule and caps reasons at 500 characters", () => {
-    expect(fieldErrorsOf(appointmentActionSchema, { type: "reschedule", reason: "", start: "", end: "" })).toHaveProperty("start");
-    expect(fieldErrorsOf(appointmentActionSchema, { type: "cancel", reason: "x".repeat(501) })).toHaveProperty("reason");
+    expect(
+      fieldErrorsOf(appointmentActionSchema, { type: "reschedule", reason: "", start: "", end: "" }),
+    ).toHaveProperty("start");
+    expect(fieldErrorsOf(appointmentActionSchema, { type: "cancel", reason: "x".repeat(501) })).toHaveProperty(
+      "reason",
+    );
   });
   it("rejects an unknown action type", () => {
     expect(validate(appointmentActionSchema, { type: "delete", reason: "x" }).ok).toBe(false);
@@ -100,17 +116,26 @@ describe("counselor forms", () => {
     expect(validate(caseReviewSchema, { id: "c1", status: "reviewed", counselorNotes: "Called." }).ok).toBe(true);
     expect(fieldErrorsOf(caseReviewSchema, { id: "", status: "open" })).toHaveProperty("id");
     expect(fieldErrorsOf(caseReviewSchema, { id: "c1", status: "closed" })).toHaveProperty("status");
-    expect(fieldErrorsOf(caseReviewSchema, { id: "c1", status: "open", counselorNotes: "x".repeat(2001) })).toHaveProperty("counselorNotes");
+    expect(
+      fieldErrorsOf(caseReviewSchema, { id: "c1", status: "open", counselorNotes: "x".repeat(2001) }),
+    ).toHaveProperty("counselorNotes");
   });
   it("assignment allows clearing the counselor with null", () => {
-    expect(validate(counselorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(true);
-    expect(validate(counselorAssignmentSchema, { studentId: "", counselorId: "c1", counselorName: "A" }).ok).toBe(false);
+    expect(validate(counselorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(
+      true,
+    );
+    expect(validate(counselorAssignmentSchema, { studentId: "", counselorId: "c1", counselorName: "A" }).ok).toBe(
+      false,
+    );
   });
 });
 
 describe("profile and goals", () => {
   it("profile trims, requires a name, and allows a blank phone", () => {
-    expect(validate(profileSchema, { name: "  Ana  ", phone: "", bio: "" })).toEqual({ ok: true, data: { name: "Ana", phone: "", bio: "" } });
+    expect(validate(profileSchema, { name: "  Ana  ", phone: "", bio: "" })).toEqual({
+      ok: true,
+      data: { name: "Ana", phone: "", bio: "" },
+    });
     expect(fieldErrorsOf(profileSchema, { name: "", phone: "abc", bio: "" })).toEqual({
       name: "Your name cannot be empty.",
       phone: "Enter a valid phone number, or leave this blank.",
@@ -124,7 +149,10 @@ describe("profile and goals", () => {
 
 describe("chatMessageSchema", () => {
   it("trims the text, rejects blanks and caps the length", () => {
-    expect(validate(chatMessageSchema, { studentId: "s", text: "  hi  " })).toMatchObject({ ok: true, data: { text: "hi" } });
+    expect(validate(chatMessageSchema, { studentId: "s", text: "  hi  " })).toMatchObject({
+      ok: true,
+      data: { text: "hi" },
+    });
     expect(validate(chatMessageSchema, { studentId: "s", text: "   " }).ok).toBe(false);
     expect(validate(chatMessageSchema, { studentId: "s", text: "x".repeat(2001) }).ok).toBe(false);
     expect(validate(chatMessageSchema, { studentId: "", text: "hi" }).ok).toBe(false);

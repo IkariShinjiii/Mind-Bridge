@@ -20,7 +20,12 @@ export default function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className="mb fixed bottom-0 left-0 right-0 z-50 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4" data-theme="light" role="region" aria-label="Cookie notice">
+    <div
+      className="mb fixed bottom-0 left-0 right-0 z-50 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4"
+      data-theme="light"
+      role="region"
+      aria-label="Cookie notice"
+    >
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <p className="flex-1 text-[color:var(--mb-ink)]">
           Mind Bridge uses only essential cookies, which keep you signed in and the site secure.{" "}

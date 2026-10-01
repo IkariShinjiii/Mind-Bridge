@@ -28,7 +28,10 @@ export default defineConfig(({ mode }) => ({
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
           const path = id.replace(/\\/g, "/");
-          if (/\/node_modules\/(recharts|d3-[^/]+|victory-vendor|es-toolkit|decimal\.js-light|react-smooth)\//.test(path)) return "charts";
+          if (
+            /\/node_modules\/(recharts|d3-[^/]+|victory-vendor|es-toolkit|decimal\.js-light|react-smooth)\//.test(path)
+          )
+            return "charts";
           if (/\/node_modules\/(@firebase|firebase|re2js)\//.test(path)) return "firebase";
           return undefined;
         },

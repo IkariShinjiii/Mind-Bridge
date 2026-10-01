@@ -36,7 +36,10 @@ export const WithHint: Story = { args: { hint: "Use the address ending in @usa.e
 
 export const Filled: Story = { args: { defaultValue: "ana@usa.edu.ph" } };
 
-export const Hover: Story = { name: "Hover (forced)", args: { ...({ "data-force-hover": "" } as Record<string, string>) } };
+export const Hover: Story = {
+  name: "Hover (forced)",
+  args: { ...({ "data-force-hover": "" } as Record<string, string>) },
+};
 
 export const Error: Story = {
   args: {
@@ -56,7 +59,13 @@ export const Loading: Story = {
 };
 
 export const Password: Story = {
-  args: { label: "Password", type: "password", autoComplete: "new-password", required: true, hint: "At least 6 characters." },
+  args: {
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    required: true,
+    hint: "At least 6 characters.",
+  },
 };
 
 export const AllStates: Story = {

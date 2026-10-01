@@ -80,7 +80,9 @@ export const Empty: Story = {
       <div className="flex flex-col items-center gap-3 py-4 text-center">
         <CalendarX className="h-8 w-8 text-[color:var(--mb-muted)]" aria-hidden="true" />
         <h3 className="text-xl font-bold">No sessions booked</h3>
-        <p className="max-w-[40ch] text-[color:var(--mb-muted)]">Book a time with a counselor whenever you are ready.</p>
+        <p className="max-w-[40ch] text-[color:var(--mb-muted)]">
+          Book a time with a counselor whenever you are ready.
+        </p>
         <Button>Book a session</Button>
       </div>
     </Card>
@@ -91,13 +93,15 @@ export const Tones: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <div className="space-y-4">
-      {([
-        ["default", "Default", "Neutral content."],
-        ["brand", "Brand", "Information from Guidance Services."],
-        ["safe", "Safe", "Your check-in was saved."],
-        ["warn", "Warn", "Your session request is waiting for review."],
-        ["urgent", "Urgent", "Priority support is available right now."],
-      ] as Array<[CardTone, string, string]>).map(([tone, title, text]) => (
+      {(
+        [
+          ["default", "Default", "Neutral content."],
+          ["brand", "Brand", "Information from Guidance Services."],
+          ["safe", "Safe", "Your check-in was saved."],
+          ["warn", "Warn", "Your session request is waiting for review."],
+          ["urgent", "Urgent", "Priority support is available right now."],
+        ] as Array<[CardTone, string, string]>
+      ).map(([tone, title, text]) => (
         <Card key={tone} tone={tone} title={title}>
           <p>{text}</p>
         </Card>

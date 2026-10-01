@@ -8,7 +8,9 @@ test.describe("Completing a wellness check-in", () => {
     await expect(page).toHaveURL(/\/student\/dashboard$/);
   });
 
-  test("the check-in starts on question 1 of 7 and cannot go back or skip ahead without an answer", async ({ page }) => {
+  test("the check-in starts on question 1 of 7 and cannot go back or skip ahead without an answer", async ({
+    page,
+  }) => {
     const checkIn = page.getByRole("region", { name: "Check-in" });
 
     await expect(checkIn.getByText("You are on question 1 of 7")).toBeVisible();
@@ -65,7 +67,9 @@ test.describe("Completing a wellness check-in", () => {
     expect(saved.questionSummary).toHaveLength(7);
   });
 
-  test("a check-in with a safety answer above zero is flagged for immediate review and shows crisis hotlines", async ({ page }) => {
+  test("a check-in with a safety answer above zero is flagged for immediate review and shows crisis hotlines", async ({
+    page,
+  }) => {
     await completeCheckIn(page, [0, 0, 0, 0, 0, 0, 1]);
 
     await expect(page.getByText("Priority support suggested")).toBeVisible();
@@ -84,6 +88,6 @@ test.describe("Completing a wellness check-in", () => {
 
     const checkIn = page.getByRole("region", { name: "Check-in" });
     await expect(checkIn.getByText("You are on question 1 of 7")).toBeVisible();
-    await expect(checkIn.locator('input[type=radio]:checked')).toHaveCount(0);
+    await expect(checkIn.locator("input[type=radio]:checked")).toHaveCount(0);
   });
 });

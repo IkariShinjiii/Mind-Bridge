@@ -13,13 +13,27 @@ type StateRow = [string, string, ControlProps, string?];
  */
 const ERROR_BORDER = "!border-[color:var(--mb-urgent)]";
 
-function Labelled({ id, label, error, children }: { id: string; label: string; error?: string | undefined; children: ReactNode }) {
+function Labelled({
+  id,
+  label,
+  error,
+  children,
+}: {
+  id: string;
+  label: string;
+  error?: string | undefined;
+  children: ReactNode;
+}) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block font-bold">{label}</label>
+      <label htmlFor={id} className="mb-1 block font-bold">
+        {label}
+      </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">{error}</p>
+        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+          {error}
+        </p>
       ) : null}
     </div>
   );
@@ -43,7 +57,12 @@ type Story = StoryObj<typeof meta>;
 
 const textareaStates: StateRow[] = [
   ["default", "notes-1", {}],
-  ["error", "notes-2", { "aria-invalid": "true", "aria-describedby": "notes-2-error", className: `mb-field ${ERROR_BORDER}` }, "Add a short note before sending."],
+  [
+    "error",
+    "notes-2",
+    { "aria-invalid": "true", "aria-describedby": "notes-2-error", className: `mb-field ${ERROR_BORDER}` },
+    "Add a short note before sending.",
+  ],
   ["disabled", "notes-3", { disabled: true, defaultValue: "Locked while the session is closed." }],
 ];
 
@@ -52,7 +71,13 @@ export const Textarea: Story = {
     <div className="space-y-6">
       {textareaStates.map(([name, id, props, error]) => (
         <Labelled key={id} id={id} label={`Notes (${name})`} error={error}>
-          <textarea id={id} rows={3} className="mb-field" placeholder="Anything you want your counselor to know" {...props} />
+          <textarea
+            id={id}
+            rows={3}
+            className="mb-field"
+            placeholder="Anything you want your counselor to know"
+            {...props}
+          />
         </Labelled>
       ))}
     </div>
@@ -61,7 +86,12 @@ export const Textarea: Story = {
 
 const selectStates: StateRow[] = [
   ["default", "year-1", {}],
-  ["error", "year-2", { "aria-invalid": "true", "aria-describedby": "year-2-error", className: `mb-field ${ERROR_BORDER}` }, "Choose your year level."],
+  [
+    "error",
+    "year-2",
+    { "aria-invalid": "true", "aria-describedby": "year-2-error", className: `mb-field ${ERROR_BORDER}` },
+    "Choose your year level.",
+  ],
   ["disabled", "year-3", { disabled: true }],
 ];
 
@@ -71,7 +101,9 @@ export const Select: Story = {
       {selectStates.map(([name, id, props, error]) => (
         <Labelled key={id} id={id} label={`Year level (${name})`} error={error}>
           <select id={id} className="mb-field" defaultValue="" {...props}>
-            <option value="" disabled>Select</option>
+            <option value="" disabled>
+              Select
+            </option>
             <option>1st year</option>
             <option>2nd year</option>
           </select>
@@ -95,9 +127,15 @@ export const CheckboxAndRadio: Story = {
       </label>
       <fieldset className="space-y-2">
         <legend className="font-bold">Session type</legend>
-        <label className="flex items-center gap-3"><input type="radio" name="type" defaultChecked className="h-5 w-5" /> In person</label>
-        <label className="flex items-center gap-3"><input type="radio" name="type" className="h-5 w-5" /> Online</label>
-        <label className="flex items-center gap-3 opacity-60"><input type="radio" name="type" disabled className="h-5 w-5" /> Phone (unavailable)</label>
+        <label className="flex items-center gap-3">
+          <input type="radio" name="type" defaultChecked className="h-5 w-5" /> In person
+        </label>
+        <label className="flex items-center gap-3">
+          <input type="radio" name="type" className="h-5 w-5" /> Online
+        </label>
+        <label className="flex items-center gap-3 opacity-60">
+          <input type="radio" name="type" disabled className="h-5 w-5" /> Phone (unavailable)
+        </label>
       </fieldset>
     </div>
   ),

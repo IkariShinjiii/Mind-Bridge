@@ -6,7 +6,8 @@ import type { AvailabilitySlot } from "../../types";
 
 const dayLabel = (d: Date | null): string =>
   d ? d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : "Date to be confirmed";
-const timeLabel = (d: Date | null): string => (d ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "");
+const timeLabel = (d: Date | null): string =>
+  d ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
 const slotStart = (slot: AvailabilitySlot): Date | null => parseDate(slot.start || slot.date || slot.time);
 const slotEnd = (slot: AvailabilitySlot): Date | null => parseDate(slot.end || slot.to);
 
@@ -108,8 +109,8 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                   here
                     ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                     : done
-                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                    : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
+                      ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                      : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
                 } ${skipped ? "opacity-60" : ""}`}
               >
                 {done ? <Check className="h-5 w-5" aria-hidden="true" /> : n}

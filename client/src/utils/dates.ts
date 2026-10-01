@@ -45,5 +45,7 @@ export function formatDateTime(value: StoredDate, empty = "Not specified"): stri
   if (!value) return empty;
   if (typeof value === "string" && !value.includes("-") && !value.includes("/")) return value;
   const d = toDate(value);
-  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  return Number.isNaN(d.getTime())
+    ? String(value)
+    : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }

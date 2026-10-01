@@ -116,13 +116,26 @@ export default function PublicShell({ children, showAuthLinks = true }: PublicSh
             <p>Messenger: USA- Guidance Services and Testing Center</p>
           </address>
           <nav aria-label="Legal" className="flex flex-col md:items-end">
-            <Link to="/privacy-policy" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Privacy Policy</Link>
-            <Link to="/terms" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Terms and Conditions</Link>
-            <Link to="/cookie-policy" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Cookie Policy</Link>
+            <Link
+              to="/privacy-policy"
+              className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline"
+            >
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">
+              Terms and Conditions
+            </Link>
+            <Link
+              to="/cookie-policy"
+              className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline"
+            >
+              Cookie Policy
+            </Link>
           </nav>
         </div>
         <p className="mx-auto max-w-6xl px-4 pb-8 text-sm text-[color:var(--mb-muted)] sm:px-6">
-          © {new Date().getFullYear()} Mind Bridge. Screening results are a guide for counselors and students, not a medical diagnosis.
+          © {new Date().getFullYear()} Mind Bridge. Screening results are a guide for counselors and students, not a
+          medical diagnosis.
         </p>
       </footer>
     </div>

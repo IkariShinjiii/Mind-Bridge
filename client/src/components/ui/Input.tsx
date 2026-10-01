@@ -30,7 +30,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   { label, id: idProp, hint, error, loading = false, required, className = "", style, ...rest },
-  ref
+  ref,
 ) {
   const generated = useId();
   const id = idProp || generated;

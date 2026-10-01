@@ -73,13 +73,17 @@ export const getAdminUsers = (): Promise<Array<UserProfile & { id: string }>> =>
   guard(async () => mapDocs<UserProfile & { id: string }>(await getDocs(collection(db, "users"))));
 
 /** Marks a staff account as approved. */
-export const approveCounselor = (id: string): Promise<void> => guard(() => updateDoc(doc(db, "users", id), { approved: true }));
+export const approveCounselor = (id: string): Promise<void> =>
+  guard(() => updateDoc(doc(db, "users", id), { approved: true }));
 /** Marks a staff account as not approved. */
-export const rejectCounselor = (id: string): Promise<void> => guard(() => updateDoc(doc(db, "users", id), { approved: false }));
+export const rejectCounselor = (id: string): Promise<void> =>
+  guard(() => updateDoc(doc(db, "users", id), { approved: false }));
 /** Blocks an account from logging in. */
-export const deactivateUser = (id: string): Promise<void> => guard(() => updateDoc(doc(db, "users", id), { active: false }));
+export const deactivateUser = (id: string): Promise<void> =>
+  guard(() => updateDoc(doc(db, "users", id), { active: false }));
 /** Lets a deactivated account log in again. */
-export const reactivateUser = (id: string): Promise<void> => guard(() => updateDoc(doc(db, "users", id), { active: true }));
+export const reactivateUser = (id: string): Promise<void> =>
+  guard(() => updateDoc(doc(db, "users", id), { active: true }));
 
 // --- ASSESSMENTS / SURVEYS ---
 
@@ -92,7 +96,10 @@ export interface SubmitOptions {
  * Scores and stores a check-in for the signed-in student.
  * @param answers - one 0-3 value per question (null counts as 0)
  */
-export const submitResponse = (answers: ReadonlyArray<number | null>, options: SubmitOptions = {}): Promise<Assessment> =>
+export const submitResponse = (
+  answers: ReadonlyArray<number | null>,
+  options: SubmitOptions = {},
+): Promise<Assessment> =>
   guard(async () => {
     const { questions = [], flaggedForImmediateReview: flaggedByCaller = false } = options;
     const authUser = getAuth().currentUser;
@@ -166,7 +173,11 @@ export const getMyAssessments = (): Promise<Assessment[]> =>
  * Updates a case status and, optionally, the counselor notes.
  * @param counselorNotes - left unchanged when undefined; an empty string clears the notes
  */
-export const updateAssessmentStatus = (id: string, status: CaseStatus | string, counselorNotes?: string): Promise<void> =>
+export const updateAssessmentStatus = (
+  id: string,
+  status: CaseStatus | string,
+  counselorNotes?: string,
+): Promise<void> =>
   guard(() => {
     const updates: Record<string, string> = { status, reviewedAt: new Date().toISOString() };
     if (counselorNotes !== undefined) updates["counselorNotes"] = counselorNotes;
@@ -251,7 +262,7 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
       if (slotMarked && slot.id) {
         // Do not leave the slot booked with no appointment behind it
         await updateDoc(doc(db, "availability", slot.id), { isBooked: false }).catch((e: unknown) =>
-          console.warn("Could not release slot after failed booking", e)
+          console.warn("Could not release slot after failed booking", e),
         );
       }
       throw error;
@@ -294,7 +305,14 @@ export const getAllAppointments = (): Promise<Appointment[]> =>
 export type AppointmentExtra = Partial<
   Pick<
     Appointment,
-    "slotId" | "start" | "end" | "declineReason" | "cancellationReason" | "cancelledBy" | "rescheduleReason" | "counselorNote"
+    | "slotId"
+    | "start"
+    | "end"
+    | "declineReason"
+    | "cancellationReason"
+    | "cancelledBy"
+    | "rescheduleReason"
+    | "counselorNote"
   >
 >;
 
@@ -303,7 +321,11 @@ export type AppointmentExtra = Partial<
  * @param status - e.g. "Confirmed", "Declined", "Cancelled", "Rescheduled"
  * @param extraData - extra fields to store (reason, new times, `slotId`)
  */
-export const updateAppointmentStatus = (id: string, status: AppointmentStatus, extraData: AppointmentExtra = {}): Promise<void> =>
+export const updateAppointmentStatus = (
+  id: string,
+  status: AppointmentStatus,
+  extraData: AppointmentExtra = {},
+): Promise<void> =>
   guard(async () => {
     const updates = { status, updatedAt: new Date().toISOString(), ...extraData };
 
@@ -366,7 +388,7 @@ export const getUserSettings = (uid?: string): Promise<(UserProfile & { id: stri
     const targetUid = uid || getCurrentUserId();
     if (!targetUid) return null;
     const userDoc = await getDoc(doc(db, "users", targetUid));
-    return userDoc.exists() ? ({ ...(userDoc.data() as UserProfile), id: userDoc.id }) : null;
+    return userDoc.exists() ? { ...(userDoc.data() as UserProfile), id: userDoc.id } : null;
   });
 
 /**
@@ -387,14 +409,14 @@ export const saveUserSettings = (uid: string | undefined, data: Partial<UserProf
 export const assignCounselorToStudent = (
   studentId: string,
   counselorId: string | null | undefined,
-  counselorName: string | null | undefined
+  counselorName: string | null | undefined,
 ): Promise<void> =>
   guard(() =>
     updateDoc(doc(db, "users", studentId), {
       assignedCounselorId: counselorId || null,
       assignedCounselorName: counselorName || null,
       assignedAt: counselorId ? new Date().toISOString() : null,
-    })
+    }),
   );
 
 // --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---
@@ -407,7 +429,7 @@ export const assignCounselorToStudent = (
 export const listenToStudentMessages = (
   studentId: string | null | undefined,
   onUpdate: (messages: ChatMessage[]) => void,
-  onError?: (error: AppError) => void
+  onError?: (error: AppError) => void,
 ): (() => void) => {
   if (!studentId) return () => {};
   try {
@@ -422,7 +444,7 @@ export const listenToStudentMessages = (
       (err) => {
         console.error("Firestore onSnapshot message error:", err);
         onError?.(toAppError(err));
-      }
+      },
     );
   } catch (err) {
     console.error("Failed to subscribe to messages", err);
@@ -439,7 +461,13 @@ export interface OutgoingMessage {
 }
 
 /** Adds a message to a student's chat thread. Returns null when the text is empty. */
-export const sendStudentMessage = ({ studentId, senderId, senderName, senderRole, text }: OutgoingMessage): Promise<ChatMessage | null> =>
+export const sendStudentMessage = ({
+  studentId,
+  senderId,
+  senderName,
+  senderRole,
+  text,
+}: OutgoingMessage): Promise<ChatMessage | null> =>
   guard(async () => {
     if (!studentId || !text?.trim()) return null;
     const payload: Omit<ChatMessage, "id"> = {

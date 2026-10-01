@@ -13,4 +13,5 @@ export const AVATAR_COLORS = [
  * @param {string} [id] - one of the AVATAR_COLORS ids
  * @returns {string} hex colour
  */
-export const avatarColor = (id?: string | null): string => (AVATAR_COLORS.find((c) => c.id === id) ?? AVATAR_COLORS[0]!).color;
+export const avatarColor = (id?: string | null): string =>
+  (AVATAR_COLORS.find((c) => c.id === id) ?? AVATAR_COLORS[0]!).color;

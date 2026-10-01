@@ -2,7 +2,9 @@ import type { Assessment, StoredDate } from "../types";
 import { toDate } from "./dates";
 
 /** The fields of an assessment that end up in the compliance CSV. */
-export type CsvAssessment = Partial<Pick<Assessment, "riskLevel" | "status" | "total" | "createdAt" | "submittedAt" | "reviewedAt">>;
+export type CsvAssessment = Partial<
+  Pick<Assessment, "riskLevel" | "status" | "total" | "createdAt" | "submittedAt" | "reviewedAt">
+>;
 
 /** Tailwind classes for a risk-level badge, keyed by "high" | "medium" | "low". */
 export const RISK_STYLES = {
@@ -59,10 +61,7 @@ export function downloadAssessmentsCsv(assessments: ReadonlyArray<CsvAssessment>
       }))
     : [{ student_id: "ST-0000", risk_level: "low", status: "n/a", score: "n/a", created_at: "", reviewed_at: "" }];
 
-  const csv = [
-    headers,
-    ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`)),
-  ]
+  const csv = [headers, ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`))]
     .map((line) => line.join(","))
     .join("\n");
 

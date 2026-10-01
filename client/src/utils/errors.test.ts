@@ -5,10 +5,19 @@ const FALLBACK = "Something went wrong. Please try again.";
 
 describe("friendlyError", () => {
   it.each([
-    "auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "auth/invalid-email",
-    "auth/user-disabled", "auth/email-already-in-use", "auth/weak-password", "auth/too-many-requests",
-    "auth/network-request-failed", "auth/requires-recent-login", "auth/popup-blocked",
-    "permission-denied", "unavailable",
+    "auth/invalid-credential",
+    "auth/wrong-password",
+    "auth/user-not-found",
+    "auth/invalid-email",
+    "auth/user-disabled",
+    "auth/email-already-in-use",
+    "auth/weak-password",
+    "auth/too-many-requests",
+    "auth/network-request-failed",
+    "auth/requires-recent-login",
+    "auth/popup-blocked",
+    "permission-denied",
+    "unavailable",
   ])("has a readable message for %s", (code) => {
     const msg = friendlyError({ code });
     expect(msg).not.toBe(FALLBACK);
@@ -17,7 +26,9 @@ describe("friendlyError", () => {
   });
 
   it("gives identical text for wrong password, unknown user and invalid credential (no account enumeration)", () => {
-    const set = new Set(["auth/wrong-password", "auth/user-not-found", "auth/invalid-credential"].map((code) => friendlyError({ code })));
+    const set = new Set(
+      ["auth/wrong-password", "auth/user-not-found", "auth/invalid-credential"].map((code) => friendlyError({ code })),
+    );
     expect(set.size).toBe(1);
   });
 
@@ -35,10 +46,19 @@ describe("friendlyError", () => {
     expect(friendlyError({ code: "x/y" }, "Could not save.")).toBe("Could not save.");
   });
 
-  it.each([[null], [undefined], [""], ["auth/invalid-credential"], [42], [{}], [new Error("plain")], [{ code: "" }], [{ code: 0 }]])(
-    "returns the fallback for non-coded input %j",
-    (input) => { expect(friendlyError(input)).toBe(FALLBACK); }
-  );
+  it.each([
+    [null],
+    [undefined],
+    [""],
+    ["auth/invalid-credential"],
+    [42],
+    [{}],
+    [new Error("plain")],
+    [{ code: "" }],
+    [{ code: 0 }],
+  ])("returns the fallback for non-coded input %j", (input) => {
+    expect(friendlyError(input)).toBe(FALLBACK);
+  });
 
   it("coerces a non-string code before lookup instead of throwing", () => {
     expect(() => friendlyError({ code: 123 })).not.toThrow();
@@ -57,8 +77,15 @@ describe("isPopupDismissed", () => {
   it.each(["auth/popup-closed-by-user", "auth/cancelled-popup-request"])("is true for %s", (code) => {
     expect(isPopupDismissed({ code })).toBe(true);
   });
-  it.each([[{ code: "auth/popup-blocked" }], [{ code: "" }], [{}], [null], [undefined], ["auth/popup-closed-by-user"], [42]])(
-    "is false for %j",
-    (input) => { expect(isPopupDismissed(input)).toBe(false); }
-  );
+  it.each([
+    [{ code: "auth/popup-blocked" }],
+    [{ code: "" }],
+    [{}],
+    [null],
+    [undefined],
+    ["auth/popup-closed-by-user"],
+    [42],
+  ])("is false for %j", (input) => {
+    expect(isPopupDismissed(input)).toBe(false);
+  });
 });

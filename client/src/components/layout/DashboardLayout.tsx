@@ -1,22 +1,11 @@
 import { useState, useRef, useEffect, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Calendar,
-  LifeBuoy,
-  Settings,
-  LogOut,
-  Users,
-  Moon,
-  Sun,
-  Phone,
-} from "lucide-react";
+import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Moon, Sun, Phone } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import Spinner from "../ui/Spinner";
 import { avatarColor } from "../../utils/avatar";
 import icon from "../../assets/mindbridge-icon.png";
-
 
 export default function DashboardLayout({ children }: { children?: ReactNode }) {
   const { currentUser, userRole, userData, logout } = useAuth();
@@ -42,14 +31,50 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
 
   const links = isStaff
     ? [
-        { to: "/admin/dashboard", label: "Dashboard", short: "Dashboard", icon: LayoutDashboard, active: location.pathname === "/admin/dashboard" && !isAccountsTab },
-        { to: "/appointments", label: "Schedule and appointments", short: "Schedule", icon: Calendar, active: isHere("/appointments") },
-        { to: "/admin/dashboard?tab=accounts", label: "Accounts and assignments", short: "Accounts", icon: Users, active: isAccountsTab },
+        {
+          to: "/admin/dashboard",
+          label: "Dashboard",
+          short: "Dashboard",
+          icon: LayoutDashboard,
+          active: location.pathname === "/admin/dashboard" && !isAccountsTab,
+        },
+        {
+          to: "/appointments",
+          label: "Schedule and appointments",
+          short: "Schedule",
+          icon: Calendar,
+          active: isHere("/appointments"),
+        },
+        {
+          to: "/admin/dashboard?tab=accounts",
+          label: "Accounts and assignments",
+          short: "Accounts",
+          icon: Users,
+          active: isAccountsTab,
+        },
       ]
     : [
-        { to: "/student/dashboard", label: "Dashboard", short: "Dashboard", icon: LayoutDashboard, active: isHere("/student/dashboard") },
-        { to: "/appointments", label: "Appointments", short: "Booking", icon: Calendar, active: isHere("/appointments") },
-        { to: "/resources", label: "Crisis resources", short: "Resources", icon: LifeBuoy, active: isHere("/resources") },
+        {
+          to: "/student/dashboard",
+          label: "Dashboard",
+          short: "Dashboard",
+          icon: LayoutDashboard,
+          active: isHere("/student/dashboard"),
+        },
+        {
+          to: "/appointments",
+          label: "Appointments",
+          short: "Booking",
+          icon: Calendar,
+          active: isHere("/appointments"),
+        },
+        {
+          to: "/resources",
+          label: "Crisis resources",
+          short: "Resources",
+          icon: LifeBuoy,
+          active: isHere("/resources"),
+        },
       ];
 
   useEffect(() => {
@@ -117,7 +142,10 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
       </a>
       <header className="shrink-0 border-b-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)]">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline">
+          <Link
+            to="/"
+            className="flex min-h-[44px] shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline"
+          >
             <img src={icon} alt="" className="h-8 w-8 rounded" />
             <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
           </Link>
@@ -156,7 +184,11 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               aria-label={`Switch to ${next} mode`}
               className="mb-btn mb-btn-line !min-h-[44px] !px-3"
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" aria-hidden="true" />
+              ) : (
+                <Moon className="h-5 w-5" aria-hidden="true" />
+              )}
             </button>
 
             <button
@@ -169,9 +201,17 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-ink)]"
             >
               {showGoogleAvatar ? (
-                <img src={currentUser.photoURL} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                <img
+                  src={currentUser.photoURL}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
               ) : (
-                <span style={{ backgroundColor: avatarBg }} className="flex h-full w-full items-center justify-center text-sm font-bold text-white">
+                <span
+                  style={{ backgroundColor: avatarBg }}
+                  className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
+                >
                   {initials}
                 </span>
               )}
@@ -216,7 +256,12 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         </div>
       </header>
 
-      <main id="main-content" ref={mainRef} tabIndex={-1} className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8">
+      <main
+        id="main-content"
+        ref={mainRef}
+        tabIndex={-1}
+        className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8"
+      >
         <div key={location.pathname} className="mx-auto w-full max-w-6xl">
           {children}
         </div>
@@ -235,15 +280,13 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                 to={to}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-w-[64px] flex-1 flex-col items-center justify-center gap-0.5 no-underline ${
-                  active
-                    ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                    : "text-[color:var(--mb-ink)]"
+                  active ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]" : "text-[color:var(--mb-ink)]"
                 }`}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
                 <span className="text-xs font-bold">{short}</span>
               </Link>
-            )
+            ),
           )}
         </div>
       </nav>

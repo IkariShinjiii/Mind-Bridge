@@ -1,7 +1,17 @@
 import { expect, type Page } from "@playwright/test";
 
-export const STUDENT: TestPerson = { uid: "uid-student", name: "Ana Student", email: "ana@usa.edu.ph", password: "Student#123" };
-export const COUNSELOR: TestPerson = { uid: "uid-counselor", name: "Dr. Reyes", email: "reyes@usa.edu.ph", password: "Counselor#123" };
+export const STUDENT: TestPerson = {
+  uid: "uid-student",
+  name: "Ana Student",
+  email: "ana@usa.edu.ph",
+  password: "Student#123",
+};
+export const COUNSELOR: TestPerson = {
+  uid: "uid-counselor",
+  name: "Dr. Reyes",
+  email: "reyes@usa.edu.ph",
+  password: "Counselor#123",
+};
 
 const STORAGE_KEY = "mb_e2e_state";
 
@@ -23,7 +33,10 @@ export type StoredDoc = { id: string } & Record<string, unknown>;
  * Firestore documents. Runs before the app boots; it only seeds an empty browser context, so
  * data written during the test survives reloads and navigations.
  */
-export async function seed(page: Page, { docs = {}, accounts = [] }: { docs?: Docs; accounts?: TestPerson[] } = {}): Promise<void> {
+export async function seed(
+  page: Page,
+  { docs = {}, accounts = [] }: { docs?: Docs; accounts?: TestPerson[] } = {},
+): Promise<void> {
   const { users: extraUsers = {}, ...otherCollections } = docs;
   const state = {
     seq: 100,
@@ -32,16 +45,24 @@ export async function seed(page: Page, { docs = {}, accounts = [] }: { docs?: Do
       [STUDENT, COUNSELOR, ...accounts].map((u) => [
         u.email,
         { uid: u.uid, email: u.email, password: u.password, displayName: u.name },
-      ])
+      ]),
     ),
     docs: {
       users: {
         [STUDENT.uid]: {
-          name: STUDENT.name, email: STUDENT.email, role: "student", approved: true, active: true,
+          name: STUDENT.name,
+          email: STUDENT.email,
+          role: "student",
+          approved: true,
+          active: true,
           emailVerified: true,
         },
         [COUNSELOR.uid]: {
-          name: COUNSELOR.name, email: COUNSELOR.email, role: "counselor", approved: true, active: true,
+          name: COUNSELOR.name,
+          email: COUNSELOR.email,
+          role: "counselor",
+          approved: true,
+          active: true,
           emailVerified: true,
         },
         ...extraUsers,
@@ -54,7 +75,7 @@ export async function seed(page: Page, { docs = {}, accounts = [] }: { docs?: Do
       if (!localStorage.getItem(key)) localStorage.setItem(key, value);
       localStorage.setItem("mindbridge_cookie_consent", "accepted");
     },
-    [STORAGE_KEY, JSON.stringify(state)] as [string, string]
+    [STORAGE_KEY, JSON.stringify(state)] as [string, string],
   );
 }
 
@@ -62,10 +83,12 @@ export async function seed(page: Page, { docs = {}, accounts = [] }: { docs?: Do
 export function readCollection(page: Page, name: string): Promise<StoredDoc[]> {
   return page.evaluate(
     ([key, col]: [string, string]) => {
-      const state = JSON.parse(localStorage.getItem(key) ?? "{}") as { docs?: Record<string, Record<string, Record<string, unknown>>> };
+      const state = JSON.parse(localStorage.getItem(key) ?? "{}") as {
+        docs?: Record<string, Record<string, Record<string, unknown>>>;
+      };
       return Object.entries(state.docs?.[col] ?? {}).map(([id, d]) => ({ ...d, id }));
     },
-    [STORAGE_KEY, name] as [string, string]
+    [STORAGE_KEY, name] as [string, string],
   );
 }
 

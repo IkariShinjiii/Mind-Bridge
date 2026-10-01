@@ -53,7 +53,9 @@ export const Loading: Story = { args: { loading: true, children: "Saving…" } }
 
 export const LoadingLine: Story = { args: { variant: "line", loading: true, children: "Cancelling…" } };
 
-export const WithIcon: Story = { args: { icon: <Send className="h-5 w-5" aria-hidden="true" />, children: "Send message" } };
+export const WithIcon: Story = {
+  args: { icon: <Send className="h-5 w-5" aria-hidden="true" />, children: "Send message" },
+};
 
 export const FullWidth: Story = { args: { fullWidth: true } };
 
@@ -75,7 +77,9 @@ export const Submit: Story = {
 export const AllStates: Story = {
   parameters: { controls: { disable: true } },
   render: () => {
-    const cols: Array<[string, { disabled?: boolean; loading?: boolean } & Record<string, string | boolean | undefined>]> = [
+    const cols: Array<
+      [string, { disabled?: boolean; loading?: boolean } & Record<string, string | boolean | undefined>]
+    > = [
       ["Default", {}],
       ["Hover", { ...FORCE_HOVER }],
       ["Disabled", { disabled: true }],

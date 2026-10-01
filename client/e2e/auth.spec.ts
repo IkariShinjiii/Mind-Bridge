@@ -3,7 +3,12 @@ import { seed, readCollection, logIn, signOut, STUDENT, COUNSELOR } from "./help
 
 async function fillSignup(
   page: Page,
-  { name = "Ben New", email = "ben@usa.edu.ph", password = "secret123", consent = true }: { name?: string; email?: string; password?: string; consent?: boolean } = {}
+  {
+    name = "Ben New",
+    email = "ben@usa.edu.ph",
+    password = "secret123",
+    consent = true,
+  }: { name?: string; email?: string; password?: string; consent?: boolean } = {},
 ) {
   await page.getByLabel("Full name").fill(name);
   await page.getByLabel("School email").fill(email);
@@ -134,7 +139,11 @@ test.describe("Deactivated accounts", () => {
       docs: {
         users: {
           [deactivated.uid]: {
-            name: deactivated.name, email: deactivated.email, role: "student", active: false, approved: true,
+            name: deactivated.name,
+            email: deactivated.email,
+            role: "student",
+            active: false,
+            approved: true,
           },
         },
       },

@@ -31,7 +31,9 @@ export default function useFocusTrap(ref: RefObject<HTMLElement | null>, active:
       }
       const container = ref.current;
       if (e.key !== "Tab" || !container) return;
-      const items = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.offsetParent !== null);
+      const items = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null,
+      );
       const first = items[0];
       const last = items[items.length - 1];
       if (!first || !last) return;

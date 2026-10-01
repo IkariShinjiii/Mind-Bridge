@@ -22,18 +22,24 @@ vi.mock("firebase/firestore", () => ({
 vi.mock("firebase/auth", () => ({ getAuth: () => ({ currentUser: h.user }) }));
 vi.mock("./firebase", () => ({ db: { fake: true } }));
 
-type FirestoreMocks = Record<"getDocs" | "getDoc" | "setDoc" | "addDoc" | "updateDoc" | "deleteDoc" | "onSnapshot", Mock<AnyFn>>;
+type FirestoreMocks = Record<
+  "getDocs" | "getDoc" | "setDoc" | "addDoc" | "updateDoc" | "deleteDoc" | "onSnapshot",
+  Mock<AnyFn>
+>;
 const fs = (await import("firebase/firestore")) as unknown as FirestoreMocks;
 const api = await import("./api");
 /** Calls an exported function by name, for it.each tables. */
-const call = (name: string, ...args: unknown[]): Promise<unknown> => (api as unknown as Record<string, AnyFn>)[name]!(...args);
+const call = (name: string, ...args: unknown[]): Promise<unknown> =>
+  (api as unknown as Record<string, AnyFn>)[name]!(...args);
 
 const NOW = new Date("2026-10-02T08:00:00.000Z");
 const snap = (rows: Array<[string, Row]>) => {
   const docs = rows.map(([id, data]) => ({ id, data: () => data }));
   return { docs, forEach: (fn: (d: (typeof docs)[number]) => void) => docs.forEach(fn) };
 };
-const signIn = (user: Row | null) => { h.user = user; };
+const signIn = (user: Row | null) => {
+  h.user = user;
+};
 const ana = { uid: "stu1", displayName: "Ana Student", email: "ana@usa.edu.ph" };
 const lastWrite = (fn: Mock<AnyFn>) => fn.mock.calls.at(-1)!;
 
@@ -50,12 +56,23 @@ beforeEach(() => {
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe("admin user management", () => {
   it("getAdminUsers maps documents to { id, ...data }", async () => {
-    fs.getDocs.mockResolvedValue(snap([["u1", { name: "A" }], ["u2", { name: "B" }]]));
-    expect(await api.getAdminUsers()).toEqual([{ id: "u1", name: "A" }, { id: "u2", name: "B" }]);
+    fs.getDocs.mockResolvedValue(
+      snap([
+        ["u1", { name: "A" }],
+        ["u2", { name: "B" }],
+      ]),
+    );
+    expect(await api.getAdminUsers()).toEqual([
+      { id: "u1", name: "A" },
+      { id: "u2", name: "B" },
+    ]);
   });
 
   // Fixed: list functions spread the data first and set `id` last, so a stored `id` field cannot replace it.
@@ -94,9 +111,18 @@ describe("submitResponse", () => {
     const r = await api.submitResponse([1, 2, 0], { questions: qs });
     expect(lastWrite(fs.addDoc)[0]).toEqual({ kind: "collection", name: "assessments" });
     expect(r).toMatchObject({
-      id: "new1", studentId: "stu1", studentName: "Ana Student", studentEmail: "ana@usa.edu.ph",
-      total: 3, maxScore: 9, riskLevel: "medium", flaggedForImmediateReview: false,
-      status: "open", counselorNotes: "", createdAt: NOW.toISOString(), answers: [1, 2, 0],
+      id: "new1",
+      studentId: "stu1",
+      studentName: "Ana Student",
+      studentEmail: "ana@usa.edu.ph",
+      total: 3,
+      maxScore: 9,
+      riskLevel: "medium",
+      flaggedForImmediateReview: false,
+      status: "open",
+      counselorNotes: "",
+      createdAt: NOW.toISOString(),
+      answers: [1, 2, 0],
     });
     const { id, ...stored } = r;
     expect(lastWrite(fs.addDoc)[1]).toEqual(stored); // returned object is exactly what was written, plus the id
@@ -136,7 +162,9 @@ describe("submitResponse", () => {
     expect(await api.submitResponse([0], { questions: [{ text: "x" }] })).toMatchObject({ studentName: "kim" });
     signIn(null);
     expect(await api.submitResponse([0], { questions: [{ text: "x" }] })).toMatchObject({
-      studentId: "anonymous", studentName: "Student", studentEmail: "No email",
+      studentId: "anonymous",
+      studentName: "Student",
+      studentEmail: "No email",
     });
   });
 
@@ -164,10 +192,13 @@ describe("getAssessments (staff list with name enrichment)", () => {
     expect(a.studentName).toBe("Ana Real");
   });
 
-  it.each(["No email", "No email provided", "", undefined])("replaces placeholder email %j with the profile email", async (email) => {
-    const [a] = await run([["a1", { studentId: "stu1", studentName: "N", studentEmail: email }]]);
-    expect(a.studentEmail).toBe("ana@usa.edu.ph");
-  });
+  it.each(["No email", "No email provided", "", undefined])(
+    "replaces placeholder email %j with the profile email",
+    async (email) => {
+      const [a] = await run([["a1", { studentId: "stu1", studentName: "N", studentEmail: email }]]);
+      expect(a.studentEmail).toBe("ana@usa.edu.ph");
+    },
+  );
 
   it("keeps real stored values over the profile", async () => {
     const [a] = await run([["a1", { studentId: "stu1", studentName: "Typed Name", studentEmail: "typed@x.ph" }]]);
@@ -186,7 +217,9 @@ describe("getAssessments (staff list with name enrichment)", () => {
   });
 
   it("returns the raw assessments (and warns) when the profile lookup fails", async () => {
-    fs.getDocs.mockResolvedValueOnce(snap([["a1", { studentName: "Student" }]])).mockRejectedValueOnce(new Error("denied"));
+    fs.getDocs
+      .mockResolvedValueOnce(snap([["a1", { studentName: "Student" }]]))
+      .mockRejectedValueOnce(new Error("denied"));
     expect(await api.getAssessments()).toEqual([{ id: "a1", studentName: "Student" }]);
     expect(console.warn).toHaveBeenCalled();
   });
@@ -205,14 +238,21 @@ describe("getMyAssessments / getAppointments / getMyAvailability", () => {
   ])("%s filters %s by %s == uid and adds ids", async (fn, col, field) => {
     fs.getDocs.mockResolvedValue(snap([["x1", { v: 1 }]]));
     expect(await call(fn)).toEqual([{ id: "x1", v: 1 }]);
-    expect(lastWrite(fs.getDocs)[0]).toEqual({ kind: "query", name: col, clauses: [{ field, op: "==", value: "stu1" }] });
+    expect(lastWrite(fs.getDocs)[0]).toEqual({
+      kind: "query",
+      name: col,
+      clauses: [{ field, op: "==", value: "stu1" }],
+    });
   });
 
-  it.each(["getMyAssessments", "getAppointments", "getMyAvailability"])("%s returns [] without querying when signed out", async (fn) => {
-    signIn(null);
-    expect(await call(fn)).toEqual([]);
-    expect(fs.getDocs).not.toHaveBeenCalled();
-  });
+  it.each(["getMyAssessments", "getAppointments", "getMyAvailability"])(
+    "%s returns [] without querying when signed out",
+    async (fn) => {
+      signIn(null);
+      expect(await call(fn)).toEqual([]);
+      expect(fs.getDocs).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe("updateAssessmentStatus", () => {
@@ -241,9 +281,17 @@ describe("bookAppointment", () => {
     expect(fs.updateDoc).toHaveBeenCalledWith({ kind: "doc", col: "availability", id: "s1" }, { isBooked: true });
     expect(lastWrite(fs.addDoc)[0]).toEqual({ kind: "collection", name: "appointments" });
     expect(lastWrite(fs.addDoc)[1]).toEqual({
-      studentId: "stu1", studentName: "Ana Student", studentEmail: "ana@usa.edu.ph", slotId: "s1",
-      counselorId: "cou1", counselorName: "Dr. Cruz", title: "Session with Dr. Cruz",
-      start: "S", end: "E", status: "Pending Review", createdAt: NOW.toISOString(),
+      studentId: "stu1",
+      studentName: "Ana Student",
+      studentEmail: "ana@usa.edu.ph",
+      slotId: "s1",
+      counselorId: "cou1",
+      counselorName: "Dr. Cruz",
+      title: "Session with Dr. Cruz",
+      start: "S",
+      end: "E",
+      status: "Pending Review",
+      createdAt: NOW.toISOString(),
     });
   });
 
@@ -269,14 +317,20 @@ describe("bookAppointment", () => {
   it("skips the slot update for a slot without an id and uses default counselor labels", async () => {
     await api.bookAppointment({ counselorId: "cou1", start: "S", end: "E" });
     expect(fs.updateDoc).not.toHaveBeenCalled();
-    expect(lastWrite(fs.addDoc)[1]).toMatchObject({ slotId: null, counselorName: "Assigned Counselor", title: "Session with Counselor" });
+    expect(lastWrite(fs.addDoc)[1]).toMatchObject({
+      slotId: null,
+      counselorName: "Assigned Counselor",
+      title: "Session with Counselor",
+    });
   });
 
   it("with no slot, creates a generic request dated 24h from now", async () => {
     await api.bookAppointment();
     expect(fs.updateDoc).not.toHaveBeenCalled();
     expect(lastWrite(fs.addDoc)[1]).toMatchObject({
-      slotId: null, title: "Counseling Session", status: "Pending Review",
+      slotId: null,
+      title: "Counseling Session",
+      status: "Pending Review",
       date: new Date(NOW.getTime() + 86400000).toISOString(),
     });
   });
@@ -304,7 +358,10 @@ describe("bookAppointment", () => {
 });
 
 describe("getAllAppointments (staff list with enrichment)", () => {
-  const run = async (appts: Array<[string, Row]>, users: ReturnType<typeof snap> = snap([["stu1", { name: "Ana Real", email: "ana@usa.edu.ph" }]])) => {
+  const run = async (
+    appts: Array<[string, Row]>,
+    users: ReturnType<typeof snap> = snap([["stu1", { name: "Ana Real", email: "ana@usa.edu.ph" }]]),
+  ) => {
     fs.getDocs.mockResolvedValueOnce(snap(appts)).mockResolvedValueOnce(users);
     return api.getAllAppointments();
   };
@@ -370,8 +427,16 @@ describe("updateAppointmentStatus", () => {
 
 describe("availability", () => {
   it("getAvailability lists every slot with ids", async () => {
-    fs.getDocs.mockResolvedValue(snap([["s1", { isBooked: true }], ["s2", { isBooked: false }]]));
-    expect(await api.getAvailability()).toEqual([{ id: "s1", isBooked: true }, { id: "s2", isBooked: false }]);
+    fs.getDocs.mockResolvedValue(
+      snap([
+        ["s1", { isBooked: true }],
+        ["s2", { isBooked: false }],
+      ]),
+    );
+    expect(await api.getAvailability()).toEqual([
+      { id: "s1", isBooked: true },
+      { id: "s2", isBooked: false },
+    ]);
   });
 
   it("addAvailability stores an unbooked slot for the signed-in counselor", async () => {
@@ -379,7 +444,14 @@ describe("availability", () => {
     await api.addAvailability("S", "E");
     expect(lastWrite(fs.addDoc)).toEqual([
       { kind: "collection", name: "availability" },
-      { counselorId: "cou1", counselorName: "Dr. Cruz", start: "S", end: "E", isBooked: false, createdAt: NOW.toISOString() },
+      {
+        counselorId: "cou1",
+        counselorName: "Dr. Cruz",
+        start: "S",
+        end: "E",
+        isBooked: false,
+        createdAt: NOW.toISOString(),
+      },
     ]);
   });
 
@@ -441,7 +513,11 @@ describe("user settings and assignment", () => {
 
   it.each([[null], [undefined], [""]])("assignCounselorToStudent clears everything for counselorId %j", async (id) => {
     await api.assignCounselorToStudent("stu1", id, "ignored name");
-    expect(lastWrite(fs.updateDoc)[1]).toEqual({ assignedCounselorId: null, assignedCounselorName: "ignored name", assignedAt: null });
+    expect(lastWrite(fs.updateDoc)[1]).toEqual({
+      assignedCounselorId: null,
+      assignedCounselorName: "ignored name",
+      assignedAt: null,
+    });
   });
 });
 
@@ -450,14 +526,24 @@ describe("messages", () => {
     it("stores a trimmed message with sender defaults and returns it with its id", async () => {
       const m = await api.sendStudentMessage({ studentId: "stu1", text: "  hello  " });
       expect(m).toEqual({
-        id: "new1", studentId: "stu1", senderId: "stu1", senderName: "Student", senderRole: "student",
-        text: "hello", timestamp: NOW.toISOString(),
+        id: "new1",
+        studentId: "stu1",
+        senderId: "stu1",
+        senderName: "Student",
+        senderRole: "student",
+        text: "hello",
+        timestamp: NOW.toISOString(),
       });
       expect(lastWrite(fs.addDoc)[0]).toEqual({ kind: "collection", name: "messages" });
     });
 
     it("uses an explicit sender and a role-based default name for counselors", async () => {
-      const m = await api.sendStudentMessage({ studentId: "stu1", senderId: "cou1", senderRole: "counselor", text: "hi" });
+      const m = await api.sendStudentMessage({
+        studentId: "stu1",
+        senderId: "cou1",
+        senderRole: "counselor",
+        text: "hi",
+      });
       expect(m).toMatchObject({ senderId: "cou1", senderRole: "counselor", senderName: "Counselor" });
     });
 
@@ -484,18 +570,22 @@ describe("messages", () => {
       fs.onSnapshot.mockReturnValue(unsub);
       expect(api.listenToStudentMessages("stu1", () => {})).toBe(unsub);
       expect(fs.onSnapshot.mock.calls[0][0]).toEqual({
-        kind: "query", name: "messages", clauses: [{ field: "studentId", op: "==", value: "stu1" }],
+        kind: "query",
+        name: "messages",
+        clauses: [{ field: "studentId", op: "==", value: "stu1" }],
       });
     });
 
     it("delivers messages oldest-first, treating a missing timestamp as the earliest", () => {
       const onUpdate = vi.fn();
       fs.onSnapshot.mockImplementation((_q: unknown, next: AnyFn) => {
-        next(snap([
-          ["m2", { timestamp: "2026-10-01T00:00:02.000Z" }],
-          ["m0", {}],
-          ["m1", { timestamp: "2026-10-01T00:00:01.000Z" }],
-        ]));
+        next(
+          snap([
+            ["m2", { timestamp: "2026-10-01T00:00:02.000Z" }],
+            ["m0", {}],
+            ["m1", { timestamp: "2026-10-01T00:00:01.000Z" }],
+          ]),
+        );
         return () => {};
       });
       api.listenToStudentMessages("stu1", onUpdate);
@@ -505,14 +595,22 @@ describe("messages", () => {
     it("reports listener errors to onError and logs them", () => {
       const onError = vi.fn();
       const err = new Error("denied");
-      fs.onSnapshot.mockImplementation((_q: unknown, _next: unknown, fail: AnyFn) => { fail(err); return () => {}; });
+      fs.onSnapshot.mockImplementation((_q: unknown, _next: unknown, fail: AnyFn) => {
+        fail(err);
+        return () => {};
+      });
       api.listenToStudentMessages("stu1", () => {}, onError);
-      expect(onError).toHaveBeenCalledWith(expect.objectContaining({ name: "AppError", message: "denied", code: "unknown", cause: err }));
+      expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "AppError", message: "denied", code: "unknown", cause: err }),
+      );
       expect(console.error).toHaveBeenCalled();
     });
 
     it("does not throw when a listener error arrives and no onError was given", () => {
-      fs.onSnapshot.mockImplementation((_q: unknown, _next: unknown, fail: AnyFn) => { fail(new Error("x")); return () => {}; });
+      fs.onSnapshot.mockImplementation((_q: unknown, _next: unknown, fail: AnyFn) => {
+        fail(new Error("x"));
+        return () => {};
+      });
       expect(() => api.listenToStudentMessages("stu1", () => {})).not.toThrow();
     });
 
@@ -523,7 +621,9 @@ describe("messages", () => {
     });
 
     it("returns a no-op if subscribing throws synchronously", () => {
-      fs.onSnapshot.mockImplementation(() => { throw new Error("bad query"); });
+      fs.onSnapshot.mockImplementation(() => {
+        throw new Error("bad query");
+      });
       const unsub = api.listenToStudentMessages("stu1", () => {});
       expect(unsub()).toBeUndefined();
       expect(console.error).toHaveBeenCalled();

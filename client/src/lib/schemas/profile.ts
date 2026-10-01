@@ -22,4 +22,6 @@ export type EmergencyContactInput = z.infer<typeof emergencyContactSchema>;
 /** Settings: wellness goals. */
 export const MAX_GOALS = 5;
 export const goalSchema = requiredText("Type a goal first.", 120);
-export const goalsSchema = z.array(z.string().min(1).max(120)).max(MAX_GOALS, `You can pick up to ${MAX_GOALS} goals at a time.`);
+export const goalsSchema = z
+  .array(z.string().min(1).max(120))
+  .max(MAX_GOALS, `You can pick up to ${MAX_GOALS} goals at a time.`);

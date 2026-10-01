@@ -1,4 +1,14 @@
-import { useState, useEffect, useRef, isValidElement, cloneElement, type FormEvent, type ReactElement, type ReactNode, type ButtonHTMLAttributes } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  isValidElement,
+  cloneElement,
+  type FormEvent,
+  type ReactElement,
+  type ReactNode,
+  type ButtonHTMLAttributes,
+} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User,
@@ -17,12 +27,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import {
-  updateProfile,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
+import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
 import { AVATAR_COLORS, avatarColor } from "../../utils/avatar";
 import Spinner from "../../components/ui/Spinner";
@@ -55,8 +60,10 @@ type TabId = "profile" | "password" | "privacy" | "emergency" | "goals" | "sessi
  */
 function statusTone(status?: string): string {
   const s = (status || "").toLowerCase();
-  if (s.includes("confirm")) return "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]";
-  if (s.includes("pending")) return "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]";
+  if (s.includes("confirm"))
+    return "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]";
+  if (s.includes("pending"))
+    return "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]";
   if (s.includes("declin") || s.includes("cancel"))
     return "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]";
   return "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]";
@@ -119,7 +126,10 @@ export default function UserSettings() {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({ type: "", message: "" });
+  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({
+    type: "",
+    message: "",
+  });
 
   // Profile
   const [name, setName] = useState("");
@@ -260,7 +270,11 @@ export default function UserSettings() {
     const errors = validatePasswordChange({ currentPassword, newPassword, confirmPassword });
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
-      const ids: Record<string, string> = { currentPassword: "set-current-pw", newPassword: "set-new-pw", confirmPassword: "set-confirm-pw" };
+      const ids: Record<string, string> = {
+        currentPassword: "set-current-pw",
+        newPassword: "set-new-pw",
+        confirmPassword: "set-confirm-pw",
+      };
       focusById(ids[Object.keys(errors)[0] ?? ""]);
       return;
     }
@@ -418,7 +432,10 @@ export default function UserSettings() {
       ) : (
         <div className="grid gap-6 md:grid-cols-[15rem_1fr]">
           {/* Section list: a column on desktop, a scrolling row on phones */}
-          <nav aria-label="Settings sections" className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+          <nav
+            aria-label="Settings sections"
+            className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0"
+          >
             {navTabs.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
@@ -450,11 +467,20 @@ export default function UserSettings() {
                   <legend className="px-1 font-bold text-[color:var(--mb-ink)]">Picture</legend>
                   <div className="flex flex-wrap items-center gap-5">
                     <div
-                      style={useGoogleAvatar && currentUser?.photoURL ? undefined : { backgroundColor: avatarColor(avatarId) }}
+                      style={
+                        useGoogleAvatar && currentUser?.photoURL
+                          ? undefined
+                          : { backgroundColor: avatarColor(avatarId) }
+                      }
                       className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-ink)]"
                     >
                       {useGoogleAvatar && currentUser?.photoURL ? (
-                        <img src={currentUser.photoURL} alt="Your profile picture" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                        <img
+                          src={currentUser.photoURL}
+                          alt="Your profile picture"
+                          className="h-full w-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
                       ) : (
                         <span className="font-display text-2xl font-bold text-white">{userInitials}</span>
                       )}
@@ -471,7 +497,12 @@ export default function UserSettings() {
                             useGoogleAvatar ? "border-[color:var(--mb-ink)]" : "border-[color:var(--mb-line)]"
                           }`}
                         >
-                          <img src={currentUser.photoURL} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                          <img
+                            src={currentUser.photoURL}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
                           {useGoogleAvatar && (
                             <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-white">
                               <Check className="h-5 w-5" aria-hidden="true" />
@@ -592,7 +623,13 @@ export default function UserSettings() {
                         className="mb-field"
                       />
                     </Field>
-                    <Field id="set-new-pw" label="New password" hint="at least 6 characters" required error={fieldErrors.newPassword}>
+                    <Field
+                      id="set-new-pw"
+                      label="New password"
+                      hint="at least 6 characters"
+                      required
+                      error={fieldErrors.newPassword}
+                    >
                       <input
                         id="set-new-pw"
                         type="password"
@@ -603,7 +640,12 @@ export default function UserSettings() {
                         className="mb-field"
                       />
                     </Field>
-                    <Field id="set-confirm-pw" label="Confirm new password" required error={fieldErrors.confirmPassword}>
+                    <Field
+                      id="set-confirm-pw"
+                      label="Confirm new password"
+                      required
+                      error={fieldErrors.confirmPassword}
+                    >
                       <input
                         id="set-confirm-pw"
                         type="password"
@@ -632,12 +674,21 @@ export default function UserSettings() {
                 {isStudent ? (
                   <ul className="space-y-3">
                     {[
-                      ["Check-in answers and scores", "You and approved guidance staff (counselors and admins). Other students never see them."],
+                      [
+                        "Check-in answers and scores",
+                        "You and approved guidance staff (counselors and admins). Other students never see them.",
+                      ],
                       ["Appointments and chat messages", "You and approved guidance staff."],
                       ["Your emergency contact", "Approved guidance staff, when they open one of your cases."],
-                      ["Reports", "Staff can export a report with names and emails removed. It lists risk level and score only."],
+                      [
+                        "Reports",
+                        "Staff can export a report with names and emails removed. It lists risk level and score only.",
+                      ],
                     ].map(([title, body]) => (
-                      <li key={title} className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+                      <li
+                        key={title}
+                        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
+                      >
                         <p className="font-bold text-[color:var(--mb-ink)]">{title}</p>
                         <p className="text-[color:var(--mb-muted)]">{body}</p>
                       </li>
@@ -648,7 +699,8 @@ export default function UserSettings() {
                     <li className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
                       <p className="font-bold text-[color:var(--mb-ink)]">Your profile</p>
                       <p className="text-[color:var(--mb-muted)]">
-                        Your name, email and role are visible to other approved staff and to students you are assigned to.
+                        Your name, email and role are visible to other approved staff and to students you are assigned
+                        to.
                       </p>
                     </li>
                   </ul>
@@ -659,14 +711,18 @@ export default function UserSettings() {
                     <Shield className="h-5 w-5" aria-hidden="true" /> Confidentiality notice
                   </p>
                   <p className="mt-1">
-                    In line with the Philippine Mental Health Act (RA 11036) and university ethics policy, what you share
-                    stays between you and the Guidance Office, except where there is a clear, imminent threat to life or
-                    safety.
+                    In line with the Philippine Mental Health Act (RA 11036) and university ethics policy, what you
+                    share stays between you and the Guidance Office, except where there is a clear, imminent threat to
+                    life or safety.
                   </p>
                 </div>
 
                 <p className="text-[color:var(--mb-muted)]">
-                  Read the full <Link to="/privacy-policy" className="font-bold text-[color:var(--mb-ink)] underline">Privacy Policy</Link>.
+                  Read the full{" "}
+                  <Link to="/privacy-policy" className="font-bold text-[color:var(--mb-ink)] underline">
+                    Privacy Policy
+                  </Link>
+                  .
                 </p>
               </div>
             )}
@@ -675,8 +731,8 @@ export default function UserSettings() {
             {activeTab === "emergency" && (
               <form onSubmit={handleSaveEmergencyContact} noValidate className="space-y-5">
                 <PanelHead title="Emergency contact">
-                  Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in an
-                  emergency.
+                  Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in
+                  an emergency.
                 </PanelHead>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -753,7 +809,8 @@ export default function UserSettings() {
                 </PanelHead>
 
                 <p className="font-bold text-[color:var(--mb-ink)]" aria-live="polite">
-                  <span className="font-display text-2xl tabular-nums">{selectedGoals.length}</span> of {MAX_GOALS} chosen
+                  <span className="font-display text-2xl tabular-nums">{selectedGoals.length}</span> of {MAX_GOALS}{" "}
+                  chosen
                 </p>
 
                 <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Wellness goals">
@@ -830,7 +887,11 @@ export default function UserSettings() {
                     <p className="mx-auto mt-1 max-w-[45ch] text-[color:var(--mb-muted)]">
                       You haven't booked a session. You can book a confidential time whenever you're ready.
                     </p>
-                    <button type="button" onClick={() => navigate("/appointments")} className="mb-btn mb-btn-solid mt-4">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/appointments")}
+                      className="mb-btn mb-btn-solid mt-4"
+                    >
                       Book a counselor
                     </button>
                   </div>
@@ -849,7 +910,9 @@ export default function UserSettings() {
                             {apt.counselorName || "Assigned counselor"} · {formatDateTime(apt.start || apt.date)}
                           </p>
                         </div>
-                        <span className={`self-start rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}>
+                        <span
+                          className={`self-start rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}
+                        >
                           {apt.status || "Pending Review"}
                         </span>
                       </li>

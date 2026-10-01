@@ -113,7 +113,6 @@ export default function Login() {
     }
   }
 
-
   async function handleForgotPassword() {
     const email = valueById("email").trim();
     setInfoMessage("");
@@ -154,13 +153,36 @@ export default function Login() {
       }
     >
       <div aria-live="polite">
-        {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
-        {infoMessage ? <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">{infoMessage}</div> : null}
+        {errorMessage ? (
+          <div className="mb-alert mb-5" role="alert">
+            {errorMessage}
+          </div>
+        ) : null}
+        {infoMessage ? (
+          <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">
+            {infoMessage}
+          </div>
+        ) : null}
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        <Field id="email" label="Email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required error={fieldErrors.email} />
-        <Field id="password" label="Password" type="password" autoComplete="current-password" required error={fieldErrors.password} />
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="you@usa.edu.ph"
+          autoComplete="email"
+          required
+          error={fieldErrors.email}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          required
+          error={fieldErrors.password}
+        />
 
         <div className="text-right">
           <button
@@ -174,7 +196,12 @@ export default function Login() {
           </button>
         </div>
 
-        <button type="submit" disabled={isSubmitting || isGoogleLoading} aria-busy={isSubmitting} className="mb-btn mb-btn-solid w-full">
+        <button
+          type="submit"
+          disabled={isSubmitting || isGoogleLoading}
+          aria-busy={isSubmitting}
+          className="mb-btn mb-btn-solid w-full"
+        >
           {isSubmitting && <Spinner />}
           {isSubmitting ? "Signing in…" : "Log in"}
         </button>

@@ -12,7 +12,9 @@ export const checkInAnswerSchema = z
 
 /** A finished check-in: exactly one valid answer per question. */
 export const checkInSchema = z.object({
-  answers: z.array(checkInAnswerSchema).length(CHECKIN_QUESTION_COUNT, `Answer all ${CHECKIN_QUESTION_COUNT} questions.`),
+  answers: z
+    .array(checkInAnswerSchema)
+    .length(CHECKIN_QUESTION_COUNT, `Answer all ${CHECKIN_QUESTION_COUNT} questions.`),
 });
 export type CheckInInput = z.infer<typeof checkInSchema>;
 

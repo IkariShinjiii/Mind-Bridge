@@ -31,13 +31,17 @@ export const passwordChangeSchema = z
       z
         .string()
         .min(1, "Enter a new password.")
-        .refine((v) => v === "" || v.length >= MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters.`)
+        .refine((v) => v === "" || v.length >= MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters.`),
     ),
     confirmPassword: z.preprocess(orEmpty, z.string().min(1, "Type the new password again.")),
   })
   .superRefine((v, ctx) => {
     if (v.newPassword.length >= MIN_PASSWORD_LENGTH && v.newPassword === v.currentPassword) {
-      ctx.addIssue({ code: "custom", path: ["newPassword"], message: "Choose a password different from your current one." });
+      ctx.addIssue({
+        code: "custom",
+        path: ["newPassword"],
+        message: "Choose a password different from your current one.",
+      });
     }
     if (v.confirmPassword !== "" && v.confirmPassword !== v.newPassword) {
       ctx.addIssue({ code: "custom", path: ["confirmPassword"], message: "The passwords do not match." });

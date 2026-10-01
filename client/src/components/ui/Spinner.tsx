@@ -1,4 +1,3 @@
-
 /**
  * Small inline loading ring. Inherits the surrounding text colour unless `color` is given.
  * Decorative by default (the parent label says what is loading); pass `label` to announce it.

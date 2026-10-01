@@ -12,16 +12,54 @@ import {
 import PublicShell from "../components/ui/PublicShell";
 
 const STOPS = [
-  { n: 1, icon: ClipboardList, title: "Check in", body: "Seven short questions about the last two weeks. About a minute." },
-  { n: 2, icon: FileCheck2, title: "See your result", body: "Guidance and next steps based on your answers. It is a screening aid, not a diagnosis." },
-  { n: 3, icon: CalendarCheck, title: "Book a counselor", body: "Pick an open time from the campus counselors' calendars." },
-  { n: 4, icon: MessageCircle, title: "Talk it through", body: "Meet your counselor and follow up in confidential chat." },
+  {
+    n: 1,
+    icon: ClipboardList,
+    title: "Check in",
+    body: "Seven short questions about the last two weeks. About a minute.",
+  },
+  {
+    n: 2,
+    icon: FileCheck2,
+    title: "See your result",
+    body: "Guidance and next steps based on your answers. It is a screening aid, not a diagnosis.",
+  },
+  {
+    n: 3,
+    icon: CalendarCheck,
+    title: "Book a counselor",
+    body: "Pick an open time from the campus counselors' calendars.",
+  },
+  {
+    n: 4,
+    icon: MessageCircle,
+    title: "Talk it through",
+    body: "Meet your counselor and follow up in confidential chat.",
+  },
 ];
 
 const DOORS = [
-  { icon: GraduationCap, who: "Students", what: "Check in, book a time, message your counselor.", to: "/signup", cta: "Create student account" },
-  { icon: Stethoscope, who: "Counselors", what: "Review flagged check-ins and set your availability.", to: "/login", cta: "Log in" },
-  { icon: ShieldCheck, who: "Administrators", what: "Approve counselor accounts and review activity.", to: "/login", cta: "Log in" },
+  {
+    icon: GraduationCap,
+    who: "Students",
+    what: "Check in, book a time, message your counselor.",
+    to: "/signup",
+    cta: "Create student account",
+  },
+  {
+    icon: Stethoscope,
+    who: "Counselors",
+    what: "Review flagged check-ins and set your availability.",
+    to: "/login",
+    cta: "Log in",
+  },
+  {
+    icon: ShieldCheck,
+    who: "Administrators",
+    what: "Approve counselor accounts and review activity.",
+    to: "/login",
+    cta: "Log in",
+  },
 ];
 
 export default function HomePage() {

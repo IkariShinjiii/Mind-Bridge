@@ -29,7 +29,9 @@ export function validateEmergencyContact(values: Raw<"name" | "phone" | "alterna
 }
 
 /** Validates a change-password form. */
-export function validatePasswordChange(values: Raw<"currentPassword" | "newPassword" | "confirmPassword">): FieldErrors {
+export function validatePasswordChange(
+  values: Raw<"currentPassword" | "newPassword" | "confirmPassword">,
+): FieldErrors {
   return fieldErrorsOf(passwordChangeSchema, values);
 }
 

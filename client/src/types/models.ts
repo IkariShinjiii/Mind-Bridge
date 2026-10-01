@@ -11,13 +11,7 @@ export type CaseStatus = "open" | "reviewed" | "escalated";
 
 /** Free text from the database; known values are listed so comparisons stay checked. */
 export type AppointmentStatus =
-  | "Pending Review"
-  | "Confirmed"
-  | "Rescheduled"
-  | "Completed"
-  | "Declined"
-  | "Cancelled"
-  | (string & {});
+  "Pending Review" | "Confirmed" | "Rescheduled" | "Completed" | "Declined" | "Cancelled" | (string & {});
 
 export interface EmergencyContact {
   name: string;
