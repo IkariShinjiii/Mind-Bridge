@@ -8,8 +8,8 @@ export default function PrivacyPolicy() {
     <PublicShell>
     <div className="px-4 py-12 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-        <Link to="/" className="mb-8 inline-flex items-center gap-2 text-[color:var(--mb-ink)]">
-          <ArrowLeft className="w-4 h-4" />
+        <Link to="/" className="mb-8 inline-flex min-h-[44px] items-center gap-2 text-[color:var(--mb-ink)] underline">
+          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Back to Home</span>
         </Link>
         

@@ -112,12 +112,12 @@ export default function DashboardLayout({ children }) {
       </a>
       <header className="shrink-0 border-b-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)]">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline">
+          <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline">
             <img src={icon} alt="" className="h-8 w-8 rounded" />
             <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
           </Link>
 
-          <nav className="mx-4 hidden flex-1 items-center gap-1 md:flex" aria-label="Main">
+          <nav className="mx-4 hidden flex-1 items-center gap-1 lg:flex" aria-label="Main">
             {links.map(({ to, label, active }) => (
               <Link
                 key={to}
@@ -209,7 +209,7 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
-      <main id="main-content" ref={mainRef} tabIndex={-1} className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 md:pb-8 lg:px-8">
+      <main id="main-content" ref={mainRef} tabIndex={-1} className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8">
         <div key={location.pathname} className="mx-auto w-full max-w-6xl">
           {children}
         </div>
@@ -217,7 +217,7 @@ export default function DashboardLayout({ children }) {
 
       <nav
         aria-label="Main"
-        className="fixed bottom-0 left-0 right-0 z-40 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex h-16 items-stretch justify-around">

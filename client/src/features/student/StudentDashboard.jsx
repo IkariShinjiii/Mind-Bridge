@@ -438,7 +438,7 @@ export default function StudentDashboard() {
                 100% confidential student channel
               </div>
             </div>
-            <button type="button" onClick={() => setChatOpen(true)} className="mb-btn mb-btn-line mt-3 self-start !min-h-[44px] !px-4 text-sm">
+            <button type="button" onClick={() => setChatOpen(true)} className="mb-btn mb-btn-line mt-3 self-start whitespace-nowrap !min-h-[44px] !px-4 text-sm">
               <MessageSquare className="h-4 w-4" aria-hidden="true" />
               Message counselor
             </button>

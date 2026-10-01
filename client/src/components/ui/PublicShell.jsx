@@ -28,7 +28,7 @@ export function useTheme() {
 
 export function Brand({ small = false }) {
   return (
-    <Link to="/" className="inline-flex items-center gap-3 no-underline text-[color:var(--mb-ink)]">
+    <Link to="/" className="inline-flex min-h-[44px] items-center gap-3 no-underline text-[color:var(--mb-ink)]">
       <img src={icon} alt="" className={small ? "h-8 w-8 rounded" : "h-10 w-10 rounded"} />
       <span className="leading-tight">
         <span className="mb-sign block whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
@@ -49,7 +49,7 @@ export function CrisisStrip() {
         <p className="font-semibold">In crisis right now? The NCMH hotline is free and open 24/7.</p>
         <a
           href="tel:1553"
-          className="mb-sign inline-flex items-center gap-2 text-xl font-bold no-underline hover:underline"
+          className="mb-sign inline-flex min-h-[44px] items-center gap-2 text-xl font-bold no-underline hover:underline"
           style={{ color: "inherit" }}
         >
           <Phone className="h-5 w-5" aria-hidden="true" />
@@ -131,10 +131,10 @@ export default function PublicShell({ children, showAuthLinks = true }) {
             </p>
             <p>Messenger: USA- Guidance Services and Testing Center</p>
           </address>
-          <nav aria-label="Legal" className="flex flex-col gap-2 md:items-end">
-            <Link to="/privacy-policy" className="text-[color:var(--mb-ink)]">Privacy Policy</Link>
-            <Link to="/terms" className="text-[color:var(--mb-ink)]">Terms and Conditions</Link>
-            <Link to="/cookie-policy" className="text-[color:var(--mb-ink)]">Cookie Policy</Link>
+          <nav aria-label="Legal" className="flex flex-col md:items-end">
+            <Link to="/privacy-policy" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Privacy Policy</Link>
+            <Link to="/terms" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Terms and Conditions</Link>
+            <Link to="/cookie-policy" className="inline-flex min-h-[44px] items-center text-[color:var(--mb-ink)] underline">Cookie Policy</Link>
           </nav>
         </div>
         <p className="mx-auto max-w-6xl px-4 pb-8 text-sm text-[color:var(--mb-muted)] sm:px-6">

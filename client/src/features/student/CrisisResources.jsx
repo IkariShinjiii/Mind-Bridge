@@ -75,12 +75,12 @@ function HotlineCard({ hotline }) {
 
       <ul className={`mt-4 divide-y-2 border-t-2 ${edge} divide-[color:var(--mb-line)]`}>
         {numbers.map((n) => (
-          <li key={n.tel} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+          <li key={n.tel} className="flex flex-wrap items-center justify-between gap-2 py-0.5">
             <span className="text-[color:var(--mb-muted)]">{n.label}</span>
             <a
               href={`tel:${n.tel}`}
               aria-label={`Call ${name}, ${n.label}, ${n.display}`}
-              className="font-bold tabular-nums text-[color:var(--mb-ink)] underline"
+              className="inline-flex min-h-[44px] items-center font-bold tabular-nums text-[color:var(--mb-ink)] underline"
             >
               {n.display}
             </a>
