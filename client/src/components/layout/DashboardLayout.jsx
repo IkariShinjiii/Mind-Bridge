@@ -13,15 +13,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../ui/PublicShell";
+import { avatarColor } from "../../lib/avatar";
 import icon from "../../assets/mindbridge-icon.png";
 
-const GRADIENTS = {
-  cyan: "from-teal-500 to-cyan-600",
-  purple: "from-indigo-500 to-slate-700",
-  emerald: "from-emerald-500 to-teal-700",
-  amber: "from-amber-500 to-orange-600",
-  rose: "from-rose-500 to-pink-600",
-};
 
 export default function DashboardLayout({ children }) {
   const { currentUser, userRole, userData, logout } = useAuth();
@@ -36,7 +30,7 @@ export default function DashboardLayout({ children }) {
   const roleLabel = isStaff ? "Staff" : "Student";
   const initials = (safeName || "U").slice(0, 2).toUpperCase();
   const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
-  const gradient = GRADIENTS[userData?.avatarGradient] || GRADIENTS.cyan;
+  const avatarBg = avatarColor(userData?.avatarGradient);
   const next = theme === "dark" ? "light" : "dark";
 
   const isAccountsTab = location.pathname === "/admin/dashboard" && location.search.includes("tab=accounts");
@@ -135,7 +129,7 @@ export default function DashboardLayout({ children }) {
               {showGoogleAvatar ? (
                 <img src={currentUser.photoURL} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
               ) : (
-                <span className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradient} text-sm font-bold text-white`}>
+                <span style={{ backgroundColor: avatarBg }} className="flex h-full w-full items-center justify-center text-sm font-bold text-white">
                   {initials}
                 </span>
               )}
