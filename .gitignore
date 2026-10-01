@@ -22,3 +22,6 @@ vite.config.js.timestamp-*
 
 # local visual-check harness
 client/.preview/
+
+# Per-machine tool settings
+.claude/settings.local.json

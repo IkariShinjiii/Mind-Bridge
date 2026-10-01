@@ -18,31 +18,13 @@ body,
   overflow: hidden;
   background-color: #030712;
   color: #f3f4f6;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 html {
   scroll-behavior: smooth;
-}
-
-/* ── 2. Unified & Locked Full-Viewport Mesh Background ── */
-.app-mesh-bg {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100dvh;
-  pointer-events: none;
-  z-index: -10;
-  background-color: #020817;
-  background-image: 
-    radial-gradient(circle at 12% 16%, rgba(6, 182, 212, 0.16) 0%, transparent 40%),
-    radial-gradient(circle at 88% 22%, rgba(59, 130, 246, 0.14) 0%, transparent 45%),
-    radial-gradient(circle at 50% 85%, rgba(139, 92, 246, 0.09) 0%, transparent 55%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 /* ── 3. Base Touch Accessibility & Interactions ── */
@@ -90,33 +72,10 @@ body::-webkit-scrollbar,
 
 /* ── 5. Component Styling Utilities ── */
 @layer utilities {
-  .glass-card {
-    @apply rounded-2xl border border-white/[0.08] bg-gray-900/60 backdrop-blur-xl shadow-xl;
-  }
-  
-  .glass-card-hover {
-    @apply glass-card transition-all duration-200 hover:border-cyan-500/30 hover:bg-gray-900/80 hover:shadow-cyan-500/5 hover:-translate-y-0.5;
-  }
-
   .interactive-tap {
     @apply active:scale-[0.98] transition-transform duration-150;
   }
 
-  .action-button {
-    @apply min-h-[44px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98];
-  }
-
-  .tab-button {
-    @apply min-h-[44px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.98];
-  }
-
-  .panel-shell {
-    @apply rounded-3xl border border-white/[0.08] bg-gray-900/80 p-4 shadow-xl backdrop-blur-md transition-all duration-200 ease-out sm:p-6;
-  }
-
-  .soft-card {
-    @apply rounded-2xl border border-white/[0.08] bg-gray-900/70 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
