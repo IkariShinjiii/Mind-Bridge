@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ClipboardList,
@@ -124,25 +124,37 @@ export default function AdminPanel() {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [exportingCsv, setExportingCsv] = useState(false);
   const [notice, setNotice] = useState({ type: "", message: "" });
+  const [loadError, setLoadError] = useState("");
+  const noticeTimer = useRef(null);
 
   const showNotice = (type, message) => {
+    clearTimeout(noticeTimer.current);
     setNotice({ type, message });
-    setTimeout(() => setNotice({ type: "", message: "" }), 6000);
+    noticeTimer.current = setTimeout(() => setNotice({ type: "", message: "" }), 6000);
   };
+  useEffect(() => () => clearTimeout(noticeTimer.current), []);
 
   async function loadData() {
     setLoading(true);
     try {
+      // A failed fetch shows an empty list; remember which ones failed so the page can say so
+      const failed = [];
+      const guard = (label) => () => {
+        failed.push(label);
+        return [];
+      };
       const [allUsers, assessmentData, appointmentData] = await Promise.all([
-        getAdminUsers().catch(() => []),
-        getAssessments().catch(() => []),
-        getAllAppointments().catch(() => []),
+        getAdminUsers().catch(guard("accounts")),
+        getAssessments().catch(guard("check-ins")),
+        getAllAppointments().catch(guard("appointments")),
       ]);
+      setLoadError(failed.length ? `Could not load ${failed.join(", ")}. What you see below may be incomplete.` : "");
       setUsers(Array.isArray(allUsers) ? allUsers : []);
       setAssessments(Array.isArray(assessmentData) ? assessmentData : []);
       setAppointments(Array.isArray(appointmentData) ? appointmentData : []);
     } catch (error) {
       console.error("Failed to load admin data", error);
+      setLoadError("Could not load the dashboard. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -369,6 +381,15 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {loadError && !loading && (
+        <div role="alert" className="mb-alert flex flex-wrap items-center justify-between gap-3 font-medium">
+          <span>{loadError}</span>
+          <button type="button" onClick={loadData} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* At-a-glance counts, most urgent first */}
       <section aria-label="Summary" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
