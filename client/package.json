@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
@@ -22,9 +24,13 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@storybook/addon-a11y": "^10.6.1",
+    "@storybook/addon-docs": "^10.6.1",
+    "@storybook/react-vite": "^10.6.1",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
+    "storybook": "^10.6.1",
     "tailwindcss": "^3.4.4",
     "vite": "^5.3.1",
     "vitest": "^2.1.9"

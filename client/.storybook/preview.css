@@ -1,0 +1,9 @@
+/* index.css locks html/body/#root to the viewport for the app shell; Storybook pages must scroll. */
+html,
+body {
+  height: auto;
+  min-height: 100%;
+  overflow: auto;
+  background-color: transparent;
+  color: inherit;
+}

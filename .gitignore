@@ -26,6 +26,9 @@ client/.preview/
 # Per-machine tool settings
 .claude/settings.local.json
 
+# Storybook build output
+/client/storybook-static/
+
 # Playwright
 /client/test-results/
 /client/playwright-report/
