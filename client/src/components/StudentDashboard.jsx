@@ -11,6 +11,7 @@ import {
   Target,
   MessageSquare,
   ArrowRight,
+  Check,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -439,175 +440,214 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* WELLNESS SURVEY */}
-        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
-                <Activity className="h-4 w-4 text-[color:var(--mb-brand)]" />
-              </div>
-              <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Wellness Check-in</h2>
-                <p className="text-xs text-[color:var(--mb-muted)]">Validated PHQ-9 & GAD-7 screening • Takes ~1 min</p>
-                <p className="text-[10px] text-[color:var(--mb-muted)] mt-1 max-w-sm">By participating, you consent to the collection and processing of your wellness data for triage and support purposes.</p>
-              </div>
-            </div>
-            {!surveyCompleted && (
-              <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
-                {answeredCount}/{SCREENING_QUESTIONS.length}
-              </div>
-            )}
+        {/* CHECK-IN: one question per screen, shown as stops on a route (Calm Wayfinding) */}
+        <section
+          className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
+          aria-labelledby="checkin-h"
+        >
+          <div className="mb-5">
+            <h2 id="checkin-h" className="mb-sign text-3xl font-bold">Check-in</h2>
+            <p className="text-[color:var(--mb-muted)]">
+              Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved
+              guidance staff only.
+            </p>
+            <p className="mt-1 max-w-[65ch] text-sm text-[color:var(--mb-muted)]">
+              By taking part, you consent to your answers being collected and processed for triage and support.
+            </p>
           </div>
 
           {surveyCompleted ? (
-            <div className="space-y-6 animate-fade-up">
-              {/* Empathetic Result Card */}
-              <div
-                className={`rounded-md border p-5 sm:p-6 text-center ${
-                  lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
-                    ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)]"
-                    : lastSubmission?.riskLevel === "medium"
-                    ? "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)]"
-                    : "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)]"
-                }`}
-              >
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--mb-surface)] shadow-inner">
-                  {lastSubmission?.riskLevel === "high" ? (
-                    <HeartPulse className="h-7 w-7 text-[color:var(--mb-urgent)]" />
-                  ) : lastSubmission?.riskLevel === "medium" ? (
-                    <Sprout className="h-7 w-7 text-[color:var(--mb-warn)]" />
-                  ) : (
-                    <Sparkles className="h-7 w-7 text-[color:var(--mb-safe)]" />
-                  )}
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-[color:var(--mb-ink)]">
-                  {lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
-                    ? "We're here with you — You don't have to carry this alone."
-                    : lastSubmission?.riskLevel === "medium"
-                    ? "Thank you for checking in — Take some time to breathe."
-                    : "Check-in Complete — You're doing great!"}
-                </h3>
-                <p className="mt-2 text-xs sm:text-sm text-[color:var(--mb-muted)] max-w-lg mx-auto leading-relaxed">
-                  {lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
-                    ? "Your responses suggest you may be navigating heavy stress or emotional distress. A University Counselor has been prioritized to review your status in complete confidence."
-                    : lastSubmission?.riskLevel === "medium"
-                    ? "Your answers indicate elevated stress levels. Practicing self-care routines or speaking with a campus counselor can help navigate academic pressures."
-                    : "Your answers show a stable wellness baseline. Continue your healthy routines, and remember support is always here if things change."}
-                </p>
-
-                {/* Crisis Support Hotlines Banner (Philippines & Campus) */}
-                {(lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview) && (
-                  <div className="mt-5 rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-ground)] p-4 text-left">
-                    <div className="flex items-center gap-2 text-[color:var(--mb-urgent)] font-semibold text-xs sm:text-sm mb-2">
-                      <HeartPulse className="h-4 w-4 text-[color:var(--mb-urgent)] shrink-0" />
-                      <span>Immediate Crisis Support Resources (Free & 24/7)</span>
+            (() => {
+              const high = lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview;
+              const medium = !high && lastSubmission?.riskLevel === "medium";
+              const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
+              return (
+                <div className="space-y-4 animate-fade-up" aria-live="polite">
+                  <div className="mb-plate p-5 sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      </span>
+                      <div>
+                        <p className="mb-sign text-lg font-bold opacity-90">
+                          {high ? "Priority support suggested" : medium ? "Some stress is showing" : "Steady right now"}
+                        </p>
+                        <h3 className="mb-sign text-3xl font-bold leading-tight sm:text-4xl">
+                          {high
+                            ? "You don't have to carry this alone."
+                            : medium
+                            ? "Thank you for checking in. Take some time to breathe."
+                            : "Check-in complete. You're doing well."}
+                        </h3>
+                        <p className="mt-2 max-w-[60ch] text-[color:var(--mb-panel-soft)]">
+                          {high
+                            ? "Your answers suggest you may be going through heavy stress or distress. Your check-in is marked for priority review by guidance staff, in confidence."
+                            : medium
+                            ? "Your answers suggest elevated stress. Self-care routines, or talking with a campus counselor, can help with academic pressure."
+                            : "Your answers show a steady baseline. Keep up your routines, and remember support is here if things change."}
+                        </p>
+                      </div>
                     </div>
-                    <ul className="space-y-1.5 text-xs text-[color:var(--mb-muted)]">
-                      <li>
-                        • <strong>NCMH National Crisis Hotline:</strong> Dial{" "}
-                        <span className="text-[color:var(--mb-brand)] font-mono font-semibold">1553</span> (Toll-Free) or{" "}
-                        <span className="text-[color:var(--mb-brand)] font-mono">0917-899-8727</span>
-                      </li>
-                      <li>
-                        • <strong>Hopeline Philippines:</strong>{" "}
-                        <span className="text-[color:var(--mb-brand)] font-mono">0917-558-4673</span> /{" "}
-                        <span className="text-[color:var(--mb-brand)] font-mono">(02) 8804-4673</span>
-                      </li>
-                      <li>
-                        • <strong>USA Center for Guidance & Counseling:</strong> Inquire directly through Mind Bridge or visit the Guidance Office.
-                      </li>
-                    </ul>
                   </div>
-                )}
 
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={openBookingModal}
-                    className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] transition hover:bg-[color:var(--mb-panel)] shadow-sm interactive-tap"
-                  >
-                    <Calendar className="h-4 w-4 shrink-0" />
-                    <span>Book Counselor Session</span>
-                  </button>
-                  <button
-                    onClick={resetCheckIn}
-                    className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 py-2.5 text-xs sm:text-sm font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-line)] transition"
-                  >
-                    Take Check-in Again
-                  </button>
+                  {high && (
+                    <div className="mb-plate-amber p-5">
+                      <p className="mb-sign text-2xl font-bold">If you need to talk to someone right now</p>
+                      <ul className="mt-2 space-y-1">
+                        <li>
+                          <strong>NCMH National Crisis Hotline:</strong> call{" "}
+                          <a href="tel:1553" className="font-bold underline">1553</a> (toll-free) or{" "}
+                          <span className="font-bold">0917-899-8727</span>
+                        </li>
+                        <li>
+                          <strong>Hopeline Philippines:</strong> <span className="font-bold">0917-558-4673</span> or{" "}
+                          <span className="font-bold">(02) 8804-4673</span>
+                        </li>
+                        <li>
+                          <strong>USA Guidance Center:</strong> message through Mind Bridge or visit the Guidance Office.
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-3">
+                    <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
+                      <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
+                    </button>
+                    <button type="button" onClick={resetCheckIn} className="mb-btn mb-btn-line">
+                      Take the check-in again
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()
           ) : (
             <>
-              {/* Progress Bar */}
-              <div className="mb-5 w-full h-2 overflow-hidden rounded-full bg-[color:var(--mb-surface-2)]">
-                <div
-                  className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
-                  style={{ width: `${progressPct}%` }}
-                />
+              {(() => {
+                const firstOpen = answers.findIndex((a) => a === null);
+                const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
+                return (
+                  <ol className="mb-5 flex gap-2" aria-label="Check-in progress">
+                    {SCREENING_QUESTIONS.map((q, i) => {
+                      const done = answers[i] !== null;
+                      const here = i === qIndex;
+                      return (
+                        <li key={q.id} className="flex-1">
+                          <button
+                            type="button"
+                            onClick={() => setQIndex(i)}
+                            disabled={i > reach}
+                            aria-current={here ? "step" : undefined}
+                            aria-label={`Question ${i + 1}${done ? ", answered" : ""}`}
+                            className={`mb-sign grid h-11 w-full place-items-center rounded border-2 text-xl font-bold disabled:cursor-not-allowed disabled:opacity-50 ${
+                              here
+                                ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                : done
+                                ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                                : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
+                            }`}
+                          >
+                            {done && !here ? <Check className="h-5 w-5" aria-hidden="true" /> : i + 1}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                );
+              })()}
+
+              <div className="mb-plate p-5 sm:p-6">
+                <p className="mb-sign text-lg font-bold opacity-90">
+                  You are on question {qIndex + 1} of {SCREENING_QUESTIONS.length}
+                </p>
+                <p className="mb-sign mt-1 text-3xl font-bold leading-tight sm:text-4xl">{currentQ.text}</p>
+                <p className="mt-2 text-[color:var(--mb-panel-soft)]">{currentQ.subtext}</p>
+                {currentQ.isCrisisItem && (
+                  <p className="mt-4 rounded bg-[color:var(--mb-panel-ink)] p-3 text-[color:var(--mb-panel)]">
+                    This question is about your safety. If you answer anything above 0, your check-in is marked for
+                    priority review by guidance staff. If you need to talk to someone right now, call{" "}
+                    <a href="tel:1553" className="font-bold underline">1553</a> (free, 24/7).
+                  </p>
+                )}
               </div>
 
-              {/* Current Question */}
-              <div className="mb-5">
-                <div className="text-[11px] uppercase tracking-wider text-[color:var(--mb-brand)] font-semibold mb-1">
-                  Question {qIndex + 1} of {SCREENING_QUESTIONS.length}{" "}
-                  {currentQ.isCrisisItem && "• Safety Item"}
+              <fieldset className="mt-5">
+                <legend className="sr-only">{currentQ.text}</legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {SCALE_OPTIONS.map((opt) => {
+                    const selected = answers[qIndex] === opt.value;
+                    return (
+                      <label key={opt.value} className="block cursor-pointer">
+                        <input
+                          type="radio"
+                          name={`q-${qIndex}`}
+                          value={opt.value}
+                          checked={selected}
+                          onChange={() => selectOption(opt.value)}
+                          className="peer sr-only"
+                        />
+                        <span
+                          className={`flex items-center gap-4 rounded-md border-2 p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
+                            selected
+                              ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                              : "border-[color:var(--mb-line)] hover:border-[color:var(--mb-ink)]"
+                          }`}
+                        >
+                          <span
+                            className={`mb-sign grid h-12 w-12 shrink-0 place-items-center rounded text-3xl font-bold ${
+                              selected
+                                ? "bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
+                                : "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {opt.value}
+                          </span>
+                          <span>
+                            <span className="mb-sign block text-xl font-bold">{opt.label.replace(/^\d - /, "")}</span>
+                            <span className={`block ${selected ? "text-[color:var(--mb-panel-soft)]" : "text-[color:var(--mb-muted)]"}`}>
+                              {opt.desc}
+                            </span>
+                          </span>
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
-                <p className="text-base sm:text-lg font-medium text-[color:var(--mb-ink)]">{currentQ.text}</p>
-                <p className="text-xs text-[color:var(--mb-muted)] mt-0.5">{currentQ.subtext}</p>
-              </div>
+              </fieldset>
 
-              {/* Options */}
-              <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-                {SCALE_OPTIONS.map((opt) => {
-                  const isSelected = answers[qIndex] === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => selectOption(opt.value)}
-                      className={`rounded-md p-3.5 sm:p-4 text-left transition transform focus:outline-none ${
-                        isSelected
-                          ? "bg-[color:var(--mb-panel)] border border-[color:var(--mb-brand)] text-[color:var(--mb-panel-ink)] shadow-sm scale-[1.01]"
-                          : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:bg-[color:var(--mb-line)]"
-                      }`}
-                    >
-                      <div className="font-semibold text-xs sm:text-sm">{opt.label}</div>
-                      <div className={`text-[11px] sm:text-xs mt-1 ${isSelected ? "text-[color:var(--mb-brand)]" : "text-[color:var(--mb-muted)]"}`}>
-                        {opt.desc}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-[color:var(--mb-line)]">
+              <div className="mt-6 flex items-center justify-between gap-3 border-t-2 border-[color:var(--mb-line)] pt-5">
                 <button
+                  type="button"
                   onClick={() => setQIndex(Math.max(0, qIndex - 1))}
                   disabled={qIndex === 0}
-                  className="rounded-md px-4 py-2 text-xs sm:text-sm text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] disabled:opacity-30 transition"
+                  className="mb-btn mb-btn-line"
                 >
-                  Previous
+                  Back
                 </button>
                 <button
+                  type="button"
                   onClick={handleNext}
                   disabled={answers[qIndex] === null || submittingSurvey}
-                  className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] transition hover:bg-[color:var(--mb-panel)] disabled:opacity-50 shadow-sm"
+                  className="mb-btn mb-btn-solid"
                 >
                   {submittingSurvey ? (
                     <>
-                      <Spinner size={14} className="text-[color:var(--mb-ink)]" />
+                      <Spinner size={16} className="text-[color:var(--mb-panel-ink)]" />
                       <span>Evaluating…</span>
                     </>
                   ) : qIndex === SCREENING_QUESTIONS.length - 1 ? (
-                    "Submit Assessment"
+                    "Submit check-in"
                   ) : (
-                    "Next Question →"
+                    <>
+                      Next <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                    </>
                   )}
                 </button>
               </div>
             </>
           )}
-        </div>
+        </section>
 
         {/* WELLNESS TREND LINE CHART & HISTORY SECTION */}
         <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6 shadow-sm">
