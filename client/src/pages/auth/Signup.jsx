@@ -152,7 +152,7 @@ export default function Signup() {
           </label>
           </div>
           {fieldErrors.consent && (
-            <p id="consent-error" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+            <p id="consent-error" role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
               {fieldErrors.consent}
             </p>
           )}

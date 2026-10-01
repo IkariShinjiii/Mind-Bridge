@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User,
@@ -26,6 +26,8 @@ import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/ap
 import { AVATAR_COLORS, avatarColor } from "../../lib/avatar";
 import Spinner from "../../components/ui/Spinner";
 import PanelHead from "../../components/ui/PanelHead";
+import { validateEmergencyContact, validatePasswordChange, isPhone } from "../../lib/validation";
+import { friendlyError } from "../../lib/errors";
 
 const PRESET_GOALS = [
   "Manage academic stress and burnout",
@@ -57,14 +59,27 @@ function statusTone(status) {
   return "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]";
 }
 
-function Field({ id, label, hint, children }) {
+function Field({ id, label, hint, error, required, children }) {
+  // Link the message to the input so screen readers read it with the field
+  const control = React.isValidElement(children)
+    ? React.cloneElement(children, {
+        "aria-invalid": error ? true : undefined,
+        "aria-describedby": error ? `${id}-error` : undefined,
+      })
+    : children;
   return (
     <div>
       <label htmlFor={id} className="mb-1 block font-bold text-[color:var(--mb-ink)]">
         {label}
+        {required && <span aria-hidden="true"> *</span>}
         {hint && <span className="ml-1 font-normal text-[color:var(--mb-muted)]">({hint})</span>}
       </label>
-      {children}
+      {control}
+      {error && (
+        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -101,6 +116,7 @@ export default function UserSettings() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Emergency contact
   const [emergencyContact, setEmergencyContact] = useState({
@@ -177,26 +193,34 @@ export default function UserSettings() {
     }
   }, [activeTab, currentUser]);
 
+  const feedbackTimer = useRef(null);
   const showFeedback = (type, message) => {
+    clearTimeout(feedbackTimer.current);
     setFeedback({ type, message });
-    setTimeout(() => setFeedback({ type: "", message: "" }), 5000);
+    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 5000);
   };
+  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
-    if (!name.trim()) {
-      showFeedback("error", "Your name cannot be empty.");
+    const errors = {};
+    if (!name.trim()) errors.name = "Your name cannot be empty.";
+    if (phone.trim() && !isPhone(phone)) errors.phone = "Enter a valid phone number, or leave this blank.";
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = errors.name ? "set-name" : "set-phone";
+      document.getElementById(first)?.focus();
       return;
     }
     setSaving(true);
     try {
       if (currentUser && currentUser.displayName !== name) {
-        await updateProfile(currentUser, { displayName: name });
+        await updateProfile(currentUser, { displayName: name.trim() });
       }
       await saveUserSettings(currentUser.uid, {
-        name,
-        phone,
-        bio,
+        name: name.trim(),
+        phone: phone.trim(),
+        bio: bio.trim(),
         avatarGradient: avatarId,
         useGoogleAvatar,
         updatedAt: new Date().toISOString(),
@@ -205,7 +229,7 @@ export default function UserSettings() {
       showFeedback("success", "Profile saved.");
     } catch (err) {
       console.error(err);
-      showFeedback("error", err.message || "Could not save your profile.");
+      showFeedback("error", friendlyError(err, "Could not save your profile."));
     } finally {
       setSaving(false);
     }
@@ -213,16 +237,11 @@ export default function UserSettings() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      showFeedback("error", "Fill in all three password fields.");
-      return;
-    }
-    if (newPassword.length < 6) {
-      showFeedback("error", "The new password must be at least 6 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      showFeedback("error", "The new passwords do not match.");
+    const errors = validatePasswordChange({ currentPassword, newPassword, confirmPassword });
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      const first = ["currentPassword", "newPassword", "confirmPassword"].find((k) => errors[k]);
+      document.getElementById({ currentPassword: "set-current-pw", newPassword: "set-new-pw", confirmPassword: "set-confirm-pw" }[first])?.focus();
       return;
     }
 
@@ -238,9 +257,10 @@ export default function UserSettings() {
     } catch (err) {
       console.error(err);
       if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-        showFeedback("error", "Your current password is incorrect.");
+        setFieldErrors({ currentPassword: "Your current password is incorrect." });
+        document.getElementById("set-current-pw")?.focus();
       } else {
-        showFeedback("error", err.message || "Could not update your password.");
+        showFeedback("error", friendlyError(err, "Could not update your password."));
       }
     } finally {
       setPasswordLoading(false);
@@ -249,20 +269,28 @@ export default function UserSettings() {
 
   const handleSaveEmergencyContact = async (e) => {
     e.preventDefault();
-    if (!emergencyContact.name.trim() || !emergencyContact.phone.trim()) {
-      showFeedback("error", "Add at least a contact name and a phone number.");
+    const errors = validateEmergencyContact(emergencyContact);
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      const ids = { name: "ec-name", phone: "ec-phone", alternatePhone: "ec-alt" };
+      document.getElementById(ids[Object.keys(errors)[0]])?.focus();
       return;
     }
     setSaving(true);
     try {
       await saveUserSettings(currentUser.uid, {
-        emergencyContact,
+        emergencyContact: {
+          ...emergencyContact,
+          name: emergencyContact.name.trim(),
+          phone: emergencyContact.phone.trim(),
+          alternatePhone: (emergencyContact.alternatePhone || "").trim(),
+        },
         updatedAt: new Date().toISOString(),
       });
       await refreshUserData();
       showFeedback("success", "Emergency contact saved.");
     } catch (err) {
-      showFeedback("error", err.message || "Could not save your emergency contact.");
+      showFeedback("error", friendlyError(err, "Could not save your emergency contact."));
     } finally {
       setSaving(false);
     }
@@ -304,7 +332,7 @@ export default function UserSettings() {
       await refreshUserData();
       showFeedback("success", "Goals saved.");
     } catch (err) {
-      showFeedback("error", err.message || "Could not save your goals.");
+      showFeedback("error", friendlyError(err, "Could not save your goals."));
     } finally {
       setSaving(false);
     }
@@ -370,7 +398,10 @@ export default function UserSettings() {
               <button
                 key={id}
                 type="button"
-                onClick={() => setActiveTab(id)}
+                onClick={() => {
+                  setFieldErrors({});
+                  setActiveTab(id);
+                }}
                 aria-current={activeTab === id ? "page" : undefined}
                 className={`inline-flex min-h-[48px] shrink-0 items-center gap-2 whitespace-nowrap rounded-md border-2 px-4 text-left font-bold transition-colors ${
                   activeTab === id
@@ -387,7 +418,7 @@ export default function UserSettings() {
           <div className="min-w-0 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
             {/* PROFILE */}
             {activeTab === "profile" && (
-              <form onSubmit={handleSaveProfile} className="space-y-5">
+              <form onSubmit={handleSaveProfile} noValidate className="space-y-5">
                 <PanelHead title="Profile">How your name and picture appear in Mind Bridge.</PanelHead>
 
                 <fieldset className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
@@ -449,11 +480,12 @@ export default function UserSettings() {
                 </fieldset>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field id="set-name" label="Full name">
+                  <Field id="set-name" label="Full name" required error={fieldErrors.name}>
                     <input
                       id="set-name"
                       type="text"
                       value={name}
+                      maxLength={80}
                       onChange={(e) => setName(e.target.value)}
                       autoComplete="name"
                       required
@@ -469,7 +501,7 @@ export default function UserSettings() {
                       className="mb-field !bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
                     />
                   </Field>
-                  <Field id="set-phone" label="Phone number" hint="optional">
+                  <Field id="set-phone" label="Phone number" hint="optional" error={fieldErrors.phone}>
                     <input
                       id="set-phone"
                       type="tel"
@@ -493,6 +525,7 @@ export default function UserSettings() {
                     id="set-bio"
                     rows={3}
                     value={bio}
+                    maxLength={500}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Your program, year level, or anything you'd like counselors to know"
                     className="mb-field"
@@ -522,8 +555,8 @@ export default function UserSettings() {
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleChangePassword} className="max-w-md space-y-4">
-                    <Field id="set-current-pw" label="Current password">
+                  <form onSubmit={handleChangePassword} noValidate className="max-w-md space-y-4">
+                    <Field id="set-current-pw" label="Current password" required error={fieldErrors.currentPassword}>
                       <input
                         id="set-current-pw"
                         type="password"
@@ -534,7 +567,7 @@ export default function UserSettings() {
                         className="mb-field"
                       />
                     </Field>
-                    <Field id="set-new-pw" label="New password" hint="at least 6 characters">
+                    <Field id="set-new-pw" label="New password" hint="at least 6 characters" required error={fieldErrors.newPassword}>
                       <input
                         id="set-new-pw"
                         type="password"
@@ -545,7 +578,7 @@ export default function UserSettings() {
                         className="mb-field"
                       />
                     </Field>
-                    <Field id="set-confirm-pw" label="Confirm new password">
+                    <Field id="set-confirm-pw" label="Confirm new password" required error={fieldErrors.confirmPassword}>
                       <input
                         id="set-confirm-pw"
                         type="password"
@@ -615,14 +648,14 @@ export default function UserSettings() {
 
             {/* EMERGENCY CONTACT (students) */}
             {activeTab === "emergency" && (
-              <form onSubmit={handleSaveEmergencyContact} className="space-y-5">
+              <form onSubmit={handleSaveEmergencyContact} noValidate className="space-y-5">
                 <PanelHead title="Emergency contact">
                   Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in an
                   emergency.
                 </PanelHead>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field id="ec-name" label="Contact's full name">
+                  <Field id="ec-name" label="Contact's full name" required error={fieldErrors.name}>
                     <input
                       id="ec-name"
                       type="text"
@@ -648,7 +681,7 @@ export default function UserSettings() {
                       <option value="Other">Other</option>
                     </select>
                   </Field>
-                  <Field id="ec-phone" label="Mobile number">
+                  <Field id="ec-phone" label="Mobile number" required error={fieldErrors.phone}>
                     <input
                       id="ec-phone"
                       type="tel"
@@ -659,7 +692,7 @@ export default function UserSettings() {
                       className="mb-field"
                     />
                   </Field>
-                  <Field id="ec-alt" label="Another number" hint="optional">
+                  <Field id="ec-alt" label="Another number" hint="optional" error={fieldErrors.alternatePhone}>
                     <input
                       id="ec-alt"
                       type="tel"

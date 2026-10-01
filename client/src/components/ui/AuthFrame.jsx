@@ -43,7 +43,7 @@ export function Field({ id, label, hint, error, ...props }) {
         style={error ? { borderColor: "var(--mb-urgent)" } : undefined}
       />
       {error ? (
-        <p id={`${id}-error`} className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
           {error}
         </p>
       ) : null}

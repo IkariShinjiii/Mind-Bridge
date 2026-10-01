@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Calendar, AlertCircle, CheckCircle2, Plus } from "lucide-react";
 import {
   getAppointments,
@@ -11,6 +11,9 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import Spinner from "../../components/ui/Spinner";
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "./BookingFlow";
+import { toLocalInputValue } from "../../lib/dates";
+import { friendlyError } from "../../lib/errors";
+import { validateAvailabilityWindow } from "../../lib/validation";
 
 function safeFormatDate(val) {
   if (!val) return "Not specified";
@@ -125,22 +128,27 @@ export default function Appointments() {
   const [rescheduleStart, setRescheduleStart] = useState("");
   const [rescheduleEnd, setRescheduleEnd] = useState("");
   const [actionSubmitting, setActionSubmitting] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [bookingError, setBookingError] = useState("");
+  const [loadError, setLoadError] = useState("");
 
+  const feedbackTimer = useRef(null);
   const showFeedback = (type, message) => {
+    clearTimeout(feedbackTimer.current);
     setFeedback({ type, message });
-    setTimeout(() => {
-      setFeedback({ type: "", message: "" });
-    }, 4000);
+    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 6000);
   };
+  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
 
   async function loadData() {
     setLoading(true);
     try {
       const data = isCounselor ? await getAllAppointments() : await getAppointments();
       setAppointments(Array.isArray(data) ? data : []);
+      setLoadError("");
     } catch (err) {
       console.error("Error loading appointments", err);
-      setAppointments([]);
+      setLoadError(friendlyError(err, "Could not load your appointments. Check your connection and try again."));
     } finally {
       setLoading(false);
     }
@@ -158,7 +166,7 @@ export default function Appointments() {
       await loadData();
     } catch (err) {
       console.error("Failed to update status", err);
-      showFeedback("error", "Failed to update appointment status.");
+      showFeedback("error", friendlyError(err, "Could not update the appointment. Please try again."));
     } finally {
       setUpdatingId(null);
     }
@@ -167,11 +175,13 @@ export default function Appointments() {
   async function openBookingModal() {
     setShowModal(true);
     setLoadingSlots(true);
+    setBookingError("");
     try {
       const slots = await getAvailability();
       setAvailableSlots(slots.filter((s) => !s.isBooked));
     } catch (err) {
       console.error("Failed to fetch slots", err);
+      setBookingError(friendlyError(err, "Could not load open slots. Close this and try again."));
     } finally {
       setLoadingSlots(false);
     }
@@ -179,6 +189,7 @@ export default function Appointments() {
 
   async function handleBookSlot(slot) {
     setBookingId(slot.id);
+    setBookingError("");
     try {
       await bookAppointment(slot);
       showFeedback("success", "Appointment requested successfully!");
@@ -186,7 +197,7 @@ export default function Appointments() {
       setShowModal(false);
     } catch (err) {
       console.error("Booking error", err);
-      showFeedback("error", "Could not book appointment.");
+      setBookingError(friendlyError(err, "That slot could not be booked. It may have just been taken. Pick another."));
     } finally {
       setBookingId(null);
     }
@@ -196,30 +207,17 @@ export default function Appointments() {
   function openActionModal(type, apt) {
     setActionModal({ type, apt });
     setActionReason("");
+    setActionError("");
     if (type === "reschedule") {
-      // Default to existing start date or tomorrow
-      const currentStart = apt.start || apt.date;
-      if (currentStart) {
-        try {
-          const d = new Date(currentStart);
-          setRescheduleStart(d.toISOString().slice(0, 16));
-        } catch {
-          setRescheduleStart("");
-        }
-      }
-      if (apt.end) {
-        try {
-          const dEnd = new Date(apt.end);
-          setRescheduleEnd(dEnd.toISOString().slice(0, 16));
-        } catch {
-          setRescheduleEnd("");
-        }
-      }
+      // Start from the current booking, in local time
+      setRescheduleStart(toLocalInputValue(apt.start || apt.date));
+      setRescheduleEnd(toLocalInputValue(apt.end));
     }
   }
 
   function closeActionModal() {
     setActionModal(null);
+    setActionError("");
     setActionReason("");
     setRescheduleStart("");
     setRescheduleEnd("");
@@ -231,6 +229,22 @@ export default function Appointments() {
     if (!actionModal) return;
     const { type, apt } = actionModal;
 
+    if (type === "decline" && !actionReason.trim()) {
+      setActionError("Give the student a reason, or pick one of the quick reasons.");
+      document.getElementById("apt-reason")?.focus();
+      return;
+    }
+    if (type === "reschedule") {
+      const errors = validateAvailabilityWindow(rescheduleStart, rescheduleEnd || rescheduleStart);
+      const problem = errors.start || (rescheduleEnd ? errors.end : "");
+      if (problem) {
+        setActionError(problem.replace("The start time is in the past.", "Pick a new start time in the future."));
+        document.getElementById(errors.start ? "apt-new-start" : "apt-new-end")?.focus();
+        return;
+      }
+    }
+
+    setActionError("");
     setActionSubmitting(true);
     try {
       if (type === "decline") {
@@ -248,11 +262,6 @@ export default function Appointments() {
         });
         showFeedback("success", "Appointment cancelled successfully.");
       } else if (type === "reschedule") {
-        if (!rescheduleStart) {
-          showFeedback("error", "Please select a new appointment date & time.");
-          setActionSubmitting(false);
-          return;
-        }
         await updateAppointmentStatus(apt.id, "Rescheduled", {
           start: new Date(rescheduleStart).toISOString(),
           end: rescheduleEnd ? new Date(rescheduleEnd).toISOString() : null,
@@ -265,7 +274,7 @@ export default function Appointments() {
       closeActionModal();
     } catch (err) {
       console.error("Action error:", err);
-      showFeedback("error", "Failed to process appointment request.");
+      setActionError(friendlyError(err, "Could not process this request. Please try again."));
     } finally {
       setActionSubmitting(false);
     }
@@ -297,7 +306,7 @@ export default function Appointments() {
         </div>
 
         {!isCounselor && (
-          <button onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
+          <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
             <Plus className="h-5 w-5" aria-hidden="true" />
             Book a counselor
           </button>
@@ -345,6 +354,14 @@ export default function Appointments() {
       </div>
 
       {/* Schedule */}
+      {loadError && !loading && (
+        <div role="alert" className="mb-alert mb-6 flex flex-wrap items-center justify-between gap-3 font-medium">
+          <span>{loadError}</span>
+          <button type="button" onClick={loadData} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
+            Try again
+          </button>
+        </div>
+      )}
       {loading ? (
         <div className="flex min-h-[240px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
           <Spinner size={20} className="text-[color:var(--mb-brand)]" />
@@ -364,7 +381,7 @@ export default function Appointments() {
               : "You have no appointments in this category."}
           </p>
           {!isCounselor && filter === "all" && (
-            <button onClick={openBookingModal} className="mb-btn mb-btn-solid mt-5">
+            <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-5">
               Book a counselor
             </button>
           )}
@@ -526,6 +543,11 @@ export default function Appointments() {
         description="A confidential one-to-one session with university guidance counselors."
         maxWidth="max-w-xl"
       >
+        {bookingError && (
+          <p role="alert" className="mb-alert font-medium">
+            {bookingError}
+          </p>
+        )}
         <BookingFlow
           slots={availableSlots}
           loading={loadingSlots}
@@ -556,12 +578,18 @@ export default function Appointments() {
         maxWidth="max-w-lg"
       >
         {actionModal && (
-          <form onSubmit={handleActionSubmit} className="space-y-5">
+          <form onSubmit={handleActionSubmit} noValidate className="space-y-5">
+            {actionError && (
+              <p role="alert" className="mb-alert font-medium">
+                {actionError}
+              </p>
+            )}
+
             {actionModal.type === "reschedule" && (
               <div className="space-y-4 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
                 <div>
                   <label htmlFor="apt-new-start" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
-                    New start
+                    New start <span aria-hidden="true">*</span>
                   </label>
                   <input
                     id="apt-new-start"
@@ -617,10 +645,12 @@ export default function Appointments() {
                   : actionModal.type === "decline"
                   ? "Explanation for the student"
                   : "Reason for cancelling"}
+                {actionModal.type === "decline" && <span aria-hidden="true"> *</span>}
               </label>
               <textarea
                 id="apt-reason"
                 rows={3}
+                maxLength={500}
                 value={actionReason}
                 onChange={(e) => setActionReason(e.target.value)}
                 placeholder={
@@ -646,6 +676,7 @@ export default function Appointments() {
               <button
                 type="submit"
                 disabled={actionSubmitting}
+                aria-busy={actionSubmitting}
                 className={`mb-btn !text-[color:var(--mb-panel-ink)] ${
                   actionModal.type === "reschedule"
                     ? "!border-[color:var(--mb-violet-solid)] !bg-[color:var(--mb-violet-solid)]"
@@ -653,9 +684,9 @@ export default function Appointments() {
                 }`}
               >
                 {actionSubmitting && <Spinner size={16} />}
-                {actionModal.type === "decline" && "Decline request"}
-                {actionModal.type === "cancel" && "Cancel appointment"}
-                {actionModal.type === "reschedule" && "Reschedule session"}
+                {actionModal.type === "decline" && (actionSubmitting ? "Declining…" : "Decline request")}
+                {actionModal.type === "cancel" && (actionSubmitting ? "Cancelling…" : "Cancel appointment")}
+                {actionModal.type === "reschedule" && (actionSubmitting ? "Rescheduling…" : "Reschedule session")}
               </button>
             </div>
           </form>

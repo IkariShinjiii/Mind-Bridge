@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getMyAvailability, addAvailability, removeAvailability } from "../../lib/api";
 import Spinner from "../../components/ui/Spinner";
+import { validateAvailabilityWindow } from "../../lib/validation";
+import { friendlyError } from "../../lib/errors";
 
 function parseDate(val) {
   if (!val) return null;
@@ -48,12 +50,11 @@ export default function ManageAvailability() {
   async function handleAdd(e) {
     e.preventDefault();
     if (savingSlot) return;
-    if (!start || !end) {
-      setError("Choose both a start and an end time.");
-      return;
-    }
-    if (new Date(end) <= new Date(start)) {
-      setError("The end time must be after the start time.");
+    const errors = validateAvailabilityWindow(start, end);
+    const first = errors.start || errors.end;
+    if (first) {
+      setError(first);
+      document.getElementById(errors.start ? "slot-start" : "slot-end")?.focus();
       return;
     }
 
@@ -65,7 +66,7 @@ export default function ManageAvailability() {
       setError("");
       load();
     } catch (err) {
-      setError(err.message);
+      setError(friendlyError(err, "Could not publish that slot. Please try again."));
     } finally {
       setSavingSlot(false);
     }
@@ -77,6 +78,8 @@ export default function ManageAvailability() {
     try {
       await removeAvailability(id);
       load();
+    } catch (err) {
+      setError(friendlyError(err, "Could not remove that slot. Please try again."));
     } finally {
       setRemovingId(null);
     }

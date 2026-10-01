@@ -43,9 +43,9 @@ export function validateSignup({ name, email, password, consent = true }) {
   const errors = {};
   if (!String(name || "").trim()) errors.name = "Enter your full name.";
   if (!String(email || "").trim()) errors.email = "Enter your school email.";
-  else if (!isSchoolEmail(email)) errors.email = `Use your school email ending in ${SCHOOL_EMAIL_DOMAIN}.`;
+  else if (!isSchoolEmail(email)) errors.email = `Student registrations must use an ${SCHOOL_EMAIL_DOMAIN} email address.`;
   if (!password) errors.password = "Choose a password.";
-  else if (password.length < MIN_PASSWORD_LENGTH) errors.password = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+  else if (password.length < MIN_PASSWORD_LENGTH) errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
   if (!consent) errors.consent = "You need to agree to continue.";
   return errors;
 }
