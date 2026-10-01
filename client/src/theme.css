@@ -160,5 +160,7 @@
 /* Pages migrated from the old dark theme keep a few legacy font utilities. */
 .mb .font-display { font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif; }
 .mb .font-sans { font-family: inherit; }
-.mb .animate-fade-up { animation: mb-lift .4s cubic-bezier(.22,1,.36,1) both; }
+/* opacity only: a lingering transform would trap position:fixed dialogs inside the animated wrapper */
+.mb .animate-fade-up { animation: mb-fade .35s ease-out backwards; }
+@keyframes mb-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mb .animate-fade-up { animation: none; } }

@@ -10,6 +10,7 @@ import {
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
 import Modal from "./ui/Modal";
+import BookingFlow from "./BookingFlow";
 
 function safeFormatDate(val) {
   if (!val) return "Not specified";
@@ -490,63 +491,21 @@ export default function Appointments() {
         </div>
       )}
 
-      {/* STUDENT BOOKING MODAL */}
+      {/* STUDENT BOOKING: counselor, time, confirm */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Select Available Counselor Slot"
-        description="Choose a confidential time slot with an assigned university guidance counselor. By booking, you consent to the collection and processing of your appointment details for counseling purposes."
-        maxWidth="max-w-lg"
-        footer={
-          <button
-            type="button"
-            onClick={() => setShowModal(false)}
-            className="min-h-[44px] rounded-md border border-[color:var(--mb-line)] px-5 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
-          >
-            Cancel
-          </button>
-        }
+        title="Book a counselor"
+        description="A confidential one-to-one session with university guidance counselors."
+        maxWidth="max-w-xl"
       >
-        {loadingSlots ? (
-          <div className="py-8 text-center text-[color:var(--mb-muted)] flex items-center justify-center gap-2 text-xs sm:text-sm">
-            <Spinner size={18} /> Loading open counselor slots...
-          </div>
-        ) : availableSlots.length === 0 ? (
-          <div className="py-8 text-center text-[color:var(--mb-muted)] border border-dashed border-[color:var(--mb-line)] rounded-md p-4 text-xs sm:text-sm">
-            No open counselor slots available right now. Please check back soon or visit the
-            University Guidance Office directly.
-          </div>
-        ) : (
-          <div className="space-y-3 custom-scrollbar">
-            {availableSlots.map((slot) => {
-              const startTime = safeFormatDate(slot.start || slot.date || slot.time);
-              const endTime = safeFormatDate(slot.end || slot.to);
-
-              return (
-                <div
-                  key={slot.id}
-                  className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:p-4 text-xs sm:text-sm hover:border-[color:var(--mb-brand)] transition"
-                >
-                  <div className="pr-2">
-                    <div className="font-medium text-[color:var(--mb-ink)]">
-                      Counselor: {slot.counselorName || "Assigned Counselor"}
-                    </div>
-                    <div className="text-[color:var(--mb-brand)] mt-0.5 font-medium text-xs">
-                      {startTime} {endTime ? `to ${endTime}` : ""}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleBookSlot(slot)}
-                    disabled={bookingId === slot.id}
-                    className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] disabled:opacity-50 interactive-tap shrink-0"
-                  >
-                    {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <BookingFlow
+          slots={availableSlots}
+          loading={loadingSlots}
+          bookingId={bookingId}
+          onBook={handleBookSlot}
+          onCancel={() => setShowModal(false)}
+        />
       </Modal>
 
       {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}

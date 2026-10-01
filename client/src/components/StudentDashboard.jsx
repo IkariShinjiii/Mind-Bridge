@@ -33,6 +33,8 @@ import {
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
 import ConfidentialChatModal from "./ConfidentialChatModal";
+import Modal from "./ui/Modal";
+import BookingFlow from "./BookingFlow";
 
 // Safely formats dates to prevent the "Invalid Date" error
 function safeFormatDate(val) {
@@ -936,71 +938,22 @@ export default function StudentDashboard() {
       </aside>
     </div>
 
-      {/* BOOKING MODAL FOR LIVE COUNSELOR SLOTS */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80  p-4 animate-fade-up">
-          <div className="w-full max-w-lg rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4 border-b border-[color:var(--mb-line)] pb-3">
-              <div>
-                <h3 className="text-lg font-bold text-[color:var(--mb-ink)]">Select Available Counselor Slot</h3>
-                <p className="text-xs text-[color:var(--mb-muted)] mt-0.5">Confidential 1-on-1 guidance</p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)] text-xl">
-                ✕
-              </button>
-            </div>
-
-            {loadingSlots ? (
-              <div className="py-8 text-center text-[color:var(--mb-muted)] flex items-center justify-center gap-2 text-xs sm:text-sm">
-                <Spinner size={16} /> Loading open slots...
-              </div>
-            ) : availableSlots.length === 0 ? (
-              <div className="py-8 text-center text-[color:var(--mb-muted)] border border-dashed border-[color:var(--mb-line)] rounded-md p-4 text-xs sm:text-sm">
-                No open counselor time slots found at the moment. Please check back later or visit the Guidance Office.
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                {availableSlots.map((slot) => {
-                  const startTime = safeFormatDate(slot.start || slot.date || slot.time);
-                  const endTime = safeFormatDate(slot.end || slot.to);
-
-                  return (
-                    <div
-                      key={slot.id}
-                      className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:p-4 text-xs sm:text-sm"
-                    >
-                      <div>
-                        <div className="font-medium text-[color:var(--mb-ink)]">
-                          Counselor: {slot.counselorName || "Assigned Counselor"}
-                        </div>
-                        <div className="text-[color:var(--mb-brand)] mt-0.5 font-medium text-xs">
-                          {startTime || "Unknown Time"} {endTime ? `to ${endTime}` : ""}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleBookSlot(slot)}
-                        disabled={bookingId === slot.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
-                      >
-                        {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            <div className="mt-5 flex justify-end pt-3 border-t border-[color:var(--mb-line)]">
-              <button
-                onClick={() => setShowModal(false)}
-                className="rounded-md border border-[color:var(--mb-line)] px-4 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* BOOKING: counselor, time, confirm */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Book a counselor"
+        description="A confidential one-to-one session with university guidance counselors."
+        maxWidth="max-w-xl"
+      >
+        <BookingFlow
+          slots={availableSlots}
+          loading={loadingSlots}
+          bookingId={bookingId}
+          onBook={handleBookSlot}
+          onCancel={() => setShowModal(false)}
+        />
+      </Modal>
 
       {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED COUNSELOR) */}
       {chatOpen && (
