@@ -8,7 +8,7 @@ initializeApp();
 
 const SMTP_URL = defineSecret("SMTP_URL"); // e.g. smtps://user:pass@smtp.example.com:465
 const SMTP_FROM = defineString("SMTP_FROM", { default: "Mind Bridge <no-reply@mindbridge.app>" });
-const APP_URL = defineString("APP_URL", { default: "https://mind-bridge.vercel.app" });
+const APP_URL = defineString("APP_URL", { default: "https://mind-bridge-omega.vercel.app" });
 
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
