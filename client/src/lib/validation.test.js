@@ -54,12 +54,20 @@ describe("form validators", () => {
   it("emergency contact needs name and phone, alternate is optional", () => {
     expect(validateEmergencyContact({ name: "", phone: "" })).toHaveProperty("name");
     expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567" })).toEqual({});
-    expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567", alternatePhone: "nope" })).toHaveProperty("alternatePhone");
+    expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567", alternatePhone: "nope" })).toHaveProperty(
+      "alternatePhone",
+    );
   });
   it("password change checks length, difference and match", () => {
-    expect(validatePasswordChange({ currentPassword: "old123", newPassword: "old123", confirmPassword: "old123" })).toHaveProperty("newPassword");
-    expect(validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new12345" })).toHaveProperty("confirmPassword");
-    expect(validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new1234" })).toEqual({});
+    expect(
+      validatePasswordChange({ currentPassword: "old123", newPassword: "old123", confirmPassword: "old123" }),
+    ).toHaveProperty("newPassword");
+    expect(
+      validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new12345" }),
+    ).toHaveProperty("confirmPassword");
+    expect(
+      validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new1234" }),
+    ).toEqual({});
   });
   it("availability window must be in the future and ordered", () => {
     const now = new Date("2026-10-02T08:00:00");
@@ -74,7 +82,9 @@ describe("friendlyError", () => {
   it("maps known codes and hides unknown ones", () => {
     expect(friendlyError({ code: "auth/invalid-credential" })).toMatch(/do not match/);
     expect(friendlyError({ code: "firestore/permission-denied" })).toMatch(/permission/);
-    expect(friendlyError({ code: "weird/thing", message: "secret internals" })).toBe("Something went wrong. Please try again.");
+    expect(friendlyError({ code: "weird/thing", message: "secret internals" })).toBe(
+      "Something went wrong. Please try again.",
+    );
     expect(friendlyError(null, "Custom")).toBe("Custom");
   });
   it("recognises dismissed popups", () => {

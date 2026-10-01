@@ -7,22 +7,36 @@ const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 
 const flaggedCase = {
-  studentId: STUDENT.uid, studentName: STUDENT.name, studentEmail: STUDENT.email,
+  studentId: STUDENT.uid,
+  studentName: STUDENT.name,
+  studentEmail: STUDENT.email,
   answers: [1, 1, 1, 1, 1, 1, 2],
   questionSummary: [
     { id: "q1", text: "Little interest or pleasure", score: 1, isCrisisItem: false },
     { id: "q7", text: "Thoughts that you would be better off not around", score: 2, isCrisisItem: true },
   ],
-  total: 8, maxScore: 21, riskLevel: "high", flaggedForImmediateReview: true, status: "open",
-  counselorNotes: "", createdAt: "2026-09-20T10:00:00.000Z",
+  total: 8,
+  maxScore: 21,
+  riskLevel: "high",
+  flaggedForImmediateReview: true,
+  status: "open",
+  counselorNotes: "",
+  createdAt: "2026-09-20T10:00:00.000Z",
 };
 
 /** Runs axe against the current page and fails with a readable list of WCAG 2.1 A/AA violations. */
 async function expectNoViolations(page, label) {
   await page.addScriptTag({ path: axePath });
-  const results = await page.evaluate((tags) => window.axe.run(document, { runOnly: { type: "tag", values: tags } }), WCAG_AA);
+  const results = await page.evaluate(
+    (tags) => window.axe.run(document, { runOnly: { type: "tag", values: tags } }),
+    WCAG_AA,
+  );
   const summary = results.violations.map(
-    (v) => `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join("\n    ")}`
+    (v) =>
+      `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes
+        .slice(0, 3)
+        .map((n) => n.target.join(" "))
+        .join("\n    ")}`,
   );
   expect(summary, `${label}: WCAG 2.1 AA violations`).toEqual([]);
 }

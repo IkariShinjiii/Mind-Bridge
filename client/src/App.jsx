@@ -31,10 +31,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
-    const redirectPath =
-      userRole === "admin" || userRole === "counselor"
-        ? "/admin/dashboard"
-        : "/student/dashboard";
+    const redirectPath = userRole === "admin" || userRole === "counselor" ? "/admin/dashboard" : "/student/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -49,10 +46,7 @@ function PublicOnlyRoute({ children }) {
   }
 
   if (currentUser) {
-    const redirectPath =
-      userRole === "admin" || userRole === "counselor"
-        ? "/admin/dashboard"
-        : "/student/dashboard";
+    const redirectPath = userRole === "admin" || userRole === "counselor" ? "/admin/dashboard" : "/student/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -66,75 +60,72 @@ export default function App() {
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <CookieConsent />
       <ErrorBoundary resetKey={location.pathname}>
-      <Suspense fallback={<PageLoader />}>
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <Login />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicOnlyRoute>
-              <Signup />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/student/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["student"]}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/counselor/dashboard"
-          element={<Navigate to="/admin/dashboard" replace />}
-        />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminPanel />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/appointments"
-          element={
-            <ProtectedRoute allowedRoles={["student", "admin"]}>
-              <Appointments />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/resources"
-          element={
-            <ProtectedRoute allowedRoles={["student", "admin"]}>
-              <CrisisResources />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute allowedRoles={["student", "admin"]}>
-              <UserSettings />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/cookie-policy" element={<CookiePolicy />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-      </Suspense>
+        <Suspense fallback={<PageLoader />}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <PublicOnlyRoute>
+                  <Signup />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/student/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["student"]}>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/counselor/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminPanel />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/appointments"
+              element={
+                <ProtectedRoute allowedRoles={["student", "admin"]}>
+                  <Appointments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/resources"
+              element={
+                <ProtectedRoute allowedRoles={["student", "admin"]}>
+                  <CrisisResources />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute allowedRoles={["student", "admin"]}>
+                  <UserSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
       </ErrorBoundary>
     </div>
   );

@@ -53,10 +53,7 @@ export function downloadAssessmentsCsv(assessments) {
     : [{ student_id: "ST-0000", risk_level: "low", status: "n/a", score: "n/a", created_at: "", reviewed_at: "" }];
 
   const headers = ["student_id", "risk_level", "status", "score", "created_at", "reviewed_at"];
-  const csv = [
-    headers,
-    ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`)),
-  ]
+  const csv = [headers, ...rows.map((row) => headers.map((key) => `"${String(row[key]).replace(/"/g, '""')}"`))]
     .map((line) => line.join(","))
     .join("\n");
 

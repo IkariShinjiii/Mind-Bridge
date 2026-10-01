@@ -12,9 +12,9 @@ export default {
 };
 
 function luminance(hex) {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-  );
+  const [r, g, b] = [1, 3, 5]
+    .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
@@ -115,7 +115,9 @@ function Row({ token, use, on, min, v }) {
           <>
             <span className="font-bold">{ratio.toFixed(1)}:1</span>
             {min ? (
-              <span className={`ml-2 text-sm font-bold ${pass ? "text-[color:var(--mb-safe)]" : "text-[color:var(--mb-urgent)]"}`}>
+              <span
+                className={`ml-2 text-sm font-bold ${pass ? "text-[color:var(--mb-safe)]" : "text-[color:var(--mb-urgent)]"}`}
+              >
                 {pass ? `meets ${min}:1` : `below ${min}:1`}
               </span>
             ) : null}
@@ -134,7 +136,10 @@ export const Colour = {
       return (
         <div ref={ref} className="grid max-w-4xl gap-6 lg:grid-cols-2">
           {GROUPS.map((g) => (
-            <section key={g.title} className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5">
+            <section
+              key={g.title}
+              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5"
+            >
               <h2 className="text-2xl font-bold">{g.title}</h2>
               <p className="mb-3 mt-1 text-[color:var(--mb-muted)]">{g.note}</p>
               <ul>
@@ -155,21 +160,27 @@ export const Typography = {
   render: () => (
     <div className="max-w-3xl space-y-8">
       <section>
-        <p className="text-sm font-bold text-[color:var(--mb-muted)]">Barlow Semi Condensed, 700: headings and numerals</p>
+        <p className="text-sm font-bold text-[color:var(--mb-muted)]">
+          Barlow Semi Condensed, 700: headings and numerals
+        </p>
         <h1 className="mb-sign mt-1 text-6xl font-bold leading-none">You are here</h1>
         <h2 className="mb-sign mt-4 text-4xl font-bold leading-tight">Check-in complete. You&apos;re doing well.</h2>
         <h3 className="mb-sign mt-4 text-2xl font-bold">Upcoming sessions</h3>
         <p className="mb-sign mt-4 text-5xl font-bold tabular-nums">7 / 21</p>
       </section>
       <section>
-        <p className="text-sm font-bold text-[color:var(--mb-muted)]">Atkinson Hyperlegible Next, 400 and 700: everything else</p>
+        <p className="text-sm font-bold text-[color:var(--mb-muted)]">
+          Atkinson Hyperlegible Next, 400 and 700: everything else
+        </p>
         <p className="mt-2 max-w-[65ch]">
-          Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved guidance
-          staff only. Body copy stays at 16px or larger on a 1.6 line height, and lines stop at about 65 characters so a
-          tired reader never loses their place.
+          Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved
+          guidance staff only. Body copy stays at 16px or larger on a 1.6 line height, and lines stop at about 65
+          characters so a tired reader never loses their place.
         </p>
         <p className="mt-3 max-w-[65ch] font-bold">Bold is for the label or the action, not for whole paragraphs.</p>
-        <p className="mt-3 max-w-[65ch] text-sm text-[color:var(--mb-muted)]">Small print is for hints and timestamps only.</p>
+        <p className="mt-3 max-w-[65ch] text-sm text-[color:var(--mb-muted)]">
+          Small print is for hints and timestamps only.
+        </p>
       </section>
     </div>
   ),
@@ -201,7 +212,10 @@ export const Signage = {
           <p className="font-bold">2px borders</p>
           <p className="text-[color:var(--mb-muted)]">Edges do the work shadows would.</p>
         </div>
-        <button type="button" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 text-left">
+        <button
+          type="button"
+          className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 text-left"
+        >
           <span className="block font-bold">3px focus ring</span>
           <span className="block text-[color:var(--mb-muted)]">Tab to this card to see it.</span>
         </button>

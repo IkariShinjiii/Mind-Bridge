@@ -2,8 +2,12 @@ import { describe, it, expect } from "vitest";
 import { scoreAnswers } from "./scoring";
 
 const qs = [
-  { id: "q1" }, { id: "q2" }, { id: "q3" },
-  { id: "q4" }, { id: "q5" }, { id: "q6" },
+  { id: "q1" },
+  { id: "q2" },
+  { id: "q3" },
+  { id: "q4" },
+  { id: "q5" },
+  { id: "q6" },
   { id: "q7", isCrisisItem: true },
 ];
 

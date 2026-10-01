@@ -1,38 +1,83 @@
 import { describe, it, expect } from "vitest";
 import {
-  isEmail, isSchoolEmail, isPhone, validateSignup, validateLogin, validateEmergencyContact,
-  validatePasswordChange, validateAvailabilityWindow, SCHOOL_EMAIL_DOMAIN, MIN_PASSWORD_LENGTH,
+  isEmail,
+  isSchoolEmail,
+  isPhone,
+  validateSignup,
+  validateLogin,
+  validateEmergencyContact,
+  validatePasswordChange,
+  validateAvailabilityWindow,
+  SCHOOL_EMAIL_DOMAIN,
+  MIN_PASSWORD_LENGTH,
 } from "./validation";
 
 describe("isEmail edge cases", () => {
-  it.each(["a@b.co", "first.last+tag@sub.domain.ph", "  a@b.co  ", "a@b.c"])("accepts %j", (v) => expect(isEmail(v)).toBe(true));
-  it.each(["", "   ", null, undefined, 0, "a", "a@", "@b.co", "a@b", "a@b.", "a@.co", "a b@c.com", "a@@b.co", "a@b@c.co", "a@b .co", "a\n@b.co"])(
-    "rejects %j",
-    (v) => expect(isEmail(v)).toBe(false)
+  it.each(["a@b.co", "first.last+tag@sub.domain.ph", "  a@b.co  ", "a@b.c"])("accepts %j", (v) =>
+    expect(isEmail(v)).toBe(true),
   );
+  it.each([
+    "",
+    "   ",
+    null,
+    undefined,
+    0,
+    "a",
+    "a@",
+    "@b.co",
+    "a@b",
+    "a@b.",
+    "a@.co",
+    "a b@c.com",
+    "a@@b.co",
+    "a@b@c.co",
+    "a@b .co",
+    "a\n@b.co",
+  ])("rejects %j", (v) => expect(isEmail(v)).toBe(false));
 });
 
 describe("isSchoolEmail edge cases", () => {
   it("tolerates surrounding whitespace and mixed case", () => {
     expect(isSchoolEmail("  Ana@Usa.Edu.Ph ")).toBe(true);
   });
-  it.each(["ana@usa.edu.ph.evil.com", "ana@evilusa.edu.ph", "ana@usa.edu.phx", "ana@usa.edu", "usa.edu.ph", "@usa.edu.ph", "", null, undefined])(
-    "rejects %j",
-    (v) => expect(isSchoolEmail(v)).toBe(false)
-  );
+  it.each([
+    "ana@usa.edu.ph.evil.com",
+    "ana@evilusa.edu.ph",
+    "ana@usa.edu.phx",
+    "ana@usa.edu",
+    "usa.edu.ph",
+    "@usa.edu.ph",
+    "",
+    null,
+    undefined,
+  ])("rejects %j", (v) => expect(isSchoolEmail(v)).toBe(false));
   it("the domain constant is what the check enforces", () => {
     expect(isSchoolEmail(`x${SCHOOL_EMAIL_DOMAIN}`)).toBe(true);
   });
 });
 
 describe("isPhone edge cases", () => {
-  it.each(["1234567", "+639178998727", "0917-899-8727", "(02) 8804.4673", "+1 (555) 010-9999", "1234567890123"])("accepts %j", (v) => {
-    expect(isPhone(v)).toBe(true);
-  });
-  it.each(["", " ", null, undefined, "123456", "12345678901234", "+", "()", "abc1234567", "0917 123 456x", "-1234567", ".1234567", "٠٩١٧١٢٣٤٥٦٧"])(
-    "rejects %j",
-    (v) => expect(isPhone(v)).toBe(false)
+  it.each(["1234567", "+639178998727", "0917-899-8727", "(02) 8804.4673", "+1 (555) 010-9999", "1234567890123"])(
+    "accepts %j",
+    (v) => {
+      expect(isPhone(v)).toBe(true);
+    },
   );
+  it.each([
+    "",
+    " ",
+    null,
+    undefined,
+    "123456",
+    "12345678901234",
+    "+",
+    "()",
+    "abc1234567",
+    "0917 123 456x",
+    "-1234567",
+    ".1234567",
+    "٠٩١٧١٢٣٤٥٦٧",
+  ])("rejects %j", (v) => expect(isPhone(v)).toBe(false));
   it("counts digits, not characters (punctuation does not pad the length)", () => {
     expect(isPhone("(1)-(2)-(3)-(4)-(5)-(6)")).toBe(false); // 6 digits
     expect(isPhone("(1)-(2)-(3)-(4)-(5)-(6)-(7)")).toBe(true); // 7 digits
@@ -85,7 +130,9 @@ describe("validateEmergencyContact edge cases", () => {
     expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567", alternatePhone: "   " })).toEqual({});
   });
   it("accepts a valid alternate phone", () => {
-    expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567", alternatePhone: "(02) 8804-4673" })).toEqual({});
+    expect(validateEmergencyContact({ name: "Mom", phone: "0917 123 4567", alternatePhone: "(02) 8804-4673" })).toEqual(
+      {},
+    );
   });
   it("reports name, phone and bad alternate independently", () => {
     const e = validateEmergencyContact({ name: " ", phone: "12", alternatePhone: "x" });
@@ -99,18 +146,28 @@ describe("validateEmergencyContact edge cases", () => {
 
 describe("validatePasswordChange edge cases", () => {
   it("an entirely empty form flags all three fields", () => {
-    expect(Object.keys(validatePasswordChange({})).sort()).toEqual(["confirmPassword", "currentPassword", "newPassword"]);
+    expect(Object.keys(validatePasswordChange({})).sort()).toEqual([
+      "confirmPassword",
+      "currentPassword",
+      "newPassword",
+    ]);
   });
   it("length is checked before 'same as current'", () => {
-    expect(validatePasswordChange({ currentPassword: "abc", newPassword: "abc", confirmPassword: "abc" }).newPassword).toMatch(/at least/);
+    expect(
+      validatePasswordChange({ currentPassword: "abc", newPassword: "abc", confirmPassword: "abc" }).newPassword,
+    ).toMatch(/at least/);
   });
   it("accepts the minimum length", () => {
     const p = "x".repeat(MIN_PASSWORD_LENGTH);
     expect(validatePasswordChange({ currentPassword: "old-one", newPassword: p, confirmPassword: p })).toEqual({});
   });
   it("confirmation is compared exactly (case and trailing space matter)", () => {
-    expect(validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "secret1" })).toHaveProperty("confirmPassword");
-    expect(validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "Secret1 " })).toHaveProperty("confirmPassword");
+    expect(
+      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "secret1" }),
+    ).toHaveProperty("confirmPassword");
+    expect(
+      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "Secret1 " }),
+    ).toHaveProperty("confirmPassword");
   });
 });
 
@@ -127,7 +184,9 @@ describe("validateAvailabilityWindow edge cases", () => {
     expect(validateAvailabilityWindow("2026-10-03T09:00", "garbage", now)).toEqual({ end: "Choose an end time." });
   });
   it("when the start is already invalid, end ordering is not also reported", () => {
-    expect(validateAvailabilityWindow("2026-10-01T09:00", "2026-10-01T08:00", now)).toEqual({ start: "The start time is in the past." });
+    expect(validateAvailabilityWindow("2026-10-01T09:00", "2026-10-01T08:00", now)).toEqual({
+      start: "The start time is in the past.",
+    });
   });
   it("missing arguments are treated as empty", () => {
     expect(Object.keys(validateAvailabilityWindow(undefined, undefined, now)).sort()).toEqual(["end", "start"]);

@@ -71,12 +71,18 @@
   color-scheme: dark;
 }
 
-.mb h1, .mb h2, .mb h3, .mb .mb-sign {
+.mb h1,
+.mb h2,
+.mb h3,
+.mb .mb-sign {
   font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
   letter-spacing: 0;
 }
 
-.mb ::selection { background: var(--mb-panel); color: var(--mb-panel-ink); }
+.mb ::selection {
+  background: var(--mb-panel);
+  color: var(--mb-panel-ink);
+}
 
 .mb :focus-visible {
   outline: 3px solid var(--mb-focus);
@@ -85,11 +91,18 @@
   border-radius: 4px;
 }
 
-.mb a { text-underline-offset: 3px; }
-.mb input, .mb button { font: inherit; }
+.mb a {
+  text-underline-offset: 3px;
+}
+.mb input,
+.mb button {
+  font: inherit;
+}
 
 /* display lives in :where() so Tailwind utilities like `hidden` can still override it */
-:where(.mb-btn) { display: inline-flex; }
+:where(.mb-btn) {
+  display: inline-flex;
+}
 
 /* Signage plate: the system's one container. Corners stay small like routed signs. */
 .mb-plate {
@@ -104,81 +117,232 @@
 }
 
 .mb-btn {
-  align-items: center; justify-content: center; gap: .6rem;
-  min-height: 48px; padding: .7rem 1.4rem; border-radius: 6px;
-  font-weight: 700; text-decoration: none; cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.7rem 1.4rem;
+  border-radius: 6px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
   border: 2px solid var(--mb-panel);
-  transition: transform .15s cubic-bezier(.22,1,.36,1), background-color .15s, color .15s;
+  transition:
+    transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.15s,
+    color 0.15s;
 }
-.mb-btn:active { transform: translateY(1px); }
-.mb-btn-solid { background: var(--mb-panel); color: var(--mb-panel-ink); }
-.mb-btn-solid:hover, .mb-btn-solid[data-force-hover] { background: color-mix(in srgb, var(--mb-panel) 85%, black); }
-.mb[data-theme="dark"] .mb-btn-solid:hover, .mb[data-theme="dark"] .mb-btn-solid[data-force-hover] { background: color-mix(in srgb, var(--mb-panel) 85%, white); }
-.mb-btn-line { background: transparent; color: var(--mb-ink); border-color: var(--mb-ink); }
-.mb-btn-line:hover, .mb-btn-line[data-force-hover] { background: var(--mb-ink); color: var(--mb-ground); }
-.mb-btn-danger { background: var(--mb-urgent-solid); color: #fff; border-color: var(--mb-urgent-solid); }
-.mb-btn-danger:hover, .mb-btn-danger[data-force-hover] { background: color-mix(in srgb, var(--mb-urgent-solid) 85%, black); border-color: color-mix(in srgb, var(--mb-urgent-solid) 85%, black); }
+.mb-btn:active {
+  transform: translateY(1px);
+}
+.mb-btn-solid {
+  background: var(--mb-panel);
+  color: var(--mb-panel-ink);
+}
+.mb-btn-solid:hover,
+.mb-btn-solid[data-force-hover] {
+  background: color-mix(in srgb, var(--mb-panel) 85%, black);
+}
+.mb[data-theme="dark"] .mb-btn-solid:hover,
+.mb[data-theme="dark"] .mb-btn-solid[data-force-hover] {
+  background: color-mix(in srgb, var(--mb-panel) 85%, white);
+}
+.mb-btn-line {
+  background: transparent;
+  color: var(--mb-ink);
+  border-color: var(--mb-ink);
+}
+.mb-btn-line:hover,
+.mb-btn-line[data-force-hover] {
+  background: var(--mb-ink);
+  color: var(--mb-ground);
+}
+.mb-btn-danger {
+  background: var(--mb-urgent-solid);
+  color: #fff;
+  border-color: var(--mb-urgent-solid);
+}
+.mb-btn-danger:hover,
+.mb-btn-danger[data-force-hover] {
+  background: color-mix(in srgb, var(--mb-urgent-solid) 85%, black);
+  border-color: color-mix(in srgb, var(--mb-urgent-solid) 85%, black);
+}
 /* data-force-hover exists so Storybook can show the hover state; the app never sets it */
-.mb-btn:disabled { opacity: .6; cursor: not-allowed; }
+.mb-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* Skip link: first tab stop, visible only when focused */
 .mb-skip {
-  position: absolute; left: .75rem; top: -4rem; z-index: 100;
-  padding: .75rem 1.1rem; border-radius: 6px; font-weight: 700;
-  background: var(--mb-panel); color: var(--mb-panel-ink); text-decoration: underline;
+  position: absolute;
+  left: 0.75rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.75rem 1.1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  background: var(--mb-panel);
+  color: var(--mb-panel-ink);
+  text-decoration: underline;
 }
-.mb-skip:focus { top: .75rem; }
+.mb-skip:focus {
+  top: 0.75rem;
+}
 
 .mb-field {
-  width: 100%; min-height: 48px; padding: .65rem .9rem;
-  background: var(--mb-surface); color: var(--mb-ink);
-  border: 2px solid var(--mb-field-line); border-radius: 6px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.65rem 0.9rem;
+  background: var(--mb-surface);
+  color: var(--mb-ink);
+  border: 2px solid var(--mb-field-line);
+  border-radius: 6px;
 }
-.mb-field::placeholder { color: var(--mb-muted); opacity: .85; }
-.mb-field:hover, .mb-field[data-force-hover] { border-color: var(--mb-ink); }
-.mb-field:focus { border-color: var(--mb-panel); }
-.mb[data-theme="dark"] .mb-field:focus { border-color: var(--mb-focus); }
-.mb-field:-webkit-autofill { -webkit-text-fill-color: var(--mb-ink); box-shadow: 0 0 0 40px var(--mb-surface) inset; }
+.mb-field::placeholder {
+  color: var(--mb-muted);
+  opacity: 0.85;
+}
+.mb-field:hover,
+.mb-field[data-force-hover] {
+  border-color: var(--mb-ink);
+}
+.mb-field:focus {
+  border-color: var(--mb-panel);
+}
+.mb[data-theme="dark"] .mb-field:focus {
+  border-color: var(--mb-focus);
+}
+.mb-field:-webkit-autofill {
+  -webkit-text-fill-color: var(--mb-ink);
+  box-shadow: 0 0 0 40px var(--mb-surface) inset;
+}
 
 .mb-alert {
-  background: var(--mb-error-bg); color: var(--mb-error-ink);
-  border: 2px solid currentColor; border-radius: 6px; padding: .75rem 1rem;
+  background: var(--mb-error-bg);
+  color: var(--mb-error-ink);
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
 }
 
 /* Route board: stops light up one after another, once, on load. */
-.mb-route { position: relative; z-index: 0; }
+.mb-route {
+  position: relative;
+  z-index: 0;
+}
 .mb-route::before {
-  content: ""; position: absolute; left: 1.9rem; top: 2rem; bottom: 2rem; width: 4px;
-  background: var(--mb-line); border-radius: 2px;
+  content: "";
+  position: absolute;
+  left: 1.9rem;
+  top: 2rem;
+  bottom: 2rem;
+  width: 4px;
+  background: var(--mb-line);
+  border-radius: 2px;
 }
 .mb-route::after {
-  content: ""; position: absolute; left: 1.9rem; top: 2rem; bottom: 2rem; width: 4px;
-  background: var(--mb-amber); border-radius: 2px; transform-origin: top;
-  animation: mb-draw 1.4s cubic-bezier(.22,1,.36,1) .3s both;
+  content: "";
+  position: absolute;
+  left: 1.9rem;
+  top: 2rem;
+  bottom: 2rem;
+  width: 4px;
+  background: var(--mb-amber);
+  border-radius: 2px;
+  transform-origin: top;
+  animation: mb-draw 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
-.mb-stop { position: relative; z-index: 1; animation: mb-lift .6s cubic-bezier(.22,1,.36,1) both; }
-.mb-stop:nth-child(1) { animation-delay: .15s; }
-.mb-stop:nth-child(2) { animation-delay: .45s; }
-.mb-stop:nth-child(3) { animation-delay: .75s; }
-.mb-stop:nth-child(4) { animation-delay: 1.05s; }
+.mb-stop {
+  position: relative;
+  z-index: 1;
+  animation: mb-lift 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mb-stop:nth-child(1) {
+  animation-delay: 0.15s;
+}
+.mb-stop:nth-child(2) {
+  animation-delay: 0.45s;
+}
+.mb-stop:nth-child(3) {
+  animation-delay: 0.75s;
+}
+.mb-stop:nth-child(4) {
+  animation-delay: 1.05s;
+}
 
-@keyframes mb-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes mb-lift { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes mb-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes mb-lift {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .mb-route::after, .mb-stop { position: relative; z-index: 1; animation: none; }
-  .mb-btn { transition: none; }
+  .mb-route::after,
+  .mb-stop {
+    position: relative;
+    z-index: 1;
+    animation: none;
+  }
+  .mb-btn {
+    transition: none;
+  }
 }
 
 /* Pages migrated from the old dark theme keep a few legacy font utilities. */
-.mb .font-display { font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif; }
-.mb .font-sans { font-family: inherit; }
+.mb .font-display {
+  font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+}
+.mb .font-sans {
+  font-family: inherit;
+}
 /* opacity only: a lingering transform would trap position:fixed dialogs inside the animated wrapper */
-.mb .animate-fade-up { animation: mb-fade .35s ease-out backwards; }
-@keyframes mb-fade { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .mb .animate-fade-up { animation: none; } }
+.mb .animate-fade-up {
+  animation: mb-fade 0.35s ease-out backwards;
+}
+@keyframes mb-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mb .animate-fade-up {
+    animation: none;
+  }
+}
 
 /* Toasts: a short rise-and-fade, nothing bouncy. Reduced motion gets the final state immediately. */
-.mb-toast { animation: mb-toast-in .22s cubic-bezier(.22,1,.36,1) backwards; }
-@keyframes mb-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .mb-toast { animation: none; } }
+.mb-toast {
+  animation: mb-toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes mb-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mb-toast {
+    animation: none;
+  }
+}

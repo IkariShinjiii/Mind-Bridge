@@ -3,9 +3,18 @@ import { seed, logIn, completeCheckIn, STUDENT } from "./helpers.js";
 
 const past = (id, createdAt, total, riskLevel) => ({
   [id]: {
-    studentId: STUDENT.uid, studentName: STUDENT.name, studentEmail: STUDENT.email,
-    answers: [], questionSummary: [], total, maxScore: 21, riskLevel,
-    flaggedForImmediateReview: false, status: "open", counselorNotes: "", createdAt,
+    studentId: STUDENT.uid,
+    studentName: STUDENT.name,
+    studentEmail: STUDENT.email,
+    answers: [],
+    questionSummary: [],
+    total,
+    maxScore: 21,
+    riskLevel,
+    flaggedForImmediateReview: false,
+    status: "open",
+    counselorNotes: "",
+    createdAt,
   },
 });
 
@@ -25,7 +34,9 @@ test.describe("Viewing assessment results", () => {
 
     await completeCheckIn(page, [2, 1, 1, 1, 1, 1, 0]); // 7 of 21 is the medium band
 
-    await expect(page.getByRole("heading", { name: "Thank you for checking in. Take some time to breathe." })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Thank you for checking in. Take some time to breathe." }),
+    ).toBeVisible();
     await expect(page.getByText("7 / 21", { exact: true })).toBeVisible();
     await expect(page.getByText("Elevated Stress", { exact: true })).toBeVisible();
     await expect(page.getByRole("img", { name: /Line chart of 1 check-in scores, latest 7 out of 21/ })).toBeVisible();

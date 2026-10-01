@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signInWithPopup,
-  signOut,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
@@ -74,7 +69,9 @@ export default function Signup() {
       // Enforce institutional email domain
       if (!user.email?.toLowerCase().endsWith(SCHOOL_EMAIL_DOMAIN)) {
         await signOut(auth);
-        setErrorMessage("Sign-Up with Google is only available for @usa.edu.ph accounts. Please use your school email.");
+        setErrorMessage(
+          "Sign-Up with Google is only available for @usa.edu.ph accounts. Please use your school email.",
+        );
         return;
       }
 
@@ -118,12 +115,24 @@ export default function Signup() {
       }
     >
       <div aria-live="polite">
-        {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
+        {errorMessage ? (
+          <div className="mb-alert mb-5" role="alert">
+            {errorMessage}
+          </div>
+        ) : null}
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <Field id="name" label="Full name" type="text" autoComplete="name" required error={fieldErrors.name} />
-        <Field id="email" label="School email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required error={fieldErrors.email} />
+        <Field
+          id="email"
+          label="School email"
+          type="email"
+          placeholder="you@usa.edu.ph"
+          autoComplete="email"
+          required
+          error={fieldErrors.email}
+        />
         <Field
           id="password"
           label="Password"
@@ -145,11 +154,17 @@ export default function Signup() {
               aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
               className="mt-1 h-5 w-5 shrink-0 accent-[color:var(--mb-panel)]"
             />
-          <label htmlFor="consent" className="text-[color:var(--mb-muted)]">
-            I agree to the{" "}
-            <a href="/terms" className="text-[color:var(--mb-ink)] underline">Terms and Conditions</a> and{" "}
-            <a href="/privacy-policy" className="text-[color:var(--mb-ink)] underline">Privacy Policy</a>, and I consent to my data being collected and processed as they describe.
-          </label>
+            <label htmlFor="consent" className="text-[color:var(--mb-muted)]">
+              I agree to the{" "}
+              <a href="/terms" className="text-[color:var(--mb-ink)] underline">
+                Terms and Conditions
+              </a>{" "}
+              and{" "}
+              <a href="/privacy-policy" className="text-[color:var(--mb-ink)] underline">
+                Privacy Policy
+              </a>
+              , and I consent to my data being collected and processed as they describe.
+            </label>
           </div>
           {fieldErrors.consent && (
             <p id="consent-error" role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
@@ -158,7 +173,12 @@ export default function Signup() {
           )}
         </div>
 
-        <button type="submit" disabled={isSubmitting || isGoogleLoading} aria-busy={isSubmitting} className="mb-btn mb-btn-solid w-full">
+        <button
+          type="submit"
+          disabled={isSubmitting || isGoogleLoading}
+          aria-busy={isSubmitting}
+          className="mb-btn mb-btn-solid w-full"
+        >
           {isSubmitting && <Spinner />}
           {isSubmitting ? "Creating account…" : "Create account"}
         </button>

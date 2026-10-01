@@ -25,8 +25,18 @@ const VARIANTS = {
  * @param {React.ReactNode} props.children - label
  */
 const Button = forwardRef(function Button(
-  { variant = "solid", loading = false, disabled = false, fullWidth = false, icon, type = "button", className = "", children, ...rest },
-  ref
+  {
+    variant = "solid",
+    loading = false,
+    disabled = false,
+    fullWidth = false,
+    icon,
+    type = "button",
+    className = "",
+    children,
+    ...rest
+  },
+  ref,
 ) {
   return (
     <button

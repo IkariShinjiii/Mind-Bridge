@@ -12,7 +12,9 @@ function Host({ initiallyOpen = true, children, footer, ...props }) {
   const close = () => setOpen(false);
   return (
     <>
-      <button type="button" className="mb-btn mb-btn-solid" onClick={() => setOpen(true)}>Open dialog</button>
+      <button type="button" className="mb-btn mb-btn-solid" onClick={() => setOpen(true)}>
+        Open dialog
+      </button>
       <Modal isOpen={open} onClose={close} {...props} footer={typeof footer === "function" ? footer(close) : footer}>
         {children}
       </Modal>
@@ -30,14 +32,23 @@ export default {
 
 const confirmFooter = (close) => (
   <>
-    <button type="button" className="mb-btn mb-btn-line" onClick={close}>Keep session</button>
-    <button type="button" className="mb-btn mb-btn-solid" onClick={close}>Cancel session</button>
+    <button type="button" className="mb-btn mb-btn-line" onClick={close}>
+      Keep session
+    </button>
+    <button type="button" className="mb-btn mb-btn-solid" onClick={close}>
+      Cancel session
+    </button>
   </>
 );
 
 export const Default = {
   render: (args) => (
-    <Host {...args} title="Cancel this session?" description="Tuesday, 14 October at 10:00 with Ms. Reyes." footer={confirmFooter}>
+    <Host
+      {...args}
+      title="Cancel this session?"
+      description="Tuesday, 14 October at 10:00 with Ms. Reyes."
+      footer={confirmFooter}
+    >
       <p>Your counselor will be told right away. You can book another time afterwards.</p>
     </Host>
   ),
@@ -51,8 +62,12 @@ export const Loading = {
       description="Open times in the next two weeks."
       footer={() => (
         <>
-          <button type="button" className="mb-btn mb-btn-line">Back</button>
-          <button type="button" className="mb-btn mb-btn-solid" disabled>Confirm</button>
+          <button type="button" className="mb-btn mb-btn-line">
+            Back
+          </button>
+          <button type="button" className="mb-btn mb-btn-solid" disabled>
+            Confirm
+          </button>
         </>
       )}
     >
@@ -68,9 +83,15 @@ export const Error = {
     <Host
       {...args}
       title="Choose a time"
-      footer={(close) => <button type="button" className="mb-btn mb-btn-line" onClick={close}>Close</button>}
+      footer={(close) => (
+        <button type="button" className="mb-btn mb-btn-line" onClick={close}>
+          Close
+        </button>
+      )}
     >
-      <p role="alert" className="mb-alert font-medium">We could not load open times. Check your connection and try again.</p>
+      <p role="alert" className="mb-alert font-medium">
+        We could not load open times. Check your connection and try again.
+      </p>
     </Host>
   ),
 };
@@ -83,7 +104,9 @@ export const FormSubmitting = {
       title="Add a note"
       footer={() => (
         <>
-          <button type="button" className="mb-btn mb-btn-line" disabled>Cancel</button>
+          <button type="button" className="mb-btn mb-btn-line" disabled>
+            Cancel
+          </button>
           <button type="submit" className="mb-btn mb-btn-solid" disabled>
             <Spinner size={16} /> Saving...
           </button>
@@ -110,7 +133,11 @@ export const Wide = {
     <Host
       {...args}
       title="Session history"
-      footer={(close) => <button type="button" className="mb-btn mb-btn-solid" onClick={close}>Done</button>}
+      footer={(close) => (
+        <button type="button" className="mb-btn mb-btn-solid" onClick={close}>
+          Done
+        </button>
+      )}
     >
       {Array.from({ length: 12 }, (_, i) => (
         <p key={i}>Session {i + 1}: notes are kept private to your counselor.</p>
@@ -131,7 +158,15 @@ export const Narrow = {
 export const TitleOnly = {
   name: "Title without description",
   render: (args) => (
-    <Host {...args} title="Crisis resources" footer={(close) => <button type="button" className="mb-btn mb-btn-solid" onClick={close}>Got it</button>}>
+    <Host
+      {...args}
+      title="Crisis resources"
+      footer={(close) => (
+        <button type="button" className="mb-btn mb-btn-solid" onClick={close}>
+          Got it
+        </button>
+      )}
+    >
       <p>If you are in immediate danger, call your local emergency number now.</p>
     </Host>
   ),
@@ -153,8 +188,18 @@ export const LongTitle = {
 export const NoHeader = {
   name: "No title (body only)",
   render: (args) => (
-    <Host {...args} footer={(close) => <button type="button" className="mb-btn mb-btn-solid" onClick={close}>OK</button>}>
-      <p>Without a title or description the header, and its close button, are left out. Escape and backdrop click still close it.</p>
+    <Host
+      {...args}
+      footer={(close) => (
+        <button type="button" className="mb-btn mb-btn-solid" onClick={close}>
+          OK
+        </button>
+      )}
+    >
+      <p>
+        Without a title or description the header, and its close button, are left out. Escape and backdrop click still
+        close it.
+      </p>
     </Host>
   ),
 };

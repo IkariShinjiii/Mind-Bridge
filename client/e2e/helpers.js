@@ -1,7 +1,12 @@
 import { expect } from "@playwright/test";
 
 export const STUDENT = { uid: "uid-student", name: "Ana Student", email: "ana@usa.edu.ph", password: "Student#123" };
-export const COUNSELOR = { uid: "uid-counselor", name: "Dr. Reyes", email: "reyes@usa.edu.ph", password: "Counselor#123" };
+export const COUNSELOR = {
+  uid: "uid-counselor",
+  name: "Dr. Reyes",
+  email: "reyes@usa.edu.ph",
+  password: "Counselor#123",
+};
 
 const STORAGE_KEY = "mb_e2e_state";
 
@@ -19,16 +24,24 @@ export async function seed(page, { docs = {}, accounts = [] } = {}) {
       [STUDENT, COUNSELOR, ...accounts].map((u) => [
         u.email,
         { uid: u.uid, email: u.email, password: u.password, displayName: u.name },
-      ])
+      ]),
     ),
     docs: {
       users: {
         [STUDENT.uid]: {
-          name: STUDENT.name, email: STUDENT.email, role: "student", approved: true, active: true,
+          name: STUDENT.name,
+          email: STUDENT.email,
+          role: "student",
+          approved: true,
+          active: true,
           emailVerified: true,
         },
         [COUNSELOR.uid]: {
-          name: COUNSELOR.name, email: COUNSELOR.email, role: "counselor", approved: true, active: true,
+          name: COUNSELOR.name,
+          email: COUNSELOR.email,
+          role: "counselor",
+          approved: true,
+          active: true,
           emailVerified: true,
         },
         ...extraUsers,
@@ -41,7 +54,7 @@ export async function seed(page, { docs = {}, accounts = [] } = {}) {
       if (!localStorage.getItem(key)) localStorage.setItem(key, value);
       localStorage.setItem("mindbridge_cookie_consent", "accepted");
     },
-    [STORAGE_KEY, JSON.stringify(state)]
+    [STORAGE_KEY, JSON.stringify(state)],
   );
 }
 
@@ -50,7 +63,7 @@ export function readCollection(page, name) {
   return page.evaluate(
     ([key, col]) =>
       Object.entries(JSON.parse(localStorage.getItem(key)).docs[col] || {}).map(([id, d]) => ({ id, ...d })),
-    [STORAGE_KEY, name]
+    [STORAGE_KEY, name],
   );
 }
 

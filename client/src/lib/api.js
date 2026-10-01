@@ -1,4 +1,16 @@
-import { collection, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  onSnapshot,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase";
 import { scoreAnswers } from "./scoring";
@@ -13,7 +25,7 @@ const getCurrentUserId = () => getAuth().currentUser?.uid;
  */
 export const getAdminUsers = async () => {
   const snapshot = await getDocs(collection(db, "users"));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 /** Marks a staff account as approved. @param {string} id - user uid @returns {Promise<void>} */
@@ -35,7 +47,7 @@ export const reactivateUser = (id) => updateDoc(doc(db, "users", id), { active: 
 export const submitResponse = async (answers, { questions = [], flaggedForImmediateReview = false } = {}) => {
   const authUser = getAuth().currentUser;
   const uid = authUser?.uid;
-  
+
   const scored = scoreAnswers(answers, questions);
   const totalScore = scored.total;
   const maxScore = scored.maxScore;
@@ -51,7 +63,7 @@ export const submitResponse = async (answers, { questions = [], flaggedForImmedi
       id: q.id || `q${idx + 1}`,
       text: q.text,
       score: answers[idx] ?? null,
-      isCrisisItem: !!q.isCrisisItem
+      isCrisisItem: !!q.isCrisisItem,
     })),
     total: totalScore,
     maxScore,
@@ -59,7 +71,7 @@ export const submitResponse = async (answers, { questions = [], flaggedForImmedi
     flaggedForImmediateReview: !!flaggedForImmediateReview,
     status: "open",
     counselorNotes: "",
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
   const docRef = await addDoc(collection(db, "assessments"), payload);
@@ -72,16 +84,16 @@ export const submitResponse = async (answers, { questions = [], flaggedForImmedi
  */
 export const getAssessments = async () => {
   const snapshot = await getDocs(collection(db, "assessments"));
-  const assessments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const assessments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
   try {
     const usersSnap = await getDocs(collection(db, "users"));
     const usersMap = {};
-    usersSnap.forEach(u => {
+    usersSnap.forEach((u) => {
       usersMap[u.id] = u.data();
     });
 
-    return assessments.map(item => {
+    return assessments.map((item) => {
       const userProfile = item.studentId ? usersMap[item.studentId] : null;
       let finalName = item.studentName;
       let finalEmail = item.studentEmail;
@@ -114,7 +126,7 @@ export const getMyAssessments = async () => {
   if (!uid) return [];
   const q = query(collection(db, "assessments"), where("studentId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 /**
@@ -158,7 +170,7 @@ export const bookAppointment = async (slot) => {
 
   const studentName = realName || authUser?.email?.split("@")[0] || "Student";
   const studentEmail = realEmail || authUser?.email || "";
-  
+
   if (slot) {
     // If a specific slot was booked, mark the slot as booked
     if (slot.id) {
@@ -180,7 +192,7 @@ export const bookAppointment = async (slot) => {
       start: slot.start,
       end: slot.end,
       status: "Pending Review",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   }
 
@@ -192,7 +204,7 @@ export const bookAppointment = async (slot) => {
     title: "Counseling Session",
     status: "Pending Review",
     date: new Date(Date.now() + 86400000).toISOString(),
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   });
 };
 
@@ -205,7 +217,7 @@ export const getAppointments = async () => {
   if (!uid) return [];
   const q = query(collection(db, "appointments"), where("studentId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 // Added so counselors can view all student bookings with enriched student names
@@ -215,16 +227,16 @@ export const getAppointments = async () => {
  */
 export const getAllAppointments = async () => {
   const snapshot = await getDocs(collection(db, "appointments"));
-  const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const appointments = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
   try {
     const usersSnap = await getDocs(collection(db, "users"));
     const usersMap = {};
-    usersSnap.forEach(u => {
+    usersSnap.forEach((u) => {
       usersMap[u.id] = u.data();
     });
 
-    return appointments.map(apt => {
+    return appointments.map((apt) => {
       const userProfile = apt.studentId ? usersMap[apt.studentId] : null;
       let finalName = apt.studentName;
       let finalEmail = apt.studentEmail;
@@ -256,10 +268,10 @@ export const getAllAppointments = async () => {
  * @returns {Promise<void>}
  */
 export const updateAppointmentStatus = async (id, status, extraData = {}) => {
-  const updates = { 
-    status, 
+  const updates = {
+    status,
     updatedAt: new Date().toISOString(),
-    ...extraData 
+    ...extraData,
   };
 
   // If slot was linked and is being declined or cancelled, free up availability slot
@@ -281,7 +293,7 @@ export const updateAppointmentStatus = async (id, status, extraData = {}) => {
  */
 export const getAvailability = async () => {
   const snapshot = await getDocs(collection(db, "availability"));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 /**
@@ -293,7 +305,7 @@ export const getMyAvailability = async () => {
   if (!uid) return [];
   const q = query(collection(db, "availability"), where("counselorId", "==", uid));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
 /**
@@ -311,7 +323,7 @@ export const addAvailability = async (start, end) => {
     start,
     end,
     isBooked: false,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   });
 };
 
@@ -374,10 +386,7 @@ export const assignCounselorToStudent = async (studentId, counselorId, counselor
 export const listenToStudentMessages = (studentId, onUpdate, onError) => {
   if (!studentId) return () => {};
   try {
-    const q = query(
-      collection(db, "messages"),
-      where("studentId", "==", studentId)
-    );
+    const q = query(collection(db, "messages"), where("studentId", "==", studentId));
     return onSnapshot(
       q,
       (snapshot) => {
@@ -388,7 +397,7 @@ export const listenToStudentMessages = (studentId, onUpdate, onError) => {
       (err) => {
         console.error("Firestore onSnapshot message error:", err);
         if (onError) onError(err);
-      }
+      },
     );
   } catch (err) {
     console.error("Failed to subscribe to messages", err);
@@ -401,13 +410,7 @@ export const listenToStudentMessages = (studentId, onUpdate, onError) => {
  * @param {{ studentId: string, senderId?: string, senderName?: string, senderRole?: string, text: string }} message
  * @returns {Promise<object|null>} the saved message, or null when the text is empty
  */
-export const sendStudentMessage = async ({
-  studentId,
-  senderId,
-  senderName,
-  senderRole,
-  text,
-}) => {
+export const sendStudentMessage = async ({ studentId, senderId, senderName, senderRole, text }) => {
   if (!studentId || !text?.trim()) return null;
   const payload = {
     studentId,

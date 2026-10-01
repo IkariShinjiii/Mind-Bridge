@@ -59,7 +59,9 @@ export default function Login() {
     } catch (error) {
       // Errors we throw ourselves carry a plain message; Firebase errors carry a code
       setErrorMessage(
-        error.code ? friendlyError(error, "Unable to sign in. Please try again.") : error.message || "Unable to sign in. Please try again."
+        error.code
+          ? friendlyError(error, "Unable to sign in. Please try again.")
+          : error.message || "Unable to sign in. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -107,14 +109,15 @@ export default function Login() {
     } catch (error) {
       if (!isPopupDismissed(error)) {
         setErrorMessage(
-          error.code ? friendlyError(error, "Google sign-in failed. Please try again.") : error.message || "Google sign-in failed. Please try again."
+          error.code
+            ? friendlyError(error, "Google sign-in failed. Please try again.")
+            : error.message || "Google sign-in failed. Please try again.",
         );
       }
     } finally {
       setIsGoogleLoading(false);
     }
   }
-
 
   async function handleForgotPassword() {
     const email = String(document.getElementById("email")?.value || "").trim();
@@ -155,13 +158,36 @@ export default function Login() {
       }
     >
       <div aria-live="polite">
-        {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
-        {infoMessage ? <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">{infoMessage}</div> : null}
+        {errorMessage ? (
+          <div className="mb-alert mb-5" role="alert">
+            {errorMessage}
+          </div>
+        ) : null}
+        {infoMessage ? (
+          <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">
+            {infoMessage}
+          </div>
+        ) : null}
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        <Field id="email" label="Email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required error={fieldErrors.email} />
-        <Field id="password" label="Password" type="password" autoComplete="current-password" required error={fieldErrors.password} />
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="you@usa.edu.ph"
+          autoComplete="email"
+          required
+          error={fieldErrors.email}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          required
+          error={fieldErrors.password}
+        />
 
         <div className="text-right">
           <button
@@ -175,7 +201,12 @@ export default function Login() {
           </button>
         </div>
 
-        <button type="submit" disabled={isSubmitting || isGoogleLoading} aria-busy={isSubmitting} className="mb-btn mb-btn-solid w-full">
+        <button
+          type="submit"
+          disabled={isSubmitting || isGoogleLoading}
+          aria-busy={isSubmitting}
+          className="mb-btn mb-btn-solid w-full"
+        >
           {isSubmitting && <Spinner />}
           {isSubmitting ? "Signing in…" : "Log in"}
         </button>

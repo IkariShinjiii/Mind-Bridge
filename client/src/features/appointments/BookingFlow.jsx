@@ -95,8 +95,8 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                   here
                     ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                     : done
-                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                    : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
+                      ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                      : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
                 } ${skipped ? "opacity-60" : ""}`}
               >
                 {done ? <Check className="h-5 w-5" aria-hidden="true" /> : n}

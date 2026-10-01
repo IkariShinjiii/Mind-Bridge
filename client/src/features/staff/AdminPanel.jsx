@@ -10,17 +10,7 @@ import {
   BarChart3,
   MessageSquare,
 } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { BarChart, Bar, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   getAdminUsers,
   getAssessments,
@@ -40,8 +30,14 @@ import Modal from "../../components/ui/Modal";
 import ManageAvailability from "./ManageAvailability";
 const ConfidentialChatModal = lazy(() => import("../chat/ConfidentialChatModal"));
 
-import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, formatDateTime, downloadAssessmentsCsv } from "./adminUtils";
-
+import {
+  RISK_STYLES,
+  STATUS_STYLES,
+  ROLE_BADGE,
+  CHART_COLORS,
+  formatDateTime,
+  downloadAssessmentsCsv,
+} from "./adminUtils";
 
 // Destructive outline button: overrides the hover fill of .mb-btn-line
 const DANGER_LINE =
@@ -69,7 +65,9 @@ function Stat({ label, value, note, tone, className = "" }) {
 function RiskTag({ risk }) {
   const Icon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded border-2 px-2 py-1 font-bold capitalize ${RISK_STYLES[risk] || RISK_STYLES.low}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded border-2 px-2 py-1 font-bold capitalize ${RISK_STYLES[risk] || RISK_STYLES.low}`}
+    >
       <Icon className="h-4 w-4" aria-hidden="true" />
       {risk} risk
     </span>
@@ -278,7 +276,7 @@ export default function AdminPanel() {
     const distinctStudents = new Set(
       assessments
         .map((item) => item.studentId || item.userId || item.student || item.user || "anonymous")
-        .filter(Boolean)
+        .filter(Boolean),
     ).size;
 
     const counts = { low: 0, medium: 0, high: 0 };
@@ -326,7 +324,7 @@ export default function AdminPanel() {
 
   // Highest priority first: safety-flagged, then high, medium, low; open before reviewed; newest first.
   const triageCases = useMemo(() => {
-    const rank = (c) => (c.flaggedForImmediateReview ? 0 : { high: 1, medium: 2, low: 3 }[c.riskLevel || "low"] ?? 3);
+    const rank = (c) => (c.flaggedForImmediateReview ? 0 : ({ high: 1, medium: 2, low: 3 }[c.riskLevel || "low"] ?? 3));
     const when = (c) => new Date(c.submittedAt || c.createdAt || 0).getTime() || 0;
     return [...visibleCases].sort((x, y) => {
       const byRank = rank(x) - rank(y);
@@ -356,7 +354,6 @@ export default function AdminPanel() {
         </p>
       </div>
 
-
       {loadError && !loading && (
         <div role="alert" className="mb-alert flex flex-wrap items-center justify-between gap-3 font-medium">
           <span>{loadError}</span>
@@ -372,12 +369,20 @@ export default function AdminPanel() {
         <Stat label="Open cases" value={openCasesCount} note="Waiting in the queue" />
         <Stat label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
         <Stat label="Students" value={analytics.totalStudents} note="With check-ins" />
-        <Stat label="Staff" value={analytics.totalStaff} note="Approved accounts" className="col-span-2 sm:col-span-1" />
+        <Stat
+          label="Staff"
+          value={analytics.totalStaff}
+          note="Approved accounts"
+          className="col-span-2 sm:col-span-1"
+        />
       </section>
 
       {/* Section switcher */}
       {mainTab !== "accounts" && (
-        <nav aria-label="Dashboard sections" className="flex flex-wrap gap-2 border-b-2 border-[color:var(--mb-line)] pb-4">
+        <nav
+          aria-label="Dashboard sections"
+          className="flex flex-wrap gap-2 border-b-2 border-[color:var(--mb-line)] pb-4"
+        >
           {[
             ["cases", ClipboardList, "Cases and triage"],
             ["analytics", BarChart3, "Analytics"],
@@ -471,8 +476,8 @@ export default function AdminPanel() {
                   risk === "high"
                     ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
                     : risk === "medium"
-                    ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
-                    : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]";
+                      ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
+                      : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]";
 
                 return (
                   <li
@@ -481,7 +486,9 @@ export default function AdminPanel() {
                       immediate ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-line)]"
                     }`}
                   >
-                    <div className={`flex flex-row items-center gap-3 rounded p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}>
+                    <div
+                      className={`flex flex-row items-center gap-3 rounded p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
+                    >
                       <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
                       <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
                     </div>
@@ -497,7 +504,8 @@ export default function AdminPanel() {
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span
                           className={`inline-flex rounded border px-2 py-0.5 text-sm font-bold capitalize ${
-                            STATUS_STYLES[status] || "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
+                            STATUS_STYLES[status] ||
+                            "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
                           }`}
                         >
                           {status}
@@ -511,7 +519,11 @@ export default function AdminPanel() {
                     </div>
 
                     <div className="flex flex-wrap gap-2 sm:flex-col">
-                      <button type="button" onClick={() => openCaseInspector(item)} className="mb-btn mb-btn-solid !min-h-[44px]">
+                      <button
+                        type="button"
+                        onClick={() => openCaseInspector(item)}
+                        className="mb-btn mb-btn-solid !min-h-[44px]"
+                      >
                         Inspect case
                       </button>
                       {status !== "reviewed" ? (
@@ -547,13 +559,17 @@ export default function AdminPanel() {
       {/* ======================================================== */}
       {mainTab === "analytics" && (
         <div className="space-y-8">
-          <section aria-labelledby="risk-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+          <section
+            aria-labelledby="risk-heading"
+            className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
+          >
             <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <h2 id="risk-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
                 Risk across all check-ins
               </h2>
               <p className="text-[color:var(--mb-muted)]">
-                {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a diagnosis.
+                {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a
+                diagnosis.
               </p>
             </div>
 
@@ -586,11 +602,28 @@ export default function AdminPanel() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analytics.chartData} margin={{ top: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
-                  <XAxis dataKey="name" stroke="var(--mb-muted)" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
-                  <YAxis allowDecimals={false} stroke="var(--mb-muted)" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="var(--mb-muted)"
+                    tick={{ fontSize: 14 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    stroke="var(--mb-muted)"
+                    tick={{ fontSize: 14 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                   <Tooltip
                     cursor={{ fill: "var(--mb-surface-2)" }}
-                    contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", borderRadius: 6, color: "var(--mb-ink)" }}
+                    contentStyle={{
+                      backgroundColor: "var(--mb-surface)",
+                      border: "2px solid var(--mb-line)",
+                      borderRadius: 6,
+                      color: "var(--mb-ink)",
+                    }}
                   />
                   <Bar dataKey="value" name="Check-ins" radius={[4, 4, 0, 0]} maxBarSize={96}>
                     {analytics.chartData.map((entry, index) => (
@@ -604,7 +637,10 @@ export default function AdminPanel() {
           </section>
 
           {/* Export */}
-          <section aria-labelledby="export-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+          <section
+            aria-labelledby="export-heading"
+            className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
+          >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 id="export-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
@@ -778,7 +814,7 @@ export default function AdminPanel() {
                             handleAccountAction(
                               deactivated ? reactivateUser : deactivateUser,
                               u.id,
-                              deactivated ? "Account reactivated." : "Account deactivated."
+                              deactivated ? "Account reactivated." : "Account deactivated.",
                             )
                           }
                           disabled={busy || isSelf}
@@ -812,7 +848,7 @@ export default function AdminPanel() {
         description={
           activeCase
             ? `${activeCase.studentEmail || "No email on file"} · Submitted ${formatDateTime(
-                activeCase.createdAt || activeCase.submittedAt
+                activeCase.createdAt || activeCase.submittedAt,
               )}`
             : undefined
         }
@@ -823,7 +859,9 @@ export default function AdminPanel() {
               {activeCase.studentId && activeCase.studentId !== "anonymous" && (
                 <button
                   type="button"
-                  onClick={() => setChatStudent({ id: activeCase.studentId, name: activeCase.studentName || "Student" })}
+                  onClick={() =>
+                    setChatStudent({ id: activeCase.studentId, name: activeCase.studentName || "Student" })
+                  }
                   className="mb-btn mb-btn-solid !px-4 text-sm"
                 >
                   <MessageSquare className="h-5 w-5" aria-hidden="true" />
@@ -887,7 +925,10 @@ export default function AdminPanel() {
               )}
             </section>
 
-            <section aria-labelledby="contact-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+            <section
+              aria-labelledby="contact-heading"
+              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
+            >
               <h3 id="contact-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
                 Emergency contact
               </h3>
@@ -903,12 +944,17 @@ export default function AdminPanel() {
                   </div>
                   <div className="flex gap-2">
                     <dt className="text-[color:var(--mb-muted)]">Relationship</dt>
-                    <dd className="font-bold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.relationship}</dd>
+                    <dd className="font-bold text-[color:var(--mb-ink)]">
+                      {studentContact.emergencyContact.relationship}
+                    </dd>
                   </div>
                   <div className="flex gap-2">
                     <dt className="text-[color:var(--mb-muted)]">Phone</dt>
                     <dd className="font-mono font-bold">
-                      <a className="text-[color:var(--mb-brand)] underline" href={`tel:${studentContact.emergencyContact.phone}`}>
+                      <a
+                        className="text-[color:var(--mb-brand)] underline"
+                        href={`tel:${studentContact.emergencyContact.phone}`}
+                      >
                         {studentContact.emergencyContact.phone}
                       </a>
                     </dd>
@@ -917,7 +963,10 @@ export default function AdminPanel() {
                     <div className="flex gap-2">
                       <dt className="text-[color:var(--mb-muted)]">Alternate</dt>
                       <dd className="font-mono font-bold">
-                        <a className="text-[color:var(--mb-brand)] underline" href={`tel:${studentContact.emergencyContact.alternatePhone}`}>
+                        <a
+                          className="text-[color:var(--mb-brand)] underline"
+                          href={`tel:${studentContact.emergencyContact.alternatePhone}`}
+                        >
                           {studentContact.emergencyContact.alternatePhone}
                         </a>
                       </dd>
@@ -931,7 +980,9 @@ export default function AdminPanel() {
                   )}
                 </dl>
               ) : (
-                <p className="text-[color:var(--mb-muted)]">This student has not added an emergency contact in their settings.</p>
+                <p className="text-[color:var(--mb-muted)]">
+                  This student has not added an emergency contact in their settings.
+                </p>
               )}
             </section>
 
@@ -972,7 +1023,12 @@ export default function AdminPanel() {
                   ))}
                 </div>
 
-                <button type="button" onClick={handleSaveNotes} disabled={savingNotes} className="mb-btn mb-btn-solid !px-4 text-sm">
+                <button
+                  type="button"
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes}
+                  className="mb-btn mb-btn-solid !px-4 text-sm"
+                >
                   {savingNotes && <Spinner size={14} />}
                   {savingNotes ? "Saving…" : "Save notes"}
                 </button>
@@ -986,12 +1042,12 @@ export default function AdminPanel() {
       {chatStudent && (
         <Suspense fallback={null}>
           <ConfidentialChatModal
-          isOpen={Boolean(chatStudent)}
-          onClose={() => setChatStudent(null)}
-          studentId={chatStudent.id}
-          recipientName={chatStudent.name}
-          recipientRole="student"
-        />
+            isOpen={Boolean(chatStudent)}
+            onClose={() => setChatStudent(null)}
+            studentId={chatStudent.id}
+            recipientName={chatStudent.name}
+            recipientRole="student"
+          />
         </Suspense>
       )}
     </div>

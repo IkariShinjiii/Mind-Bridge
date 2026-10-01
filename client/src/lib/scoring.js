@@ -13,9 +13,7 @@ export function scoreAnswers(answers, questions = []) {
   const count = questions.length || answers.length;
   const total = answers.reduce((sum, v) => sum + (Number(v) || 0), 0);
   const maxScore = count * 3;
-  const flaggedForImmediateReview = questions.some(
-    (q, i) => q.isCrisisItem && Number(answers[i]) > 0
-  );
+  const flaggedForImmediateReview = questions.some((q, i) => q.isCrisisItem && Number(answers[i]) > 0);
 
   let riskLevel = "low";
   if (flaggedForImmediateReview || total >= maxScore * 0.6) riskLevel = "high";

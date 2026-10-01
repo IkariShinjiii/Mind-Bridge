@@ -18,7 +18,15 @@ body,
   overflow: hidden;
   background-color: #030712;
   color: #f3f4f6;
-  font-family: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "Atkinson Hyperlegible Next",
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -29,10 +37,10 @@ html {
 
 /* ── 3. Base Touch Accessibility & Interactions ── */
 @layer base {
-  button, 
+  button,
   [role="button"],
-  input, 
-  select, 
+  input,
+  select,
   textarea {
     @apply min-h-[44px] touch-manipulation;
   }
@@ -75,11 +83,12 @@ body::-webkit-scrollbar,
   .interactive-tap {
     @apply active:scale-[0.98] transition-transform duration-150;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

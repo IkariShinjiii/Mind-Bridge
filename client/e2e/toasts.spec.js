@@ -2,9 +2,18 @@ import { test, expect } from "@playwright/test";
 import { seed, logIn, STUDENT, COUNSELOR } from "./helpers.js";
 
 const openCase = {
-  studentId: STUDENT.uid, studentName: STUDENT.name, studentEmail: STUDENT.email,
-  answers: [1, 1, 1, 1, 1, 1, 2], questionSummary: [], total: 8, maxScore: 21, riskLevel: "high",
-  flaggedForImmediateReview: true, status: "open", counselorNotes: "", createdAt: "2026-09-20T10:00:00.000Z",
+  studentId: STUDENT.uid,
+  studentName: STUDENT.name,
+  studentEmail: STUDENT.email,
+  answers: [1, 1, 1, 1, 1, 1, 2],
+  questionSummary: [],
+  total: 8,
+  maxScore: 21,
+  riskLevel: "high",
+  flaggedForImmediateReview: true,
+  status: "open",
+  counselorNotes: "",
+  createdAt: "2026-09-20T10:00:00.000Z",
 };
 
 test.describe("Toast notifications", () => {

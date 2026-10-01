@@ -53,7 +53,13 @@ export const Loading = {
 };
 
 export const Password = {
-  args: { label: "Password", type: "password", autoComplete: "new-password", required: true, hint: "At least 6 characters." },
+  args: {
+    label: "Password",
+    type: "password",
+    autoComplete: "new-password",
+    required: true,
+    hint: "At least 6 characters.",
+  },
 };
 
 export const AllStates = {

@@ -12,7 +12,10 @@ export default function NotFoundPage() {
           <p className="mt-2 max-w-[45ch] text-[color:var(--mb-panel-soft)]">
             The page you are looking for does not exist or may have moved.
           </p>
-          <Link to="/" className="mb-btn mt-6 border-[color:var(--mb-panel-ink)] bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
+          <Link
+            to="/"
+            className="mb-btn mt-6 border-[color:var(--mb-panel-ink)] bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
+          >
             Back to home
           </Link>
         </div>

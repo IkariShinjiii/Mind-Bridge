@@ -31,10 +31,18 @@ export const Triggers = {
     <Trigger>
       {(toast) => (
         <>
-          <button type="button" className="mb-btn mb-btn-solid" onClick={() => toast.success("Appointment requested. Your counselor will confirm.")}>
+          <button
+            type="button"
+            className="mb-btn mb-btn-solid"
+            onClick={() => toast.success("Appointment requested. Your counselor will confirm.")}
+          >
             Show success
           </button>
-          <button type="button" className="mb-btn mb-btn-line" onClick={() => toast.error("Could not save your profile. Your changes are still here, try again.")}>
+          <button
+            type="button"
+            className="mb-btn mb-btn-line"
+            onClick={() => toast.error("Could not save your profile. Your changes are still here, try again.")}
+          >
             Show error
           </button>
         </>

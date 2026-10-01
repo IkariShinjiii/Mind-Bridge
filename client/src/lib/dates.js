@@ -23,5 +23,7 @@ export function formatDateTime(value, empty = "Not specified") {
   if (!value) return empty;
   if (typeof value === "string" && !value.includes("-") && !value.includes("/")) return value;
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  return Number.isNaN(d.getTime())
+    ? String(value)
+    : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }

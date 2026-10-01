@@ -19,7 +19,9 @@ export function ToastProvider({ children }) {
   const push = useCallback((type, message) => {
     const id = (nextId.current += 1);
     // Repeating the same message replaces it instead of stacking duplicates.
-    setToasts((all) => [...all.filter((t) => !(t.type === type && t.message === message)), { id, type, message }].slice(-4));
+    setToasts((all) =>
+      [...all.filter((t) => !(t.type === type && t.message === message)), { id, type, message }].slice(-4),
+    );
     return id;
   }, []);
 
@@ -29,14 +31,10 @@ export function ToastProvider({ children }) {
       error: (message) => push("error", message),
       dismiss,
     }),
-    [push, dismiss]
+    [push, dismiss],
   );
 
-  return (
-    <ToastContext.Provider value={{ api, toasts }}>
-      {children}
-    </ToastContext.Provider>
-  );
+  return <ToastContext.Provider value={{ api, toasts }}>{children}</ToastContext.Provider>;
 }
 
 /** @returns {{ success: (message: string) => number, error: (message: string) => number, dismiss: (id: number) => void }} */

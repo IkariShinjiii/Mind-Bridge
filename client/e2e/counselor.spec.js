@@ -12,14 +12,29 @@ const questionSummary = [
 ].map((text, i) => ({ id: `q${i + 1}`, text, score: i === 6 ? 2 : 1, isCrisisItem: i === 6 }));
 
 const flaggedCase = {
-  studentId: STUDENT.uid, studentName: STUDENT.name, studentEmail: STUDENT.email,
-  answers: [1, 1, 1, 1, 1, 1, 2], questionSummary, total: 8, maxScore: 21, riskLevel: "high",
-  flaggedForImmediateReview: true, status: "open", counselorNotes: "", createdAt: "2026-09-20T10:00:00.000Z",
+  studentId: STUDENT.uid,
+  studentName: STUDENT.name,
+  studentEmail: STUDENT.email,
+  answers: [1, 1, 1, 1, 1, 1, 2],
+  questionSummary,
+  total: 8,
+  maxScore: 21,
+  riskLevel: "high",
+  flaggedForImmediateReview: true,
+  status: "open",
+  counselorNotes: "",
+  createdAt: "2026-09-20T10:00:00.000Z",
 };
 
 const lowCase = {
-  ...flaggedCase, studentId: "uid-other", studentName: "Carlo Other", studentEmail: "carlo@usa.edu.ph",
-  total: 2, riskLevel: "low", flaggedForImmediateReview: false, createdAt: "2026-09-19T10:00:00.000Z",
+  ...flaggedCase,
+  studentId: "uid-other",
+  studentName: "Carlo Other",
+  studentEmail: "carlo@usa.edu.ph",
+  total: 2,
+  riskLevel: "low",
+  flaggedForImmediateReview: false,
+  createdAt: "2026-09-19T10:00:00.000Z",
 };
 
 test.describe("Counselor accessing student data", () => {
@@ -48,9 +63,17 @@ test.describe("Counselor accessing student data", () => {
           assessments: { c1: flaggedCase, c2: lowCase },
           users: {
             [STUDENT.uid]: {
-              name: STUDENT.name, email: STUDENT.email, role: "student", approved: true, active: true,
+              name: STUDENT.name,
+              email: STUDENT.email,
+              role: "student",
+              approved: true,
+              active: true,
               emergencyContact: {
-                name: "Maria Student", relationship: "Mother", phone: "0917-111-2222", alternatePhone: "", notes: "Call after 5pm",
+                name: "Maria Student",
+                relationship: "Mother",
+                phone: "0917-111-2222",
+                alternatePhone: "",
+                notes: "Call after 5pm",
               },
             },
           },
@@ -118,7 +141,10 @@ test.describe("Counselor accessing student data", () => {
     });
 
     test("the Accounts section lists registered students so staff can manage assignments", async ({ page }) => {
-      await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Accounts and assignments" }).click();
+      await page
+        .getByRole("navigation", { name: "Main" })
+        .getByRole("link", { name: "Accounts and assignments" })
+        .click();
 
       await expect(page).toHaveURL(/tab=accounts/);
       await expect(page.getByRole("heading", { name: "Accounts" })).toBeVisible();

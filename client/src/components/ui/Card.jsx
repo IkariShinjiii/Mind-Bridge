@@ -90,7 +90,9 @@ export default function Card({
       )}
       {body}
       {footer && !loading && (
-        <div className="mt-5 flex flex-wrap justify-end gap-3 border-t-2 border-[color:var(--mb-line)] pt-4">{footer}</div>
+        <div className="mt-5 flex flex-wrap justify-end gap-3 border-t-2 border-[color:var(--mb-line)] pt-4">
+          {footer}
+        </div>
       )}
     </Tag>
   );

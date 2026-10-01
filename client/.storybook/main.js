@@ -14,7 +14,9 @@ export default {
     resolve: {
       ...config.resolve,
       alias: [
-        ...(Array.isArray(config.resolve?.alias) ? config.resolve.alias : Object.entries(config.resolve?.alias ?? {}).map(([find, replacement]) => ({ find, replacement }))),
+        ...(Array.isArray(config.resolve?.alias)
+          ? config.resolve.alias
+          : Object.entries(config.resolve?.alias ?? {}).map(([find, replacement]) => ({ find, replacement }))),
         { find: /^firebase\/app$/, replacement: fake("firebase-app") },
         { find: /^firebase\/auth$/, replacement: fake("firebase-auth") },
         { find: /^firebase\/firestore$/, replacement: fake("firebase-firestore") },

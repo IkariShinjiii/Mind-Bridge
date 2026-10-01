@@ -43,9 +43,11 @@ export function validateSignup({ name, email, password, consent = true }) {
   const errors = {};
   if (!String(name || "").trim()) errors.name = "Enter your full name.";
   if (!String(email || "").trim()) errors.email = "Enter your school email.";
-  else if (!isSchoolEmail(email)) errors.email = `Student registrations must use an ${SCHOOL_EMAIL_DOMAIN} email address.`;
+  else if (!isSchoolEmail(email))
+    errors.email = `Student registrations must use an ${SCHOOL_EMAIL_DOMAIN} email address.`;
   if (!password) errors.password = "Choose a password.";
-  else if (password.length < MIN_PASSWORD_LENGTH) errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+  else if (password.length < MIN_PASSWORD_LENGTH)
+    errors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
   if (!consent) errors.consent = "You need to agree to continue.";
   return errors;
 }
@@ -88,7 +90,8 @@ export function validatePasswordChange({ currentPassword, newPassword, confirmPa
   const errors = {};
   if (!currentPassword) errors.currentPassword = "Enter your current password.";
   if (!newPassword) errors.newPassword = "Enter a new password.";
-  else if (newPassword.length < MIN_PASSWORD_LENGTH) errors.newPassword = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+  else if (newPassword.length < MIN_PASSWORD_LENGTH)
+    errors.newPassword = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
   else if (newPassword === currentPassword) errors.newPassword = "Choose a password different from your current one.";
   if (!confirmPassword) errors.confirmPassword = "Type the new password again.";
   else if (confirmPassword !== newPassword) errors.confirmPassword = "The passwords do not match.";

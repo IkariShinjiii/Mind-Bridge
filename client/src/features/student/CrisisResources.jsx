@@ -61,7 +61,10 @@ function HotlineCard({ hotline }) {
   const ink = urgent ? "text-[color:var(--mb-urgent)]" : "text-[color:var(--mb-brand)]";
 
   return (
-    <section aria-labelledby={`hotline-${hotline.id}`} className={`flex flex-col rounded-md border-2 p-5 sm:p-6 ${edge} ${wash}`}>
+    <section
+      aria-labelledby={`hotline-${hotline.id}`}
+      className={`flex flex-col rounded-md border-2 p-5 sm:p-6 ${edge} ${wash}`}
+    >
       <div className="mb-3 flex items-start justify-between gap-3">
         <span className={`rounded-md border-2 px-2.5 py-1 text-sm font-bold ${edge} ${ink}`}>{badge}</span>
         <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-2 ${edge} ${ink}`}>
@@ -148,7 +151,10 @@ export default function CrisisResources() {
 
         <dl className="grid gap-4 sm:grid-cols-3">
           {CAMPUS_FACTS.map((f) => (
-            <div key={f.label} className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+            <div
+              key={f.label}
+              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
+            >
               <dt className="font-bold text-[color:var(--mb-ink)]">{f.label}</dt>
               <dd className="mt-1 text-[color:var(--mb-muted)]">{f.value}</dd>
             </div>
