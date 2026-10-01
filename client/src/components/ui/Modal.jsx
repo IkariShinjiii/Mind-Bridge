@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useFocusTrap from "../../lib/useFocusTrap";
 
 export default function Modal({
   isOpen,
@@ -10,16 +11,19 @@ export default function Modal({
   footer,
   maxWidth = "max-w-lg", // max-w-md, max-w-lg, max-w-xl, max-w-2xl, etc.
 }) {
-  // Close on Escape Key
+  const titleId = useId();
+  const dialogRef = useRef(null);
+  useFocusTrap(dialogRef, isOpen, onClose);
+
+  // Move focus into the dialog when it opens
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+    if (!isOpen) return;
+    const t = setTimeout(() => {
+      const target = dialogRef.current?.querySelector("[autofocus], input, textarea, select") || dialogRef.current;
+      target?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [isOpen]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -50,26 +54,28 @@ export default function Modal({
 
           {/* Modal Dialog Card */}
           <motion.div
+            ref={dialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
-            aria-labelledby={title ? "modal-title" : undefined}
+            aria-labelledby={title ? titleId : undefined}
             initial={{ opacity: 0, scale: 0.95, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-            className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden`}
+            className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden focus:outline-none`}
           >
             {/* Header */}
             {(title || description) && (
-              <div className="flex items-start justify-between border-b border-[color:var(--mb-line)] px-5 py-4 sm:px-6 sm:py-5 shrink-0 bg-[color:var(--mb-ground)]">
+              <div className="flex items-start justify-between border-b-2 border-[color:var(--mb-line)] px-5 py-4 sm:px-6 sm:py-5 shrink-0 bg-[color:var(--mb-ground)]">
                 <div className="space-y-1 pr-4">
                   {title && (
-                    <h2 id="modal-title" className="text-base font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-xl">
+                    <h2 id={titleId} className="text-xl font-bold text-[color:var(--mb-ink)] sm:text-2xl">
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] leading-relaxed">
+                    <p className="text-[color:var(--mb-muted)]">
                       {description}
                     </p>
                   )}
@@ -96,7 +102,7 @@ export default function Modal({
 
             {/* Optional Footer */}
             {footer && (
-              <div className="border-t border-[color:var(--mb-line)] px-5 py-3.5 sm:px-6 sm:py-4 bg-[color:var(--mb-ground)] shrink-0 flex items-center justify-end gap-3">
+              <div className="border-t-2 border-[color:var(--mb-line)] px-5 py-3.5 sm:px-6 sm:py-4 bg-[color:var(--mb-ground)] shrink-0 flex items-center justify-end gap-3">
                 {footer}
               </div>
             )}

@@ -25,6 +25,7 @@ import {
 import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
 import { AVATAR_COLORS, avatarColor } from "../../lib/avatar";
 import Spinner from "../../components/ui/Spinner";
+import PanelHead from "../../components/ui/PanelHead";
 
 const PRESET_GOALS = [
   "Manage academic stress and burnout",
@@ -54,15 +55,6 @@ function statusTone(status) {
   if (s.includes("declin") || s.includes("cancel"))
     return "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]";
   return "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]";
-}
-
-function PanelHead({ title, children }) {
-  return (
-    <div className="mb-5 border-b-2 border-[color:var(--mb-line)] pb-4">
-      <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">{title}</h2>
-      {children && <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">{children}</p>}
-    </div>
-  );
 }
 
 function Field({ id, label, hint, children }) {

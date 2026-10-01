@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { listenToStudentMessages, sendStudentMessage } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { X, Lock, AlertTriangle, Send } from "lucide-react";
+import Spinner from "../../components/ui/Spinner";
+import useFocusTrap from "../../lib/useFocusTrap";
 
 function formatTime(val) {
   if (!val) return "";
@@ -66,6 +68,8 @@ export default function ConfidentialChatModal({
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const dialogRef = useRef(null);
+  useFocusTrap(dialogRef, isOpen, onClose);
 
   const currentUserId = currentUser?.uid;
   const currentUserName =
@@ -87,7 +91,7 @@ export default function ConfidentialChatModal({
       },
       (err) => {
         console.error("Chat error", err);
-        setError("Could not load messages. Check Firestore rules.");
+        setError("Could not load messages. Check your connection and reopen the chat.");
         setLoading(false);
       }
     );
@@ -106,17 +110,6 @@ export default function ConfidentialChatModal({
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [isOpen]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
 
   async function handleSend(e) {
     e?.preventDefault();
@@ -180,76 +173,83 @@ export default function ConfidentialChatModal({
             transition={{ duration: 0.2 }}
             onClick={onClose}
             aria-hidden="true"
-            className="fixed inset-0 bg-black/80 "
+            className="fixed inset-0 bg-black/80"
           />
 
           {/* Modal Container */}
           <motion.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Confidential chat"
+            aria-label={`Confidential chat with ${recipientName || (isCounselorView ? "student" : "your counselor")}`}
             initial={{ opacity: 0, scale: 0.95, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-            className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
+            className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
           >
             {/* ── Header ── */}
-            <div className="flex items-center gap-3 bg-[color:var(--mb-ground)] px-4 py-3.5 sm:px-5 sm:py-4 border-b border-[color:var(--mb-line)] shrink-0 ">
+            <div className="flex items-center gap-3 bg-[color:var(--mb-ground)] px-4 py-3.5 sm:px-5 sm:py-4 border-b-2 border-[color:var(--mb-line)] shrink-0">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[color:var(--mb-panel-ink)] font-bold text-sm shadow-sm">
+                <div className="h-11 w-11 rounded-full border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] font-bold">
                   {(recipientName || "?").slice(0, 1).toUpperCase()}
                 </div>
-                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)] border-2 border-[color:var(--mb-line)] shadow-sm" />
+                
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[color:var(--mb-ink)] text-sm truncate">
+                  <span className="font-bold text-[color:var(--mb-ink)] truncate">
                     {recipientName || (isCounselorView ? "Student" : "Your Counselor")}
                   </span>
-                  <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[9px] font-bold uppercase text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)] tracking-wide">
+                  <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
                     {recipientRole}
                   </span>
                 </div>
-                <p className="text-[11px] text-[color:var(--mb-muted)] flex items-center gap-1 mt-0.5 truncate">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--mb-panel)]" />
-                  Confidential & Private Counseling Channel
+                <p className="text-sm text-[color:var(--mb-muted)] flex items-center gap-1.5 truncate">
+                  <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  Private and confidential
                 </p>
               </div>
 
               {/* Close Button */}
               <button
+                type="button"
                 onClick={onClose}
-                className="shrink-0 h-11 w-11 rounded-md flex items-center justify-center text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
+                className="shrink-0 h-12 w-12 rounded-md flex items-center justify-center text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                 aria-label="Close chat"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
 
             {/* ── Message Body ── */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[color:var(--mb-ground)] custom-scrollbar">
+            <div
+              role="log"
+              aria-live="polite"
+              aria-label="Messages"
+              className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[color:var(--mb-ground)] custom-scrollbar"
+            >
               {loading ? (
                 <div className="flex flex-col h-full items-center justify-center gap-3 text-[color:var(--mb-muted)]">
-                  <div className="h-8 w-8 rounded-full border-2 border-[color:var(--mb-brand)] border-t-transparent animate-spin" />
-                  <span className="text-xs">Loading secure messages…</span>
+                  <Spinner size={28} className="text-[color:var(--mb-brand)]" />
+                  <span>Loading secure messages…</span>
                 </div>
               ) : error ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-center px-6">
-                  <AlertTriangle className="h-8 w-8 text-[color:var(--mb-urgent)]" />
-                  <p className="text-sm font-medium text-[color:var(--mb-urgent)]">{error}</p>
+                  <AlertTriangle className="h-8 w-8 text-[color:var(--mb-urgent)]" aria-hidden="true" />
+                  <p role="alert" className="font-medium text-[color:var(--mb-urgent)]">{error}</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center gap-3 px-6">
-                  <div className="h-14 w-14 rounded-md bg-[color:var(--mb-brand-bg)] flex items-center justify-center shadow-inner border border-[color:var(--mb-brand)]">
-                    <Lock className="h-6 w-6 text-[color:var(--mb-brand)]" />
+                  <div className="h-14 w-14 rounded-md bg-[color:var(--mb-brand-bg)] flex items-center justify-center border-2 border-[color:var(--mb-brand)]">
+                    <Lock className="h-6 w-6 text-[color:var(--mb-brand)]" aria-hidden="true" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[color:var(--mb-ink)]">Confidential Counseling Thread</p>
-                    <p className="text-xs text-[color:var(--mb-muted)] mt-1 leading-relaxed max-w-xs">
+                    <p className="text-lg font-bold text-[color:var(--mb-ink)]">Confidential counseling thread</p>
+                    <p className="text-[color:var(--mb-muted)] mt-1 max-w-xs">
                       {isCounselorView
                         ? "Send a private message to this student. Only you and the student have access to this conversation."
                         : "Send a secure message to your guidance counselor. This conversation is completely confidential."}
@@ -261,11 +261,11 @@ export default function ConfidentialChatModal({
                   <div key={day}>
                     {/* Day label */}
                     <div className="flex items-center gap-2 my-3">
-                      <div className="flex-1 h-px bg-[color:var(--mb-surface-2)]" />
-                      <span className="text-[10px] text-[color:var(--mb-muted)] font-medium px-1">
+                      <div className="flex-1 h-0.5 bg-[color:var(--mb-line)]" />
+                      <span className="text-sm text-[color:var(--mb-muted)] font-medium px-1">
                         {formatDayLabel(dayMsgs[0]?.timestamp)}
                       </span>
-                      <div className="flex-1 h-px bg-[color:var(--mb-surface-2)]" />
+                      <div className="flex-1 h-0.5 bg-[color:var(--mb-line)]" />
                     </div>
 
                     {dayMsgs.map((msg, i) => {
@@ -281,7 +281,7 @@ export default function ConfidentialChatModal({
                           {/* Avatar for other person */}
                           {!isMe && (
                             <div className={`w-6 mr-1.5 flex items-end ${isLast ? "opacity-100" : "opacity-0"}`}>
-                              <div className="h-6 w-6 rounded-full bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] text-[9px] font-bold shrink-0">
+                              <div className="h-6 w-6 rounded-full bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] text-xs font-bold shrink-0">
                                 {(msg.senderName || "?").slice(0, 1).toUpperCase()}
                               </div>
                             </div>
@@ -289,15 +289,15 @@ export default function ConfidentialChatModal({
 
                           <div className="flex flex-col max-w-[78%]">
                             {!isMe && isFirst && (
-                              <span className="text-[10px] text-[color:var(--mb-muted)] ml-1 mb-1 font-medium">
+                              <span className="text-sm text-[color:var(--mb-muted)] ml-1 mb-1 font-medium">
                                 {msg.senderName || "Counselor"}
                               </span>
                             )}
 
                             <div
-                              className={`px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                              className={`px-3.5 py-2.5 whitespace-pre-wrap break-words ${
                                 isMe
-                                  ? `bg-[color:var(--mb-panel)] text-white ${
+                                  ? `bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] ${
                                       isFirst && isLast
                                         ? "rounded-2xl"
                                         : isFirst
@@ -306,7 +306,7 @@ export default function ConfidentialChatModal({
                                         ? "rounded-2xl rounded-tr-md"
                                         : "rounded-lg rounded-r-md"
                                     }`
-                                  : `bg-[color:var(--mb-surface-2)]/90 border border-[color:var(--mb-line)] text-[color:var(--mb-ink)] ${
+                                  : `bg-[color:var(--mb-surface)] border-2 border-[color:var(--mb-line)] text-[color:var(--mb-ink)] ${
                                       isFirst && isLast
                                         ? "rounded-2xl"
                                         : isFirst
@@ -321,7 +321,7 @@ export default function ConfidentialChatModal({
                             </div>
 
                             {isLast && (
-                              <span className={`text-[10px] text-[color:var(--mb-muted)] mt-0.5 ${isMe ? "text-right mr-1" : "ml-1"}`}>
+                              <span className={`text-sm text-[color:var(--mb-muted)] mt-0.5 ${isMe ? "text-right mr-1" : "ml-1"}`}>
                                 {formatTime(msg.timestamp)}
                               </span>
                             )}
@@ -337,7 +337,7 @@ export default function ConfidentialChatModal({
 
             {/* ── Quick Replies ── */}
             {!loading && (
-              <div className="px-3 py-2 border-t border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
+              <div className="px-3 py-2 border-t-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
                 {quickReplies.map((reply) => (
                   <button
                     key={reply}
@@ -346,7 +346,7 @@ export default function ConfidentialChatModal({
                       setInputText(reply);
                       inputRef.current?.focus();
                     }}
-                    className="min-h-[36px] shrink-0 whitespace-nowrap rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3 py-1.5 text-xs text-[color:var(--mb-muted)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)] transition interactive-tap"
+                    className="min-h-[44px] shrink-0 whitespace-nowrap rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-3 py-1.5 text-sm text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)] transition"
                   >
                     {reply}
                   </button>
@@ -357,11 +357,16 @@ export default function ConfidentialChatModal({
             {/* ── Input Bar ── */}
             <form
               onSubmit={handleSend}
-              className="flex items-end gap-2.5 px-3 py-3 bg-[color:var(--mb-ground)] border-t border-[color:var(--mb-line)] shrink-0"
+              className="flex items-end gap-2.5 px-3 py-3 bg-[color:var(--mb-ground)] border-t-2 border-[color:var(--mb-line)] shrink-0"
             >
               <div className="flex-1 relative">
+                <label htmlFor="chat-message" className="sr-only">
+                  Message
+                </label>
                 <textarea
+                  id="chat-message"
                   ref={inputRef}
+                  maxLength={2000}
                   rows={1}
                   value={inputText}
                   onChange={(e) => {
@@ -371,21 +376,21 @@ export default function ConfidentialChatModal({
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a confidential message…"
-                  className="w-full resize-none overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-4 py-2.5 text-sm text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] transition leading-relaxed min-h-[44px]"
-                  style={{ height: "44px" }}
+                  className="mb-field resize-none overflow-hidden leading-relaxed"
+                  style={{ height: "48px" }}
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={!inputText.trim() || sending}
-                className="shrink-0 h-11 w-11 rounded-md bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-40 shadow-sm disabled:shadow-none interactive-tap"
+                className="mb-btn mb-btn-solid shrink-0 !h-12 !w-12 !min-h-0 !p-0"
                 aria-label="Send message"
               >
                 {sending ? (
-                  <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  <Spinner size={18} />
                 ) : (
-                  <Send className="h-5 w-5 translate-x-0.5" />
+                  <Send className="h-5 w-5" aria-hidden="true" />
                 )}
               </button>
             </form>

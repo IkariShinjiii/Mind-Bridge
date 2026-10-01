@@ -1,182 +1,200 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { PhoneCall, HeartHandshake, Building2, Calendar } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { PhoneCall, HeartHandshake, Building2, Calendar, ArrowLeft } from "lucide-react";
+import PanelHead from "../../components/ui/PanelHead";
 
-export default function CrisisResources() {
-  const [breathingState, setBreathingState] = useState("idle"); // idle | inhale | hold | exhale
-  const [timer, setTimer] = useState(4);
+const HOTLINES = [
+  {
+    id: "ncmh",
+    icon: PhoneCall,
+    badge: "24/7 nationwide, toll-free",
+    name: "NCMH Crisis Hotline",
+    blurb: "National Center for Mental Health free psychiatric and crisis counseling support.",
+    tone: "urgent",
+    numbers: [
+      { label: "Toll-free", display: "1553", tel: "1553" },
+      { label: "Globe / TM", display: "0917-899-8727", tel: "+639178998727" },
+      { label: "Smart / Sun / TNT", display: "0966-351-4518", tel: "+639663514518" },
+    ],
+  },
+  {
+    id: "hopeline",
+    icon: HeartHandshake,
+    badge: "24/7 crisis and suicide prevention",
+    name: "Hopeline Philippines",
+    blurb: "Suicide prevention and emotional crisis support hotline.",
+    tone: "brand",
+    numbers: [
+      { label: "Mobile", display: "0917-558-4673", tel: "+639175584673" },
+      { label: "Smart", display: "0918-873-4673", tel: "+639188734673" },
+      { label: "PLDT landline", display: "(02) 8804-4673", tel: "+63288044673" },
+    ],
+  },
+];
 
-  useEffect(() => {
-    let interval = null;
-    if (breathingState === "inhale") {
-      interval = setTimeout(() => {
-        setBreathingState("hold");
-        setTimer(4);
-      }, 4000);
-    } else if (breathingState === "hold") {
-      interval = setTimeout(() => {
-        setBreathingState("exhale");
-        setTimer(4);
-      }, 4000);
-    } else if (breathingState === "exhale") {
-      interval = setTimeout(() => {
-        setBreathingState("inhale");
-        setTimer(4);
-      }, 4000);
-    }
-    return () => clearTimeout(interval);
-  }, [breathingState]);
+const CAMPUS_FACTS = [
+  { label: "Location", value: "Main Campus, Ground Floor, Blanco Hall" },
+  { label: "Office hours", value: "Monday to Friday, 8:00 AM to 5:00 PM" },
+  { label: "Confidentiality", value: "Protected under RA 11036 (Mental Health Act)" },
+];
+
+const PHASES = {
+  idle: { label: "Ready", next: "inhale" },
+  inhale: { label: "Inhale", next: "hold" },
+  hold: { label: "Hold", next: "exhale" },
+  exhale: { label: "Exhale", next: "inhale" },
+};
+const PHASE_MS = 4000;
+
+const CIRCLE_TONE = {
+  idle: "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]",
+  inhale: "scale-125 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]",
+  hold: "scale-125 border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)]",
+  exhale: "scale-90 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]",
+};
+
+function HotlineCard({ hotline }) {
+  const { icon: Icon, badge, name, blurb, tone, numbers } = hotline;
+  const urgent = tone === "urgent";
+  const edge = urgent ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-brand)]";
+  const wash = urgent ? "bg-[color:var(--mb-urgent-bg)]" : "bg-[color:var(--mb-brand-bg)]";
+  const ink = urgent ? "text-[color:var(--mb-urgent)]" : "text-[color:var(--mb-brand)]";
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-10">
+    <section aria-labelledby={`hotline-${hotline.id}`} className={`flex flex-col rounded-md border-2 p-5 sm:p-6 ${edge} ${wash}`}>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <span className={`rounded-md border-2 px-2.5 py-1 text-sm font-bold ${edge} ${ink}`}>{badge}</span>
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-2 ${edge} ${ink}`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+      </div>
+      <h2 id={`hotline-${hotline.id}`} className="text-2xl font-bold text-[color:var(--mb-ink)]">
+        {name}
+      </h2>
+      <p className="mt-1 text-[color:var(--mb-muted)]">{blurb}</p>
+
+      <ul className={`mt-4 divide-y-2 border-t-2 ${edge} divide-[color:var(--mb-line)]`}>
+        {numbers.map((n) => (
+          <li key={n.tel} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+            <span className="text-[color:var(--mb-muted)]">{n.label}</span>
+            <a
+              href={`tel:${n.tel}`}
+              aria-label={`Call ${name}, ${n.label}, ${n.display}`}
+              className="font-bold tabular-nums text-[color:var(--mb-ink)] underline"
+            >
+              {n.display}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default function CrisisResources() {
+  const navigate = useNavigate();
+  const [phase, setPhase] = useState("idle"); // idle | inhale | hold | exhale
+
+  // Advance to the next phase every PHASE_MS; idle never advances
+  useEffect(() => {
+    if (phase === "idle") return undefined;
+    const t = setTimeout(() => setPhase(PHASES[phase].next), PHASE_MS);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  return (
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
       {/* Header */}
-      <div className="border-b border-[color:var(--mb-line)] pb-5">
-        <h1 className="text-2xl font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-3xl font-display">
-          Mental Health & Crisis Resources
-        </h1>
-        <p className="text-sm text-[color:var(--mb-muted)] mt-1">
-          Free, confidential, and 24/7 support lines for students in distress, plus guided grounding exercises.
-        </p>
+      <div className="flex flex-wrap items-center gap-4 border-b-2 border-[color:var(--mb-line)] pb-5">
+        <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
+          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+          Back
+        </button>
+        <div>
+          <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Crisis resources</h1>
+          <p className="max-w-[65ch] text-[color:var(--mb-muted)]">
+            Free, confidential support lines for students in distress, plus a guided breathing exercise.
+          </p>
+        </div>
       </div>
 
-      {/* Immediate Crisis Hotlines Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* NCMH Hotline */}
-        <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-6 flex flex-col justify-between">
+      {/* In immediate danger */}
+      <p role="note" className="mb-alert font-medium">
+        If you or someone near you is in immediate danger, call your local emergency number now.
+      </p>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {HOTLINES.map((h) => (
+          <HotlineCard key={h.id} hotline={h} />
+        ))}
+      </div>
+
+      {/* Campus guidance center */}
+      <section
+        aria-labelledby="campus-heading"
+        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
+      >
+        <div className="mb-5 flex items-start gap-4 border-b-2 border-[color:var(--mb-line)] pb-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-2 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]">
+            <Building2 className="h-5 w-5" aria-hidden="true" />
+          </span>
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)] px-2.5 py-0.5 rounded-full">
-                24/7 Nationwide Toll-Free
-              </span>
-              <div className="h-9 w-9 rounded-md bg-[color:var(--mb-urgent-bg)] border border-[color:var(--mb-urgent)] flex items-center justify-center">
-                <PhoneCall className="h-5 w-5 text-[color:var(--mb-urgent)]" />
-              </div>
+            <h2 id="campus-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
+              University of San Agustin Guidance Center
+            </h2>
+            <p className="mt-1 text-[color:var(--mb-muted)]">Center for Guidance and Counseling Services (CGCS)</p>
+          </div>
+        </div>
+
+        <dl className="grid gap-4 sm:grid-cols-3">
+          {CAMPUS_FACTS.map((f) => (
+            <div key={f.label} className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+              <dt className="font-bold text-[color:var(--mb-ink)]">{f.label}</dt>
+              <dd className="mt-1 text-[color:var(--mb-muted)]">{f.value}</dd>
             </div>
-            <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-1">NCMH Crisis Hotline</h3>
-            <p className="text-xs text-[color:var(--mb-muted)] mb-4">
-              National Center for Mental Health free psychiatric & crisis counseling support.
-            </p>
-          </div>
-          <div className="space-y-1.5 pt-3 border-t border-[color:var(--mb-urgent)] text-xs font-mono text-[color:var(--mb-brand)]">
-            <div>• Toll-Free: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">1553</strong></div>
-            <div>• Globe/TM: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0917-899-8727</strong></div>
-            <div>• Smart/Sun/TNT: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0966-351-4518</strong></div>
-          </div>
+          ))}
+        </dl>
+
+        <div className="mt-5 flex justify-end">
+          <Link to="/appointments" className="mb-btn mb-btn-solid w-full sm:w-auto">
+            <Calendar className="h-5 w-5" aria-hidden="true" />
+            Book an on-campus session
+          </Link>
         </div>
+      </section>
 
-        {/* Hopeline PH */}
-        <div className="rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] px-2.5 py-0.5 rounded-full">
-                24/7 Crisis & Suicide Prevention
-              </span>
-              <div className="h-9 w-9 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
-                <HeartHandshake className="h-5 w-5 text-[color:var(--mb-brand)]" />
-              </div>
-            </div>
-            <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-1">Hopeline Philippines</h3>
-            <p className="text-xs text-[color:var(--mb-muted)] mb-4">
-              24/7 suicide prevention and emotional crisis support hotline in the Philippines.
-            </p>
-          </div>
-          <div className="space-y-1.5 pt-3 border-t border-[color:var(--mb-brand)] text-xs font-mono text-[color:var(--mb-brand)]">
-            <div>• Mobile: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0917-558-4673</strong></div>
-            <div>• Smart: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0918-873-4673</strong></div>
-            <div>• PLDT Landline: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">(02) 8804-4673</strong></div>
-          </div>
-        </div>
-      </div>
+      {/* Box breathing */}
+      <section
+        aria-label="Box breathing exercise"
+        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
+      >
+        <PanelHead title="Box breathing (4-4-4)">
+          Breathe in, hold, and breathe out for four seconds each. A minute of this can settle a racing mind.
+        </PanelHead>
 
-      {/* University of San Agustin Guidance Center Section */}
-      <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-[color:var(--mb-brand)]" />
+        <div className="flex flex-col items-center gap-6 py-4">
+          <div
+            aria-hidden="true"
+            className={`flex h-36 w-36 items-center justify-center rounded-full border-4 transition-all duration-1000 motion-reduce:transition-none ${CIRCLE_TONE[phase]}`}
+          >
+            <span className="text-lg font-bold uppercase tracking-widest">{PHASES[phase].label}</span>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-[color:var(--mb-ink)]">University of San Agustin Guidance Center</h3>
-            <p className="text-xs text-[color:var(--mb-brand)]">Center for Guidance & Counseling Services (CGCS)</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-[color:var(--mb-muted)] mb-6">
-          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
-            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Location</span>
-            Main Campus, Ground Floor, Blanco Hall
-          </div>
-          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
-            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Office Hours</span>
-            Monday – Friday, 8:00 AM – 5:00 PM
-          </div>
-          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
-            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Confidentiality</span>
-            Protected under RA 11036 (Mental Health Act)
-          </div>
-        </div>
-
-        <Link
-          to="/appointments"
-          className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm interactive-tap"
-        >
-          <Calendar className="h-4 w-4" />
-          <span>Book an On-Campus Counseling Session</span>
-        </Link>
-      </div>
-
-      {/* Interactive Box Breathing Grounding Tool */}
-      <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8 text-center">
-        <div className="max-w-md mx-auto">
-          <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-2">Box Breathing (4-4-4 Technique)</h3>
-          <p className="text-xs text-[color:var(--mb-muted)] mb-6">
-            Calm your nervous system in 60 seconds with guided rhythmic breathing.
+          {/* Screen readers hear each phase change once */}
+          <p role="status" aria-live="polite" className="sr-only">
+            {phase === "idle" ? "Breathing exercise stopped." : PHASES[phase].label}
           </p>
 
-          <div className="relative flex items-center justify-center my-8">
-            <div
-              className={`h-36 w-36 rounded-full border-4 flex items-center justify-center transition-all duration-1000 shadow-sm ${
-                breathingState === "inhale"
-                  ? "scale-125 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                  : breathingState === "hold"
-                  ? "scale-125 border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)]"
-                  : breathingState === "exhale"
-                  ? "scale-90 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                  : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
-              }`}
-            >
-              <div className="text-center font-bold">
-                <div className="text-sm uppercase tracking-widest">
-                  {breathingState === "idle"
-                    ? "Ready"
-                    : breathingState === "inhale"
-                    ? "Inhale"
-                    : breathingState === "hold"
-                    ? "Hold"
-                    : "Exhale"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-center gap-3">
-            {breathingState === "idle" ? (
-              <button
-                onClick={() => setBreathingState("inhale")}
-                className="rounded-md bg-[color:var(--mb-panel)] px-6 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm"
-              >
-                Start Breathing Exercise
-              </button>
-            ) : (
-              <button
-                onClick={() => setBreathingState("idle")}
-                className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-5 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-line)] transition"
-              >
-                Reset
-              </button>
-            )}
-          </div>
+          {phase === "idle" ? (
+            <button type="button" onClick={() => setPhase("inhale")} className="mb-btn mb-btn-solid w-full sm:w-auto">
+              Start breathing exercise
+            </button>
+          ) : (
+            <button type="button" onClick={() => setPhase("idle")} className="mb-btn mb-btn-line w-full sm:w-auto">
+              Stop
+            </button>
+          )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
