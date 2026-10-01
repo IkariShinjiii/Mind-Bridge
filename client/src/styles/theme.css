@@ -177,3 +177,8 @@
 .mb .animate-fade-up { animation: mb-fade .35s ease-out backwards; }
 @keyframes mb-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mb .animate-fade-up { animation: none; } }
+
+/* Toasts: a short rise-and-fade, nothing bouncy. Reduced motion gets the final state immediately. */
+.mb-toast { animation: mb-toast-in .22s cubic-bezier(.22,1,.36,1) backwards; }
+@keyframes mb-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mb-toast { animation: none; } }

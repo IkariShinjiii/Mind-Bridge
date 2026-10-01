@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Calendar, AlertCircle, CheckCircle2, Plus } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import { Calendar, Plus } from "lucide-react";
 import {
   getAppointments,
   getAllAppointments,
@@ -9,6 +9,7 @@ import {
 } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "./BookingFlow";
 import { toLocalInputValue } from "../../lib/dates";
@@ -120,7 +121,6 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState(null);
-  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   // Booking Modal State (for students)
   const [showModal, setShowModal] = useState(false);
@@ -138,13 +138,8 @@ export default function Appointments() {
   const [bookingError, setBookingError] = useState("");
   const [loadError, setLoadError] = useState("");
 
-  const feedbackTimer = useRef(null);
-  const showFeedback = (type, message) => {
-    clearTimeout(feedbackTimer.current);
-    setFeedback({ type, message });
-    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 6000);
-  };
-  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
+  const toast = useToast();
+  const showFeedback = (type, message) => (type === "success" ? toast.success(message) : toast.error(message));
 
   async function loadData() {
     setLoading(true);
@@ -319,25 +314,6 @@ export default function Appointments() {
         )}
       </div>
 
-      {/* Feedback */}
-      <div role="status" aria-live="polite">
-        {feedback.message && (
-          <div
-            className={`mb-6 flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              feedback.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {feedback.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
-        )}
-      </div>
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter appointments by status">

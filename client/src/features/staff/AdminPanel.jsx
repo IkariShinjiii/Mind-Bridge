@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ClipboardList,
@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Diamond,
   CircleCheck,
-  CheckCircle2,
   BarChart3,
   MessageSquare,
 } from "lucide-react";
@@ -36,6 +35,7 @@ import {
 } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import Modal from "../../components/ui/Modal";
 import ManageAvailability from "./ManageAvailability";
 const ConfidentialChatModal = lazy(() => import("../chat/ConfidentialChatModal"));
@@ -123,16 +123,10 @@ export default function AdminPanel() {
   const [accountSubTab, setAccountSubTab] = useState("staff");
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [exportingCsv, setExportingCsv] = useState(false);
-  const [notice, setNotice] = useState({ type: "", message: "" });
   const [loadError, setLoadError] = useState("");
-  const noticeTimer = useRef(null);
 
-  const showNotice = (type, message) => {
-    clearTimeout(noticeTimer.current);
-    setNotice({ type, message });
-    noticeTimer.current = setTimeout(() => setNotice({ type: "", message: "" }), 6000);
-  };
-  useEffect(() => () => clearTimeout(noticeTimer.current), []);
+  const toast = useToast();
+  const showNotice = (type, message) => (type === "success" ? toast.success(message) : toast.error(message));
 
   async function loadData() {
     setLoading(true);
@@ -362,25 +356,6 @@ export default function AdminPanel() {
         </p>
       </div>
 
-      {/* Outcome of the last action. Failures must be visible: a silent failure on a case looks like success. */}
-      <div role="status" aria-live="polite">
-        {notice.message && (
-          <div
-            className={`flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              notice.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {notice.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{notice.message}</span>
-          </div>
-        )}
-      </div>
 
       {loadError && !loading && (
         <div role="alert" className="mb-alert flex flex-wrap items-center justify-between gap-3 font-medium">

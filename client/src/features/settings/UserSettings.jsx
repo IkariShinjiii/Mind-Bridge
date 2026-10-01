@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   User,
@@ -10,8 +10,6 @@ import {
   ArrowLeft,
   Calendar,
   Check,
-  CheckCircle2,
-  AlertCircle,
   KeyRound,
   Plus,
 } from "lucide-react";
@@ -25,6 +23,7 @@ import {
 import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
 import { AVATAR_COLORS, avatarColor } from "../../lib/avatar";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import PanelHead from "../../components/ui/PanelHead";
 import { validateEmergencyContact, validatePasswordChange, isPhone } from "../../lib/validation";
 import { friendlyError } from "../../lib/errors";
@@ -99,7 +98,6 @@ export default function UserSettings() {
   const [activeTab, setActiveTab] = useState("profile");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState({ type: "", message: "" });
 
   // Profile
   const [name, setName] = useState("");
@@ -190,13 +188,8 @@ export default function UserSettings() {
     }
   }, [activeTab, currentUser]);
 
-  const feedbackTimer = useRef(null);
-  const showFeedback = (type, message) => {
-    clearTimeout(feedbackTimer.current);
-    setFeedback({ type, message });
-    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 5000);
-  };
-  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
+  const toast = useToast();
+  const showFeedback = (type, message) => (type === "success" ? toast.success(message) : toast.error(message));
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -362,25 +355,6 @@ export default function UserSettings() {
         </div>
       </div>
 
-      {/* Outcome of the last action */}
-      <div role="status" aria-live="polite">
-        {feedback.message && (
-          <div
-            className={`mb-6 flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              feedback.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {feedback.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
-        )}
-      </div>
 
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">

@@ -84,3 +84,26 @@ export async function signInWithPopup() {
 }
 
 export async function sendPasswordResetEmail() {}
+
+export class EmailAuthProvider {
+  static credential(email, password) {
+    return { email, password };
+  }
+}
+
+export async function reauthenticateWithCredential(user, { email, password }) {
+  const account = load().accounts[email.toLowerCase()];
+  if (!account || account.uid !== user.uid || account.password !== password) {
+    throw authError("auth/invalid-credential", "Firebase: Error (auth/invalid-credential).");
+  }
+}
+
+export async function updatePassword(user, password) {
+  if (password.length < 6) {
+    throw authError("auth/weak-password", "Firebase: Password should be at least 6 characters (auth/weak-password).");
+  }
+  const state = load();
+  const account = Object.values(state.accounts).find((a) => a.uid === user.uid);
+  if (account) account.password = password;
+  save(state);
+}
