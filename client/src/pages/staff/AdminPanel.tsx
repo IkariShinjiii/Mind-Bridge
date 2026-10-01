@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ClipboardList,
@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Diamond,
   CircleCheck,
-  CheckCircle2,
   BarChart3,
   MessageSquare,
   type LucideIcon,
@@ -27,6 +26,7 @@ import {
 } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import Modal from "../../components/ui/Modal";
 import ManageAvailability from "../../components/staff/ManageAvailability";
 const ConfidentialChatModal = lazy(() => import("../../components/chat/ConfidentialChatModal"));
@@ -166,16 +166,10 @@ export default function AdminPanel() {
   const [accountSubTab, setAccountSubTab] = useState<"staff" | "students">("staff");
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [exportingCsv, setExportingCsv] = useState(false);
-  const [notice, setNotice] = useState<{ type: "" | "success" | "error"; message: string }>({ type: "", message: "" });
   const [loadError, setLoadError] = useState("");
-  const noticeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const showNotice = (type: "success" | "error", message: string) => {
-    clearTimeout(noticeTimer.current);
-    setNotice({ type, message });
-    noticeTimer.current = setTimeout(() => setNotice({ type: "", message: "" }), 6000);
-  };
-  useEffect(() => () => clearTimeout(noticeTimer.current), []);
+  const toast = useToast();
+  const showNotice = (type: "success" | "error", message: string) =>
+    type === "success" ? toast.success(message) : toast.error(message);
 
   async function loadData() {
     setLoading(true);
@@ -418,26 +412,6 @@ export default function AdminPanel() {
         <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
           Triage student check-ins, manage accounts and availability, and review system-wide trends.
         </p>
-      </div>
-
-      {/* Outcome of the last action. Failures must be visible: a silent failure on a case looks like success. */}
-      <div role="status" aria-live="polite">
-        {notice.message && (
-          <div
-            className={`flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              notice.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {notice.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{notice.message}</span>
-          </div>
-        )}
       </div>
 
       {loadError && !loading && (

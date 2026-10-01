@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo, useRef, type FormEvent, type ReactNode } from "react";
-import { Calendar, AlertCircle, CheckCircle2, Plus } from "lucide-react";
+import { useEffect, useState, useMemo, type FormEvent, type ReactNode } from "react";
+import { Calendar, Plus } from "lucide-react";
 import {
   getAppointments,
   getAllAppointments,
@@ -9,6 +9,7 @@ import {
 } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "../../components/appointments/BookingFlow";
 import { toLocalInputValue, formatDateTime, parseDate } from "../../utils/dates";
@@ -131,10 +132,6 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({
-    type: "",
-    message: "",
-  });
 
   // Booking Modal State (for students)
   const [showModal, setShowModal] = useState(false);
@@ -152,13 +149,9 @@ export default function Appointments() {
   const [bookingError, setBookingError] = useState("");
   const [loadError, setLoadError] = useState("");
 
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const showFeedback = (type: "success" | "error", message: string) => {
-    clearTimeout(feedbackTimer.current);
-    setFeedback({ type, message });
-    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 6000);
-  };
-  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
+  const toast = useToast();
+  const showFeedback = (type: "success" | "error", message: string) =>
+    type === "success" ? toast.success(message) : toast.error(message);
 
   async function loadData() {
     setLoading(true);
@@ -342,26 +335,6 @@ export default function Appointments() {
             <Plus className="h-5 w-5" aria-hidden="true" />
             Book a counselor
           </button>
-        )}
-      </div>
-
-      {/* Feedback */}
-      <div role="status" aria-live="polite">
-        {feedback.message && (
-          <div
-            className={`mb-6 flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              feedback.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {feedback.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
         )}
       </div>
 

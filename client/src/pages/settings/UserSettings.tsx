@@ -1,7 +1,6 @@
 import {
   useState,
   useEffect,
-  useRef,
   isValidElement,
   cloneElement,
   type FormEvent,
@@ -20,8 +19,6 @@ import {
   ArrowLeft,
   Calendar,
   Check,
-  CheckCircle2,
-  AlertCircle,
   KeyRound,
   Plus,
   type LucideIcon,
@@ -31,6 +28,7 @@ import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthP
 import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
 import { AVATAR_COLORS, avatarColor } from "../../utils/avatar";
 import Spinner from "../../components/ui/Spinner";
+import { useToast } from "../../components/ui/Toast";
 import PanelHead from "../../components/ui/PanelHead";
 import { validateEmergencyContact, validatePasswordChange } from "../../utils/validation";
 import { validate } from "../../lib/validate";
@@ -126,10 +124,6 @@ export default function UserSettings() {
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "" | "success" | "error"; message: string }>({
-    type: "",
-    message: "",
-  });
 
   // Profile
   const [name, setName] = useState("");
@@ -221,13 +215,9 @@ export default function UserSettings() {
     }
   }, [activeTab, currentUser]);
 
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const showFeedback = (type: "success" | "error", message: string) => {
-    clearTimeout(feedbackTimer.current);
-    setFeedback({ type, message });
-    feedbackTimer.current = setTimeout(() => setFeedback({ type: "", message: "" }), 5000);
-  };
-  useEffect(() => () => clearTimeout(feedbackTimer.current), []);
+  const toast = useToast();
+  const showFeedback = (type: "success" | "error", message: string) =>
+    type === "success" ? toast.success(message) : toast.error(message);
 
   const handleSaveProfile = async (e: FormEvent) => {
     e.preventDefault();
@@ -402,26 +392,6 @@ export default function UserSettings() {
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Settings</h1>
           <p className="max-w-[65ch] text-[color:var(--mb-muted)]">Your profile, security and what others can see.</p>
         </div>
-      </div>
-
-      {/* Outcome of the last action */}
-      <div role="status" aria-live="polite">
-        {feedback.message && (
-          <div
-            className={`mb-6 flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
-              feedback.type === "success"
-                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
-                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-            }`}
-          >
-            {feedback.type === "success" ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
-            ) : (
-              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
-        )}
       </div>
 
       {loading ? (

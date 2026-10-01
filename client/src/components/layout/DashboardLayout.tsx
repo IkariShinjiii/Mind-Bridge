@@ -4,6 +4,7 @@ import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Moon, Sun
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import Spinner from "../ui/Spinner";
+import { ToastViewport } from "../ui/Toast";
 import { avatarColor } from "../../utils/avatar";
 import icon from "../../assets/mindbridge-icon.png";
 
@@ -266,6 +267,8 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
           {children}
         </div>
       </main>
+
+      <ToastViewport />
 
       <nav
         aria-label="Main"
