@@ -266,6 +266,7 @@ written and tested but **not deployed yet**.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): system diagram, data model, security model, scaling
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): Vercel and Firebase deployment, rollback, troubleshooting
 - [`docs/API.md`](docs/API.md): backend operations, roles and expected outcomes
+- [`docs/DATA_AND_VALIDATION.md`](docs/DATA_AND_VALIDATION.md): document types (JSDoc), form validation rules with examples, scoring summary. The project is plain JavaScript; there is no TypeScript or Zod
 - [`PRODUCT.md`](PRODUCT.md): product purpose, users and constraints
 - [`DESIGN.md`](DESIGN.md): design system and tokens
 - Storybook (`npm run storybook` in `client/`): UI components and design foundations
