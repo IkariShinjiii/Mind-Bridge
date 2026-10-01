@@ -17,19 +17,14 @@ import CookiePolicy from "./pages/CookiePolicy";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import CookieConsent from "./components/ui/CookieConsent";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
+import PageLoader from "./components/ui/PageLoader";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { currentUser, userRole, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="h-[100dvh] w-full bg-gray-950 flex items-center justify-center text-white/70">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-          <span className="text-xs text-gray-400">Loading session…</span>
-        </div>
-      </div>
-    );
+    return <PageLoader label="Loading session…" />;
   }
 
   if (!currentUser) {
@@ -51,14 +46,7 @@ function PublicOnlyRoute({ children }) {
   const { currentUser, userRole, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="h-[100dvh] w-full bg-gray-950 flex items-center justify-center text-white/70">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
-          <span className="text-xs text-gray-400">Loading session…</span>
-        </div>
-      </div>
-    );
+    return <PageLoader label="Loading session…" />;
   }
 
   if (currentUser) {
@@ -78,7 +66,8 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <CookieConsent />
-      <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="h-8 w-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" /></div>}>
+      <ErrorBoundary resetKey={location.pathname}>
+      <Suspense fallback={<PageLoader />}>
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<HomePage />} />
         <Route
@@ -147,6 +136,7 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

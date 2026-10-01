@@ -9,28 +9,30 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
+import { validateSignup, SCHOOL_EMAIL_DOMAIN } from "../../lib/validation";
+import { friendlyError, isPopupDismissed } from "../../lib/errors";
 
 export default function Signup() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   async function handleSubmit(e) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const name = String(form.get("name") || "").trim();
     const email = String(form.get("email") || "").trim();
-    const password = String(form.get("password") || "").trim();
+    const password = String(form.get("password") || "");
+    const consent = form.get("consent") === "on";
 
-    if (!name || !email || !password) return;
-
-    if (!email.toLowerCase().endsWith("@usa.edu.ph")) {
-      setErrorMessage("Student registrations must use an @usa.edu.ph email address.");
-      return;
-    }
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters.");
+    const errors = validateSignup({ name, email, password, consent });
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setErrorMessage("");
+      const first = ["name", "email", "password", "consent"].find((k) => errors[k]);
+      document.getElementById(first)?.focus();
       return;
     }
 
@@ -54,12 +56,7 @@ export default function Signup() {
 
       navigate("/student/dashboard", { replace: true });
     } catch (error) {
-      const msg =
-        error.code === "auth/email-already-in-use"
-          ? "An account with that email already exists. Try logging in instead."
-          : error.code === "auth/weak-password"
-            ? "Password must be at least 6 characters."
-            : error.message || "Unable to create account. Please try again.";
+      const msg = friendlyError(error, "Unable to create account. Please try again.");
       setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
@@ -75,7 +72,7 @@ export default function Signup() {
       const user = result.user;
 
       // Enforce institutional email domain
-      if (!user.email?.toLowerCase().endsWith("@usa.edu.ph")) {
+      if (!user.email?.toLowerCase().endsWith(SCHOOL_EMAIL_DOMAIN)) {
         await signOut(auth);
         setErrorMessage("Sign-Up with Google is only available for @usa.edu.ph accounts. Please use your school email.");
         return;
@@ -99,8 +96,8 @@ export default function Signup() {
       // Whether new or existing, navigate to dashboard
       navigate("/student/dashboard", { replace: true });
     } catch (error) {
-      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-        setErrorMessage(error.message || "Google sign-up failed. Please try again.");
+      if (!isPopupDismissed(error)) {
+        setErrorMessage(friendlyError(error, "Google sign-up failed. Please try again."));
       }
     } finally {
       setIsGoogleLoading(false);
@@ -124,9 +121,9 @@ export default function Signup() {
         {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Field id="name" label="Full name" type="text" autoComplete="name" required />
-        <Field id="email" label="School email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required />
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <Field id="name" label="Full name" type="text" autoComplete="name" required error={fieldErrors.name} />
+        <Field id="email" label="School email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required error={fieldErrors.email} />
         <Field
           id="password"
           label="Password"
@@ -134,20 +131,36 @@ export default function Signup() {
           autoComplete="new-password"
           hint="At least 6 characters."
           required
+          error={fieldErrors.password}
         />
 
-        <div className="flex items-start gap-3">
-          <input id="consent" name="consent" type="checkbox" required className="mt-1 h-5 w-5 shrink-0 accent-[color:var(--mb-panel)]" />
+        <div>
+          <div className="flex items-start gap-3">
+            <input
+              id="consent"
+              name="consent"
+              type="checkbox"
+              required
+              aria-invalid={fieldErrors.consent ? true : undefined}
+              aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
+              className="mt-1 h-5 w-5 shrink-0 accent-[color:var(--mb-panel)]"
+            />
           <label htmlFor="consent" className="text-[color:var(--mb-muted)]">
             I agree to the{" "}
-            <a href="/terms" className="text-[color:var(--mb-ink)]">Terms and Conditions</a> and{" "}
-            <a href="/privacy-policy" className="text-[color:var(--mb-ink)]">Privacy Policy</a>, and I consent to my data being collected and processed as they describe.
+            <a href="/terms" className="text-[color:var(--mb-ink)] underline">Terms and Conditions</a> and{" "}
+            <a href="/privacy-policy" className="text-[color:var(--mb-ink)] underline">Privacy Policy</a>, and I consent to my data being collected and processed as they describe.
           </label>
+          </div>
+          {fieldErrors.consent && (
+            <p id="consent-error" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+              {fieldErrors.consent}
+            </p>
+          )}
         </div>
 
-        <button type="submit" disabled={isSubmitting || isGoogleLoading} className="mb-btn mb-btn-solid w-full">
+        <button type="submit" disabled={isSubmitting || isGoogleLoading} aria-busy={isSubmitting} className="mb-btn mb-btn-solid w-full">
           {isSubmitting && <Spinner />}
-          {isSubmitting ? "Creating account..." : "Create account"}
+          {isSubmitting ? "Creating account…" : "Create account"}
         </button>
 
         <div className="flex items-center gap-3 text-[color:var(--mb-muted)]" aria-hidden="true">
@@ -163,7 +176,7 @@ export default function Signup() {
           className="mb-btn mb-btn-line w-full"
         >
           {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
-          {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
+          {isGoogleLoading ? "Signing up…" : "Sign up with Google"}
         </button>
       </form>
     </AuthFrame>

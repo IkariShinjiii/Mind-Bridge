@@ -4,6 +4,8 @@ import { signInWithEmailAndPassword, signInWithPopup, signOut, sendPasswordReset
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
+import { validateLogin, isEmail } from "../../lib/validation";
+import { friendlyError, isPopupDismissed } from "../../lib/errors";
 
 function navigateByRole(role, navigate) {
   if (role === "admin" || role === "counselor") navigate("/admin/dashboard", { replace: true });
@@ -16,38 +18,49 @@ export default function Login() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [infoMessage, setInfoMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [isResetting, setIsResetting] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email") || "").trim();
-    const password = String(form.get("password") || "").trim();
+    const password = String(form.get("password") || "");
 
-    if (!email || !password) {
-      setErrorMessage("Please enter both your email and password.");
+    const errors = validateLogin({ email, password });
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setErrorMessage("");
+      document.getElementById(Object.keys(errors)[0])?.focus();
       return;
     }
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setInfoMessage("");
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const userDoc = await getDoc(doc(db, "users", credential.user.uid));
 
       if (!userDoc.exists()) {
+        await signOut(auth);
         throw new Error("No profile found for this account.");
       }
 
       const profile = userDoc.data();
       if (profile.active === false) {
+        await signOut(auth);
         throw new Error("This account has been deactivated. Contact an administrator.");
       }
 
       const role = (profile.role || "student").toLowerCase();
       navigateByRole(role, navigate);
     } catch (error) {
-      setErrorMessage(error.message || "Unable to sign in. Please try again.");
+      // Errors we throw ourselves carry a plain message; Firebase errors carry a code
+      setErrorMessage(
+        error.code ? friendlyError(error, "Unable to sign in. Please try again.") : error.message || "Unable to sign in. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -92,8 +105,10 @@ export default function Login() {
         navigateByRole(role, navigate);
       }
     } catch (error) {
-      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-        setErrorMessage(error.message || "Google sign-in failed. Please try again.");
+      if (!isPopupDismissed(error)) {
+        setErrorMessage(
+          error.code ? friendlyError(error, "Google sign-in failed. Please try again.") : error.message || "Google sign-in failed. Please try again."
+        );
       }
     } finally {
       setIsGoogleLoading(false);
@@ -104,20 +119,25 @@ export default function Login() {
   async function handleForgotPassword() {
     const email = String(document.getElementById("email")?.value || "").trim();
     setInfoMessage("");
-    if (!email) {
-      setErrorMessage("Type your email above first, then choose Forgot password.");
+    if (!isEmail(email)) {
+      setFieldErrors({ email: "Type your email here first, then choose Forgot password." });
+      document.getElementById("email")?.focus();
       return;
     }
     setErrorMessage("");
+    setFieldErrors({});
+    setIsResetting(true);
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       // Same message either way so the form can't be used to find out who has an account.
       if (error.code !== "auth/user-not-found" && error.code !== "auth/invalid-email") {
-        setErrorMessage("We could not send the reset email. Please try again.");
+        setErrorMessage(friendlyError(error, "We could not send the reset email. Please try again."));
+        setIsResetting(false);
         return;
       }
     }
+    setIsResetting(false);
     setInfoMessage("If an account exists for that email, a reset link is on its way.");
   }
 
@@ -136,22 +156,28 @@ export default function Login() {
     >
       <div aria-live="polite">
         {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
-        {infoMessage ? <div className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">{infoMessage}</div> : null}
+        {infoMessage ? <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">{infoMessage}</div> : null}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Field id="email" label="Email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required />
-        <Field id="password" label="Password" type="password" autoComplete="current-password" required />
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <Field id="email" label="Email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required error={fieldErrors.email} />
+        <Field id="password" label="Password" type="password" autoComplete="current-password" required error={fieldErrors.password} />
 
         <div className="text-right">
-          <button type="button" onClick={handleForgotPassword} className="font-bold underline underline-offset-4">
-            Forgot password?
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={isResetting || isSubmitting}
+            className="inline-flex min-h-[44px] items-center gap-2 font-bold underline underline-offset-4 disabled:opacity-60"
+          >
+            {isResetting && <Spinner />}
+            {isResetting ? "Sending…" : "Forgot password?"}
           </button>
         </div>
 
-        <button type="submit" disabled={isSubmitting || isGoogleLoading} className="mb-btn mb-btn-solid w-full">
+        <button type="submit" disabled={isSubmitting || isGoogleLoading} aria-busy={isSubmitting} className="mb-btn mb-btn-solid w-full">
           {isSubmitting && <Spinner />}
-          {isSubmitting ? "Signing in..." : "Log in"}
+          {isSubmitting ? "Signing in…" : "Log in"}
         </button>
 
         <div className="flex items-center gap-3 text-[color:var(--mb-muted)]" aria-hidden="true">
@@ -167,7 +193,7 @@ export default function Login() {
           className="mb-btn mb-btn-line w-full"
         >
           {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
-          {isGoogleLoading ? "Signing in..." : "Continue with Google"}
+          {isGoogleLoading ? "Signing in…" : "Continue with Google"}
         </button>
       </form>
     </AuthFrame>
