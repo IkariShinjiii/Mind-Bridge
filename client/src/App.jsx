@@ -1,22 +1,22 @@
 import React, { lazy, Suspense } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "./AuthContext.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 
 import HomePage from "./pages/HomePage";
-const StudentDashboard = lazy(() => import("./components/StudentDashboard"));
-const AdminPanel = lazy(() => import("./components/AdminPanel"));
-import Login from "./components/Login";
-import Signup from "./components/Signup";
-const UserSettings = lazy(() => import("./components/UserSettings"));
-const Appointments = lazy(() => import("./components/Appointments"));
-const CrisisResources = lazy(() => import("./components/CrisisResources"));
+const StudentDashboard = lazy(() => import("./features/student/StudentDashboard"));
+const AdminPanel = lazy(() => import("./features/staff/AdminPanel"));
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+const UserSettings = lazy(() => import("./features/settings/UserSettings"));
+const Appointments = lazy(() => import("./features/appointments/Appointments"));
+const CrisisResources = lazy(() => import("./features/student/CrisisResources"));
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import CookiePolicy from "./pages/CookiePolicy";
 import NotFoundPage from "./pages/NotFoundPage";
-import DashboardLayout from "./components/DashboardLayout";
-import CookieConsent from "./components/CookieConsent";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import CookieConsent from "./components/ui/CookieConsent";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { currentUser, userRole, loading } = useAuth();

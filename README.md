@@ -14,6 +14,26 @@ manage appointments.
 - **Alerts:** `functions/` holds a Cloud Function that emails staff when a
   new assessment is high risk
 
+## Project layout
+
+```
+client/src/
+  App.jsx, main.jsx      routes and entry point
+  lib/                   Firestore/Auth calls (api.js), Firebase init, risk scoring + tests
+  context/               AuthContext (current user and role)
+  styles/                index.css (Tailwind base), theme.css (design tokens, see DESIGN.md)
+  components/ui/         shared pieces: Modal, Spinner, PublicShell, AuthFrame, CookieConsent
+  components/layout/     DashboardLayout (signed-in app shell)
+  pages/                 public pages (home, legal, 404) and pages/auth (login, signup)
+  features/student/      check-in dashboard and crisis resources
+  features/appointments/ appointments list and the booking flow
+  features/staff/        admin and counselor dashboard, availability
+  features/settings/     user settings
+  features/chat/         confidential chat dialog
+functions/               Cloud Function for high-risk email alerts (not deployed yet)
+firestore.rules          access control
+```
+
 ## Roles
 
 - `student`: created by self-signup (`@usa.edu.ph` accounts, email/password or Google)

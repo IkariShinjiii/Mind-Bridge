@@ -29,12 +29,12 @@ import {
   submitResponse,
   getAvailability,
   getMyAssessments,
-} from "../api";
-import { useAuth } from "../AuthContext.jsx";
-import Spinner from "./Spinner";
-import ConfidentialChatModal from "./ConfidentialChatModal";
-import Modal from "./ui/Modal";
-import BookingFlow from "./BookingFlow";
+} from "../../lib/api";
+import { useAuth } from "../../context/AuthContext.jsx";
+import Spinner from "../../components/ui/Spinner";
+import ConfidentialChatModal from "../chat/ConfidentialChatModal";
+import Modal from "../../components/ui/Modal";
+import BookingFlow from "../appointments/BookingFlow";
 
 // Safely formats dates to prevent the "Invalid Date" error
 function safeFormatDate(val) {

@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, signInWithPopup, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, provider } from "../firebase";
-import AuthFrame, { GoogleIcon, Spinner, Field } from "./ui/AuthFrame";
+import { auth, db, provider } from "../../lib/firebase";
+import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
 
 function navigateByRole(role, navigate) {
   if (role === "admin" || role === "counselor") navigate("/admin/dashboard", { replace: true });

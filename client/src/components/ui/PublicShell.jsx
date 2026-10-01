@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { Moon, Sun, Phone } from "lucide-react";
 import icon from "../../assets/mindbridge-icon.png";
 

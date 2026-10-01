@@ -11,9 +11,9 @@ import {
   Sun,
   Phone,
 } from "lucide-react";
-import { useAuth } from "../AuthContext.jsx";
-import { useTheme } from "./ui/PublicShell";
-import icon from "../assets/mindbridge-icon.png";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useTheme } from "../ui/PublicShell";
+import icon from "../../assets/mindbridge-icon.png";
 
 const GRADIENTS = {
   cyan: "from-teal-500 to-cyan-600",

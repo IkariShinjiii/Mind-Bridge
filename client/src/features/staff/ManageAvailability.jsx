@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getMyAvailability, addAvailability, removeAvailability } from "../api";
-import Spinner from "./Spinner";
+import { getMyAvailability, addAvailability, removeAvailability } from "../../lib/api";
+import Spinner from "../../components/ui/Spinner";
 
 function parseDate(val) {
   if (!val) return null;

@@ -53,7 +53,7 @@ Light is the default (daytime use on campus), with a dark theme for late-night c
 
 ## Implementation notes
 
-- Tokens live in `client/src/theme.css` as `--mb-*` custom properties under `.mb`, with a dark override.
+- Tokens live in `client/src/styles/theme.css` as `--mb-*` custom properties under `.mb`, with a dark override.
 - Pages use Tailwind arbitrary values such as `text-[color:var(--mb-ink)]`. Status tints use `--mb-urgent`, `--mb-warn`, `--mb-safe`, `--mb-brand` and their `-bg` pairs; solid fills use `--mb-urgent-solid` and similar so light text stays readable in both themes.
 - Public pages use `PublicShell`; signed-in pages use `DashboardLayout`. Both wrap content in `.mb`.
 - The student, appointments, resources, settings and staff pages were moved onto these tokens with a scripted class migration rather than rebuilt from scratch, so their layouts still follow the earlier card-based structure.

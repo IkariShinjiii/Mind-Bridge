@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { listenToStudentMessages, sendStudentMessage } from "../api";
-import { useAuth } from "../AuthContext.jsx";
+import { listenToStudentMessages, sendStudentMessage } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { X, Lock, AlertTriangle, Send } from "lucide-react";
 
 function formatTime(val) {

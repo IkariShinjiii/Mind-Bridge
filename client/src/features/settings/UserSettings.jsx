@@ -13,16 +13,16 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import { useAuth } from "../AuthContext.jsx";
-import { auth } from "../firebase";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { auth } from "../../lib/firebase";
 import {
   updateProfile,
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
 } from "firebase/auth";
-import { getUserSettings, saveUserSettings, getAppointments } from "../api";
-import Spinner from "./Spinner";
+import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
+import Spinner from "../../components/ui/Spinner";
 
 const AVATAR_GRADIENTS = [
   { id: "cyan", name: "Ocean Breeze", class: "from-teal-500 to-cyan-600" },

@@ -49,9 +49,9 @@ Unlike clinical electronic health record (EHR) systems that feel cold and bureau
 
 ## Evidence on Hand
 
-- Fully functional role-based architecture in `server/` (Express API, JWT auth, risk scoring algorithms, appointment management).
+- Role-based access (student, counselor, admin) on Firebase Auth and Firestore, enforced by `firestore.rules`, with rule-based risk scoring in `client/src/lib/scoring.js` and appointment management.
 - Complete frontend client in `client/` (React + Tailwind CSS + Framer Motion) with student check-in, counselor triage view, scheduling calendar, admin panel, and settings.
-- Real campus crisis resource listings and hotline protocols in `client/src/components/CrisisResources.jsx`.
+- Real campus crisis resource listings and hotline protocols in `client/src/features/student/CrisisResources.jsx`.
 
 ## Product Principles
 

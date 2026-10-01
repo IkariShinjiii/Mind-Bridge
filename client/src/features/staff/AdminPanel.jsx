@@ -33,14 +33,14 @@ import {
   reactivateUser,
   assignCounselorToStudent,
   getUserSettings,
-} from "../api";
-import { useAuth } from "../AuthContext.jsx";
-import Spinner from "./Spinner";
-import Modal from "./ui/Modal";
+} from "../../lib/api";
+import { useAuth } from "../../context/AuthContext.jsx";
+import Spinner from "../../components/ui/Spinner";
+import Modal from "../../components/ui/Modal";
 import ManageAvailability from "./ManageAvailability";
-import ConfidentialChatModal from "./ConfidentialChatModal";
+import ConfidentialChatModal from "../chat/ConfidentialChatModal";
 
-import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, formatDateTime, downloadAssessmentsCsv } from "./admin/adminUtils";
+import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, formatDateTime, downloadAssessmentsCsv } from "./adminUtils";
 
 
 // Destructive outline button: overrides the hover fill of .mb-btn-line

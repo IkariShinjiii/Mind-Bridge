@@ -6,10 +6,10 @@ import {
   updateAppointmentStatus,
   bookAppointment,
   getAvailability,
-} from "../api";
-import { useAuth } from "../AuthContext.jsx";
-import Spinner from "./Spinner";
-import Modal from "./ui/Modal";
+} from "../../lib/api";
+import { useAuth } from "../../context/AuthContext.jsx";
+import Spinner from "../../components/ui/Spinner";
+import Modal from "../../components/ui/Modal";
 import BookingFlow from "./BookingFlow";
 
 function safeFormatDate(val) {

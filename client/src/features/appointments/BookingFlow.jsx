@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import Spinner from "./Spinner";
+import Spinner from "../../components/ui/Spinner";
 
 const toDate = (value) => {
   const d = new Date(value);

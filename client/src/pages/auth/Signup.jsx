@@ -7,8 +7,8 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, provider } from "../firebase";
-import AuthFrame, { GoogleIcon, Spinner, Field } from "./ui/AuthFrame";
+import { auth, db, provider } from "../../lib/firebase";
+import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
 
 export default function Signup() {
   const navigate = useNavigate();
