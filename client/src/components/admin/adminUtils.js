@@ -16,7 +16,8 @@ export const ROLE_BADGE = {
   admin: "bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)] border-[color:var(--mb-violet)]",
 };
 
-export const CHART_COLORS = ["#1fbf9f", "#f5b84c", "#ef5d5d"];
+// Low, medium, high. CSS variables so the chart follows the light/dark theme.
+export const CHART_COLORS = ["var(--mb-safe)", "var(--mb-warn)", "var(--mb-urgent)"];
 
 export const defaultAuditLogs = [
   {

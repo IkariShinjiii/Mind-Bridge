@@ -7,24 +7,16 @@ import {
   AlertTriangle,
   Diamond,
   CircleCheck,
-  X,
-  FileText,
   CheckCircle2,
-  Users,
   BarChart3,
-  Clock,
-  Shield,
   MessageSquare,
-  ArrowRight,
 } from "lucide-react";
 import {
   BarChart,
   Bar,
   CartesianGrid,
   Cell,
-  Legend,
-  Pie,
-  PieChart,
+  LabelList,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -44,11 +36,45 @@ import {
 } from "../api";
 import { useAuth } from "../AuthContext.jsx";
 import Spinner from "./Spinner";
+import Modal from "./ui/Modal";
 import ManageAvailability from "./ManageAvailability";
 import ConfidentialChatModal from "./ConfidentialChatModal";
 
 import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, defaultAuditLogs, formatDateTime, buildAuditLogs, downloadAssessmentsCsv } from "./admin/adminUtils";
 
+
+// Destructive outline button: overrides the hover fill of .mb-btn-line
+const DANGER_LINE =
+  "!border-[color:var(--mb-urgent)] !text-[color:var(--mb-urgent)] hover:!bg-[color:var(--mb-urgent-bg)] hover:!text-[color:var(--mb-urgent)]";
+
+const roleLabel = (role) => (role === "admin" ? "Admin" : role === "counselor" ? "Counselor" : "Student");
+
+function Stat({ label, value, note, tone, className = "" }) {
+  const urgent = tone === "urgent";
+  return (
+    <div
+      className={`rounded-md border-2 p-4 ${
+        urgent
+          ? "border-[color:var(--mb-urgent-solid)] bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
+          : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)]"
+      } ${className}`}
+    >
+      <p className="text-sm font-bold uppercase tracking-wider">{label}</p>
+      <p className="mb-sign mt-1 text-4xl font-bold leading-none tabular-nums">{value}</p>
+      <p className={`mt-1 text-sm ${urgent ? "" : "text-[color:var(--mb-muted)]"}`}>{note}</p>
+    </div>
+  );
+}
+
+function RiskTag({ risk }) {
+  const Icon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded border-2 px-2 py-1 font-bold capitalize ${RISK_STYLES[risk] || RISK_STYLES.low}`}>
+      <Icon className="h-4 w-4" aria-hidden="true" />
+      {risk} risk
+    </span>
+  );
+}
 
 export default function AdminPanel() {
   const { currentUser } = useAuth();
@@ -98,6 +124,12 @@ export default function AdminPanel() {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [exportingCsv, setExportingCsv] = useState(false);
   const [auditLogs, setAuditLogs] = useState(defaultAuditLogs);
+  const [notice, setNotice] = useState({ type: "", message: "" });
+
+  const showNotice = (type, message) => {
+    setNotice({ type, message });
+    setTimeout(() => setNotice({ type: "", message: "" }), 6000);
+  };
 
   async function loadData() {
     setLoading(true);
@@ -132,8 +164,10 @@ export default function AdminPanel() {
       if (activeCase && activeCase.id === id) {
         setActiveCase((prev) => ({ ...prev, status: nextStatus }));
       }
+      showNotice("success", `Case marked ${nextStatus}.`);
     } catch (err) {
       console.error("Failed to update assessment status", err);
+      showNotice("error", "Could not update the case status. It has not been changed. Try again.");
     } finally {
       setUpdatingAssessmentId(null);
     }
@@ -163,8 +197,10 @@ export default function AdminPanel() {
       await updateAssessmentStatus(activeCase.id, activeCase.status || "open", counselorNoteInput);
       setActiveCase((prev) => ({ ...prev, counselorNotes: counselorNoteInput }));
       await loadData();
+      showNotice("success", "Case notes saved.");
     } catch (err) {
       console.error("Error saving counselor notes", err);
+      showNotice("error", "Could not save the case notes. Your text is still in the box. Try again.");
     } finally {
       setSavingNotes(false);
     }
@@ -186,25 +222,30 @@ export default function AdminPanel() {
     try {
       await assignCounselorToStudent(studentId, counselorId || null, counselorName);
       await loadData();
+      showNotice("success", counselorId ? `Assigned to ${counselorName}.` : "Counselor assignment removed.");
     } catch (err) {
       console.error("Failed to assign counselor", err);
+      showNotice("error", "Could not change the counselor assignment. Try again.");
     } finally {
       setActionLoadingId(null);
     }
   }
 
-  async function handleAccountAction(action, id) {
+  async function handleAccountAction(action, id, successMessage = "Done.") {
     if (actionLoadingId) return;
     setActionLoadingId(id);
     try {
       await action(id);
       await loadData();
+      showNotice("success", successMessage);
+    } catch (err) {
+      console.error("Account action failed", err);
+      showNotice("error", "That account change did not go through. Try again.");
     } finally {
       setActionLoadingId(null);
     }
   }
 
-  // CSV Export
   // CSV Export
   function exportCsv() {
     if (exportingCsv) return;
@@ -253,11 +294,6 @@ export default function AdminPanel() {
         { name: "Low", value: counts.low },
         { name: "Medium", value: counts.medium },
         { name: "High", value: counts.high },
-      ],
-      pieData: [
-        { name: "Low", value: counts.low, color: CHART_COLORS[0] },
-        { name: "Medium", value: counts.medium, color: CHART_COLORS[1] },
-        { name: "High", value: counts.high, color: CHART_COLORS[2] },
       ],
     };
   }, [assessments, users, approvedStaff.length, pendingStaff.length, immediateCount]);
@@ -309,110 +345,66 @@ export default function AdminPanel() {
   return (
     <div className="mx-auto max-w-7xl animate-fade-up space-y-8 pb-12">
       {/* Header */}
-      <div className="border-b border-[color:var(--mb-line)] pb-5">
-        <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[color:var(--mb-ink)]">
-          Staff & Admin Dashboard
-        </h1>
-        <p className="text-sm text-[color:var(--mb-muted)] mt-1">
-          Consolidated clinical triage, student case management, schedule availability, and system analytics.
+      <div className="border-b-2 border-[color:var(--mb-line)] pb-5">
+        <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Staff dashboard</h1>
+        <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+          Triage student check-ins, manage accounts and availability, and review system-wide trends.
         </p>
       </div>
 
-      {/* Top Metric Cards */}
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Students</p>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.totalStudents}</span>
-            <span className="rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
-              Tracked
-            </span>
+      {/* Outcome of the last action. Failures must be visible: a silent failure on a case looks like success. */}
+      <div role="status" aria-live="polite">
+        {notice.message && (
+          <div
+            className={`flex items-center gap-2 rounded-md border-2 px-4 py-3 font-medium ${
+              notice.type === "success"
+                ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
+                : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
+            }`}
+          >
+            {notice.type === "success" ? (
+              <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+            ) : (
+              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+            )}
+            <span>{notice.message}</span>
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Staff Accounts</p>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.totalStaff}</span>
-            <span className="rounded-full bg-[color:var(--mb-warn-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]">
-              Active
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-4 shadow-sm">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-urgent)] font-semibold flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[color:var(--mb-urgent-solid)] animate-pulse" />
-            <span>High Risk</span>
-          </div>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{immediateCount}</span>
-            <span className="rounded-full bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)]">
-              Priority
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Open Cases</p>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{openCasesCount}</span>
-            <span className="rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
-              In Queue
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm col-span-2 sm:col-span-1">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Appointments</p>
-          <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{pendingAppointmentsCount}</span>
-            <span className="rounded-full bg-[color:var(--mb-warn-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]">
-              Pending
-            </span>
-          </div>
-        </div>
+      {/* At-a-glance counts, most urgent first */}
+      <section aria-label="Summary" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <Stat tone="urgent" label="High risk" value={immediateCount} note="Need review first" />
+        <Stat label="Open cases" value={openCasesCount} note="Waiting in the queue" />
+        <Stat label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
+        <Stat label="Students" value={analytics.totalStudents} note="With check-ins" />
+        <Stat label="Staff" value={analytics.totalStaff} note="Approved accounts" className="col-span-2 sm:col-span-1" />
       </section>
 
-      {/* Main Section Navigation Switcher */}
+      {/* Section switcher */}
       {mainTab !== "accounts" && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-[color:var(--mb-line)] pb-3">
-          <button
-            onClick={() => handleTabSelect("cases")}
-            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
-              mainTab === "cases"
-                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
-                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
-            }`}
-          >
-            <ClipboardList className="h-4 w-4" />
-            <span>Student Cases & Triage</span>
-          </button>
-
-          <button
-            onClick={() => handleTabSelect("analytics")}
-            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
-              mainTab === "analytics"
-                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
-                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
-            }`}
-          >
-            <BarChart3 className="h-4 w-4" />
-            <span>System Analytics & Trends</span>
-          </button>
-
-          <button
-            onClick={() => handleTabSelect("availability")}
-            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
-              mainTab === "availability"
-                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
-                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
-            }`}
-          >
-            <Calendar className="h-4 w-4" />
-            <span>Manage My Availability</span>
-          </button>
-        </div>
+        <nav aria-label="Dashboard sections" className="flex flex-wrap gap-2 border-b-2 border-[color:var(--mb-line)] pb-4">
+          {[
+            ["cases", ClipboardList, "Cases and triage"],
+            ["analytics", BarChart3, "Analytics"],
+            ["availability", Calendar, "My availability"],
+          ].map(([tab, Icon, label]) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => handleTabSelect(tab)}
+              aria-current={mainTab === tab ? "page" : undefined}
+              className={`inline-flex min-h-[48px] items-center gap-2 rounded-md border-2 px-4 font-bold transition-colors ${
+                mainTab === tab
+                  ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                  : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
+              }`}
+            >
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </nav>
       )}
 
       {/* ======================================================== */}
@@ -560,106 +552,90 @@ export default function AdminPanel() {
       {/* TAB 2: SYSTEM ANALYTICS & TRENDS                         */}
       {/* ======================================================== */}
       {mainTab === "analytics" && (
-        <div className="space-y-6">
-          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">ANALYTICS</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">System-Wide Clinical Analytics</h2>
-              </div>
-              <div className="text-sm text-[color:var(--mb-muted)]">
-                <div>{analytics.totalAssessments} total assessments</div>
-                <div>{analytics.totalStudents} students tracked</div>
-              </div>
+        <div className="space-y-8">
+          <section aria-labelledby="risk-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+            <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <h2 id="risk-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
+                Risk across all check-ins
+              </h2>
+              <p className="text-[color:var(--mb-muted)]">
+                {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a diagnosis.
+              </p>
             </div>
 
             <div className="mb-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Low risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.low}</div>
-              </div>
-              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Medium risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.medium}</div>
-              </div>
-              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">High risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.high}</div>
-              </div>
+              {[
+                ["low", "Low risk", CircleCheck],
+                ["medium", "Medium risk", Diamond],
+                ["high", "High risk", AlertTriangle],
+              ].map(([risk, label, Icon]) => {
+                const n = analytics.riskCounts[risk];
+                const pct = analytics.totalAssessments ? Math.round((n / analytics.totalAssessments) * 100) : 0;
+                return (
+                  <div key={risk} className={`rounded-md border-2 p-4 ${RISK_STYLES[risk]}`}>
+                    <p className="flex items-center gap-2 font-bold">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      {label}
+                    </p>
+                    <p className="mb-sign mt-1 text-4xl font-bold leading-none tabular-nums">{n}</p>
+                    <p className="mt-1 text-sm">{pct}% of check-ins</p>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-2">
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" />
-                    <XAxis dataKey="name" stroke="var(--mb-muted)" tickLine={false} axisLine={false} />
-                    <YAxis allowDecimals={false} stroke="var(--mb-muted)" tickLine={false} axisLine={false} />
-                    <Tooltip cursor={{ fill: "rgba(31,191,159,0.08)" }} contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", color: "var(--mb-ink)" }} />
-                    <Legend />
-                    <Bar dataKey="value" name="Assessments" radius={[8, 8, 0, 0]}>
-                      {analytics.chartData.map((entry, index) => (
-                        <Cell key={`cell-${entry.name}`} fill={CHART_COLORS[index]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={analytics.pieData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={90}
-                      innerRadius={35}
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {analytics.pieData.map((entry, index) => (
-                        <Cell key={`cell-${entry.name}`} fill={entry.color || CHART_COLORS[index]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", color: "var(--mb-ink)" }} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+            <div
+              className="h-72 w-full"
+              role="img"
+              aria-label={`Bar chart of check-ins by risk level: ${analytics.riskCounts.low} low, ${analytics.riskCounts.medium} medium, ${analytics.riskCounts.high} high.`}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={analytics.chartData} margin={{ top: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--mb-muted)" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+                  <YAxis allowDecimals={false} stroke="var(--mb-muted)" tick={{ fontSize: 14 }} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "var(--mb-surface-2)" }}
+                    contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", borderRadius: 6, color: "var(--mb-ink)" }}
+                  />
+                  <Bar dataKey="value" name="Check-ins" radius={[4, 4, 0, 0]} maxBarSize={96}>
+                    {analytics.chartData.map((entry, index) => (
+                      <Cell key={entry.name} fill={CHART_COLORS[index]} />
+                    ))}
+                    <LabelList dataKey="value" position="top" fill="var(--mb-ink)" fontSize={14} fontWeight={700} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </section>
 
-          {/* Audit Logs */}
-          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">AUDIT</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">Audit Logs / Activity Tracking</h2>
-              </div>
-            </div>
+          {/* Activity log */}
+          <section aria-labelledby="audit-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+            <h2 id="audit-heading" className="mb-4 text-2xl font-bold text-[color:var(--mb-ink)]">
+              Activity log
+            </h2>
 
             <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
+              <table className="min-w-full text-left">
+                <caption className="sr-only">Recent staff and system activity</caption>
                 <thead>
-                  <tr className="border-b border-[color:var(--mb-line)] text-[color:var(--mb-muted)]">
-                    <th className="min-w-[100px] py-3 pr-4 font-medium">Actor</th>
-                    <th className="min-w-[180px] py-3 pr-4 font-medium">Action</th>
-                    <th className="min-w-[150px] py-3 pr-4 font-medium">Target</th>
-                    <th className="min-w-[180px] py-3 pr-4 font-medium">Timestamp</th>
-                    <th className="py-3 font-medium">Outcome</th>
+                  <tr className="border-b-2 border-[color:var(--mb-line)] text-[color:var(--mb-ink)]">
+                    <th scope="col" className="min-w-[110px] py-3 pr-4 font-bold">Actor</th>
+                    <th scope="col" className="min-w-[200px] py-3 pr-4 font-bold">Action</th>
+                    <th scope="col" className="min-w-[160px] py-3 pr-4 font-bold">Target</th>
+                    <th scope="col" className="min-w-[180px] py-3 pr-4 font-bold">Time</th>
+                    <th scope="col" className="py-3 font-bold">Outcome</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {auditLogs.map((log, index) => (
+                  {auditLogs.map((log) => (
                     <tr key={log.id} className="border-b border-[color:var(--mb-line)] align-top">
-                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.actor}</td>
-                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.action}</td>
-                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.target}</td>
+                      <td className="py-3 pr-4">{log.actor}</td>
+                      <td className="py-3 pr-4">{log.action}</td>
+                      <td className="py-3 pr-4">{log.target}</td>
                       <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{formatDateTime(log.timestamp)}</td>
                       <td className="py-3">
-                        <span className="inline-flex rounded-full border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2 py-1 text-[11px] font-medium text-[color:var(--mb-muted)]">
+                        <span className="inline-flex rounded border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2 py-0.5 text-sm font-bold">
                           {log.outcome}
                         </span>
                       </td>
@@ -670,28 +646,20 @@ export default function AdminPanel() {
             </div>
           </section>
 
-          {/* Export Section */}
-          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
+          {/* Export */}
+          <section aria-labelledby="export-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">EXPORT</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">Data Exporting</h2>
-                <p className="mt-1 text-sm text-[color:var(--mb-muted)]">Export an anonymized assessment compliance report as CSV.</p>
+                <h2 id="export-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
+                  Export report
+                </h2>
+                <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+                  Download an anonymized compliance report of all check-ins as a CSV file.
+                </p>
               </div>
-              <button
-                type="button"
-                onClick={exportCsv}
-                disabled={exportingCsv}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-3 text-sm font-semibold text-[color:var(--mb-panel-ink)] transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {exportingCsv ? (
-                  <>
-                    <Spinner size={15} color="#ffffff" className="text-[color:var(--mb-ink)]" />
-                    <span>Exporting…</span>
-                  </>
-                ) : (
-                  "Export CSV"
-                )}
+              <button type="button" onClick={exportCsv} disabled={exportingCsv} className="mb-btn mb-btn-solid">
+                {exportingCsv && <Spinner size={16} />}
+                {exportingCsv ? "Exporting…" : "Export CSV"}
               </button>
             </div>
           </section>
@@ -702,7 +670,7 @@ export default function AdminPanel() {
       {/* TAB 3: MANAGE MY AVAILABILITY                            */}
       {/* ======================================================== */}
       {mainTab === "availability" && (
-        <div className="max-w-4xl space-y-4">
+        <div className="max-w-4xl">
           <ManageAvailability />
         </div>
       )}
@@ -712,268 +680,331 @@ export default function AdminPanel() {
       {/* ======================================================== */}
       {mainTab === "accounts" && (
         <div className="space-y-6">
-          {/* Sub Tab Switcher: Staff vs Students */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setAccountSubTab("staff")}
-              className={`rounded-md px-4 py-2 text-xs font-semibold transition ${
-                accountSubTab === "staff"
-                  ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
-                  : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
-              }`}
-            >
-              Manage Staff Accounts ({approvedStaff.length + pendingStaff.length})
-            </button>
-            <button
-              onClick={() => setAccountSubTab("students")}
-              className={`rounded-md px-4 py-2 text-xs font-semibold transition ${
-                accountSubTab === "students"
-                  ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
-                  : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
-              }`}
-            >
-              Manage Students & Counselor Assignments
-            </button>
+          <div>
+            <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">Accounts</h2>
+            <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+              Approve staff, deactivate accounts, and assign each student a counselor.
+            </p>
           </div>
 
-          {/* Pending Staff Approvals (if any) */}
-          {accountSubTab === "staff" && pendingStaff.length > 0 && (
-            <section className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 shadow-sm">
-              <div className="mb-3">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--mb-warn)]">
-                  Pending Staff Approvals ({pendingStaff.length})
-                </h2>
-              </div>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Account type">
+            {[
+              ["staff", `Staff (${approvedStaff.length + pendingStaff.length})`],
+              ["students", "Students and counselor assignments"],
+            ].map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setAccountSubTab(val)}
+                aria-pressed={accountSubTab === val}
+                className={`min-h-[48px] rounded-md border-2 px-4 font-bold transition-colors ${
+                  accountSubTab === val
+                    ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-              <div className="space-y-2">
+          {/* Pending staff approvals */}
+          {accountSubTab === "staff" && pendingStaff.length > 0 && (
+            <section
+              aria-labelledby="pending-heading"
+              className="rounded-md border-2 border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 sm:p-5"
+            >
+              <h3 id="pending-heading" className="mb-3 text-xl font-bold text-[color:var(--mb-warn)]">
+                Waiting for approval ({pendingStaff.length})
+              </h3>
+              <ul className="space-y-3">
                 {pendingStaff.map((u) => (
-                  <div
+                  <li
                     key={u.id}
-                    className="flex flex-col gap-3 rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-surface)] p-3 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div>
-                      <p className="font-medium text-[color:var(--mb-ink)]">{u.name || "Unnamed Staff"}</p>
-                      <p className="text-sm text-[color:var(--mb-muted)]">{u.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed staff"}</p>
+                      <p className="break-all font-mono text-sm text-[color:var(--mb-muted)]">{u.email}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => handleAccountAction(approveCounselor, u.id)}
+                        onClick={() => handleAccountAction(approveCounselor, u.id, "Staff account approved.")}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-sm font-medium text-[color:var(--mb-panel-ink)] transition hover:brightness-110 disabled:opacity-60"
+                        className="mb-btn mb-btn-solid !px-4 text-sm"
                       >
-                        {actionLoadingId === u.id ? <Spinner size={14} /> : "Approve Staff"}
+                        {actionLoadingId === u.id && <Spinner size={14} />}
+                        Approve
                       </button>
                       <button
-                        onClick={() => handleAccountAction(rejectCounselor, u.id)}
+                        onClick={() => handleAccountAction(rejectCounselor, u.id, "Staff request rejected.")}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-md border border-[color:var(--mb-urgent)] px-4 py-2 text-sm font-medium text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)] disabled:opacity-60"
+                        className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
                       >
-                        {actionLoadingId === u.id ? <Spinner size={14} /> : "Reject"}
+                        Reject
                       </button>
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </section>
           )}
 
-          {/* User Accounts Table */}
-          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-5">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--mb-muted)]">
-                {accountSubTab === "staff" ? "Staff & Administrator Accounts" : "Student Accounts & Assignments"}
-              </h2>
-            </div>
+          <section aria-labelledby="accounts-heading">
+            <h3
+              id="accounts-heading"
+              className="mb-3 border-b-2 border-[color:var(--mb-line)] pb-2 text-xl font-bold text-[color:var(--mb-ink)]"
+            >
+              {accountSubTab === "staff" ? "Staff and administrators" : "Students"}
+            </h3>
 
             {filteredUsers.length === 0 ? (
-              <p className="text-sm text-[color:var(--mb-muted)] py-4">No accounts found in this category.</p>
+              <p className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
+                No accounts in this category.
+              </p>
             ) : (
-              <div className="space-y-2">
-                {filteredUsers.map((u) => (
-                  <div
-                    key={u.id}
-                    className="flex flex-col gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
-                      <div>
-                        <p className="font-medium text-[color:var(--mb-ink)]">{u.name || "User"}</p>
-                        <p className="text-sm text-[color:var(--mb-muted)] font-mono">{u.email}</p>
-                      </div>
-                      <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${ROLE_BADGE[u.role || "student"] || "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"}`}>
-                        {u.role === "counselor" || u.role === "admin" ? "Staff Admin" : "Student"}
-                      </span>
-                      {u.active === false && (
-                        <span className="inline-flex w-fit rounded-full border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-urgent)]">
-                          Deactivated
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      {accountSubTab === "students" && (
-                        <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-[color:var(--mb-muted)] text-[11px]">Assigned Counselor:</span>
-                          <select
-                            value={u.assignedCounselorId || ""}
-                            onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
-                            disabled={actionLoadingId === u.id}
-                            className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-2.5 py-1 text-xs text-[color:var(--mb-ink)] focus:border-[color:var(--mb-brand)] focus:outline-none"
+              <ul className="space-y-3">
+                {filteredUsers.map((u) => {
+                  const isSelf = u.id === currentUser?.uid;
+                  const deactivated = u.active === false;
+                  const busy = actionLoadingId === u.id;
+                  return (
+                    <li
+                      key={u.id}
+                      className="flex flex-col gap-4 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 lg:flex-row lg:items-center lg:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-lg font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed user"}</p>
+                          <span
+                            className={`rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
+                              ROLE_BADGE[u.role || "student"] || ROLE_BADGE.student
+                            }`}
                           >
-                            <option value="">Unassigned</option>
-                            {approvedStaff.map((c) => (
-                              <option key={c.id} value={c.id}>
-                                {c.name || c.email}
-                              </option>
-                            ))}
-                          </select>
+                            {roleLabel(u.role)}
+                          </span>
+                          {deactivated && (
+                            <span className="rounded border-2 border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-[color:var(--mb-urgent)]">
+                              Deactivated
+                            </span>
+                          )}
+                          {isSelf && <span className="text-sm text-[color:var(--mb-muted)]">(you)</span>}
                         </div>
-                      )}
+                        <p className="break-all font-mono text-sm text-[color:var(--mb-muted)]">{u.email}</p>
+                      </div>
 
-                      <button
-                        onClick={() => handleAccountAction(u.active === false ? reactivateUser : deactivateUser, u.id)}
-                        disabled={actionLoadingId === u.id || u.id === currentUser?.uid}
-                        className={`inline-flex items-center justify-center gap-2 rounded-md border px-3.5 py-1.5 text-xs font-medium transition ${
-                          u.id === currentUser?.uid
-                            ? "opacity-30 cursor-not-allowed border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
-                            : u.active === false
-                            ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] hover:bg-[color:var(--mb-safe-bg)]"
-                            : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)]"
-                        }`}
-                      >
-                        {actionLoadingId === u.id ? (
-                          <Spinner size={12} />
-                        ) : u.active === false ? (
-                          "Reactivate"
-                        ) : (
-                          "Deactivate"
+                      <div className="flex flex-wrap items-center gap-3">
+                        {accountSubTab === "students" && (
+                          <label className="flex items-center gap-2 text-sm">
+                            <span className="font-bold text-[color:var(--mb-ink)]">Counselor</span>
+                            <select
+                              value={u.assignedCounselorId || ""}
+                              onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
+                              disabled={busy}
+                              className="mb-field !w-auto min-w-[10rem]"
+                            >
+                              <option value="">Unassigned</option>
+                              {approvedStaff.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name || c.email}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
                         )}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+                        <button
+                          onClick={() =>
+                            handleAccountAction(
+                              deactivated ? reactivateUser : deactivateUser,
+                              u.id,
+                              deactivated ? "Account reactivated." : "Account deactivated."
+                            )
+                          }
+                          disabled={busy || isSelf}
+                          title={isSelf ? "You cannot deactivate your own account" : undefined}
+                          className={`mb-btn mb-btn-line !px-4 text-sm ${
+                            deactivated
+                              ? "!border-[color:var(--mb-safe)] !text-[color:var(--mb-safe)] hover:!bg-[color:var(--mb-safe-bg)] hover:!text-[color:var(--mb-safe)]"
+                              : DANGER_LINE
+                          }`}
+                        >
+                          {busy && <Spinner size={14} />}
+                          {deactivated ? "Reactivate" : "Deactivate"}
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
         </div>
       )}
 
       {/* ======================================================== */}
-      {/* CASE INSPECTOR MODAL                                     */}
+      {/* CASE INSPECTOR                                           */}
       {/* ======================================================== */}
-      {activeCase && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80  p-4 animate-fade-up">
-          <div className="w-full max-w-2xl rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8 shadow-sm max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-[color:var(--mb-line)] mb-5">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">{activeCase.studentName || "Student Assessment Details"}</h3>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${RISK_STYLES[activeCase.riskLevel || "low"]}`}>
-                    {activeCase.riskLevel} Risk
-                  </span>
-                  {activeCase.flaggedForImmediateReview && (
-                    <span className="rounded-full bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--mb-panel-ink)] uppercase">
-                      Immediate Concern
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-[color:var(--mb-muted)] mt-1">
-                  Email: <span className="text-[color:var(--mb-brand)] font-mono">{activeCase.studentEmail}</span> • Submitted: {new Date(activeCase.createdAt || activeCase.submittedAt || Date.now()).toLocaleString()}
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveCase(null)}
-                className="text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)] text-xl p-1 interactive-tap"
-                aria-label="Close"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Questions Breakdown */}
-            <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-3">
-                Screening Responses Breakdown (PHQ-9 / GAD-7 Scale)
-              </h4>
-              {Array.isArray(activeCase.questionSummary) && activeCase.questionSummary.length > 0 ? (
-                <div className="space-y-2">
-                  {activeCase.questionSummary.map((q, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-3 rounded-md border text-xs flex items-center justify-between gap-3 ${
-                        q.isCrisisItem && Number(q.score) > 0
-                          ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] font-medium"
-                          : "border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] text-[color:var(--mb-muted)]"
-                      }`}
-                    >
-                      <div className="flex-1">
-                        <span className="font-semibold text-[color:var(--mb-ink)] mr-1.5">{idx + 1}.</span>
-                        {q.text}
-                        {q.isCrisisItem && (
-                          <span className="ml-2 text-[10px] uppercase font-bold text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)] px-1.5 py-0.5 rounded">
-                            Crisis Item
-                          </span>
-                        )}
-                      </div>
-                      <div className="shrink-0 font-bold text-xs px-2.5 py-1 rounded bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] font-mono">
-                        Score: {q.score ?? "—"}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-[color:var(--mb-muted)]">Total Score: {activeCase.total} / {activeCase.maxScore || 21}</p>
+      <Modal
+        isOpen={Boolean(activeCase)}
+        onClose={() => setActiveCase(null)}
+        title={activeCase?.studentName || "Student check-in"}
+        description={
+          activeCase
+            ? `${activeCase.studentEmail || "No email on file"} · Submitted ${formatDateTime(
+                activeCase.createdAt || activeCase.submittedAt
+              )}`
+            : undefined
+        }
+        maxWidth="max-w-2xl"
+        footer={
+          activeCase ? (
+            <>
+              {activeCase.studentId && activeCase.studentId !== "anonymous" && (
+                <button
+                  type="button"
+                  onClick={() => setChatStudent({ id: activeCase.studentId, name: activeCase.studentName || "Student" })}
+                  className="mb-btn mb-btn-solid !px-4 text-sm"
+                >
+                  <MessageSquare className="h-5 w-5" aria-hidden="true" />
+                  Open confidential chat
+                </button>
               )}
+              <button type="button" onClick={() => setActiveCase(null)} className="mb-btn mb-btn-line !px-4 text-sm">
+                Close
+              </button>
+            </>
+          ) : undefined
+        }
+      >
+        {activeCase && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <RiskTag risk={activeCase.riskLevel || "low"} />
+              {activeCase.flaggedForImmediateReview && (
+                <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
+                </span>
+              )}
+              <span className="text-[color:var(--mb-muted)]">
+                Score {activeCase.total ?? 0} of {activeCase.maxScore || 21}
+              </span>
             </div>
 
-            {/* Emergency Contact Information */}
-            <div className="mb-6 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-2">
-                Emergency Contact Record
-              </h4>
+            <section aria-labelledby="resp-heading">
+              <h3 id="resp-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
+                Screening responses
+              </h3>
+              {Array.isArray(activeCase.questionSummary) && activeCase.questionSummary.length > 0 ? (
+                <ol className="space-y-2">
+                  {activeCase.questionSummary.map((q, idx) => {
+                    const crisisHit = q.isCrisisItem && Number(q.score) > 0;
+                    return (
+                      <li
+                        key={idx}
+                        className={`flex items-start justify-between gap-3 rounded-md border-2 p-3 ${
+                          crisisHit
+                            ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
+                            : "border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] text-[color:var(--mb-ink)]"
+                        }`}
+                      >
+                        <p className="min-w-0 flex-1">
+                          <span className="mr-1.5 font-bold">{idx + 1}.</span>
+                          {q.text}
+                          {q.isCrisisItem && (
+                            <span className="ml-2 inline-block rounded border-2 border-current px-1.5 text-xs font-bold uppercase">
+                              Safety question
+                            </span>
+                          )}
+                        </p>
+                        <p className="shrink-0 font-display text-xl font-bold tabular-nums">{q.score ?? "—"}</p>
+                      </li>
+                    );
+                  })}
+                </ol>
+              ) : (
+                <p className="text-[color:var(--mb-muted)]">No per-question breakdown was saved for this check-in.</p>
+              )}
+            </section>
+
+            <section aria-labelledby="contact-heading" className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+              <h3 id="contact-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
+                Emergency contact
+              </h3>
               {loadingContact ? (
-                <div className="text-xs text-[color:var(--mb-muted)] flex items-center gap-2"><Spinner size={12} /> Loading profile contact...</div>
+                <p className="flex items-center gap-2 text-[color:var(--mb-muted)]">
+                  <Spinner size={14} /> Loading contact details…
+                </p>
               ) : studentContact?.emergencyContact?.name ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[color:var(--mb-muted)]">
-                  <div>Name: <span className="font-semibold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.name}</span></div>
-                  <div>Relationship: <span className="font-semibold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.relationship}</span></div>
-                  <div>Primary Phone: <span className="font-semibold text-[color:var(--mb-brand)] font-mono">{studentContact.emergencyContact.phone}</span></div>
+                <dl className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                  <div className="flex gap-2">
+                    <dt className="text-[color:var(--mb-muted)]">Name</dt>
+                    <dd className="font-bold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.name}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-[color:var(--mb-muted)]">Relationship</dt>
+                    <dd className="font-bold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.relationship}</dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="text-[color:var(--mb-muted)]">Phone</dt>
+                    <dd className="font-mono font-bold">
+                      <a className="text-[color:var(--mb-brand)] underline" href={`tel:${studentContact.emergencyContact.phone}`}>
+                        {studentContact.emergencyContact.phone}
+                      </a>
+                    </dd>
+                  </div>
                   {studentContact.emergencyContact.alternatePhone && (
-                    <div>Alternate Phone: <span className="font-semibold text-[color:var(--mb-muted)] font-mono">{studentContact.emergencyContact.alternatePhone}</span></div>
+                    <div className="flex gap-2">
+                      <dt className="text-[color:var(--mb-muted)]">Alternate</dt>
+                      <dd className="font-mono font-bold">
+                        <a className="text-[color:var(--mb-brand)] underline" href={`tel:${studentContact.emergencyContact.alternatePhone}`}>
+                          {studentContact.emergencyContact.alternatePhone}
+                        </a>
+                      </dd>
+                    </div>
                   )}
                   {studentContact.emergencyContact.notes && (
-                    <div className="col-span-2 text-[color:var(--mb-muted)] italic">Notes: {studentContact.emergencyContact.notes}</div>
+                    <div className="sm:col-span-2">
+                      <dt className="inline text-[color:var(--mb-muted)]">Notes </dt>
+                      <dd className="inline text-[color:var(--mb-ink)]">{studentContact.emergencyContact.notes}</dd>
+                    </div>
                   )}
-                </div>
+                </dl>
               ) : (
-                <p className="text-xs text-[color:var(--mb-muted)]">Student has not designated an emergency contact in profile settings.</p>
+                <p className="text-[color:var(--mb-muted)]">This student has not added an emergency contact in their settings.</p>
               )}
-            </div>
+            </section>
 
-            {/* Case Notes & Status Update */}
-            <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-2">
-                Confidential Staff Case Notes & Status
-              </h4>
+            <section aria-labelledby="notes-heading">
+              <h3 id="notes-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
+                Confidential case notes
+              </h3>
+              <label htmlFor="case-notes" className="sr-only">
+                Case notes
+              </label>
               <textarea
-                rows={3}
+                id="case-notes"
+                rows={4}
                 value={counselorNoteInput}
                 onChange={(e) => setCounselorNoteInput(e.target.value)}
-                placeholder="Document case assessment, outreach actions, or scheduled guidance sessions..."
-                className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 py-2.5 text-xs text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none"
+                placeholder="Assessment, outreach taken, sessions scheduled…"
+                className="mb-field"
               />
-              <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-[color:var(--mb-muted)]">Set Case Status:</span>
+
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Case status">
+                  <span className="font-bold text-[color:var(--mb-ink)]">Status</span>
                   {["open", "reviewed", "escalated"].map((st) => (
                     <button
                       key={st}
                       type="button"
                       onClick={() => markAssessmentStatus(activeCase.id, st)}
-                      className={`px-3 py-1 rounded-md text-xs font-semibold capitalize transition ${
-                        activeCase.status === st
-                          ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                          : "border border-[color:var(--mb-line)] text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
+                      disabled={Boolean(updatingAssessmentId)}
+                      aria-pressed={(activeCase.status || "open") === st}
+                      className={`min-h-[44px] rounded-md border-2 px-3 font-bold capitalize transition-colors disabled:opacity-60 ${
+                        (activeCase.status || "open") === st
+                          ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                          : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
                       }`}
                     >
                       {st}
@@ -981,44 +1012,15 @@ export default function AdminPanel() {
                   ))}
                 </div>
 
-                <button
-                  onClick={handleSaveNotes}
-                  disabled={savingNotes}
-                  className="rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-50"
-                >
-                  {savingNotes ? "Saving Notes…" : "Save Case Notes"}
+                <button type="button" onClick={handleSaveNotes} disabled={savingNotes} className="mb-btn mb-btn-solid !px-4 text-sm">
+                  {savingNotes && <Spinner size={14} />}
+                  {savingNotes ? "Saving…" : "Save notes"}
                 </button>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[color:var(--mb-line)]">
-              {activeCase.studentId && activeCase.studentId !== "anonymous" && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setChatStudent({
-                      id: activeCase.studentId,
-                      name: activeCase.studentName || "Student",
-                    })
-                  }
-                  className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Open Confidential Chat</span>
-                </button>
-              )}
-
-              <button
-                onClick={() => setActiveCase(null)}
-                className="rounded-md border border-[color:var(--mb-line)] px-5 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] transition ml-auto"
-              >
-                Close Inspector
-              </button>
-            </div>
+            </section>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
 
       {/* Confidential Chat Modal */}
       {chatStudent && (
