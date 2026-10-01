@@ -20,28 +20,24 @@ export default function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-800 p-4 shadow-2xl animate-fade-up">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex-1 text-sm text-gray-300">
-          We use essential cookies to ensure our platform functions securely and to provide you with the best experience. By continuing to use Mind Bridge, you consent to our use of these strictly necessary cookies.{" "}
-          <Link to="/cookie-policy" className="text-teal-400 hover:underline">
+    <div className="mb fixed bottom-0 left-0 right-0 z-50 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4" data-theme="light" role="region" aria-label="Cookie notice">
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <p className="flex-1 text-[color:var(--mb-ink)]">
+          Mind Bridge uses only essential cookies, which keep you signed in and the site secure.{" "}
+          <Link to="/cookie-policy" className="font-bold text-[color:var(--mb-ink)]">
             Learn more
           </Link>
-          .
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={handleAccept}
-            className="bg-teal-500 hover:bg-teal-400 text-teal-950 px-5 py-2 rounded-lg text-sm font-semibold transition-colors"
-          >
-            Accept & Continue
+        </p>
+        <div className="flex shrink-0 items-center gap-3">
+          <button onClick={handleAccept} className="mb-btn mb-btn-solid">
+            Accept and continue
           </button>
           <button
             onClick={() => setIsVisible(false)}
-            className="p-2 text-gray-400 hover:text-white transition-colors"
-            aria-label="Dismiss"
+            className="mb-btn mb-btn-line !px-3"
+            aria-label="Dismiss cookie notice"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       </div>

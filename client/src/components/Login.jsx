@@ -1,30 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../firebase";
-import icon from "../assets/mindbridge-icon.png";
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-      <path fill="none" d="M0 0h48v48H0z" />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-      <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
-    </svg>
-  );
-}
+import AuthFrame, { GoogleIcon, Spinner, Field } from "./ui/AuthFrame";
 
 function navigateByRole(role, navigate) {
   if (role === "admin" || role === "counselor") navigate("/admin/dashboard", { replace: true });
@@ -36,6 +15,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -120,92 +100,76 @@ export default function Login() {
     }
   }
 
+
+  async function handleForgotPassword() {
+    const email = String(document.getElementById("email")?.value || "").trim();
+    setInfoMessage("");
+    if (!email) {
+      setErrorMessage("Type your email above first, then choose Forgot password.");
+      return;
+    }
+    setErrorMessage("");
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      // Same message either way so the form can't be used to find out who has an account.
+      if (error.code !== "auth/user-not-found" && error.code !== "auth/invalid-email") {
+        setErrorMessage("We could not send the reset email. Please try again.");
+        return;
+      }
+    }
+    setInfoMessage("If an account exists for that email, a reset link is on its way.");
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white auth-page auth-card-enter-right">
-      <div className="bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-800 transform transition-all duration-300 hover:shadow-[0_18px_40px_rgba(6,182,212,0.12)]">
-        <div className="p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <img src={icon} alt="Mind Bridge logo" className="h-9 w-9 rounded-lg object-cover" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge • USA</p>
-              <h2 className="text-2xl font-semibold text-white mt-0.5">Welcome back</h2>
-            </div>
-          </div>
-          <p className="text-sm text-gray-300 mb-6">Log in to continue to your dashboard</p>
-
-          {errorMessage ? (
-            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{errorMessage}</div>
-          ) : null}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="text-sm text-gray-300 block mb-1">Email Address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@usa.edu.ph"
-                required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="text-sm text-gray-300 block mb-1">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <input id="remember" name="remember" type="checkbox" className="h-4 w-4 text-cyan-600 bg-gray-800 border-gray-700 rounded" />
-                <label htmlFor="remember" className="text-sm text-gray-300">Remember me</label>
-              </div>
-              <a href="#" className="text-cyan-400 hover:text-cyan-300">Forgot password?</a>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                disabled={isGoogleLoading || isSubmitting}
-                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
-                <span>{isGoogleLoading ? "Signing in..." : "Continue with Google"}</span>
-              </button>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || isGoogleLoading}
-                className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
-              >
-                {isSubmitting && <Spinner />}
-                {isSubmitting ? "Signing in..." : "Log in"}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-400">
-            New here? Create an account to book sessions.{" "}
-            <button
-              type="button"
-              onClick={() => navigate("/signup")}
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition-all duration-200 hover:underline"
-            >
-              Sign up
-            </button>
-          </div>
-        </div>
+    <AuthFrame
+      title="Welcome back"
+      intro="Log in to check in, see your results, or manage your sessions."
+      footer={
+        <p>
+          New here?{" "}
+          <button type="button" onClick={() => navigate("/signup")} className="font-bold underline underline-offset-4">
+            Create a student account
+          </button>
+        </p>
+      }
+    >
+      <div aria-live="polite">
+        {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
+        {infoMessage ? <div className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">{infoMessage}</div> : null}
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <Field id="email" label="Email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required />
+        <Field id="password" label="Password" type="password" autoComplete="current-password" required />
+
+        <div className="text-right">
+          <button type="button" onClick={handleForgotPassword} className="font-bold underline underline-offset-4">
+            Forgot password?
+          </button>
+        </div>
+
+        <button type="submit" disabled={isSubmitting || isGoogleLoading} className="mb-btn mb-btn-solid w-full">
+          {isSubmitting && <Spinner />}
+          {isSubmitting ? "Signing in..." : "Log in"}
+        </button>
+
+        <div className="flex items-center gap-3 text-[color:var(--mb-muted)]" aria-hidden="true">
+          <span className="h-0.5 flex-1 bg-[color:var(--mb-line)]" />
+          <span>or</span>
+          <span className="h-0.5 flex-1 bg-[color:var(--mb-line)]" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={isGoogleLoading || isSubmitting}
+          className="mb-btn mb-btn-line w-full"
+        >
+          {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
+          {isGoogleLoading ? "Signing in..." : "Continue with Google"}
+        </button>
+      </form>
+    </AuthFrame>
   );
 }

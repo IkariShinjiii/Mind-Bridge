@@ -1,17 +1,22 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import PublicShell from "../components/ui/PublicShell";
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-6 text-white">
-      <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 text-center shadow-2xl max-w-md w-full">
-        <p className="text-sm uppercase tracking-[0.2em] text-cyan-400 mb-3">404</p>
-        <h1 className="text-3xl font-bold mb-2">Page not found</h1>
-        <p className="text-gray-300 mb-6">The page you’re looking for does not exist or may have moved.</p>
-        <Link to="/" className="inline-block bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg px-5 py-2.5 transition-all duration-200">
-          Back to home
-        </Link>
+    <PublicShell>
+      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
+        <div className="mb-plate p-8">
+          <p className="mb-sign text-7xl font-bold leading-none">404</p>
+          <h1 className="mb-sign mt-4 text-4xl font-bold">This page is not on the map</h1>
+          <p className="mt-2 max-w-[45ch] text-[color:var(--mb-panel-soft)]">
+            The page you are looking for does not exist or may have moved.
+          </p>
+          <Link to="/" className="mb-btn mt-6 border-[color:var(--mb-panel-ink)] bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
+            Back to home
+          </Link>
+        </div>
       </div>
-    </div>
+    </PublicShell>
   );
 }

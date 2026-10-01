@@ -8,29 +8,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../firebase";
-import icon from "../assets/mindbridge-icon.png";
-import usaLogo from "../assets/usa-logo.png";
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-5 w-5">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-      <path fill="none" d="M0 0h48v48H0z" />
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-      <path d="M22 12a10 10 0 00-10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="opacity-90" />
-    </svg>
-  );
-}
+import AuthFrame, { GoogleIcon, Spinner, Field } from "./ui/AuthFrame";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -130,114 +108,64 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4 font-sans text-white auth-page auth-card-enter-left">
-      <div className="bg-gray-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-gray-800 transform transition-all duration-300 hover:shadow-[0_18px_40px_rgba(6,182,212,0.12)]">
-        <div className="p-8">
-          <div className="mb-6 text-center">
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold">Mind Bridge • USA</p>
-            <h2 className="text-2xl font-semibold text-white mt-0.5">Create account</h2>
-          </div>
-
-          {errorMessage ? (
-            <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{errorMessage}</div>
-          ) : null}
-
-
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="text-sm text-gray-300 block mb-1">Full Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                placeholder="Jane Doe"
-                required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="text-sm text-gray-300 block mb-1">Email Address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@usa.edu.ph"
-                required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="text-sm text-gray-300 block mb-1">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="At least 6 characters"
-                required
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div className="relative flex items-center gap-3 my-6">
-              <div className="flex-1 border-t border-gray-700" />
-              <span className="text-xs text-gray-500 flex-shrink-0">or sign up with Google</span>
-              <div className="flex-1 border-t border-gray-700" />
-            </div>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleGoogleSignUp}
-                disabled={isGoogleLoading || isSubmitting}
-                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
-                <span>{isGoogleLoading ? "Signing up..." : "Sign up with Google"}</span>
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting || isGoogleLoading}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 !mt-6"
-            >
-              {isSubmitting && <Spinner />}
-              {isSubmitting ? "Creating account..." : "Create account"}
-            </button>
-
-            <div className="flex items-start gap-2 pt-2">
-              <div className="flex h-5 items-center">
-                <input
-                  id="consent"
-                  name="consent"
-                  type="checkbox"
-                  required
-                  className="h-4 w-4 rounded border-gray-700 bg-gray-900 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900"
-                />
-              </div>
-              <div className="text-xs text-gray-400 text-left">
-                <label htmlFor="consent">
-                  I agree to the <a href="/terms" className="text-cyan-400 hover:underline">Terms & Conditions</a> and <a href="/privacy-policy" className="text-cyan-400 hover:underline">Privacy Policy</a>. I consent to the collection and processing of my data as outlined.
-                </label>
-              </div>
-            </div>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-gray-300">
-            Already have an account?{" "}
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              className="text-cyan-400 hover:text-cyan-300 font-medium transition-all duration-200 hover:underline"
-            >
-              Log in
-            </button>
-          </div>
-        </div>
+    <AuthFrame
+      title="Create account"
+      intro="Student accounts use your @usa.edu.ph email. It takes under a minute."
+      footer={
+        <p>
+          Already have an account?{" "}
+          <button type="button" onClick={() => navigate("/login")} className="font-bold underline underline-offset-4">
+            Log in
+          </button>
+        </p>
+      }
+    >
+      <div aria-live="polite">
+        {errorMessage ? <div className="mb-alert mb-5" role="alert">{errorMessage}</div> : null}
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <Field id="name" label="Full name" type="text" autoComplete="name" required />
+        <Field id="email" label="School email" type="email" placeholder="you@usa.edu.ph" autoComplete="email" required />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          hint="At least 6 characters."
+          required
+        />
+
+        <div className="flex items-start gap-3">
+          <input id="consent" name="consent" type="checkbox" required className="mt-1 h-5 w-5 shrink-0 accent-[color:var(--mb-panel)]" />
+          <label htmlFor="consent" className="text-[color:var(--mb-muted)]">
+            I agree to the{" "}
+            <a href="/terms" className="text-[color:var(--mb-ink)]">Terms and Conditions</a> and{" "}
+            <a href="/privacy-policy" className="text-[color:var(--mb-ink)]">Privacy Policy</a>, and I consent to my data being collected and processed as they describe.
+          </label>
+        </div>
+
+        <button type="submit" disabled={isSubmitting || isGoogleLoading} className="mb-btn mb-btn-solid w-full">
+          {isSubmitting && <Spinner />}
+          {isSubmitting ? "Creating account..." : "Create account"}
+        </button>
+
+        <div className="flex items-center gap-3 text-[color:var(--mb-muted)]" aria-hidden="true">
+          <span className="h-0.5 flex-1 bg-[color:var(--mb-line)]" />
+          <span>or</span>
+          <span className="h-0.5 flex-1 bg-[color:var(--mb-line)]" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleSignUp}
+          disabled={isGoogleLoading || isSubmitting}
+          className="mb-btn mb-btn-line w-full"
+        >
+          {isGoogleLoading ? <Spinner /> : <GoogleIcon />}
+          {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
+        </button>
+      </form>
+    </AuthFrame>
   );
 }

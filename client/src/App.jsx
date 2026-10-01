@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Link, Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./AuthContext.jsx";
 
@@ -17,7 +17,6 @@ import CookiePolicy from "./pages/CookiePolicy";
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/DashboardLayout";
 import CookieConsent from "./components/CookieConsent";
-import icon from "./assets/mindbridge-icon.png";
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { currentUser, userRole, loading } = useAuth();
@@ -70,34 +69,7 @@ function PublicOnlyRoute({ children }) {
     return <Navigate to={redirectPath} replace />;
   }
 
-  return (
-    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
-      <div className="app-mesh-bg" aria-hidden="true" />
-      <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Navbar() {
-  return (
-    <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-gray-950/75 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3 group interactive-tap">
-          <img src={icon} alt="Mind Bridge logo" className="h-8 w-8 rounded-xl object-cover shadow-md transition-transform group-hover:scale-105" />
-          <div className="text-lg font-bold tracking-tight text-white">
-            Mind Bridge
-          </div>
-        </Link>
-        <nav className="flex items-center gap-3 text-sm">
-          <Link to="/login" className="min-h-[40px] flex items-center rounded-xl border border-teal-500/30 bg-teal-500/10 px-4 py-1.5 text-xs font-semibold text-teal-300 hover:bg-teal-500/20 transition interactive-tap">
-            Sign In
-          </Link>
-        </nav>
-      </div>
-    </header>
-  );
+  return children;
 }
 
 export default function App() {
@@ -108,18 +80,7 @@ export default function App() {
       <CookieConsent />
       <Suspense fallback={<div className="flex-1 flex items-center justify-center"><div className="h-8 w-8 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" /></div>}>
       <Routes location={location} key={location.pathname}>
-        <Route
-          path="/"
-          element={
-            <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
-              <div className="app-mesh-bg" aria-hidden="true" />
-              <Navbar />
-              <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-                <HomePage />
-              </div>
-            </div>
-          }
-        />
+        <Route path="/" element={<HomePage />} />
         <Route
           path="/login"
           element={
@@ -180,33 +141,9 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/privacy-policy" element={
-          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
-            <div className="app-mesh-bg" aria-hidden="true" />
-            <Navbar />
-            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-              <PrivacyPolicy />
-            </div>
-          </div>
-        } />
-        <Route path="/terms" element={
-          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
-            <div className="app-mesh-bg" aria-hidden="true" />
-            <Navbar />
-            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-              <TermsAndConditions />
-            </div>
-          </div>
-        } />
-        <Route path="/cookie-policy" element={
-          <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-gray-950 text-gray-100 font-sans">
-            <div className="app-mesh-bg" aria-hidden="true" />
-            <Navbar />
-            <div className="relative flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-              <CookiePolicy />
-            </div>
-          </div>
-        } />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </Suspense>

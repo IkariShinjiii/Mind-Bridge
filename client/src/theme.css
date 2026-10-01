@@ -1,0 +1,131 @@
+/* Mind Bridge "Calm Wayfinding" design system.
+   Scoped to .mb so pages not yet migrated keep their existing styles. */
+
+.mb {
+  --mb-ground: #f3f5f2;
+  --mb-surface: #ffffff;
+  --mb-panel: #0f4a55;
+  --mb-panel-ink: #f4f8f6;
+  --mb-panel-soft: #d9e7e5;
+  --mb-ink: #14292f;
+  --mb-muted: #4c6269;
+  --mb-line: #c9d5d2;
+  --mb-amber: #f0b13a;
+  --mb-amber-ink: #2b1f00;
+  --mb-safe: #1e7a56;
+  --mb-focus: #0b6bcb;
+  --mb-error-bg: #fbe9e7;
+  --mb-error-ink: #7a1f14;
+
+  background: var(--mb-ground);
+  color: var(--mb-ink);
+  font-family: "Atkinson Hyperlegible Next", "Segoe UI", system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color-scheme: light;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mb-line) transparent;
+}
+
+.mb[data-theme="dark"] {
+  --mb-ground: #0c191d;
+  --mb-surface: #122329;
+  --mb-panel: #1a5560;
+  --mb-panel-ink: #f2f8f6;
+  --mb-panel-soft: #b9d3d0;
+  --mb-ink: #e6efed;
+  --mb-muted: #9fb5ba;
+  --mb-line: #27414a;
+  --mb-focus: #ffc857;
+  --mb-error-bg: #3a1a17;
+  --mb-error-ink: #ffd5cf;
+  color-scheme: dark;
+}
+
+.mb h1, .mb h2, .mb h3, .mb .mb-sign {
+  font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: 0;
+}
+
+.mb ::selection { background: var(--mb-panel); color: var(--mb-panel-ink); }
+
+.mb :focus-visible {
+  outline: 3px solid var(--mb-focus);
+  outline-offset: 3px;
+  box-shadow: none;
+  border-radius: 4px;
+}
+
+.mb a { text-underline-offset: 3px; }
+.mb input, .mb button { font: inherit; }
+
+/* display lives in :where() so Tailwind utilities like `hidden` can still override it */
+:where(.mb-btn) { display: inline-flex; }
+
+/* Signage plate: the system's one container. Corners stay small like routed signs. */
+.mb-plate {
+  background: var(--mb-panel);
+  color: var(--mb-panel-ink);
+  border-radius: 6px;
+}
+.mb-plate-amber {
+  background: var(--mb-amber);
+  color: var(--mb-amber-ink);
+  border-radius: 6px;
+}
+
+.mb-btn {
+  align-items: center; justify-content: center; gap: .6rem;
+  min-height: 48px; padding: .7rem 1.4rem; border-radius: 6px;
+  font-weight: 700; text-decoration: none; cursor: pointer;
+  border: 2px solid var(--mb-panel);
+  transition: transform .15s cubic-bezier(.22,1,.36,1), background-color .15s, color .15s;
+}
+.mb-btn:active { transform: translateY(1px); }
+.mb-btn-solid { background: var(--mb-panel); color: var(--mb-panel-ink); }
+.mb-btn-solid:hover { background: color-mix(in srgb, var(--mb-panel) 85%, black); }
+.mb[data-theme="dark"] .mb-btn-solid:hover { background: color-mix(in srgb, var(--mb-panel) 85%, white); }
+.mb-btn-line { background: transparent; color: var(--mb-ink); border-color: var(--mb-ink); }
+.mb-btn-line:hover { background: var(--mb-ink); color: var(--mb-ground); }
+.mb-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.mb-field {
+  width: 100%; min-height: 48px; padding: .65rem .9rem;
+  background: var(--mb-surface); color: var(--mb-ink);
+  border: 2px solid var(--mb-line); border-radius: 6px;
+}
+.mb-field::placeholder { color: var(--mb-muted); opacity: .85; }
+.mb-field:hover { border-color: var(--mb-muted); }
+.mb-field:focus { border-color: var(--mb-panel); }
+.mb[data-theme="dark"] .mb-field:focus { border-color: var(--mb-focus); }
+.mb-field:-webkit-autofill { -webkit-text-fill-color: var(--mb-ink); box-shadow: 0 0 0 40px var(--mb-surface) inset; }
+
+.mb-alert {
+  background: var(--mb-error-bg); color: var(--mb-error-ink);
+  border: 2px solid currentColor; border-radius: 6px; padding: .75rem 1rem;
+}
+
+/* Route board: stops light up one after another, once, on load. */
+.mb-route { position: relative; z-index: 0; }
+.mb-route::before {
+  content: ""; position: absolute; left: 1.9rem; top: 2rem; bottom: 2rem; width: 4px;
+  background: var(--mb-line); border-radius: 2px;
+}
+.mb-route::after {
+  content: ""; position: absolute; left: 1.9rem; top: 2rem; bottom: 2rem; width: 4px;
+  background: var(--mb-amber); border-radius: 2px; transform-origin: top;
+  animation: mb-draw 1.4s cubic-bezier(.22,1,.36,1) .3s both;
+}
+.mb-stop { position: relative; z-index: 1; animation: mb-lift .6s cubic-bezier(.22,1,.36,1) both; }
+.mb-stop:nth-child(1) { animation-delay: .15s; }
+.mb-stop:nth-child(2) { animation-delay: .45s; }
+.mb-stop:nth-child(3) { animation-delay: .75s; }
+.mb-stop:nth-child(4) { animation-delay: 1.05s; }
+
+@keyframes mb-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes mb-lift { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-route::after, .mb-stop { position: relative; z-index: 1; animation: none; }
+  .mb-btn { transition: none; }
+}
