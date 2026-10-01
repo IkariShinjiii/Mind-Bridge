@@ -262,6 +262,7 @@ written and tested but **not deployed yet**.
 
 ## Documentation
 
+- [`docs/IPOO.md`](docs/IPOO.md): IPOO framework mapping, risk-scoring algorithm, security measures, objectives to code
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): system diagram, data model, security model, scaling
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): Vercel and Firebase deployment, rollback, troubleshooting
 - [`docs/API.md`](docs/API.md): backend operations, roles and expected outcomes
