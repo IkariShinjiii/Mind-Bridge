@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../AuthContext.jsx";
 import { Moon, Sun, Phone } from "lucide-react";
 import icon from "../../assets/mindbridge-icon.png";
 
@@ -61,6 +62,8 @@ export function CrisisStrip() {
 
 export default function PublicShell({ children, showAuthLinks = true }) {
   const [theme, toggle] = useTheme();
+  const { currentUser, userRole, logout } = useAuth();
+  const dashboard = userRole === "admin" || userRole === "counselor" ? "/admin/dashboard" : "/student/dashboard";
   const next = theme === "dark" ? "light" : "dark";
 
   return (
@@ -82,16 +85,27 @@ export default function PublicShell({ children, showAuthLinks = true }) {
                 <Moon className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
-            {showAuthLinks && (
+            {currentUser ? (
               <>
-                <Link to="/login" className="mb-btn mb-btn-line hidden sm:inline-flex">
-                  Log in
+                <Link to={dashboard} className="mb-btn mb-btn-solid whitespace-nowrap">
+                  Dashboard
                 </Link>
-                <Link to="/signup" className="mb-btn mb-btn-solid whitespace-nowrap">
-                  <span className="sm:hidden">Sign up</span>
-                  <span className="hidden sm:inline">Create account</span>
-                </Link>
+                <button type="button" onClick={logout} className="mb-btn mb-btn-line whitespace-nowrap">
+                  Log out
+                </button>
               </>
+            ) : (
+              showAuthLinks && (
+                <>
+                  <Link to="/login" className="mb-btn mb-btn-line hidden sm:inline-flex">
+                    Log in
+                  </Link>
+                  <Link to="/signup" className="mb-btn mb-btn-solid whitespace-nowrap">
+                    <span className="sm:hidden">Sign up</span>
+                    <span className="hidden sm:inline">Create account</span>
+                  </Link>
+                </>
+              )
             )}
           </nav>
         </div>
