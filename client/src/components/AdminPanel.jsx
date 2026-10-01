@@ -4,6 +4,9 @@ import {
   ClipboardList,
   Calendar,
   AlertCircle,
+  AlertTriangle,
+  Diamond,
+  CircleCheck,
   X,
   FileText,
   CheckCircle2,
@@ -281,6 +284,20 @@ export default function AdminPanel() {
     });
   }, [assessments, filter, assignedOnly, currentUser?.uid]);
 
+  // Highest priority first: safety-flagged, then high, medium, low; open before reviewed; newest first.
+  const triageCases = useMemo(() => {
+    const rank = (c) => (c.flaggedForImmediateReview ? 0 : { high: 1, medium: 2, low: 3 }[c.riskLevel || "low"] ?? 3);
+    const when = (c) => new Date(c.submittedAt || c.createdAt || 0).getTime() || 0;
+    return [...visibleCases].sort((x, y) => {
+      const byRank = rank(x) - rank(y);
+      if (byRank) return byRank;
+      const xDone = (x.status || "open") === "reviewed" ? 1 : 0;
+      const yDone = (y.status || "open") === "reviewed" ? 1 : 0;
+      if (xDone !== yDone) return xDone - yDone;
+      return when(y) - when(x);
+    });
+  }, [visibleCases]);
+
   // Filtered users for Accounts tab
   const filteredUsers = useMemo(() => {
     if (accountSubTab === "staff") {
@@ -404,140 +421,137 @@ export default function AdminPanel() {
       {mainTab === "cases" && (
         <div className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  ["flagged", "Flagged / Urgent"],
-                  ["open", "Open Cases"],
-                  ["reviewed", "Reviewed"],
-                  ["escalated", "Escalated"],
-                  ["high", "High Risk"],
-                  ["medium", "Medium Risk"],
-                  ["all", "All Submissions"],
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    onClick={() => setFilter(value)}
-                    className={`rounded-full px-3.5 py-1.5 text-xs transition font-medium ${
-                      filter === value
-                        ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm font-semibold"
-                        : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
+              {[
+                ["flagged", "Flagged / urgent"],
+                ["open", "Open"],
+                ["reviewed", "Reviewed"],
+                ["escalated", "Escalated"],
+                ["high", "High risk"],
+                ["medium", "Medium risk"],
+                ["all", "All"],
+              ].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFilter(value)}
+                  aria-pressed={filter === value}
+                  className={`min-h-[44px] rounded border-2 px-3.5 font-bold transition-colors ${
+                    filter === value
+                      ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                      : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-ink)]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
               <button
+                type="button"
                 onClick={() => setAssignedOnly(!assignedOnly)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition border interactive-tap ${
+                aria-pressed={assignedOnly}
+                className={`min-h-[44px] rounded border-2 px-3.5 font-bold transition-colors ${
                   assignedOnly
-                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] shadow-sm"
-                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
+                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-ink)]"
                 }`}
               >
-                {assignedOnly ? "✓ My Assigned Students" : "Filter: My Assigned"}
+                {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
               </button>
             </div>
-
-            <span className="text-xs text-[color:var(--mb-muted)]">
-              Showing {visibleCases.length} case{visibleCases.length !== 1 ? "s" : ""}
-            </span>
+            <p className="text-[color:var(--mb-muted)]" aria-live="polite">
+              {triageCases.length} case{triageCases.length !== 1 ? "s" : ""}, highest priority first
+            </p>
           </div>
 
           {loading ? (
-            <div className="flex min-h-[300px] items-center justify-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)] gap-3">
+            <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
               <Spinner size={20} className="text-[color:var(--mb-brand)]" />
-              <span>Loading student assessment records...</span>
+              <span>Loading student check-ins...</span>
             </div>
-          ) : visibleCases.length === 0 ? (
-            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-10 text-center text-sm text-[color:var(--mb-muted)]">
-              No student cases in this view category.
+          ) : triageCases.length === 0 ? (
+            <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-10 text-center text-[color:var(--mb-muted)]">
+              No cases match this filter.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm">
-              <table className="min-w-[750px] w-full text-left text-sm">
-                <thead className="bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] text-xs uppercase tracking-wider">
-                  <tr>
-                    <th className="px-4 py-3.5 font-semibold">Student</th>
-                    <th className="px-4 py-3.5 font-semibold">Risk Classification</th>
-                    <th className="px-4 py-3.5 font-semibold">Score</th>
-                    <th className="px-4 py-3.5 font-semibold">Case Status</th>
-                    <th className="px-4 py-3.5 font-semibold">Submitted</th>
-                    <th className="px-4 py-3.5 font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleCases.map((item) => {
-                    const risk = item.riskLevel || "low";
-                    const status = item.status || "open";
-                    const submittedAt = item.submittedAt
-                      ? new Date(item.submittedAt).toLocaleString()
-                      : item.createdAt
-                        ? new Date(item.createdAt).toLocaleString()
-                        : "Unknown";
+            <ul className="space-y-3">
+              {triageCases.map((item) => {
+                const risk = item.riskLevel || "low";
+                const status = item.status || "open";
+                const immediate = Boolean(item.flaggedForImmediateReview);
+                const when = item.submittedAt || item.createdAt;
+                const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
+                const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
+                const riskTone =
+                  risk === "high"
+                    ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
+                    : risk === "medium"
+                    ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
+                    : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]";
 
-                    return (
-                      <tr key={item.id} className="border-t border-[color:var(--mb-line)] align-middle hover:bg-[color:var(--mb-surface-2)] transition-colors">
-                        <td className="px-4 py-3.5">
-                          <div className="font-semibold text-[color:var(--mb-ink)]">{item.studentName || "Student"}</div>
-                          <div className="text-xs text-[color:var(--mb-muted)] font-mono">{item.studentEmail || "Institutional email"}</div>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${RISK_STYLES[risk]}`}>
-                              {risk} Risk
-                            </span>
-                            {item.flaggedForImmediateReview && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--mb-panel-ink)] uppercase tracking-wider animate-pulse">
-                                <AlertCircle className="h-3 w-3" /> Immediate
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5 text-[color:var(--mb-muted)] font-mono text-xs">
-                          {item.total ?? 0} / {item.maxScore ?? 21}
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status] || "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border-[color:var(--mb-line)]"}`}>
-                            {status}
+                return (
+                  <li
+                    key={item.id}
+                    className={`grid gap-4 rounded-md border-2 bg-[color:var(--mb-surface)] p-3 sm:grid-cols-[7.5rem_1fr_auto] sm:items-center ${
+                      immediate ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-line)]"
+                    }`}
+                  >
+                    <div className={`flex flex-row items-center gap-3 rounded p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}>
+                      <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
+                      <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="mb-sign text-2xl font-bold leading-tight">{item.studentName || "Student"}</p>
+                      <p className="truncate font-mono text-sm text-[color:var(--mb-muted)]">
+                        {item.studentEmail || "Institutional email"}
+                      </p>
+                      <p className="mt-1 text-[color:var(--mb-muted)]">
+                        Score {item.total ?? 0} of {item.maxScore ?? 21} · {submittedAt}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span
+                          className={`inline-flex rounded border px-2 py-0.5 text-sm font-bold capitalize ${
+                            STATUS_STYLES[status] || "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
+                          }`}
+                        >
+                          {status}
+                        </span>
+                        {immediate && (
+                          <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                            <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
                           </span>
-                        </td>
-                        <td className="px-4 py-3.5 text-xs text-[color:var(--mb-muted)]">{submittedAt}</td>
-                        <td className="px-4 py-3.5">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => openCaseInspector(item)}
-                              className="rounded-md bg-[color:var(--mb-surface-2)] border border-[color:var(--mb-line)] px-3 py-1.5 text-xs font-medium text-[color:var(--mb-brand)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
-                            >
-                              Inspect Case
-                            </button>
-                            {status !== "reviewed" ? (
-                              <button
-                                onClick={() => markAssessmentStatus(item.id, "reviewed")}
-                                disabled={updatingAssessmentId === item.id}
-                                className="rounded-md bg-[color:var(--mb-panel)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-60 interactive-tap"
-                              >
-                                {updatingAssessmentId === item.id ? "Updating…" : "Mark Reviewed"}
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => markAssessmentStatus(item.id, "open")}
-                                disabled={updatingAssessmentId === item.id}
-                                className="rounded-md border border-[color:var(--mb-line)] px-3 py-1.5 text-xs font-medium text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)] transition disabled:opacity-60 interactive-tap"
-                              >
-                                {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 sm:flex-col">
+                      <button type="button" onClick={() => openCaseInspector(item)} className="mb-btn mb-btn-solid !min-h-[44px]">
+                        Inspect case
+                      </button>
+                      {status !== "reviewed" ? (
+                        <button
+                          type="button"
+                          onClick={() => markAssessmentStatus(item.id, "reviewed")}
+                          disabled={updatingAssessmentId === item.id}
+                          className="mb-btn mb-btn-line !min-h-[44px]"
+                        >
+                          {updatingAssessmentId === item.id ? "Updating…" : "Mark reviewed"}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => markAssessmentStatus(item.id, "open")}
+                          disabled={updatingAssessmentId === item.id}
+                          className="mb-btn mb-btn-line !min-h-[44px]"
+                        >
+                          {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
+                        </button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </div>
       )}
