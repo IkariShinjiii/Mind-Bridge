@@ -106,7 +106,7 @@ Browser (React SPA, Vercel)
 ### What works
 - Passwords are handled entirely by Firebase Auth. The app never stores or logs them.
 - Login errors are normalized: wrong password, unknown user and invalid credential all show the same
-  message (`client/src/lib/errors.js`), which limits account enumeration through the UI.
+  message (`client/src/utils/errors.ts`), which limits account enumeration through the UI.
 - Sign-in throttling is provided by Firebase (`auth/too-many-requests` is handled).
 - Self-signup can only create `role: "student"`, `approved: true`, `active: true`. A student cannot
   promote themselves: the rules reject changes to `role`, `approved`, `active` and the assignment
@@ -118,7 +118,7 @@ Browser (React SPA, Vercel)
 
 ### F-01 (High): School-email restriction and verification are client-side only
 
-**Evidence.** `Signup.jsx` and `Login.jsx` check `endsWith("@usa.edu.ph")` in the browser. The `users`
+**Evidence.** `Signup.tsx` and `Login.tsx` check `endsWith("@usa.edu.ph")` in the browser. The `users`
 create rule checks only `role`, `approved` and `active`. Sign-up stores `emailVerified: false` as a
 field the user writes themselves, and nothing reads `request.auth.token.email_verified`.
 
@@ -206,7 +206,7 @@ function.
 
 **Recommendation.** Do not trust the stored value.
 1. Immediate, no backend needed: have the staff dashboard recompute risk from `total`, `maxScore`
-   and `questionSummary` with `lib/scoring.js`, and show a warning when it differs from the stored
+   and `questionSummary` with `utils/scoring.ts`, and show a warning when it differs from the stored
    `riskLevel`.
 2. Better: enforce in the rules that `riskLevel` is consistent with `total` and `maxScore`, and that
    `flaggedForImmediateReview` is true whenever a crisis item is non-zero.
@@ -320,7 +320,7 @@ edits, and indefinite retention of mental-health records is hard to justify.
 ## 6. Input validation, XSS and CSRF
 
 ### Input validation
-Client validators in `client/src/lib/validation.js` cover email, school domain, phone, password
+Client validators in `client/src/lib/schemas + utils/validation.ts` cover email, school domain, phone, password
 change, emergency contact and availability windows, with unit tests including edge cases. They are
 good UX but **client-only** (see F-06). The email regex accepts any `x@y.z` and the domain check is
 the only school-specific rule (see F-01).
@@ -329,7 +329,7 @@ the only school-specific rule (see F-01).
 - The code base has no `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `document.write` or
   `window.open`. React escapes all interpolated text, including student names, notes and chat
   messages, which are the user-controlled strings staff see.
-- The only dynamic `href` values are `tel:${phone}` links (`AdminPanel.jsx`, `CrisisResources.jsx`). The
+- The only dynamic `href` values are `tel:${phone}` links (`AdminPanel.tsx`, `CrisisResources.tsx`). The
   `tel:` prefix prevents a `javascript:` URI. The phone number is validated at input but, because of F-06,
   a student could store any string; the worst outcome is a malformed dial link. Constrain it in the
   rules or sanitize at render.

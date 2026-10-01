@@ -58,28 +58,28 @@ The same picture as plain text:
 |---|---|---|
 | No custom backend | Smallest surface to run and secure for a student project; Firebase handles auth, storage and scaling | Business rules live in client code and in `firestore.rules` |
 | Firestore rules as the access layer | Enforced server-side regardless of what the client does | Rules are hard to unit test, so there is a dedicated emulator suite in `backend-tests/` |
-| Lazy-loaded routes and vendor chunks | Initial JS is about 82 kB; Firebase and Recharts load on demand | Slightly more build configuration (`vite.config.js`) |
+| Lazy-loaded routes and vendor chunks | Initial JS is about 82 kB; Firebase and Recharts load on demand | Slightly more build configuration (`vite.config.ts`) |
 | Rule-based risk scoring | Transparent and explainable to counselors | Needs clinical validation; see the README notes |
-| Function recomputes risk server-side | The email never trusts the client-supplied `riskLevel` | Scoring logic exists in two places (`scoring.js` and `functions/index.js`) and must be kept in sync |
+| Function recomputes risk server-side | The email never trusts the client-supplied `riskLevel` | Scoring logic exists in two places (`scoring.ts` and `functions/index.js`) and must be kept in sync |
 
 ## 2. Frontend architecture
 
 ```
-main.jsx -> ErrorBoundary -> App.jsx (lazy routes) -> AuthContext -> DashboardLayout / PublicShell
+main.tsx -> ErrorBoundary -> App.tsx (lazy routes) -> AuthProvider -> DashboardLayout / PublicShell
                                                            │
-pages & features ──▶ lib/api.js ──▶ lib/firebase.js ──▶ Firebase SDK
+pages ──▶ lib/api.ts ──▶ lib/firebase.js ──▶ Firebase SDK
 ```
 
 | Layer | Location | Responsibility |
 |---|---|---|
-| Routing | `src/App.jsx` | Lazy-loaded routes, auth and role redirects |
-| Auth state | `src/context/AuthContext.jsx` | Current user, role, approval and active flags |
-| Data access | `src/lib/api.js` | The only module that calls Firestore; everything else imports from it |
-| Business logic | `src/lib/scoring.js`, `validation.js`, `errors.js`, `dates.js` | Pure functions, covered by unit tests |
+| Routing | `src/App.tsx` | Lazy-loaded routes, auth and role redirects |
+| Auth state | `src/components/AuthProvider.tsx` | Current user, role, approval and active flags |
+| Data access | `src/lib/api.ts` | The only module that calls Firestore; everything else imports from it |
+| Business logic | `src/utils/scoring.ts`, `validation.js`, `errors.ts`, `dates.js` | Pure functions, covered by unit tests |
 | UI primitives | `src/components/ui/` | Shared components with Storybook stories |
 | Features | `src/features/{student,appointments,staff,settings,chat}` | One folder per user-facing area |
 
-Keeping every Firestore call in `lib/api.js` is deliberate: it is the seam used by the unit tests,
+Keeping every Firestore call in `lib/api.ts` is deliberate: it is the seam used by the unit tests,
 and the Playwright suite replaces the whole Firebase SDK with in-memory fakes at the Vite alias
 level (`vite --mode e2e`).
 
@@ -123,7 +123,7 @@ erDiagram
 ```
 
 Field lists are abbreviated to those the rules and function depend on. The full shapes are in
-`client/src/lib/api.js`.
+`client/src/lib/api.ts`.
 
 ## 4. Security model
 
@@ -145,7 +145,7 @@ denied on every collection.
 
 - **Client is untrusted.** Role, approval and active flags cannot be self-edited; the rules check
   the stored profile, not anything the client sends.
-- **Email domain is enforced in the UI only.** `Signup.jsx` and `Login.jsx` reject non-`@usa.edu.ph`
+- **Email domain is enforced in the UI only.** `Signup.tsx` and `Login.tsx` reject non-`@usa.edu.ph`
   accounts, but the rules do not check the domain. Someone calling the Firebase API directly could
   create a student account with another email. If that matters, add a domain check to the `users`
   create rule or use a blocking Auth function.

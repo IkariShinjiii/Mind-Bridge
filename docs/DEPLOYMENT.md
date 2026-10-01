@@ -249,7 +249,7 @@ Rolling back code does not undo bad writes. For data protection:
 | Page loads but is blank; console says `auth/invalid-api-key` | `VITE_FIREBASE_*` missing or set after the build | Add variables for the right environment, then **redeploy** |
 | 404 when refreshing `/login` or `/admin/dashboard` | SPA rewrite missing | Confirm `client/vercel.json` is in the deployed root directory |
 | Preview deploy works, production does not (or reverse) | Variables set for only one environment | Set them for Production and Preview |
-| Build warns about chunks over 500 kB | Firebase and Recharts vendor chunks | Expected; limit is raised to 700 kB in `vite.config.js` |
+| Build warns about chunks over 500 kB | Firebase and Recharts vendor chunks | Expected; limit is raised to 700 kB in `vite.config.ts` |
 | `npm run build` passes locally, fails in CI | Node version mismatch | Use Node 20 and `npm ci` (not `npm install`) |
 
 ### Authentication
@@ -294,7 +294,7 @@ Rolling back code does not undo bad writes. For data protection:
 | Emulator port already in use | A previous emulator is still running | Stop the old process or `firebase emulators:exec` again after it exits |
 | Playwright cannot find a browser | Browsers not installed | `npx playwright install chromium` |
 | E2E tests talk to real Firebase | Server was not started in e2e mode | Use `npm run test:e2e` (it starts `vite --mode e2e`) |
-| `npm test` picks up Playwright specs | Config changed | `vite.config.js` must keep `test.exclude: ["e2e/**"]` |
+| `npm test` picks up Playwright specs | Config changed | `vite.config.ts` must keep `test.exclude: ["e2e/**"]` |
 
 ### Diagnostic checklist
 

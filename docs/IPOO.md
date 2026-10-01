@@ -32,21 +32,21 @@ flowchart LR
     end
 
     subgraph PROCESS["PROCESS"]
-        P0["Validate<br/>lib/validation.js"]
-        P1["Score + classify<br/>lib/scoring.js"]
+        P0["Validate<br/>lib/schemas + utils/validation.ts"]
+        P1["Score + classify<br/>utils/scoring.ts"]
         P2{{"Access control<br/>firestore.rules"}}
         P3[("Cloud Firestore")]
         P4["Re-score + alert<br/>functions/index.js"]
-        P5["Prioritize cases<br/>AdminPanel.jsx"]
+        P5["Prioritize cases<br/>AdminPanel.tsx"]
     end
 
     subgraph OUTPUT["OUTPUT"]
-        O1["Risk result + guidance<br/>StudentDashboard.jsx"]
+        O1["Risk result + guidance<br/>StudentDashboard.tsx"]
         O2["Priority-sorted case queue<br/>+ counselor notes"]
         O3["Confirmed appointment"]
         O4["Email alert to staff"]
         O5["Anonymized CSV + risk chart"]
-        O6["Crisis resources<br/>CrisisResources.jsx"]
+        O6["Crisis resources<br/>CrisisResources.tsx"]
     end
 
     subgraph OUTCOME["OUTCOME"]
@@ -95,13 +95,13 @@ For infrastructure (Vercel, Firebase, trust boundaries) see [`ARCHITECTURE.md`](
 
 ## 3. Risk-scoring algorithm
 
-Source of truth: [`client/src/lib/scoring.js`](../client/src/lib/scoring.js). The Cloud Function
+Source of truth: [`client/src/utils/scoring.ts`](../client/src/utils/scoring.ts). The Cloud Function
 (`functions/index.js`, `assess()`) applies the same rules independently.
 
 ### 3.1 The instrument
 
 Seven items, each answered **0 to 3**, covering the last two weeks. The questions are defined in
-`client/src/features/student/StudentDashboard.jsx`.
+`client/src/pages/student/StudentDashboard.tsx`.
 
 | # | Item | Domain | Crisis item |
 |---|---|---|---|
@@ -156,7 +156,7 @@ The algorithm uses **two tiers, not per-item weights**:
 
 If the proposal specifies different weights per domain, they would be added in `scoreAnswers()` by
 multiplying each answer by a weight before summing and scaling `maxScore` the same way. The tests
-in `scoring.test.js` and `scoring.edge.test.js` would then need new boundary cases.
+in `scoring.test.ts` and `scoring.edge.test.ts` would then need new boundary cases.
 
 ### 3.5 Worked examples
 
@@ -173,18 +173,18 @@ in `scoring.test.js` and `scoring.edge.test.js` would then need new boundary cas
 
 | Use | File |
 |---|---|
-| Compute and store the result | `scoring.js`, `api.js` `submitResponse()` |
-| Student result and guidance copy | `StudentDashboard.jsx` |
-| Trend versus previous check-in (points up, down, unchanged) | `StudentDashboard.jsx` |
-| Queue order: safety-flagged, then high, medium, low; open before reviewed; newest first | `AdminPanel.jsx` |
+| Compute and store the result | `scoring.ts`, `api.ts` `submitResponse()` |
+| Student result and guidance copy | `StudentDashboard.tsx` |
+| Trend versus previous check-in (points up, down, unchanged) | `StudentDashboard.tsx` |
+| Queue order: safety-flagged, then high, medium, low; open before reviewed; newest first | `AdminPanel.tsx` |
 | Re-score on the server and decide whether to email | `functions/index.js` `assess()` |
-| Bar chart of low, medium and high counts | `AdminPanel.jsx` (Analytics tab) |
+| Bar chart of low, medium and high counts | `AdminPanel.tsx` (Analytics tab) |
 
 ### 3.7 Limits
 
 - The scoring is a **triage aid, not a diagnosis**. `PRODUCT.md` makes this a stated constraint, and
   a counselor or psychologist should validate the thresholds before clinical reliance.
-- The duplicated rule in `functions/index.js` must be kept in sync with `scoring.js`. `scoring.js` carries a
+- The duplicated rule in `functions/index.js` must be kept in sync with `scoring.ts`. `scoring.ts` carries a
   comment saying so, and `backend-tests/` covers the function side.
 - `riskLevel` is stored as sent by the client and the rules do not recompute it. A tampered client
   could store a lower level on its own record, which would affect the staff queue order. The email
@@ -204,7 +204,7 @@ in `scoring.test.js` and `scoring.edge.test.js` would then need new boundary cas
 | **Account shutdown** | `active: false` blocks every collection immediately | `isActive()` in the rules |
 | **Impersonation** | Create rules require `studentId` / `senderId` to equal the caller's uid | `firestore.rules` |
 | **Tampering with records** | No deletes (except availability slots); assessments updatable by staff only; messages immutable; students may only cancel their own appointment | `firestore.rules` |
-| **Authentication** | Firebase Authentication handles credentials. Passwords are salted and hashed by Firebase and never reach our code or database. Google sign-in is limited to `@usa.edu.ph` in the UI | `Login.jsx`, `Signup.jsx` |
+| **Authentication** | Firebase Authentication handles credentials. Passwords are salted and hashed by Firebase and never reach our code or database. Google sign-in is limited to `@usa.edu.ph` in the UI | `Login.tsx`, `Signup.tsx` |
 | **Data in transit and at rest** | HTTPS everywhere (Vercel and Firebase); Google encrypts Firestore data at rest | Platform |
 | **Alert content** | The email contains name, score, and flag only; individual answers stay in the app | `functions/index.js` |
 | **Output escaping** | Names are HTML-escaped before going into the email | `esc()` in `functions/index.js` |
@@ -239,16 +239,16 @@ code stays the same.
 
 | # | Objective (aligned to `PRODUCT.md`) | Stage | Implemented in | Verified by |
 |---|---|---|---|---|
-| 1 | Provide a **safe, private self-assessment** of mood, stress, sleep, focus and safety | Input | `StudentDashboard.jsx` (7-item form, crisis item), `validation.js` | `scoring*.test.js`, `e2e/assessment.spec.js` |
-| 2 | **Evaluate risk** objectively with a multi-tier result | Process | `lib/scoring.js`, `api.js` `submitResponse()` | `scoring.test.js`, `scoring.edge.test.js`, `api.test.js` |
-| 3 | Give **immediate, actionable guidance** and crisis resources | Output | Result card in `StudentDashboard.jsx`, `CrisisResources.jsx` | `e2e/results.spec.js`, `e2e/crisis-resources.spec.js` |
-| 4 | Let counselors **triage flagged cases first** and record notes | Process / Output | `AdminPanel.jsx` (filters, priority sort, status, notes) | `e2e/counselor.spec.js` |
+| 1 | Provide a **safe, private self-assessment** of mood, stress, sleep, focus and safety | Input | `StudentDashboard.tsx` (7-item form, crisis item), `validation.js` | `scoring*.test.js`, `e2e/assessment.spec.js` |
+| 2 | **Evaluate risk** objectively with a multi-tier result | Process | `utils/scoring.ts`, `api.ts` `submitResponse()` | `scoring.test.js`, `scoring.edge.test.js`, `api.test.js` |
+| 3 | Give **immediate, actionable guidance** and crisis resources | Output | Result card in `StudentDashboard.tsx`, `CrisisResources.tsx` | `e2e/results.spec.js`, `e2e/crisis-resources.spec.js` |
+| 4 | Let counselors **triage flagged cases first** and record notes | Process / Output | `AdminPanel.tsx` (filters, priority sort, status, notes) | `e2e/counselor.spec.js` |
 | 5 | **Notify staff** when a high-risk check-in arrives | Output | `functions/index.js` `alertOnHighRisk` (not yet deployed) | `backend-tests/functions/alertOnHighRisk.test.js` |
-| 6 | **Book and manage appointments** with counselors | Process / Output | `BookingFlow.jsx`, `Appointments.jsx`, `ManageAvailability.jsx`, `api.js` | `backend-tests/api/api.test.js` |
-| 7 | **Confidential communication** between student and counselor | Input / Output | `ConfidentialChatModal.jsx`, `api.js` (`listenToStudentMessages`, `sendStudentMessage`), `messages` rules | `backend-tests/rules/scheduling.test.js`, `known-gaps.test.js` (partial) |
-| 8 | **Role-based access and governance** (approve counselors, deactivate users) | Process | `AuthContext.jsx`, `AdminPanel.jsx`, `firestore.rules` | `backend-tests/rules/users.test.js` |
+| 6 | **Book and manage appointments** with counselors | Process / Output | `BookingFlow.jsx`, `Appointments.jsx`, `ManageAvailability.jsx`, `api.ts` | `backend-tests/api/api.test.js` |
+| 7 | **Confidential communication** between student and counselor | Input / Output | `ConfidentialChatModal.jsx`, `api.ts` (`listenToStudentMessages`, `sendStudentMessage`), `messages` rules | `backend-tests/rules/scheduling.test.js`, `known-gaps.test.js` (partial) |
+| 8 | **Role-based access and governance** (approve counselors, deactivate users) | Process | `AuthContext.jsx`, `AdminPanel.tsx`, `firestore.rules` | `backend-tests/rules/users.test.js` |
 | 9 | **Protect privacy** of sensitive data | Process | Section 4 above | `backend-tests/rules/assessments.test.js`, `users.test.js` |
-| 10 | **Aggregate insight** for wellness planning | Output / Outcome | Analytics tab and anonymized CSV in `AdminPanel.jsx`, `adminUtils.js` | No automated test yet |
+| 10 | **Aggregate insight** for wellness planning | Output / Outcome | Analytics tab and anonymized CSV in `AdminPanel.tsx`, `adminUtils.js` | No automated test yet |
 | 11 | **Accessible, calm** experience under stress | Output | `theme.css` tokens, `Modal`, `useFocusTrap`, 44px targets, reduced motion | Storybook a11y addon, `DESIGN.md` |
 
 ## 6. How each stage flows: end to end

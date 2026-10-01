@@ -140,7 +140,8 @@ Other scripts (all run from `client/`):
 
 | Suite | Command | Notes |
 |---|---|---|
-| Unit tests | `cd client && npm test` | Scoring, validation, errors, dates, api, avatar |
+| Type check | `cd client && npm run typecheck` | `tsc --noEmit` in strict mode over src, e2e and configs |
+| Unit tests | `cd client && npm test` | Scoring, validation, schemas, errors, dates, api, avatar |
 | End-to-end | `cd client && npx playwright install chromium && npm run test:e2e` | Runs the app with `vite --mode e2e`, which swaps Firebase for in-memory fakes. Never touches the real project. Use `npm run test:e2e:ui` for the interactive runner. |
 | Backend (rules, API, function) | `cd backend-tests && npm test` | Starts the Firestore emulator (needs Java 21) and tests `firestore.rules`, the Firestore operations and the alert function |
 
@@ -153,25 +154,24 @@ to `main` and every pull request.
 .
 ├── client/                     React single-page app
 │   ├── src/
-│   │   ├── App.jsx, main.jsx   Routes (lazy-loaded) and entry point, wrapped in an ErrorBoundary
-│   │   ├── lib/                api.js (all Firestore/Auth calls), firebase.js (init),
-│   │   │                       scoring.js (risk rules), validation.js (form rules),
-│   │   │                       errors.js (Firebase error -> plain sentence), dates.js,
-│   │   │                       avatar.js, useFocusTrap.js; *.test.js beside each
-│   │   ├── context/            AuthContext (current user and role)
-│   │   ├── styles/             index.css (Tailwind base), theme.css (design tokens)
-│   │   ├── components/ui/      Shared pieces (Button, Card, Input, Modal, Spinner, ...) with Storybook stories
-│   │   ├── components/layout/  DashboardLayout (signed-in shell: nav, account menu, skip link)
-│   │   ├── pages/              Public pages (home, legal, 404) and pages/auth (login, signup)
-│   │   └── features/
-│   │       ├── student/        Check-in dashboard and crisis resources
-│   │       ├── appointments/   Appointment list and booking flow
-│   │       ├── staff/          Admin and counselor dashboard, availability, CSV export helpers
-│   │       ├── settings/       User settings
-│   │       └── chat/           Confidential chat dialog
+│   │   ├── App.tsx, main.tsx   Routes (lazy-loaded) and entry point, wrapped in an ErrorBoundary
+│   │   ├── components/         Reusable UI. ui/ (Button, Card, Input, Modal, Spinner, ErrorBoundary, ...
+│   │   │                       with Storybook stories), layout/ (DashboardLayout), chat/, appointments/,
+│   │   │                       staff/ (feature widgets), AuthProvider.tsx
+│   │   ├── pages/              One folder per screen: auth/, student/, appointments/, staff/, settings/,
+│   │   │                       plus the public pages (home, legal, 404)
+│   │   ├── hooks/              useAuth, useTheme, useFocusTrap
+│   │   ├── types/              Domain types (models.ts), error types (errors.ts), auth context (auth.ts)
+│   │   ├── utils/              Pure helpers with tests: scoring, validation, predicates, errors (AppError),
+│   │   │                       dates, avatar, booking, dom, roles, adminExport
+│   │   ├── lib/                api.ts (all Firestore calls), firebase.ts (init), auth-context.ts,
+│   │   │                       validate.ts (Zod -> field errors), schemas/ (Zod: auth, check-in,
+│   │   │                       appointment, counselor, profile, chat)
+│   │   └── styles/             index.css (Tailwind base), theme.css (design tokens)
 │   ├── e2e/                    Playwright specs and Firebase fakes
 │   ├── vercel.json             SPA rewrite for Vercel
-│   └── vite.config.js          Build config and vendor chunk splitting
+│   ├── tsconfig.json           Strict TypeScript config (npm run typecheck)
+│   └── vite.config.ts          Build config and vendor chunk splitting
 ├── functions/                  Cloud Function: emails staff on high-risk assessments
 ├── backend-tests/              Emulator-based tests for rules, API operations and the function
 ├── docs/API.md                 Backend operations, roles and expected outcomes
@@ -213,15 +213,23 @@ Code conventions:
 - **Cards:** every page uses the same card (`rounded-md border-2 border-[color:var(--mb-line)]
   bg-[color:var(--mb-surface)] p-5 sm:p-6`) with a `PanelHead`. Buttons are `mb-btn mb-btn-solid` /
   `mb-btn-line`, inputs are `mb-field`. Design tokens are in `styles/theme.css`.
-- **Forms:** use `noValidate` and the rules in `lib/validation.js`. Errors appear next to the field
+- **Forms:** use `noValidate` and the Zod schemas in `lib/schemas/` (wrapped by `utils/validation.ts`). Errors appear next to the field
   (`role="alert"`, linked with `aria-describedby`) and focus moves to the first invalid field.
   Buttons that start async work disable themselves and show a `Spinner`.
 - **Errors:** never show raw Firebase text. Pass errors through `friendlyError()` from
-  `lib/errors.js`. Failed loads show a message with a retry button, not an empty list.
+  `utils/errors.ts`. Failed loads show a message with a retry button, not an empty list.
 - **Accessibility:** target WCAG 2.2 AA. Text contrast is at least 4.5:1, input borders at least
   3:1, tap targets 44px. Dialogs use `Modal` or `useFocusTrap`.
-- **Dates:** use `formatDateTime` / `toLocalInputValue` from `lib/dates.js`. Do not build
+- **Dates:** use `formatDateTime` / `toLocalInputValue` from `utils/dates.ts`. Do not build
   `datetime-local` values with `toISOString()` (that is UTC and shifts the hour).
+- **Types:** TypeScript is strict (`noImplicitAny`, `strictNullChecks`, `noUnusedLocals`...). Domain
+  types live in `src/types/`; do not use `any`. Check with `npm run typecheck` (also part of `npm run build`).
+- **Validation:** one Zod schema per form in `lib/schemas/`. Validate with `validate(schema, input)` from
+  `lib/validate.ts`, which returns `{ ok, data }` or the standard `validation` error with per-field messages.
+  The data layer (`lib/api.ts`) trusts its callers; schemas run in the forms and handlers.
+- **Error responses:** `lib/api.ts` rejects with `AppError` (`utils/errors.ts`): `code` (app-level reason),
+  `userMessage` (safe to show), `message` (technical, for logs). Render `friendlyError(err, fallback)`, never
+  `err.message`. `ErrorBoundary` wraps the app and every route.
 - **Secrets:** never commit `.env*` files or credentials. They are already git-ignored.
 
 ## Deployment

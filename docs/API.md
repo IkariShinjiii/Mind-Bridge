@@ -5,8 +5,8 @@ Mind Bridge has **no REST server**. The browser talks straight to Firebase, and
 
 | Kind | Where it lives | How it is called |
 |---|---|---|
-| Firebase Auth | `client/src/pages/auth/*`, `context/AuthContext.jsx` | Firebase Auth SDK |
-| Firestore operation | `client/src/lib/api.js` | Firestore SDK, checked by `firestore.rules` |
+| Firebase Auth | `client/src/pages/auth/*`, `components/AuthProvider.tsx` | Firebase Auth SDK |
+| Firestore operation | `client/src/lib/api.ts` | Firestore SDK, checked by `firestore.rules` |
 | Cloud Function trigger | `functions/index.js` (**not deployed yet**) | fires on `assessments/{id}` create |
 
 Sections 1-6 describe each operation; section 7 gives a curl example for every one, 8 covers
@@ -20,7 +20,7 @@ errors and 9 rate limits. Auth flow: 7.1.
 | 400 | `invalid-argument` (e.g. an `undefined` field, rejected client-side before the network) |
 | 401 | no `request.auth`; the rules deny it as `permission-denied` |
 | 403 | `permission-denied` |
-| 404 | `getDoc` resolves with `exists() === false` (`api.js` returns `null` for settings) |
+| 404 | `getDoc` resolves with `exists() === false` (`api.ts` returns `null` for settings) |
 
 ## Roles
 
@@ -38,7 +38,7 @@ an active, approved **student**; counselors and admins are provisioned out of ba
 
 ## 1. Auth
 
-### Sign up (email): `Signup.jsx`
+### Sign up (email): `Signup.tsx`
 `createUserWithEmailAndPassword` → `updateProfile` → `setDoc(users/{uid})`
 
 ```js
@@ -54,7 +54,7 @@ await setDoc(doc(db, "users", uid), {
 | other uid, or `role` ≠ student, or `approved`/`active` false | 403 |
 | signed out | 403 |
 
-### Sign in (email / Google): `Login.jsx`
+### Sign in (email / Google): `Login.tsx`
 `signInWithEmailAndPassword` or `signInWithPopup`, then `getDoc(users/{uid})`.
 Missing profile or `active === false` → the client signs the user out. First Google
 sign-in creates the student profile (same rule as sign up).
@@ -116,7 +116,7 @@ Document shape:
 | `updateAssessmentStatus(id, status, notes?)` | update | **403** | 200 |
 | – | delete | 403 | 403 |
 
-Scoring (`lib/scoring.js`): `maxScore = 3 × questions`; **high** if any crisis item > 0 or
+Scoring (`utils/scoring.ts`): `maxScore = 3 × questions`; **high** if any crisis item > 0 or
 total ≥ 60 % of max; **medium** at ≥ 30 %; else **low**.
 
 ```js
@@ -447,7 +447,7 @@ normally comes back as 403, not 401.
 
 ### Auth REST errors
 Returned as `{"error":{"code":400,"message":"EMAIL_EXISTS"}}`. The SDK's `auth/*` code and the
-user-facing text from `client/src/lib/errors.js` are shown alongside.
+user-facing text from `client/src/utils/errors.ts` are shown alongside.
 
 | REST `message` | SDK code | User-facing text |
 |---|---|---|
@@ -459,9 +459,9 @@ user-facing text from `client/src/lib/errors.js` are shown alongside.
 | `TOO_MANY_ATTEMPTS_TRY_LATER` | `auth/too-many-requests` | Too many attempts. Wait a few minutes, then try again. |
 
 `USER_DISABLED` is Firebase-level disabling. The app's own deactivation (`users.active = false`)
-is different: sign-in succeeds, then `Login.jsx` signs the user out and every Firestore call is denied.
+is different: sign-in succeeds, then `Login.tsx` signs the user out and every Firestore call is denied.
 
-In the UI, `errors.js` maps these codes to friendly messages and never shows raw codes or stack text.
+In the UI, `errors.ts` maps these codes to friendly messages and never shows raw codes or stack text.
 
 ---
 
@@ -516,6 +516,6 @@ needed after install; it uses the demo project `demo-mindbridge`.
 | Suite | File | What it checks |
 |---|---|---|
 | Rules | `rules/users`, `assessments`, `scheduling` | role × operation matrix against the real `firestore.rules` |
-| Contract | `api/api.test.js` | every export of `lib/api.js`: return shapes, persisted data, 403s |
-| Function | `functions/alertOnHighRisk.test.js` | alert logic, recipients, escaping, parity with `scoring.js` |
+| Contract | `api/api.test.js` | every export of `lib/api.ts`: return shapes, persisted data, 403s |
+| Function | `functions/alertOnHighRisk.test.js` | alert logic, recipients, escaping, parity with `scoring.ts` |
 | Gaps | `rules/known-gaps.test.js` | the five gaps above |
