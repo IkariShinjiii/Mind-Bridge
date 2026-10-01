@@ -1,19 +1,18 @@
 import React, { lazy, Suspense } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "./context/AuthContext.jsx";
 
 import HomePage from "./pages/HomePage";
 const StudentDashboard = lazy(() => import("./features/student/StudentDashboard"));
 const AdminPanel = lazy(() => import("./features/staff/AdminPanel"));
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
+const Login = lazy(() => import("./pages/auth/Login"));
+const Signup = lazy(() => import("./pages/auth/Signup"));
 const UserSettings = lazy(() => import("./features/settings/UserSettings"));
 const Appointments = lazy(() => import("./features/appointments/Appointments"));
 const CrisisResources = lazy(() => import("./features/student/CrisisResources"));
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import CookiePolicy from "./pages/CookiePolicy";
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import CookieConsent from "./components/ui/CookieConsent";

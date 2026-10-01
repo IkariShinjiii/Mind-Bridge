@@ -24,6 +24,8 @@ export default function DashboardLayout({ children }) {
   const [theme, toggleTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const menuButtonRef = useRef(null);
+  const mainRef = useRef(null);
 
   const safeName = userData?.name || currentUser?.displayName || "Student";
   const isStaff = userRole === "admin" || userRole === "counselor";
@@ -53,7 +55,12 @@ export default function DashboardLayout({ children }) {
       if (menuRef.current && !menuRef.current.contains(event.target)) setMenuOpen(false);
     }
     function onKey(event) {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen((open) => {
+          if (open) menuButtonRef.current?.focus();
+          return false;
+        });
+      }
     }
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
@@ -62,6 +69,32 @@ export default function DashboardLayout({ children }) {
       document.removeEventListener("keydown", onKey);
     };
   }, []);
+
+  // Open menu: focus the first item; arrow keys move between items
+  useEffect(() => {
+    if (menuOpen) menuRef.current?.querySelector('[role="menuitem"]')?.focus();
+  }, [menuOpen]);
+
+  function onMenuKeyDown(event) {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+    const items = Array.from(menuRef.current?.querySelectorAll('[role="menuitem"]') || []);
+    if (!items.length) return;
+    event.preventDefault();
+    const i = items.indexOf(document.activeElement);
+    const step = event.key === "ArrowDown" ? 1 : -1;
+    items[(i + step + items.length) % items.length].focus();
+  }
+
+  // After navigating, move focus to the page so keyboard and screen reader users start at the top of it
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    mainRef.current?.focus({ preventScroll: true });
+    mainRef.current?.scrollTo?.({ top: 0 });
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -74,6 +107,9 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="mb flex h-[100dvh] w-full flex-col overflow-hidden" data-theme={theme}>
+      <a href="#main-content" className="mb-skip">
+        Skip to main content
+      </a>
       <header className="shrink-0 border-b-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)]">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline">
@@ -120,6 +156,7 @@ export default function DashboardLayout({ children }) {
 
             <button
               type="button"
+              ref={menuButtonRef}
               onClick={() => setMenuOpen((o) => !o)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
@@ -138,6 +175,8 @@ export default function DashboardLayout({ children }) {
             {menuOpen && (
               <div
                 role="menu"
+                aria-label="Account"
+                onKeyDown={onMenuKeyDown}
                 className="absolute right-0 top-14 z-50 w-64 rounded-md border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-2"
               >
                 <div className="border-b-2 border-[color:var(--mb-line)] px-3 py-2">
@@ -146,6 +185,7 @@ export default function DashboardLayout({ children }) {
                   <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
                 </div>
                 <button
+                  type="button"
                   role="menuitem"
                   onClick={() => {
                     setMenuOpen(false);
@@ -156,6 +196,7 @@ export default function DashboardLayout({ children }) {
                   <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
                 </button>
                 <button
+                  type="button"
                   role="menuitem"
                   onClick={handleLogout}
                   className="flex min-h-[44px] w-full items-center gap-3 rounded px-3 font-bold text-[color:var(--mb-error-ink)] hover:bg-[color:var(--mb-error-bg)]"
@@ -168,7 +209,7 @@ export default function DashboardLayout({ children }) {
         </div>
       </header>
 
-      <main className="relative flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 md:pb-8 lg:px-8">
+      <main id="main-content" ref={mainRef} tabIndex={-1} className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 md:pb-8 lg:px-8">
         <div key={location.pathname} className="mx-auto w-full max-w-6xl">
           {children}
         </div>

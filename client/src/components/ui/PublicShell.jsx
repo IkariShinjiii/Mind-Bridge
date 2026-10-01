@@ -68,6 +68,9 @@ export default function PublicShell({ children, showAuthLinks = true }) {
 
   return (
     <div className="mb h-[100dvh] overflow-y-auto overflow-x-hidden" data-theme={theme}>
+      <a href="#main-content" className="mb-skip">
+        Skip to main content
+      </a>
       <CrisisStrip />
       <header className="border-b-2 border-[color:var(--mb-line)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
@@ -111,7 +114,9 @@ export default function PublicShell({ children, showAuthLinks = true }) {
         </div>
       </header>
 
-      <main>{children}</main>
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
+        {children}
+      </main>
 
       <footer className="mt-20 border-t-2 border-[color:var(--mb-line)]">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1fr_auto]">
