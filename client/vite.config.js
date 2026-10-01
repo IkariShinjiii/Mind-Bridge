@@ -19,6 +19,22 @@ export default defineConfig(({ mode }) => ({
           ]
         : [],
   },
+  build: {
+    // The two vendor chunks left over 500 kB are Firebase (Firestore) and Recharts; both are split out and cached.
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      output: {
+        // Heavy vendors get their own long-cached chunks instead of landing inside whichever route imports them first.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          const path = id.replace(/\\/g, "/");
+          if (/\/node_modules\/(recharts|d3-[^/]+|victory-vendor|es-toolkit|decimal\.js-light|react-smooth)\//.test(path)) return "charts";
+          if (/\/node_modules\/(@firebase|firebase|re2js)\//.test(path)) return "firebase";
+          return undefined;
+        },
+      },
+    },
+  },
   // Playwright specs live in e2e/ and must not be picked up by `npm test`.
   test: { exclude: ["e2e/**", "node_modules/**"] },
 }));

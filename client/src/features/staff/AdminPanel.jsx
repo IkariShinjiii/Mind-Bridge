@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ClipboardList,
@@ -38,7 +38,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import Spinner from "../../components/ui/Spinner";
 import Modal from "../../components/ui/Modal";
 import ManageAvailability from "./ManageAvailability";
-import ConfidentialChatModal from "../chat/ConfidentialChatModal";
+const ConfidentialChatModal = lazy(() => import("../chat/ConfidentialChatModal"));
 
 import { RISK_STYLES, STATUS_STYLES, ROLE_BADGE, CHART_COLORS, formatDateTime, downloadAssessmentsCsv } from "./adminUtils";
 
@@ -1009,13 +1009,15 @@ export default function AdminPanel() {
 
       {/* Confidential Chat Modal */}
       {chatStudent && (
-        <ConfidentialChatModal
+        <Suspense fallback={null}>
+          <ConfidentialChatModal
           isOpen={Boolean(chatStudent)}
           onClose={() => setChatStudent(null)}
           studentId={chatStudent.id}
           recipientName={chatStudent.name}
           recipientRole="student"
         />
+        </Suspense>
       )}
     </div>
   );

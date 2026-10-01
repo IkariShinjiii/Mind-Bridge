@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import useFocusTrap from "../../lib/useFocusTrap";
 
 export default function Modal({
@@ -38,11 +38,12 @@ export default function Modal({
   }, [isOpen]);
 
   return (
-    <AnimatePresence>
+    <LazyMotion features={domAnimation} strict>
+      <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-6">
           {/* Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -53,7 +54,7 @@ export default function Modal({
           />
 
           {/* Modal Dialog Card */}
-          <motion.div
+          <m.div
             ref={dialogRef}
             tabIndex={-1}
             role="dialog"
@@ -106,9 +107,10 @@ export default function Modal({
                 {footer}
               </div>
             )}
-          </motion.div>
+          </m.div>
         </div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </LazyMotion>
   );
 }

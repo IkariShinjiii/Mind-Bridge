@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import { listenToStudentMessages, sendStudentMessage } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { X, Lock, AlertTriangle, Send } from "lucide-react";
@@ -176,11 +176,12 @@ export default function ConfidentialChatModal({
   const quickReplies = isCounselorView ? quickRepliesCounselor : quickRepliesStudent;
 
   return (
-    <AnimatePresence>
+    <LazyMotion features={domAnimation} strict>
+      <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           {/* Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -191,7 +192,7 @@ export default function ConfidentialChatModal({
           />
 
           {/* Modal Container */}
-          <motion.div
+          <m.div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
@@ -408,9 +409,10 @@ export default function ConfidentialChatModal({
                 )}
               </button>
             </form>
-          </motion.div>
+          </m.div>
         </div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </LazyMotion>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { lazy, Suspense, useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Activity,
@@ -32,7 +32,7 @@ import {
 } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext.jsx";
 import Spinner from "../../components/ui/Spinner";
-import ConfidentialChatModal from "../chat/ConfidentialChatModal";
+const ConfidentialChatModal = lazy(() => import("../chat/ConfidentialChatModal"));
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "../appointments/BookingFlow";
 import { formatDateTime } from "../../lib/dates";
@@ -951,13 +951,15 @@ export default function StudentDashboard() {
 
       {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED COUNSELOR) */}
       {chatOpen && (
-        <ConfidentialChatModal
+        <Suspense fallback={null}>
+          <ConfidentialChatModal
           isOpen={chatOpen}
           onClose={() => setChatOpen(false)}
           studentId={currentUser?.uid}
           recipientName={assignedCounselorName}
           recipientRole="counselor"
         />
+        </Suspense>
       )}
     </div>
   );
