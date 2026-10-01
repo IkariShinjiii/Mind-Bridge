@@ -367,21 +367,21 @@ export default function UserSettings() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up">
       {/* Header Bar */}
-      <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4 sm:pb-5">
+      <div className="mb-6 flex items-center justify-between border-b border-[color:var(--mb-line)] pb-4 sm:pb-5">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white transition shadow-sm interactive-tap"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)] transition shadow-sm interactive-tap"
             title="Go Back"
             aria-label="Go Back"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl lg:text-3xl font-display">
+            <h1 className="text-xl font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-2xl lg:text-3xl font-display">
               Account & Profile Settings
             </h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
               Manage personal profile, notifications, and confidentiality preferences.
             </p>
           </div>
@@ -391,30 +391,30 @@ export default function UserSettings() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${feedback.type === "success"
-            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-            : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+          className={`mb-6 rounded-md border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${feedback.type === "success"
+            ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
+            : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
             }`}
         >
           {feedback.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-[color:var(--mb-safe)] shrink-0" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+            <AlertCircle className="h-4 w-4 text-[color:var(--mb-urgent)] shrink-0" />
           )}
           <span>{feedback.message}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-          <Spinner size={20} className="text-teal-400" />
+        <div className="flex min-h-[320px] items-center justify-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)] gap-3">
+          <Spinner size={20} className="text-[color:var(--mb-brand)]" />
           <span className="text-sm">Loading your settings...</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
           {/* Sidebar Tabs (Desktop) / Smooth Horizontal Scroll Pills (Mobile) */}
           <div className="md:col-span-1">
-            <div className="flex flex-row overflow-x-auto gap-1.5 rounded-2xl border border-gray-800 bg-gray-900/90 p-1.5 md:flex-col md:overflow-visible scrollbar-none">
+            <div className="flex flex-row overflow-x-auto gap-1.5 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-1.5 md:flex-col md:overflow-visible scrollbar-none">
               {navTabs.map((tab) => {
                 const isActive = activeTab === tab.id;
                 const Icon = tab.icon;
@@ -422,9 +422,9 @@ export default function UserSettings() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all interactive-tap ${isActive
-                      ? "bg-teal-600 text-white shadow-md shadow-teal-900/30 font-semibold"
-                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-md px-3.5 py-2.5 text-left text-xs sm:text-sm font-medium transition-all interactive-tap ${isActive
+                      ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm shadow-teal-900/30 font-semibold"
+                      : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
                       }`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -437,27 +437,27 @@ export default function UserSettings() {
 
           {/* Tab Content Panel */}
           <div className="md:col-span-3">
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 sm:p-6 md:p-8 shadow-xl">
+            <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:p-6 md:p-8 shadow-sm">
               {/* TAB 1: PROFILE INFO */}
               {activeTab === "profile" && (
                 <form onSubmit={handleSaveProfile} className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Information</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Profile Information</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       Update your account details and choose how you appear in Mind Bridge.
                     </p>
                   </div>
 
                   {/* Avatar & Color Picker */}
-                  <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4">
-                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-3">
+                  <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-3">
                       Profile Avatar & Color Accent
                     </label>
                     <div className="flex flex-wrap items-center gap-4">
 
                       {/* Current Selected Avatar Preview */}
                       <div
-                        className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl overflow-hidden shadow-lg ${!useGoogleAvatar ? `bg-gradient-to-br ${currentGradientClass}` : 'bg-gray-900'
+                        className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl overflow-hidden shadow-lg ${!useGoogleAvatar ? `bg-gradient-to-br ${currentGradientClass}` : 'bg-[color:var(--mb-surface)]'
                           }`}
                       >
                         {useGoogleAvatar && currentUser?.photoURL ? (
@@ -468,7 +468,7 @@ export default function UserSettings() {
                             referrerPolicy="no-referrer"
                           />
                         ) : (
-                          <span className="text-lg sm:text-xl font-bold text-white">{userInitials}</span>
+                          <span className="text-lg sm:text-xl font-bold text-[color:var(--mb-ink)]">{userInitials}</span>
                         )}
                       </div>
 
@@ -516,7 +516,7 @@ export default function UserSettings() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Full Name
                       </label>
                       <input
@@ -525,24 +525,24 @@ export default function UserSettings() {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your full name"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
-                        Email Address <span className="text-[10px] text-gray-500">(Institutional)</span>
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
+                        Email Address <span className="text-[10px] text-[color:var(--mb-muted)]">(Institutional)</span>
                       </label>
                       <input
                         type="email"
                         value={currentUser?.email || ""}
                         disabled
-                        className="w-full rounded-xl border border-gray-800 bg-gray-950/60 px-3.5 py-2.5 text-gray-400 cursor-not-allowed text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] px-3.5 py-2.5 text-[color:var(--mb-muted)] cursor-not-allowed text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Phone Number
                       </label>
                       <input
@@ -550,30 +550,30 @@ export default function UserSettings() {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+63 912 345 6789"
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Account Role
                       </label>
-                      <div className="flex h-[42px] items-center rounded-xl border border-gray-800 bg-gray-950/60 px-3.5 text-xs sm:text-sm text-cyan-300 font-semibold uppercase tracking-wider">
+                      <div className="flex h-[42px] items-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] px-3.5 text-xs sm:text-sm text-[color:var(--mb-brand)] font-semibold uppercase tracking-wider">
                         {userRole || "student"}
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
-                      About / Bio <span className="text-[10px] text-gray-500">(Optional note for counselors)</span>
+                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
+                      About / Bio <span className="text-[10px] text-[color:var(--mb-muted)]">(Optional note for counselors)</span>
                     </label>
                     <textarea
                       rows={3}
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       placeholder="Share brief context about your program, year level, or anything you'd like counselors to know..."
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                      className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                     />
                   </div>
 
@@ -581,7 +581,7 @@ export default function UserSettings() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                     >
                       {saving && <Spinner size={14} />}
                       {saving ? "Saving Changes..." : "Save Profile"}
@@ -594,21 +594,21 @@ export default function UserSettings() {
               {activeTab === "password" && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Security & Password</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Security & Password</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       Keep your Mind Bridge account safe with a strong, distinct password.
                     </p>
                   </div>
 
                   {isGoogleUser ? (
-                    <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 p-6 text-center">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/20 text-xl text-cyan-300">
+                    <div className="rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6 text-center">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--mb-brand-bg)] text-xl text-[color:var(--mb-brand)]">
                         🔐
                       </div>
-                      <h3 className="text-base font-semibold text-white">
+                      <h3 className="text-base font-semibold text-[color:var(--mb-ink)]">
                         Google Authenticated Account
                       </h3>
-                      <p className="mt-1 text-xs sm:text-sm text-gray-300 max-w-md mx-auto leading-relaxed">
+                      <p className="mt-1 text-xs sm:text-sm text-[color:var(--mb-muted)] max-w-md mx-auto leading-relaxed">
                         Your account is linked with your Google login (<strong>{currentUser?.email}</strong>).
                         Password changes and 2-Factor Authentication are managed directly in your Google Security settings.
                       </p>
@@ -616,7 +616,7 @@ export default function UserSettings() {
                   ) : (
                     <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                       <div>
-                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                           Current Password
                         </label>
                         <input
@@ -625,12 +625,12 @@ export default function UserSettings() {
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="••••••••"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                          className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                           New Password
                         </label>
                         <input
@@ -639,12 +639,12 @@ export default function UserSettings() {
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="At least 6 characters"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                          className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                        <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                           Confirm New Password
                         </label>
                         <input
@@ -653,7 +653,7 @@ export default function UserSettings() {
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Confirm new password"
                           required
-                          className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                          className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                         />
                       </div>
 
@@ -661,7 +661,7 @@ export default function UserSettings() {
                         <button
                           type="submit"
                           disabled={passwordLoading}
-                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                         >
                           {passwordLoading && <Spinner size={14} />}
                           {passwordLoading ? "Updating Password..." : "Update Password"}
@@ -676,19 +676,19 @@ export default function UserSettings() {
               {activeTab === "notifications" && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Notification Preferences</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Notification Preferences</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       Choose which updates, reminders, and alerts you wish to receive.
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Appointment Reminders
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5">
                           Receive notifications 24 hours and 1 hour before scheduled counseling sessions.
                         </div>
                       </div>
@@ -701,16 +701,16 @@ export default function UserSettings() {
                             appointmentReminders: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Weekly Wellness Check-in Nudge
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5">
                           Gentle reminders to take your 2-minute weekly wellness check-in survey.
                         </div>
                       </div>
@@ -723,16 +723,16 @@ export default function UserSettings() {
                             wellnessNudges: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Counselor Updates & Notes
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5">
                           Notifications when your assigned counselor reviews your survey or posts notes.
                         </div>
                       </div>
@@ -745,16 +745,16 @@ export default function UserSettings() {
                             counselorMessages: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] ml-3"
                       />
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Urgent Support & Crisis Hotlines Alert
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5">
                           Direct resources and hotline prompts during elevated distress signals.
                         </div>
                       </div>
@@ -767,7 +767,7 @@ export default function UserSettings() {
                             emergencyAlerts: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 ml-3"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] ml-3"
                       />
                     </div>
                   </div>
@@ -777,7 +777,7 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSaveNotifications}
                       disabled={saving}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                     >
                       {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Preferences"}
@@ -790,19 +790,19 @@ export default function UserSettings() {
               {activeTab === "privacy" && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Privacy & Confidentiality</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Privacy & Confidentiality</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       Your mental health data is protected under strict confidentiality protocols.
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-start justify-between gap-4 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Counselor Check-in Access
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 leading-relaxed">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5 leading-relaxed">
                           Allow registered University Counselors to review your check-in trends to personalize guidance and offer proactive appointments.
                         </div>
                       </div>
@@ -815,16 +815,16 @@ export default function UserSettings() {
                             allowCounselorHistory: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 mt-1"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] mt-1"
                       />
                     </div>
 
-                    <div className="flex items-start justify-between gap-4 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4">
+                    <div className="flex items-start justify-between gap-4 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4">
                       <div>
-                        <div className="font-medium text-white text-xs sm:text-sm">
+                        <div className="font-medium text-[color:var(--mb-ink)] text-xs sm:text-sm">
                           Anonymized Institutional Research
                         </div>
-                        <div className="text-[11px] sm:text-xs text-gray-400 mt-0.5 leading-relaxed">
+                        <div className="text-[11px] sm:text-xs text-[color:var(--mb-muted)] mt-0.5 leading-relaxed">
                           Permit stripped, fully anonymized aggregate statistics to help the university improve overall student mental health programs.
                         </div>
                       </div>
@@ -837,16 +837,16 @@ export default function UserSettings() {
                             includeInAnonymizedReports: e.target.checked,
                           })
                         }
-                        className="h-5 w-5 rounded border-gray-700 bg-gray-800 text-cyan-600 focus:ring-cyan-500 mt-1"
+                        className="h-5 w-5 rounded border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] focus:ring-[color:var(--mb-focus)] mt-1"
                       />
                     </div>
 
-                    <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3.5 sm:p-4">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-amber-300">
+                    <div className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-3.5 sm:p-4">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[color:var(--mb-warn)]">
                         <span>ℹ️</span>
                         <span>Confidentiality Notice</span>
                       </div>
-                      <p className="mt-1 text-[11px] sm:text-xs text-amber-200/80 leading-relaxed">
+                      <p className="mt-1 text-[11px] sm:text-xs text-[color:var(--mb-warn)] leading-relaxed">
                         In accordance with the Philippine Mental Health Act (RA 11036) and institutional ethics policies, student disclosures remain strictly confidential between you and the University Guidance Office, except in clear, imminent threats to life or safety.
                       </p>
                     </div>
@@ -857,7 +857,7 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSavePrivacy}
                       disabled={saving}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                     >
                       {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Privacy Settings"}
@@ -870,15 +870,15 @@ export default function UserSettings() {
               {activeTab === "emergency" && (
                 <form onSubmit={handleSaveEmergencyContact} className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Emergency Contact</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Emergency Contact</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       Designate a trusted individual (parent, guardian, close friend) to be reached in extreme emergencies.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Contact Full Name
                       </label>
                       <input
@@ -889,12 +889,12 @@ export default function UserSettings() {
                         }
                         placeholder="e.g. Maria Santos"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Relationship
                       </label>
                       <select
@@ -905,7 +905,7 @@ export default function UserSettings() {
                             relationship: e.target.value,
                           })
                         }
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       >
                         <option value="Parent">Parent</option>
                         <option value="Guardian">Legal Guardian</option>
@@ -917,7 +917,7 @@ export default function UserSettings() {
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
                         Primary Mobile / Phone
                       </label>
                       <input
@@ -928,13 +928,13 @@ export default function UserSettings() {
                         }
                         placeholder="+63 912 345 6789"
                         required
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
-                        Alternate Contact / Landline <span className="text-[10px] text-gray-500">(Optional)</span>
+                      <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
+                        Alternate Contact / Landline <span className="text-[10px] text-[color:var(--mb-muted)]">(Optional)</span>
                       </label>
                       <input
                         type="tel"
@@ -946,14 +946,14 @@ export default function UserSettings() {
                           })
                         }
                         placeholder="+63 (033) 337-xxxx"
-                        className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                        className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-gray-300">
-                      Special Medical / Response Notes <span className="text-[10px] text-gray-500">(Optional)</span>
+                    <label className="mb-1.5 block text-xs sm:text-sm font-medium text-[color:var(--mb-muted)]">
+                      Special Medical / Response Notes <span className="text-[10px] text-[color:var(--mb-muted)]">(Optional)</span>
                     </label>
                     <textarea
                       rows={2}
@@ -962,7 +962,7 @@ export default function UserSettings() {
                         setEmergencyContact({ ...emergencyContact, notes: e.target.value })
                       }
                       placeholder="e.g. Speaks Hiligaynon, lives nearby on campus dorm, has asthma..."
-                      className="w-full rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2.5 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                      className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                     />
                   </div>
 
@@ -970,7 +970,7 @@ export default function UserSettings() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                     >
                       {saving && <Spinner size={14} />}
                       {saving ? "Saving..." : "Save Emergency Contact"}
@@ -984,12 +984,12 @@ export default function UserSettings() {
                 <div className="space-y-5">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div>
-                      <h2 className="text-lg sm:text-xl font-semibold text-white">Personal Wellness Goals</h2>
-                      <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                      <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Personal Wellness Goals</h2>
+                      <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                         Pick up to 5 focus areas to track your emotional and personal growth.
                       </p>
                     </div>
-                    <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 self-start">
+                    <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)] self-start">
                       {selectedGoals.length} / 5 Selected
                     </div>
                   </div>
@@ -1002,16 +1002,16 @@ export default function UserSettings() {
                           key={goal}
                           type="button"
                           onClick={() => handleToggleGoal(goal)}
-                          className={`flex items-center justify-between rounded-xl border p-3 text-left text-xs sm:text-sm transition-all ${isSelected
-                            ? "border-cyan-500 bg-cyan-950/40 text-cyan-200 shadow-sm"
-                            : "border-gray-800 bg-gray-950/40 text-gray-300 hover:border-gray-700 hover:text-white"
+                          className={`flex items-center justify-between rounded-md border p-3 text-left text-xs sm:text-sm transition-all ${isSelected
+                            ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] shadow-sm"
+                            : "border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)]"
                             }`}
                         >
                           <span className="font-medium pr-2">{goal}</span>
                           <span
                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-xs font-bold ${isSelected
-                              ? "bg-teal-400 text-teal-950"
-                              : "border border-gray-700 text-transparent"
+                              ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-brand)]"
+                              : "border border-[color:var(--mb-line)] text-transparent"
                               }`}
                           >
                             ✓
@@ -1028,11 +1028,11 @@ export default function UserSettings() {
                       value={customGoal}
                       onChange={(e) => setCustomGoal(e.target.value)}
                       placeholder="Add custom wellness goal..."
-                      className="flex-1 rounded-xl border border-gray-700 bg-gray-800/80 px-3.5 py-2 text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-xs sm:text-sm"
+                      className="flex-1 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2 text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] text-xs sm:text-sm"
                     />
                     <button
                       type="submit"
-                      className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-2 text-xs sm:text-sm font-medium text-white hover:bg-gray-700 transition-colors"
+                      className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 py-2 text-xs sm:text-sm font-medium text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-line)] transition-colors"
                     >
                       + Add
                     </button>
@@ -1043,7 +1043,7 @@ export default function UserSettings() {
                       type="button"
                       onClick={handleSaveGoals}
                       disabled={saving}
-                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-600 px-6 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-cyan-500 disabled:opacity-50"
+                      className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                     >
                       {saving && <Spinner size={14} />}
                       {saving ? "Saving Goals..." : "Save Focus Goals"}
@@ -1056,29 +1056,29 @@ export default function UserSettings() {
               {activeTab === "sessions" && (
                 <div className="space-y-5">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-semibold text-white">Counseling Session Records</h2>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-0.5">
+                    <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Counseling Session Records</h2>
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] mt-0.5">
                       View your appointment history and guidance logs with school counselors.
                     </p>
                   </div>
 
                   {loadingApts ? (
-                    <div className="flex items-center justify-center py-10 text-gray-400 gap-2 text-xs sm:text-sm">
-                      <Spinner size={18} className="text-cyan-400" />
+                    <div className="flex items-center justify-center py-10 text-[color:var(--mb-muted)] gap-2 text-xs sm:text-sm">
+                      <Spinner size={18} className="text-[color:var(--mb-brand)]" />
                       <span>Loading your session records...</span>
                     </div>
                   ) : appointmentsList.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-800 p-8 text-center text-gray-400">
-                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-800/60 text-teal-400">
+                    <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]">
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)]">
                         <Calendar className="h-6 w-6" />
                       </div>
-                      <h3 className="text-sm sm:text-base font-medium text-white">No Sessions Found</h3>
-                      <p className="mt-1 text-xs sm:text-sm text-gray-400 max-w-sm mx-auto">
+                      <h3 className="text-sm sm:text-base font-medium text-[color:var(--mb-ink)]">No Sessions Found</h3>
+                      <p className="mt-1 text-xs sm:text-sm text-[color:var(--mb-muted)] max-w-sm mx-auto">
                         You haven't booked any counseling sessions yet. You can book a confidential slot from your dashboard anytime.
                       </p>
                       <button
                         onClick={() => navigate("/student/dashboard")}
-                        className="mt-4 rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-500 transition-colors interactive-tap"
+                        className="mt-4 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition-colors interactive-tap"
                       >
                         Go to Dashboard to Book
                       </button>
@@ -1093,21 +1093,21 @@ export default function UserSettings() {
                         return (
                           <div
                             key={apt.id}
-                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-xl border border-gray-800 bg-gray-950/60 p-3.5 sm:p-4 transition-all hover:border-gray-700 text-xs sm:text-sm"
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5 sm:p-4 transition-all hover:border-[color:var(--mb-line)] text-xs sm:text-sm"
                           >
                             <div>
-                              <div className="font-semibold text-white">
+                              <div className="font-semibold text-[color:var(--mb-ink)]">
                                 {apt.title || "Counseling Session"}
                               </div>
-                              <div className="mt-1 text-xs text-gray-400">
+                              <div className="mt-1 text-xs text-[color:var(--mb-muted)]">
                                 Counselor:{" "}
-                                <span className="text-gray-300 font-medium">
+                                <span className="text-[color:var(--mb-muted)] font-medium">
                                   {apt.counselorName || "Assigned Counselor"}
                                 </span>
                               </div>
-                              <div className="mt-0.5 text-xs text-gray-400">
+                              <div className="mt-0.5 text-xs text-[color:var(--mb-muted)]">
                                 Date & Time:{" "}
-                                <span className="text-cyan-300 font-medium">
+                                <span className="text-[color:var(--mb-brand)] font-medium">
                                   {safeFormatDate(apt.start || apt.date)}
                                 </span>
                               </div>
@@ -1116,10 +1116,10 @@ export default function UserSettings() {
                             <div className="flex items-center gap-2 self-start sm:self-center">
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${isConfirmed
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]"
                                   : isPending
-                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                    : "bg-gray-800 text-gray-300 border border-gray-700"
+                                    ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                                    : "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border border-[color:var(--mb-line)]"
                                   }`}
                               >
                                 {status}

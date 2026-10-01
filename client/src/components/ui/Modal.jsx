@@ -45,7 +45,7 @@ export default function Modal({
             transition={{ duration: 0.2 }}
             onClick={onClose}
             aria-hidden="true"
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/80 "
           />
 
           {/* Modal Dialog Card */}
@@ -57,19 +57,19 @@ export default function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-            className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-3xl border border-white/[0.08] bg-gray-900 shadow-2xl overflow-hidden`}
+            className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden`}
           >
             {/* Header */}
             {(title || description) && (
-              <div className="flex items-start justify-between border-b border-white/[0.08] px-5 py-4 sm:px-6 sm:py-5 shrink-0 bg-gray-950/50">
+              <div className="flex items-start justify-between border-b border-[color:var(--mb-line)] px-5 py-4 sm:px-6 sm:py-5 shrink-0 bg-[color:var(--mb-ground)]">
                 <div className="space-y-1 pr-4">
                   {title && (
-                    <h2 id="modal-title" className="text-base font-bold tracking-tight text-white sm:text-xl">
+                    <h2 id="modal-title" className="text-base font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-xl">
                       {title}
                     </h2>
                   )}
                   {description && (
-                    <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-[color:var(--mb-muted)] leading-relaxed">
                       {description}
                     </p>
                   )}
@@ -79,7 +79,7 @@ export default function Modal({
                   type="button"
                   onClick={onClose}
                   aria-label="Close dialog"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-gray-400 hover:bg-white/[0.08] hover:text-white transition interactive-tap"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -96,7 +96,7 @@ export default function Modal({
 
             {/* Optional Footer */}
             {footer && (
-              <div className="border-t border-white/[0.08] px-5 py-3.5 sm:px-6 sm:py-4 bg-gray-950/50 shrink-0 flex items-center justify-end gap-3">
+              <div className="border-t border-[color:var(--mb-line)] px-5 py-3.5 sm:px-6 sm:py-4 bg-[color:var(--mb-ground)] shrink-0 flex items-center justify-end gap-3">
                 {footer}
               </div>
             )}

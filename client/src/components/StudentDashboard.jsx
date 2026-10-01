@@ -276,19 +276,19 @@ export default function StudentDashboard() {
       return {
         direction: "improving",
         text: `↓ ${Math.abs(diff)} pts lower than previous check-in (Improving)`,
-        color: "text-emerald-400",
+        color: "text-[color:var(--mb-safe)]",
       };
     } else if (diff > 0) {
       return {
         direction: "elevated",
         text: `↑ ${diff} pts higher distress than previous check-in`,
-        color: "text-amber-400",
+        color: "text-[color:var(--mb-warn)]",
       };
     } else {
       return {
         direction: "stable",
         text: "→ Stress levels unchanged since last check-in",
-        color: "text-cyan-300",
+        color: "text-[color:var(--mb-brand)]",
       };
     }
   }, [chartData]);
@@ -306,10 +306,10 @@ export default function StudentDashboard() {
     <div className="space-y-6 animate-fade-up relative">
       {/* Top Welcome Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)] tracking-tight">
           Welcome back, {displayName}
         </h1>
-        <p className="mt-1 text-xs sm:text-sm text-cyan-200/80">
+        <p className="mt-1 text-xs sm:text-sm text-[color:var(--mb-brand)]">
           How are you feeling today? Take a quick confidential check-in.
         </p>
       </div>
@@ -320,27 +320,27 @@ export default function StudentDashboard() {
           {/* Quick Info Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
           {/* Gauge / Status Card */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
+          <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm relative overflow-hidden flex flex-col justify-between">
             <div>
-              <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">
+              <div className="text-[11px] text-[color:var(--mb-muted)] uppercase tracking-wider font-semibold">
                 Latest Wellness Index
               </div>
               <div className="mt-2 flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
                     {latestScore !== null ? `${latestScore} / ${maxScore}` : "No check-in"}
                   </div>
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span
                       className={`inline-block h-2 w-2 rounded-full ${
                         latestRisk === "high"
-                          ? "bg-red-400 animate-pulse"
+                          ? "bg-[color:var(--mb-urgent-solid)] animate-pulse"
                           : latestRisk === "medium"
-                          ? "bg-amber-400"
-                          : "bg-emerald-400"
+                          ? "bg-[color:var(--mb-amber)]"
+                          : "bg-[color:var(--mb-safe-solid)]"
                       }`}
                     />
-                    <span className="text-xs font-semibold capitalize text-gray-200">
+                    <span className="text-xs font-semibold capitalize text-[color:var(--mb-ink)]">
                       {latestRisk === "high"
                         ? "Needs Attention"
                         : latestRisk === "medium"
@@ -355,7 +355,7 @@ export default function StudentDashboard() {
                   <div className="relative h-12 w-12 shrink-0">
                     <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
                       <path
-                        className="text-gray-800"
+                        className="text-[color:var(--mb-muted)]"
                         strokeWidth="3.5"
                         stroke="currentColor"
                         fill="none"
@@ -367,7 +367,7 @@ export default function StudentDashboard() {
                             ? "text-red-500"
                             : latestRisk === "medium"
                             ? "text-amber-400"
-                            : "text-cyan-400"
+                            : "text-[color:var(--mb-brand)]"
                         }
                         strokeDasharray={`${gaugePct}, 100`}
                         strokeWidth="3.5"
@@ -377,7 +377,7 @@ export default function StudentDashboard() {
                         d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                       />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-[color:var(--mb-ink)]">
                       {gaugePct}%
                     </span>
                   </div>
@@ -393,44 +393,44 @@ export default function StudentDashboard() {
           </div>
 
           {/* Next Appointment Card */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm flex flex-col justify-between">
+          <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">
+              <div className="text-[11px] text-[color:var(--mb-muted)] uppercase tracking-wider font-semibold">
                 Next Appointment
               </div>
-              <div className="mt-2 text-sm sm:text-base font-semibold text-white truncate">
+              <div className="mt-2 text-sm sm:text-base font-semibold text-[color:var(--mb-ink)] truncate">
                 {appointments.length > 0
                   ? safeFormatDate(appointments[0].start || appointments[0].date)
                   : "None scheduled"}
               </div>
             </div>
-            <div className="mt-2 text-[11px] text-gray-400 flex items-center justify-between">
+            <div className="mt-2 text-[11px] text-[color:var(--mb-muted)] flex items-center justify-between">
               <span>Status:</span>
-              <span className="font-semibold text-cyan-300 capitalize">
+              <span className="font-semibold text-[color:var(--mb-brand)] capitalize">
                 {appointments[0]?.status || "Open"}
               </span>
             </div>
           </div>
 
           {/* Assigned Counselor Card */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm flex flex-col justify-between">
+          <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold flex items-center justify-between">
+              <div className="text-[11px] text-[color:var(--mb-muted)] uppercase tracking-wider font-semibold flex items-center justify-between">
                 <span>Guidance Counselor</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-semibold uppercase">
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)] font-semibold uppercase">
                   Assigned
                 </span>
               </div>
-              <div className="mt-2 font-semibold text-white text-sm truncate">
+              <div className="mt-2 font-semibold text-[color:var(--mb-ink)] text-sm truncate">
                 {assignedCounselorName}
               </div>
-              <div className="mt-0.5 text-[11px] text-gray-400">
+              <div className="mt-0.5 text-[11px] text-[color:var(--mb-muted)]">
                 100% confidential student channel
               </div>
             </div>
             <button
               onClick={() => setChatOpen(true)}
-              className="mt-2 text-[11px] font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1.5 self-start interactive-tap"
+              className="mt-2 text-[11px] font-semibold text-[color:var(--mb-brand)] hover:text-[color:var(--mb-brand)] flex items-center gap-1.5 self-start interactive-tap"
             >
               <MessageSquare className="h-3.5 w-3.5" />
               <span>Message Counselor</span>
@@ -440,20 +440,20 @@ export default function StudentDashboard() {
         </div>
 
         {/* WELLNESS SURVEY */}
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 sm:p-6 shadow-xl">
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                <Activity className="h-4 w-4 text-teal-400" />
+              <div className="h-8 w-8 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
+                <Activity className="h-4 w-4 text-[color:var(--mb-brand)]" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-white">Wellness Check-in</h2>
-                <p className="text-xs text-gray-400">Validated PHQ-9 & GAD-7 screening • Takes ~1 min</p>
-                <p className="text-[10px] text-gray-500 mt-1 max-w-sm">By participating, you consent to the collection and processing of your wellness data for triage and support purposes.</p>
+                <h2 className="text-lg sm:text-xl font-semibold text-[color:var(--mb-ink)]">Wellness Check-in</h2>
+                <p className="text-xs text-[color:var(--mb-muted)]">Validated PHQ-9 & GAD-7 screening • Takes ~1 min</p>
+                <p className="text-[10px] text-[color:var(--mb-muted)] mt-1 max-w-sm">By participating, you consent to the collection and processing of your wellness data for triage and support purposes.</p>
               </div>
             </div>
             {!surveyCompleted && (
-              <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20">
+              <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
                 {answeredCount}/{SCREENING_QUESTIONS.length}
               </div>
             )}
@@ -463,31 +463,31 @@ export default function StudentDashboard() {
             <div className="space-y-6 animate-fade-up">
               {/* Empathetic Result Card */}
               <div
-                className={`rounded-2xl border p-5 sm:p-6 text-center ${
+                className={`rounded-md border p-5 sm:p-6 text-center ${
                   lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
-                    ? "border-red-500/30 bg-red-500/10"
+                    ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)]"
                     : lastSubmission?.riskLevel === "medium"
-                    ? "border-amber-500/30 bg-amber-500/10"
-                    : "border-emerald-500/30 bg-emerald-500/10"
+                    ? "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)]"
+                    : "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)]"
                 }`}
               >
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-900/90 shadow-inner">
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--mb-surface)] shadow-inner">
                   {lastSubmission?.riskLevel === "high" ? (
-                    <HeartPulse className="h-7 w-7 text-rose-400" />
+                    <HeartPulse className="h-7 w-7 text-[color:var(--mb-urgent)]" />
                   ) : lastSubmission?.riskLevel === "medium" ? (
-                    <Sprout className="h-7 w-7 text-amber-400" />
+                    <Sprout className="h-7 w-7 text-[color:var(--mb-warn)]" />
                   ) : (
-                    <Sparkles className="h-7 w-7 text-emerald-400" />
+                    <Sparkles className="h-7 w-7 text-[color:var(--mb-safe)]" />
                   )}
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">
+                <h3 className="text-lg sm:text-xl font-bold text-[color:var(--mb-ink)]">
                   {lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
                     ? "We're here with you — You don't have to carry this alone."
                     : lastSubmission?.riskLevel === "medium"
                     ? "Thank you for checking in — Take some time to breathe."
                     : "Check-in Complete — You're doing great!"}
                 </h3>
-                <p className="mt-2 text-xs sm:text-sm text-gray-300 max-w-lg mx-auto leading-relaxed">
+                <p className="mt-2 text-xs sm:text-sm text-[color:var(--mb-muted)] max-w-lg mx-auto leading-relaxed">
                   {lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview
                     ? "Your responses suggest you may be navigating heavy stress or emotional distress. A University Counselor has been prioritized to review your status in complete confidence."
                     : lastSubmission?.riskLevel === "medium"
@@ -497,21 +497,21 @@ export default function StudentDashboard() {
 
                 {/* Crisis Support Hotlines Banner (Philippines & Campus) */}
                 {(lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview) && (
-                  <div className="mt-5 rounded-xl border border-red-500/30 bg-gray-950/90 p-4 text-left">
-                    <div className="flex items-center gap-2 text-red-400 font-semibold text-xs sm:text-sm mb-2">
-                      <HeartPulse className="h-4 w-4 text-red-400 shrink-0" />
+                  <div className="mt-5 rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-ground)] p-4 text-left">
+                    <div className="flex items-center gap-2 text-[color:var(--mb-urgent)] font-semibold text-xs sm:text-sm mb-2">
+                      <HeartPulse className="h-4 w-4 text-[color:var(--mb-urgent)] shrink-0" />
                       <span>Immediate Crisis Support Resources (Free & 24/7)</span>
                     </div>
-                    <ul className="space-y-1.5 text-xs text-gray-300">
+                    <ul className="space-y-1.5 text-xs text-[color:var(--mb-muted)]">
                       <li>
                         • <strong>NCMH National Crisis Hotline:</strong> Dial{" "}
-                        <span className="text-teal-300 font-mono font-semibold">1553</span> (Toll-Free) or{" "}
-                        <span className="text-teal-300 font-mono">0917-899-8727</span>
+                        <span className="text-[color:var(--mb-brand)] font-mono font-semibold">1553</span> (Toll-Free) or{" "}
+                        <span className="text-[color:var(--mb-brand)] font-mono">0917-899-8727</span>
                       </li>
                       <li>
                         • <strong>Hopeline Philippines:</strong>{" "}
-                        <span className="text-teal-300 font-mono">0917-558-4673</span> /{" "}
-                        <span className="text-teal-300 font-mono">(02) 8804-4673</span>
+                        <span className="text-[color:var(--mb-brand)] font-mono">0917-558-4673</span> /{" "}
+                        <span className="text-[color:var(--mb-brand)] font-mono">(02) 8804-4673</span>
                       </li>
                       <li>
                         • <strong>USA Center for Guidance & Counseling:</strong> Inquire directly through Mind Bridge or visit the Guidance Office.
@@ -523,14 +523,14 @@ export default function StudentDashboard() {
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={openBookingModal}
-                    className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-teal-500 shadow-md interactive-tap"
+                    className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] transition hover:bg-[color:var(--mb-panel)] shadow-sm interactive-tap"
                   >
                     <Calendar className="h-4 w-4 shrink-0" />
                     <span>Book Counselor Session</span>
                   </button>
                   <button
                     onClick={resetCheckIn}
-                    className="rounded-xl border border-gray-700 bg-gray-800 px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-300 hover:bg-gray-700 transition"
+                    className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 py-2.5 text-xs sm:text-sm font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-line)] transition"
                   >
                     Take Check-in Again
                   </button>
@@ -540,7 +540,7 @@ export default function StudentDashboard() {
           ) : (
             <>
               {/* Progress Bar */}
-              <div className="mb-5 w-full h-2 overflow-hidden rounded-full bg-gray-800">
+              <div className="mb-5 w-full h-2 overflow-hidden rounded-full bg-[color:var(--mb-surface-2)]">
                 <div
                   className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
                   style={{ width: `${progressPct}%` }}
@@ -549,12 +549,12 @@ export default function StudentDashboard() {
 
               {/* Current Question */}
               <div className="mb-5">
-                <div className="text-[11px] uppercase tracking-wider text-cyan-400 font-semibold mb-1">
+                <div className="text-[11px] uppercase tracking-wider text-[color:var(--mb-brand)] font-semibold mb-1">
                   Question {qIndex + 1} of {SCREENING_QUESTIONS.length}{" "}
                   {currentQ.isCrisisItem && "• Safety Item"}
                 </div>
-                <p className="text-base sm:text-lg font-medium text-gray-100">{currentQ.text}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{currentQ.subtext}</p>
+                <p className="text-base sm:text-lg font-medium text-[color:var(--mb-ink)]">{currentQ.text}</p>
+                <p className="text-xs text-[color:var(--mb-muted)] mt-0.5">{currentQ.subtext}</p>
               </div>
 
               {/* Options */}
@@ -565,14 +565,14 @@ export default function StudentDashboard() {
                     <button
                       key={opt.value}
                       onClick={() => selectOption(opt.value)}
-                      className={`rounded-xl p-3.5 sm:p-4 text-left transition transform focus:outline-none ${
+                      className={`rounded-md p-3.5 sm:p-4 text-left transition transform focus:outline-none ${
                         isSelected
-                          ? "bg-cyan-600 border border-cyan-400 text-white shadow-md scale-[1.01]"
-                          : "border border-gray-800 bg-gray-800/80 text-gray-300 hover:border-gray-700 hover:bg-gray-700/80"
+                          ? "bg-[color:var(--mb-panel)] border border-[color:var(--mb-brand)] text-[color:var(--mb-panel-ink)] shadow-sm scale-[1.01]"
+                          : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:bg-[color:var(--mb-line)]"
                       }`}
                     >
                       <div className="font-semibold text-xs sm:text-sm">{opt.label}</div>
-                      <div className={`text-[11px] sm:text-xs mt-1 ${isSelected ? "text-cyan-100" : "text-gray-400"}`}>
+                      <div className={`text-[11px] sm:text-xs mt-1 ${isSelected ? "text-[color:var(--mb-brand)]" : "text-[color:var(--mb-muted)]"}`}>
                         {opt.desc}
                       </div>
                     </button>
@@ -580,22 +580,22 @@ export default function StudentDashboard() {
                 })}
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-gray-800">
+              <div className="flex items-center justify-between pt-3 border-t border-[color:var(--mb-line)]">
                 <button
                   onClick={() => setQIndex(Math.max(0, qIndex - 1))}
                   disabled={qIndex === 0}
-                  className="rounded-lg px-4 py-2 text-xs sm:text-sm text-gray-400 hover:bg-gray-800 hover:text-white disabled:opacity-30 transition"
+                  className="rounded-md px-4 py-2 text-xs sm:text-sm text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] disabled:opacity-30 transition"
                 >
                   Previous
                 </button>
                 <button
                   onClick={handleNext}
                   disabled={answers[qIndex] === null || submittingSurvey}
-                  className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:opacity-50 shadow-md"
+                  className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] transition hover:bg-[color:var(--mb-panel)] disabled:opacity-50 shadow-sm"
                 >
                   {submittingSurvey ? (
                     <>
-                      <Spinner size={14} className="text-white" />
+                      <Spinner size={14} className="text-[color:var(--mb-ink)]" />
                       <span>Evaluating…</span>
                     </>
                   ) : qIndex === SCREENING_QUESTIONS.length - 1 ? (
@@ -610,40 +610,40 @@ export default function StudentDashboard() {
         </div>
 
         {/* WELLNESS TREND LINE CHART & HISTORY SECTION */}
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 sm:p-6 shadow-xl">
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6 shadow-sm">
           <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-teal-400" />
+                <div className="h-8 w-8 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-[color:var(--mb-brand)]" />
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-white">
+                <h3 className="text-base sm:text-lg font-bold text-[color:var(--mb-ink)]">
                   My Wellness Distress Trend
                 </h3>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-[color:var(--mb-muted)] mt-0.5">
                 Track your PHQ-9 & GAD-7 score trajectory across screening check-ins.
               </p>
             </div>
 
             {pastAssessments.length > 0 && (
-              <div className="flex items-center rounded-xl border border-gray-800 bg-gray-950/60 p-1 self-start">
+              <div className="flex items-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1 self-start">
                 <button
                   onClick={() => setTrendView("chart")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
                     trendView === "chart"
-                      ? "bg-teal-600 text-white shadow-sm"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                      : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
                   }`}
                 >
                   Chart
                 </button>
                 <button
                   onClick={() => setTrendView("table")}
-                  className={`px-3 py-1 text-xs font-semibold rounded-lg transition ${
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
                     trendView === "table"
-                      ? "bg-teal-600 text-white shadow-sm"
-                      : "text-gray-400 hover:text-white"
+                      ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                      : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
                   }`}
                 >
                   History Log
@@ -653,16 +653,16 @@ export default function StudentDashboard() {
           </div>
 
           {loadingHistory ? (
-            <div className="flex h-56 items-center justify-center text-xs text-gray-400 gap-2">
+            <div className="flex h-56 items-center justify-center text-xs text-[color:var(--mb-muted)] gap-2">
               <Spinner size={16} /> Loading wellness trend data...
             </div>
           ) : chartData.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-gray-800 p-8 text-center text-gray-400">
-              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-800/60 text-lg">
-                <BarChart2 className="h-5 w-5 text-gray-400" />
+            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]">
+              <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[color:var(--mb-surface-2)] text-lg">
+                <BarChart2 className="h-5 w-5 text-[color:var(--mb-muted)]" />
               </div>
-              <p className="text-xs sm:text-sm font-medium text-white">No Check-in Data Yet</p>
-              <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+              <p className="text-xs sm:text-sm font-medium text-[color:var(--mb-ink)]">No Check-in Data Yet</p>
+              <p className="text-xs text-[color:var(--mb-muted)] mt-1 max-w-sm mx-auto">
                 Complete your first 1-minute wellness check-in above to begin tracking your distress
                 index over time.
               </p>
@@ -670,17 +670,17 @@ export default function StudentDashboard() {
           ) : trendView === "chart" ? (
             <div>
               {/* Score Benchmark Legend */}
-              <div className="mb-3 flex flex-wrap items-center gap-3 text-[11px] text-gray-400">
+              <div className="mb-3 flex flex-wrap items-center gap-3 text-[11px] text-[color:var(--mb-muted)]">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  <span className="h-2 w-2 rounded-full bg-[color:var(--mb-safe-solid)]" />
                   <span>0 - 6: Balanced</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-amber-400" />
+                  <span className="h-2 w-2 rounded-full bg-[color:var(--mb-amber)]" />
                   <span>7 - 12: Moderate Distress</span>
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-rose-400" />
+                  <span className="h-2 w-2 rounded-full bg-[color:var(--mb-urgent-solid)]" />
                   <span>13 - 21: High / Priority</span>
                 </span>
               </div>
@@ -694,21 +694,21 @@ export default function StudentDashboard() {
                   >
                     <defs>
                       <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.35} />
-                        <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="var(--mb-brand)" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="var(--mb-brand)" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
                     <XAxis
                       dataKey="formattedDate"
-                      stroke="#6b7280"
+                      stroke="var(--mb-muted)"
                       tick={{ fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}
                     />
                     <YAxis
                       domain={[0, 21]}
-                      stroke="#6b7280"
+                      stroke="var(--mb-muted)"
                       tick={{ fontSize: 11 }}
                       tickLine={false}
                       axisLine={false}
@@ -719,19 +719,19 @@ export default function StudentDashboard() {
                         if (active && payload && payload.length) {
                           const data = payload[0].payload;
                           return (
-                            <div className="rounded-xl border border-gray-700 bg-gray-900 p-3 shadow-xl text-xs">
-                              <div className="font-semibold text-white">{data.fullDate || data.formattedDate}</div>
+                            <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 shadow-sm text-xs">
+                              <div className="font-semibold text-[color:var(--mb-ink)]">{data.fullDate || data.formattedDate}</div>
                               <div className="mt-1 flex items-center gap-2">
-                                <span className="text-teal-300 font-bold text-sm">
+                                <span className="text-[color:var(--mb-brand)] font-bold text-sm">
                                   Score: {data.score} / {data.max}
                                 </span>
                                 <span
                                   className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
                                     data.riskLevel === "high"
-                                      ? "bg-red-500/20 text-red-300"
+                                      ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
                                       : data.riskLevel === "medium"
-                                      ? "bg-amber-500/20 text-amber-300"
-                                      : "bg-emerald-500/20 text-emerald-300"
+                                      ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]"
+                                      : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
                                   }`}
                                 >
                                   {data.riskLevel}
@@ -748,11 +748,11 @@ export default function StudentDashboard() {
                     <Area
                       type="monotone"
                       dataKey="score"
-                      stroke="#2dd4bf"
+                      stroke="var(--mb-brand)"
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#scoreGradient)"
-                      activeDot={{ r: 6, fill: "#38bdf8", stroke: "#fff", strokeWidth: 2 }}
+                      activeDot={{ r: 6, fill: "var(--mb-brand)", stroke: "var(--mb-surface)", strokeWidth: 2 }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -764,21 +764,21 @@ export default function StudentDashboard() {
               {pastAssessments.slice(0, 6).map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-3 text-xs"
+                  className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3 text-xs"
                 >
                   <div>
-                    <span className="font-medium text-white">{safeFormatDate(item.createdAt)}</span>
-                    <span className="ml-2 text-gray-400">
-                      Score: <strong className="text-teal-300">{item.total}</strong> / {item.maxScore || 21}
+                    <span className="font-medium text-[color:var(--mb-ink)]">{safeFormatDate(item.createdAt)}</span>
+                    <span className="ml-2 text-[color:var(--mb-muted)]">
+                      Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> / {item.maxScore || 21}
                     </span>
                   </div>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                       item.riskLevel === "high"
-                        ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                        ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)]"
                         : item.riskLevel === "medium"
-                        ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                        : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                        : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]"
                     }`}
                   >
                     {item.riskLevel} Risk
@@ -792,15 +792,15 @@ export default function StudentDashboard() {
 
       {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
       <aside className="lg:w-1/3 space-y-6 w-full">
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 shadow-xl">
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-teal-400" />
+            <h3 className="text-base sm:text-lg font-bold text-[color:var(--mb-ink)] flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-[color:var(--mb-brand)]" />
               <span>Counseling Sessions</span>
             </h3>
             <Link
               to="/appointments"
-              className="text-xs text-teal-400 hover:text-teal-300 font-medium transition"
+              className="text-xs text-[color:var(--mb-brand)] hover:text-[color:var(--mb-brand)] font-medium transition"
             >
               View all
             </Link>
@@ -808,37 +808,37 @@ export default function StudentDashboard() {
 
           <div className="space-y-2.5">
             {loadingAppointments ? (
-              <div className="flex items-center gap-2 text-xs text-gray-400 py-4">
+              <div className="flex items-center gap-2 text-xs text-[color:var(--mb-muted)] py-4">
                 <Spinner size={14} /> Loading sessions...
               </div>
             ) : appointments.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-800 p-4 text-center text-xs text-gray-500">
+              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-xs text-[color:var(--mb-muted)]">
                 No active appointments scheduled.
               </div>
             ) : (
               appointments.slice(0, 3).map((apt) => (
-                <div key={apt.id} className="rounded-xl border border-gray-800 bg-gray-950/60 p-3 text-xs">
+                <div key={apt.id} className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3 text-xs">
                   <div className="flex justify-between items-start gap-2">
-                    <div className="font-semibold text-white truncate">
+                    <div className="font-semibold text-[color:var(--mb-ink)] truncate">
                       {apt.title || "Counseling Session"}
                     </div>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                         (apt.status || "").toLowerCase().includes("confirm")
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          ? "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]"
                           : (apt.status || "").toLowerCase().includes("pending")
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-gray-800 text-gray-300"
+                          ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                          : "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
                       }`}
                     >
                       {apt.status || "Pending"}
                     </span>
                   </div>
-                  <div className="mt-1 text-gray-400">
+                  <div className="mt-1 text-[color:var(--mb-muted)]">
                     {safeFormatDate(apt.start || apt.date) || "Scheduled"}
                   </div>
                   {apt.counselorName && (
-                    <div className="mt-0.5 text-teal-300/90 font-medium">
+                    <div className="mt-0.5 text-[color:var(--mb-brand)] font-medium">
                       With {apt.counselorName}
                     </div>
                   )}
@@ -849,22 +849,22 @@ export default function StudentDashboard() {
 
           <button
             onClick={openBookingModal}
-            className="mt-4 w-full rounded-xl bg-teal-600 px-4 py-2.5 text-xs sm:text-sm font-semibold text-white transition hover:bg-teal-500 shadow-md interactive-tap"
+            className="mt-4 w-full rounded-md bg-[color:var(--mb-panel)] px-4 py-2.5 text-xs sm:text-sm font-semibold text-[color:var(--mb-panel-ink)] transition hover:bg-[color:var(--mb-panel)] shadow-sm interactive-tap"
           >
             + Book Counseling Slot
           </button>
         </div>
 
         {/* My Wellness Focus Goals */}
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-5 shadow-xl">
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-              <Target className="h-5 w-5 text-sky-400" />
+            <h3 className="text-base sm:text-lg font-bold text-[color:var(--mb-ink)] flex items-center gap-2">
+              <Target className="h-5 w-5 text-[color:var(--mb-brand)]" />
               <span>My Wellness Goals</span>
             </h3>
             <Link
               to="/settings"
-              className="text-xs text-teal-400 hover:text-teal-300 transition-colors font-medium"
+              className="text-xs text-[color:var(--mb-brand)] hover:text-[color:var(--mb-brand)] transition-colors font-medium"
             >
               Edit in Settings
             </Link>
@@ -875,9 +875,9 @@ export default function StudentDashboard() {
               {userData.wellnessGoals.map((goal, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-2 rounded-xl border border-gray-800 bg-gray-950/60 p-2.5 text-xs text-gray-200"
+                  className="flex items-center gap-2 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-2.5 text-xs text-[color:var(--mb-ink)]"
                 >
-                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] font-bold">
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] text-[10px] font-bold">
                     ✓
                   </span>
                   <span className="truncate">{goal}</span>
@@ -885,9 +885,9 @@ export default function StudentDashboard() {
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-gray-800 p-4 text-center text-xs text-gray-500">
+            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-xs text-[color:var(--mb-muted)]">
               No focus goals chosen yet.{" "}
-              <Link to="/settings" className="text-cyan-400 hover:underline">
+              <Link to="/settings" className="text-[color:var(--mb-brand)] hover:underline">
                 Pick focus goals
               </Link>
             </div>
@@ -898,24 +898,24 @@ export default function StudentDashboard() {
 
       {/* BOOKING MODAL FOR LIVE COUNSELOR SLOTS */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
-          <div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80  p-4 animate-fade-up">
+          <div className="w-full max-w-lg rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-[color:var(--mb-line)] pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Select Available Counselor Slot</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Confidential 1-on-1 guidance</p>
+                <h3 className="text-lg font-bold text-[color:var(--mb-ink)]">Select Available Counselor Slot</h3>
+                <p className="text-xs text-[color:var(--mb-muted)] mt-0.5">Confidential 1-on-1 guidance</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white text-xl">
+              <button onClick={() => setShowModal(false)} className="text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)] text-xl">
                 ✕
               </button>
             </div>
 
             {loadingSlots ? (
-              <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2 text-xs sm:text-sm">
+              <div className="py-8 text-center text-[color:var(--mb-muted)] flex items-center justify-center gap-2 text-xs sm:text-sm">
                 <Spinner size={16} /> Loading open slots...
               </div>
             ) : availableSlots.length === 0 ? (
-              <div className="py-8 text-center text-gray-400 border border-dashed border-gray-800 rounded-xl p-4 text-xs sm:text-sm">
+              <div className="py-8 text-center text-[color:var(--mb-muted)] border border-dashed border-[color:var(--mb-line)] rounded-md p-4 text-xs sm:text-sm">
                 No open counselor time slots found at the moment. Please check back later or visit the Guidance Office.
               </div>
             ) : (
@@ -927,20 +927,20 @@ export default function StudentDashboard() {
                   return (
                     <div
                       key={slot.id}
-                      className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-800/40 p-3.5 sm:p-4 text-xs sm:text-sm"
+                      className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:p-4 text-xs sm:text-sm"
                     >
                       <div>
-                        <div className="font-medium text-white">
+                        <div className="font-medium text-[color:var(--mb-ink)]">
                           Counselor: {slot.counselorName || "Assigned Counselor"}
                         </div>
-                        <div className="text-cyan-300 mt-0.5 font-medium text-xs">
+                        <div className="text-[color:var(--mb-brand)] mt-0.5 font-medium text-xs">
                           {startTime || "Unknown Time"} {endTime ? `to ${endTime}` : ""}
                         </div>
                       </div>
                       <button
                         onClick={() => handleBookSlot(slot)}
                         disabled={bookingId === slot.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] disabled:opacity-50"
                       >
                         {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
                       </button>
@@ -950,10 +950,10 @@ export default function StudentDashboard() {
               </div>
             )}
 
-            <div className="mt-5 flex justify-end pt-3 border-t border-gray-800">
+            <div className="mt-5 flex justify-end pt-3 border-t border-[color:var(--mb-line)]">
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-xl border border-gray-700 px-4 py-2 text-xs font-medium text-gray-400 hover:bg-gray-800 transition"
+                className="rounded-md border border-[color:var(--mb-line)] px-4 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] transition"
               >
                 Cancel
               </button>

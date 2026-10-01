@@ -292,68 +292,65 @@ export default function AdminPanel() {
   return (
     <div className="mx-auto max-w-7xl animate-fade-up space-y-8 pb-12">
       {/* Header */}
-      <div className="border-b border-gray-800 pb-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold mb-1">
-          Staff & Administration Control Center
-        </p>
-        <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+      <div className="border-b border-[color:var(--mb-line)] pb-5">
+        <h1 className="font-sans text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[color:var(--mb-ink)]">
           Staff & Admin Dashboard
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-[color:var(--mb-muted)] mt-1">
           Consolidated clinical triage, student case management, schedule availability, and system analytics.
         </p>
       </div>
 
       {/* Top Metric Cards */}
       <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Students</p>
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Students</p>
           <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{analytics.totalStudents}</span>
-            <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-400 border border-cyan-500/20">
+            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.totalStudents}</span>
+            <span className="rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
               Tracked
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Staff Accounts</p>
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Staff Accounts</p>
           <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{analytics.totalStaff}</span>
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400 border border-amber-500/20">
+            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.totalStaff}</span>
+            <span className="rounded-full bg-[color:var(--mb-warn-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]">
               Active
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-4 shadow-sm">
-          <div className="text-[10px] uppercase tracking-[0.16em] text-red-400 font-semibold flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+        <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-4 shadow-sm">
+          <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-urgent)] font-semibold flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-[color:var(--mb-urgent-solid)] animate-pulse" />
             <span>High Risk</span>
           </div>
           <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{immediateCount}</span>
-            <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-300 border border-red-500/30">
+            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{immediateCount}</span>
+            <span className="rounded-full bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)]">
               Priority
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Open Cases</p>
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Open Cases</p>
           <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{openCasesCount}</span>
-            <span className="rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-semibold text-teal-300 border border-teal-500/20">
+            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{openCasesCount}</span>
+            <span className="rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]">
               In Queue
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-4 shadow-sm col-span-2 sm:col-span-1">
-          <p className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Appointments</p>
+        <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm col-span-2 sm:col-span-1">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Appointments</p>
           <div className="mt-2 flex items-end justify-between">
-            <span className="text-2xl sm:text-3xl font-bold text-white">{pendingAppointmentsCount}</span>
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-300 border border-amber-500/20">
+            <span className="text-2xl sm:text-3xl font-bold text-[color:var(--mb-ink)]">{pendingAppointmentsCount}</span>
+            <span className="rounded-full bg-[color:var(--mb-warn-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]">
               Pending
             </span>
           </div>
@@ -362,13 +359,13 @@ export default function AdminPanel() {
 
       {/* Main Section Navigation Switcher */}
       {mainTab !== "accounts" && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-gray-800 pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-[color:var(--mb-line)] pb-3">
           <button
             onClick={() => handleTabSelect("cases")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
+            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
               mainTab === "cases"
-                ? "bg-teal-600 text-white shadow-sm"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
             }`}
           >
             <ClipboardList className="h-4 w-4" />
@@ -377,10 +374,10 @@ export default function AdminPanel() {
 
           <button
             onClick={() => handleTabSelect("analytics")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
+            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
               mainTab === "analytics"
-                ? "bg-teal-600 text-white shadow-sm"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
             }`}
           >
             <BarChart3 className="h-4 w-4" />
@@ -389,10 +386,10 @@ export default function AdminPanel() {
 
           <button
             onClick={() => handleTabSelect("availability")}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
+            className={`flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition interactive-tap ${
               mainTab === "availability"
-                ? "bg-teal-600 text-white shadow-sm"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                : "text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
             }`}
           >
             <Calendar className="h-4 w-4" />
@@ -423,8 +420,8 @@ export default function AdminPanel() {
                     onClick={() => setFilter(value)}
                     className={`rounded-full px-3.5 py-1.5 text-xs transition font-medium ${
                       filter === value
-                        ? "bg-teal-600 text-white shadow-sm font-semibold"
-                        : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
+                        ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm font-semibold"
+                        : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)]"
                     }`}
                   >
                     {label}
@@ -436,32 +433,32 @@ export default function AdminPanel() {
                 onClick={() => setAssignedOnly(!assignedOnly)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition border interactive-tap ${
                   assignedOnly
-                    ? "border-teal-500 bg-teal-500/20 text-teal-300 shadow-sm"
-                    : "border-gray-800 bg-gray-900 text-gray-400 hover:text-white"
+                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] shadow-sm"
+                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
                 }`}
               >
                 {assignedOnly ? "✓ My Assigned Students" : "Filter: My Assigned"}
               </button>
             </div>
 
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[color:var(--mb-muted)]">
               Showing {visibleCases.length} case{visibleCases.length !== 1 ? "s" : ""}
             </span>
           </div>
 
           {loading ? (
-            <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-              <Spinner size={20} className="text-teal-400" />
+            <div className="flex min-h-[300px] items-center justify-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)] gap-3">
+              <Spinner size={20} className="text-[color:var(--mb-brand)]" />
               <span>Loading student assessment records...</span>
             </div>
           ) : visibleCases.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-800 bg-gray-900/40 p-10 text-center text-sm text-gray-500">
+            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-10 text-center text-sm text-[color:var(--mb-muted)]">
               No student cases in this view category.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-gray-800 bg-gray-900 shadow-sm">
+            <div className="overflow-x-auto rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm">
               <table className="min-w-[750px] w-full text-left text-sm">
-                <thead className="bg-gray-800/50 text-gray-400 text-xs uppercase tracking-wider">
+                <thead className="bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] text-xs uppercase tracking-wider">
                   <tr>
                     <th className="px-4 py-3.5 font-semibold">Student</th>
                     <th className="px-4 py-3.5 font-semibold">Risk Classification</th>
@@ -482,10 +479,10 @@ export default function AdminPanel() {
                         : "Unknown";
 
                     return (
-                      <tr key={item.id} className="border-t border-gray-800 align-middle hover:bg-gray-800/30 transition-colors">
+                      <tr key={item.id} className="border-t border-[color:var(--mb-line)] align-middle hover:bg-[color:var(--mb-surface-2)] transition-colors">
                         <td className="px-4 py-3.5">
-                          <div className="font-semibold text-white">{item.studentName || "Student"}</div>
-                          <div className="text-xs text-gray-400 font-mono">{item.studentEmail || "Institutional email"}</div>
+                          <div className="font-semibold text-[color:var(--mb-ink)]">{item.studentName || "Student"}</div>
+                          <div className="text-xs text-[color:var(--mb-muted)] font-mono">{item.studentEmail || "Institutional email"}</div>
                         </td>
                         <td className="px-4 py-3.5">
                           <div className="flex flex-wrap items-center gap-2">
@@ -493,26 +490,26 @@ export default function AdminPanel() {
                               {risk} Risk
                             </span>
                             {item.flaggedForImmediateReview && (
-                              <span className="inline-flex items-center gap-1 rounded-full border border-red-500 bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider animate-pulse">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--mb-panel-ink)] uppercase tracking-wider animate-pulse">
                                 <AlertCircle className="h-3 w-3" /> Immediate
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3.5 text-gray-300 font-mono text-xs">
+                        <td className="px-4 py-3.5 text-[color:var(--mb-muted)] font-mono text-xs">
                           {item.total ?? 0} / {item.maxScore ?? 21}
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status] || "bg-gray-800 text-gray-300 border-gray-700"}`}>
+                          <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[status] || "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border-[color:var(--mb-line)]"}`}>
                             {status}
                           </span>
                         </td>
-                        <td className="px-4 py-3.5 text-xs text-gray-400">{submittedAt}</td>
+                        <td className="px-4 py-3.5 text-xs text-[color:var(--mb-muted)]">{submittedAt}</td>
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => openCaseInspector(item)}
-                              className="rounded-lg bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs font-medium text-teal-300 hover:border-teal-500 hover:text-white transition interactive-tap"
+                              className="rounded-md bg-[color:var(--mb-surface-2)] border border-[color:var(--mb-line)] px-3 py-1.5 text-xs font-medium text-[color:var(--mb-brand)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                             >
                               Inspect Case
                             </button>
@@ -520,7 +517,7 @@ export default function AdminPanel() {
                               <button
                                 onClick={() => markAssessmentStatus(item.id, "reviewed")}
                                 disabled={updatingAssessmentId === item.id}
-                                className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-500 transition disabled:opacity-60 interactive-tap"
+                                className="rounded-md bg-[color:var(--mb-panel)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-60 interactive-tap"
                               >
                                 {updatingAssessmentId === item.id ? "Updating…" : "Mark Reviewed"}
                               </button>
@@ -528,7 +525,7 @@ export default function AdminPanel() {
                               <button
                                 onClick={() => markAssessmentStatus(item.id, "open")}
                                 disabled={updatingAssessmentId === item.id}
-                                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs font-medium text-gray-400 hover:border-gray-500 hover:text-white transition disabled:opacity-60 interactive-tap"
+                                className="rounded-md border border-[color:var(--mb-line)] px-3 py-1.5 text-xs font-medium text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)] transition disabled:opacity-60 interactive-tap"
                               >
                                 {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
                               </button>
@@ -550,30 +547,30 @@ export default function AdminPanel() {
       {/* ======================================================== */}
       {mainTab === "analytics" && (
         <div className="space-y-6">
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
+          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">ANALYTICS</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-white tracking-tight">System-Wide Clinical Analytics</h2>
+                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">ANALYTICS</p>
+                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">System-Wide Clinical Analytics</h2>
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-[color:var(--mb-muted)]">
                 <div>{analytics.totalAssessments} total assessments</div>
                 <div>{analytics.totalStudents} students tracked</div>
               </div>
             </div>
 
             <div className="mb-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Low risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-white">{analytics.riskCounts.low}</div>
+              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Low risk</div>
+                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.low}</div>
               </div>
-              <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">Medium risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-white">{analytics.riskCounts.medium}</div>
+              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">Medium risk</div>
+                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.medium}</div>
               </div>
-              <div className="rounded-xl border border-gray-800 bg-gray-800/50 p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-gray-400 font-semibold">High risk</div>
-                <div className="mt-2 font-sans text-3xl font-bold text-white">{analytics.riskCounts.high}</div>
+              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-4">
+                <div className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--mb-muted)] font-semibold">High risk</div>
+                <div className="mt-2 font-sans text-3xl font-bold text-[color:var(--mb-ink)]">{analytics.riskCounts.high}</div>
               </div>
             </div>
 
@@ -581,10 +578,10 @@ export default function AdminPanel() {
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={analytics.chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="name" stroke="#9ca3af" tickLine={false} axisLine={false} />
-                    <YAxis allowDecimals={false} stroke="#9ca3af" tickLine={false} axisLine={false} />
-                    <Tooltip cursor={{ fill: "rgba(31,191,159,0.08)" }} contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" />
+                    <XAxis dataKey="name" stroke="var(--mb-muted)" tickLine={false} axisLine={false} />
+                    <YAxis allowDecimals={false} stroke="var(--mb-muted)" tickLine={false} axisLine={false} />
+                    <Tooltip cursor={{ fill: "rgba(31,191,159,0.08)" }} contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", color: "var(--mb-ink)" }} />
                     <Legend />
                     <Bar dataKey="value" name="Assessments" radius={[8, 8, 0, 0]}>
                       {analytics.chartData.map((entry, index) => (
@@ -612,7 +609,7 @@ export default function AdminPanel() {
                         <Cell key={`cell-${entry.name}`} fill={entry.color || CHART_COLORS[index]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "none", color: "#fff" }} />
+                    <Tooltip contentStyle={{ backgroundColor: "var(--mb-surface)", border: "2px solid var(--mb-line)", color: "var(--mb-ink)" }} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -621,18 +618,18 @@ export default function AdminPanel() {
           </section>
 
           {/* Audit Logs */}
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
+          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
             <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">AUDIT</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-white tracking-tight">Audit Logs / Activity Tracking</h2>
+                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">AUDIT</p>
+                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">Audit Logs / Activity Tracking</h2>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-800 text-gray-400">
+                  <tr className="border-b border-[color:var(--mb-line)] text-[color:var(--mb-muted)]">
                     <th className="min-w-[100px] py-3 pr-4 font-medium">Actor</th>
                     <th className="min-w-[180px] py-3 pr-4 font-medium">Action</th>
                     <th className="min-w-[150px] py-3 pr-4 font-medium">Target</th>
@@ -642,13 +639,13 @@ export default function AdminPanel() {
                 </thead>
                 <tbody>
                   {auditLogs.map((log, index) => (
-                    <tr key={log.id} className="border-b border-gray-800/50 align-top">
-                      <td className="py-3 pr-4 text-gray-300">{log.actor}</td>
-                      <td className="py-3 pr-4 text-gray-300">{log.action}</td>
-                      <td className="py-3 pr-4 text-gray-300">{log.target}</td>
-                      <td className="py-3 pr-4 text-gray-400">{formatDateTime(log.timestamp)}</td>
+                    <tr key={log.id} className="border-b border-[color:var(--mb-line)] align-top">
+                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.actor}</td>
+                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.action}</td>
+                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{log.target}</td>
+                      <td className="py-3 pr-4 text-[color:var(--mb-muted)]">{formatDateTime(log.timestamp)}</td>
                       <td className="py-3">
-                        <span className="inline-flex rounded-full border border-gray-700 bg-gray-800 px-2 py-1 text-[11px] font-medium text-gray-300">
+                        <span className="inline-flex rounded-full border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2 py-1 text-[11px] font-medium text-[color:var(--mb-muted)]">
                           {log.outcome}
                         </span>
                       </td>
@@ -660,22 +657,22 @@ export default function AdminPanel() {
           </section>
 
           {/* Export Section */}
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-6">
+          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-cyan-400 font-semibold tracking-[0.18em] text-[10px]">EXPORT</p>
-                <h2 className="font-sans text-xl sm:text-2xl font-bold text-white tracking-tight">Data Exporting</h2>
-                <p className="mt-1 text-sm text-gray-400">Export an anonymized assessment compliance report as CSV.</p>
+                <p className="text-[color:var(--mb-brand)] font-semibold tracking-[0.18em] text-[10px]">EXPORT</p>
+                <h2 className="font-sans text-xl sm:text-2xl font-bold text-[color:var(--mb-ink)] tracking-tight">Data Exporting</h2>
+                <p className="mt-1 text-sm text-[color:var(--mb-muted)]">Export an anonymized assessment compliance report as CSV.</p>
               </div>
               <button
                 type="button"
                 onClick={exportCsv}
                 disabled={exportingCsv}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 px-5 py-3 text-sm font-semibold text-white transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-3 text-sm font-semibold text-[color:var(--mb-panel-ink)] transition duration-200 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {exportingCsv ? (
                   <>
-                    <Spinner size={15} color="#ffffff" className="text-white" />
+                    <Spinner size={15} color="#ffffff" className="text-[color:var(--mb-ink)]" />
                     <span>Exporting…</span>
                   </>
                 ) : (
@@ -705,20 +702,20 @@ export default function AdminPanel() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setAccountSubTab("staff")}
-              className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              className={`rounded-md px-4 py-2 text-xs font-semibold transition ${
                 accountSubTab === "staff"
-                  ? "bg-teal-600 text-white shadow-sm"
-                  : "border border-gray-800 bg-gray-900 text-gray-400 hover:text-white"
+                  ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                  : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
               }`}
             >
               Manage Staff Accounts ({approvedStaff.length + pendingStaff.length})
             </button>
             <button
               onClick={() => setAccountSubTab("students")}
-              className={`rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              className={`rounded-md px-4 py-2 text-xs font-semibold transition ${
                 accountSubTab === "students"
-                  ? "bg-teal-600 text-white shadow-sm"
-                  : "border border-gray-800 bg-gray-900 text-gray-400 hover:text-white"
+                  ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm"
+                  : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
               }`}
             >
               Manage Students & Counselor Assignments
@@ -727,9 +724,9 @@ export default function AdminPanel() {
 
           {/* Pending Staff Approvals (if any) */}
           {accountSubTab === "staff" && pendingStaff.length > 0 && (
-            <section className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 shadow-sm">
+            <section className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 shadow-sm">
               <div className="mb-3">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-400">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--mb-warn)]">
                   Pending Staff Approvals ({pendingStaff.length})
                 </h2>
               </div>
@@ -738,24 +735,24 @@ export default function AdminPanel() {
                 {pendingStaff.map((u) => (
                   <div
                     key={u.id}
-                    className="flex flex-col gap-3 rounded-xl border border-amber-500/20 bg-gray-900 p-3 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-surface)] p-3 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div>
-                      <p className="font-medium text-white">{u.name || "Unnamed Staff"}</p>
-                      <p className="text-sm text-gray-400">{u.email}</p>
+                      <p className="font-medium text-[color:var(--mb-ink)]">{u.name || "Unnamed Staff"}</p>
+                      <p className="text-sm text-[color:var(--mb-muted)]">{u.email}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleAccountAction(approveCounselor, u.id)}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-sm font-medium text-[color:var(--mb-panel-ink)] transition hover:brightness-110 disabled:opacity-60"
                       >
                         {actionLoadingId === u.id ? <Spinner size={14} /> : "Approve Staff"}
                       </button>
                       <button
                         onClick={() => handleAccountAction(rejectCounselor, u.id)}
                         disabled={actionLoadingId === u.id}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-60"
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-[color:var(--mb-urgent)] px-4 py-2 text-sm font-medium text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)] disabled:opacity-60"
                       >
                         {actionLoadingId === u.id ? <Spinner size={14} /> : "Reject"}
                       </button>
@@ -767,32 +764,32 @@ export default function AdminPanel() {
           )}
 
           {/* User Accounts Table */}
-          <section className="rounded-2xl border border-gray-800 bg-gray-900 p-4 shadow-sm sm:p-5">
+          <section className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 shadow-sm sm:p-5">
             <div className="mb-4">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-400">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--mb-muted)]">
                 {accountSubTab === "staff" ? "Staff & Administrator Accounts" : "Student Accounts & Assignments"}
               </h2>
             </div>
 
             {filteredUsers.length === 0 ? (
-              <p className="text-sm text-gray-500 py-4">No accounts found in this category.</p>
+              <p className="text-sm text-[color:var(--mb-muted)] py-4">No accounts found in this category.</p>
             ) : (
               <div className="space-y-2">
                 {filteredUsers.map((u) => (
                   <div
                     key={u.id}
-                    className="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-800/50 p-3.5 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
                       <div>
-                        <p className="font-medium text-white">{u.name || "User"}</p>
-                        <p className="text-sm text-gray-400 font-mono">{u.email}</p>
+                        <p className="font-medium text-[color:var(--mb-ink)]">{u.name || "User"}</p>
+                        <p className="text-sm text-[color:var(--mb-muted)] font-mono">{u.email}</p>
                       </div>
-                      <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${ROLE_BADGE[u.role || "student"] || "bg-gray-800 text-gray-300"}`}>
+                      <span className={`inline-flex w-fit rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${ROLE_BADGE[u.role || "student"] || "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"}`}>
                         {u.role === "counselor" || u.role === "admin" ? "Staff Admin" : "Student"}
                       </span>
                       {u.active === false && (
-                        <span className="inline-flex w-fit rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">
+                        <span className="inline-flex w-fit rounded-full border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-[10px] font-semibold text-[color:var(--mb-urgent)]">
                           Deactivated
                         </span>
                       )}
@@ -801,12 +798,12 @@ export default function AdminPanel() {
                     <div className="flex flex-wrap items-center gap-3">
                       {accountSubTab === "students" && (
                         <div className="flex items-center gap-1.5 text-xs">
-                          <span className="text-gray-400 text-[11px]">Assigned Counselor:</span>
+                          <span className="text-[color:var(--mb-muted)] text-[11px]">Assigned Counselor:</span>
                           <select
                             value={u.assignedCounselorId || ""}
                             onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
                             disabled={actionLoadingId === u.id}
-                            className="rounded-lg border border-gray-700 bg-gray-900 px-2.5 py-1 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                            className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-2.5 py-1 text-xs text-[color:var(--mb-ink)] focus:border-[color:var(--mb-brand)] focus:outline-none"
                           >
                             <option value="">Unassigned</option>
                             {approvedStaff.map((c) => (
@@ -821,12 +818,12 @@ export default function AdminPanel() {
                       <button
                         onClick={() => handleAccountAction(u.active === false ? reactivateUser : deactivateUser, u.id)}
                         disabled={actionLoadingId === u.id || u.id === currentUser?.uid}
-                        className={`inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-1.5 text-xs font-medium transition ${
+                        className={`inline-flex items-center justify-center gap-2 rounded-md border px-3.5 py-1.5 text-xs font-medium transition ${
                           u.id === currentUser?.uid
-                            ? "opacity-30 cursor-not-allowed border-gray-700 text-gray-500"
+                            ? "opacity-30 cursor-not-allowed border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
                             : u.active === false
-                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                            : "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                            ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] hover:bg-[color:var(--mb-safe-bg)]"
+                            : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)]"
                         }`}
                       >
                         {actionLoadingId === u.id ? (
@@ -850,29 +847,29 @@ export default function AdminPanel() {
       {/* CASE INSPECTOR MODAL                                     */}
       {/* ======================================================== */}
       {activeCase && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-up">
-          <div className="w-full max-w-2xl rounded-2xl border border-gray-800 bg-gray-900 p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80  p-4 animate-fade-up">
+          <div className="w-full max-w-2xl rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8 shadow-sm max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-gray-800 mb-5">
+            <div className="flex items-start justify-between pb-4 border-b border-[color:var(--mb-line)] mb-5">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-white">{activeCase.studentName || "Student Assessment Details"}</h3>
+                  <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">{activeCase.studentName || "Student Assessment Details"}</h3>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${RISK_STYLES[activeCase.riskLevel || "low"]}`}>
                     {activeCase.riskLevel} Risk
                   </span>
                   {activeCase.flaggedForImmediateReview && (
-                    <span className="rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white uppercase">
+                    <span className="rounded-full bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--mb-panel-ink)] uppercase">
                       Immediate Concern
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  Email: <span className="text-teal-300 font-mono">{activeCase.studentEmail}</span> • Submitted: {new Date(activeCase.createdAt || activeCase.submittedAt || Date.now()).toLocaleString()}
+                <p className="text-xs text-[color:var(--mb-muted)] mt-1">
+                  Email: <span className="text-[color:var(--mb-brand)] font-mono">{activeCase.studentEmail}</span> • Submitted: {new Date(activeCase.createdAt || activeCase.submittedAt || Date.now()).toLocaleString()}
                 </p>
               </div>
               <button
                 onClick={() => setActiveCase(null)}
-                className="text-gray-400 hover:text-white text-xl p-1 interactive-tap"
+                className="text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)] text-xl p-1 interactive-tap"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -881,7 +878,7 @@ export default function AdminPanel() {
 
             {/* Questions Breakdown */}
             <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-300 mb-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-3">
                 Screening Responses Breakdown (PHQ-9 / GAD-7 Scale)
               </h4>
               {Array.isArray(activeCase.questionSummary) && activeCase.questionSummary.length > 0 ? (
@@ -889,59 +886,59 @@ export default function AdminPanel() {
                   {activeCase.questionSummary.map((q, idx) => (
                     <div
                       key={idx}
-                      className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 ${
+                      className={`p-3 rounded-md border text-xs flex items-center justify-between gap-3 ${
                         q.isCrisisItem && Number(q.score) > 0
-                          ? "border-red-500 bg-red-950/40 text-red-200 font-medium"
-                          : "border-gray-800 bg-gray-950/60 text-gray-300"
+                          ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] font-medium"
+                          : "border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] text-[color:var(--mb-muted)]"
                       }`}
                     >
                       <div className="flex-1">
-                        <span className="font-semibold text-white mr-1.5">{idx + 1}.</span>
+                        <span className="font-semibold text-[color:var(--mb-ink)] mr-1.5">{idx + 1}.</span>
                         {q.text}
                         {q.isCrisisItem && (
-                          <span className="ml-2 text-[10px] uppercase font-bold text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded">
+                          <span className="ml-2 text-[10px] uppercase font-bold text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)] px-1.5 py-0.5 rounded">
                             Crisis Item
                           </span>
                         )}
                       </div>
-                      <div className="shrink-0 font-bold text-xs px-2.5 py-1 rounded bg-gray-800 text-cyan-300 font-mono">
+                      <div className="shrink-0 font-bold text-xs px-2.5 py-1 rounded bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)] font-mono">
                         Score: {q.score ?? "—"}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-gray-400">Total Score: {activeCase.total} / {activeCase.maxScore || 21}</p>
+                <p className="text-xs text-[color:var(--mb-muted)]">Total Score: {activeCase.total} / {activeCase.maxScore || 21}</p>
               )}
             </div>
 
             {/* Emergency Contact Information */}
-            <div className="mb-6 rounded-xl border border-gray-800 bg-gray-950/70 p-4">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+            <div className="mb-6 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-2">
                 Emergency Contact Record
               </h4>
               {loadingContact ? (
-                <div className="text-xs text-gray-500 flex items-center gap-2"><Spinner size={12} /> Loading profile contact...</div>
+                <div className="text-xs text-[color:var(--mb-muted)] flex items-center gap-2"><Spinner size={12} /> Loading profile contact...</div>
               ) : studentContact?.emergencyContact?.name ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-300">
-                  <div>Name: <span className="font-semibold text-white">{studentContact.emergencyContact.name}</span></div>
-                  <div>Relationship: <span className="font-semibold text-white">{studentContact.emergencyContact.relationship}</span></div>
-                  <div>Primary Phone: <span className="font-semibold text-cyan-300 font-mono">{studentContact.emergencyContact.phone}</span></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[color:var(--mb-muted)]">
+                  <div>Name: <span className="font-semibold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.name}</span></div>
+                  <div>Relationship: <span className="font-semibold text-[color:var(--mb-ink)]">{studentContact.emergencyContact.relationship}</span></div>
+                  <div>Primary Phone: <span className="font-semibold text-[color:var(--mb-brand)] font-mono">{studentContact.emergencyContact.phone}</span></div>
                   {studentContact.emergencyContact.alternatePhone && (
-                    <div>Alternate Phone: <span className="font-semibold text-gray-300 font-mono">{studentContact.emergencyContact.alternatePhone}</span></div>
+                    <div>Alternate Phone: <span className="font-semibold text-[color:var(--mb-muted)] font-mono">{studentContact.emergencyContact.alternatePhone}</span></div>
                   )}
                   {studentContact.emergencyContact.notes && (
-                    <div className="col-span-2 text-gray-400 italic">Notes: {studentContact.emergencyContact.notes}</div>
+                    <div className="col-span-2 text-[color:var(--mb-muted)] italic">Notes: {studentContact.emergencyContact.notes}</div>
                   )}
                 </div>
               ) : (
-                <p className="text-xs text-gray-500">Student has not designated an emergency contact in profile settings.</p>
+                <p className="text-xs text-[color:var(--mb-muted)]">Student has not designated an emergency contact in profile settings.</p>
               )}
             </div>
 
             {/* Case Notes & Status Update */}
             <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-300 mb-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[color:var(--mb-muted)] mb-2">
                 Confidential Staff Case Notes & Status
               </h4>
               <textarea
@@ -949,20 +946,20 @@ export default function AdminPanel() {
                 value={counselorNoteInput}
                 onChange={(e) => setCounselorNoteInput(e.target.value)}
                 placeholder="Document case assessment, outreach actions, or scheduled guidance sessions..."
-                className="w-full rounded-xl border border-gray-700 bg-gray-800 px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none"
+                className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 py-2.5 text-xs text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none"
               />
               <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Set Case Status:</span>
+                  <span className="text-xs text-[color:var(--mb-muted)]">Set Case Status:</span>
                   {["open", "reviewed", "escalated"].map((st) => (
                     <button
                       key={st}
                       type="button"
                       onClick={() => markAssessmentStatus(activeCase.id, st)}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize transition ${
+                      className={`px-3 py-1 rounded-md text-xs font-semibold capitalize transition ${
                         activeCase.status === st
-                          ? "bg-cyan-600 text-white"
-                          : "border border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white"
+                          ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                          : "border border-[color:var(--mb-line)] text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
                       }`}
                     >
                       {st}
@@ -973,7 +970,7 @@ export default function AdminPanel() {
                 <button
                   onClick={handleSaveNotes}
                   disabled={savingNotes}
-                  className="rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition disabled:opacity-50"
+                  className="rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-50"
                 >
                   {savingNotes ? "Saving Notes…" : "Save Case Notes"}
                 </button>
@@ -981,7 +978,7 @@ export default function AdminPanel() {
             </div>
 
             {/* Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[color:var(--mb-line)]">
               {activeCase.studentId && activeCase.studentId !== "anonymous" && (
                 <button
                   type="button"
@@ -991,7 +988,7 @@ export default function AdminPanel() {
                       name: activeCase.studentName || "Student",
                     })
                   }
-                  className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition shadow-md"
+                  className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm"
                 >
                   <MessageSquare className="h-4 w-4" />
                   <span>Open Confidential Chat</span>
@@ -1000,7 +997,7 @@ export default function AdminPanel() {
 
               <button
                 onClick={() => setActiveCase(null)}
-                className="rounded-xl border border-gray-700 px-5 py-2 text-xs font-medium text-gray-300 hover:bg-gray-800 transition ml-auto"
+                className="rounded-md border border-[color:var(--mb-line)] px-5 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] transition ml-auto"
               >
                 Close Inspector
               </button>

@@ -19,3 +19,6 @@ npm-debug.log*
 .env.local
 .env.*.local
 vite.config.js.timestamp-*
+
+# local visual-check harness
+client/.preview/

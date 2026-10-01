@@ -180,7 +180,7 @@ export default function ConfidentialChatModal({
             transition={{ duration: 0.2 }}
             onClick={onClose}
             aria-hidden="true"
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/80 "
           />
 
           {/* Modal Container */}
@@ -192,30 +192,30 @@ export default function ConfidentialChatModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-            className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-3xl border border-white/[0.08] bg-gray-900 shadow-2xl overflow-hidden"
+            className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
           >
             {/* ── Header ── */}
-            <div className="flex items-center gap-3 bg-gray-950/70 px-4 py-3.5 sm:px-5 sm:py-4 border-b border-white/[0.08] shrink-0 backdrop-blur-md">
+            <div className="flex items-center gap-3 bg-[color:var(--mb-ground)] px-4 py-3.5 sm:px-5 sm:py-4 border-b border-[color:var(--mb-line)] shrink-0 ">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[color:var(--mb-panel-ink)] font-bold text-sm shadow-sm">
                   {(recipientName || "?").slice(0, 1).toUpperCase()}
                 </div>
-                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-gray-950 shadow-sm" />
+                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)] border-2 border-[color:var(--mb-line)] shadow-sm" />
               </div>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-white text-sm truncate">
+                  <span className="font-semibold text-[color:var(--mb-ink)] text-sm truncate">
                     {recipientName || (isCounselorView ? "Student" : "Your Counselor")}
                   </span>
-                  <span className="shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[9px] font-bold uppercase text-cyan-300 border border-cyan-500/20 tracking-wide">
+                  <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-[9px] font-bold uppercase text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)] tracking-wide">
                     {recipientRole}
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5 truncate">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400" />
+                <p className="text-[11px] text-[color:var(--mb-muted)] flex items-center gap-1 mt-0.5 truncate">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--mb-panel)]" />
                   Confidential & Private Counseling Channel
                 </p>
               </div>
@@ -223,7 +223,7 @@ export default function ConfidentialChatModal({
               {/* Close Button */}
               <button
                 onClick={onClose}
-                className="shrink-0 h-11 w-11 rounded-xl flex items-center justify-center text-gray-400 hover:bg-white/[0.08] hover:text-white transition interactive-tap"
+                className="shrink-0 h-11 w-11 rounded-md flex items-center justify-center text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                 aria-label="Close chat"
               >
                 <X className="h-5 w-5" />
@@ -231,25 +231,25 @@ export default function ConfidentialChatModal({
             </div>
 
             {/* ── Message Body ── */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-gradient-to-b from-gray-950/60 to-gray-900/80 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-[color:var(--mb-ground)] custom-scrollbar">
               {loading ? (
-                <div className="flex flex-col h-full items-center justify-center gap-3 text-gray-400">
-                  <div className="h-8 w-8 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
+                <div className="flex flex-col h-full items-center justify-center gap-3 text-[color:var(--mb-muted)]">
+                  <div className="h-8 w-8 rounded-full border-2 border-[color:var(--mb-brand)] border-t-transparent animate-spin" />
                   <span className="text-xs">Loading secure messages…</span>
                 </div>
               ) : error ? (
                 <div className="flex h-full flex-col items-center justify-center gap-2 text-center px-6">
-                  <AlertTriangle className="h-8 w-8 text-red-400" />
-                  <p className="text-sm font-medium text-red-300">{error}</p>
+                  <AlertTriangle className="h-8 w-8 text-[color:var(--mb-urgent)]" />
+                  <p className="text-sm font-medium text-[color:var(--mb-urgent)]">{error}</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center gap-3 px-6">
-                  <div className="h-14 w-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center shadow-inner border border-cyan-500/20">
-                    <Lock className="h-6 w-6 text-cyan-400" />
+                  <div className="h-14 w-14 rounded-md bg-[color:var(--mb-brand-bg)] flex items-center justify-center shadow-inner border border-[color:var(--mb-brand)]">
+                    <Lock className="h-6 w-6 text-[color:var(--mb-brand)]" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Confidential Counseling Thread</p>
-                    <p className="text-xs text-gray-400 mt-1 leading-relaxed max-w-xs">
+                    <p className="text-sm font-semibold text-[color:var(--mb-ink)]">Confidential Counseling Thread</p>
+                    <p className="text-xs text-[color:var(--mb-muted)] mt-1 leading-relaxed max-w-xs">
                       {isCounselorView
                         ? "Send a private message to this student. Only you and the student have access to this conversation."
                         : "Send a secure message to your guidance counselor. This conversation is completely confidential."}
@@ -261,11 +261,11 @@ export default function ConfidentialChatModal({
                   <div key={day}>
                     {/* Day label */}
                     <div className="flex items-center gap-2 my-3">
-                      <div className="flex-1 h-px bg-white/[0.08]" />
-                      <span className="text-[10px] text-gray-400 font-medium px-1">
+                      <div className="flex-1 h-px bg-[color:var(--mb-surface-2)]" />
+                      <span className="text-[10px] text-[color:var(--mb-muted)] font-medium px-1">
                         {formatDayLabel(dayMsgs[0]?.timestamp)}
                       </span>
-                      <div className="flex-1 h-px bg-white/[0.08]" />
+                      <div className="flex-1 h-px bg-[color:var(--mb-surface-2)]" />
                     </div>
 
                     {dayMsgs.map((msg, i) => {
@@ -281,7 +281,7 @@ export default function ConfidentialChatModal({
                           {/* Avatar for other person */}
                           {!isMe && (
                             <div className={`w-6 mr-1.5 flex items-end ${isLast ? "opacity-100" : "opacity-0"}`}>
-                              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                              <div className="h-6 w-6 rounded-full bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] text-[9px] font-bold shrink-0">
                                 {(msg.senderName || "?").slice(0, 1).toUpperCase()}
                               </div>
                             </div>
@@ -289,7 +289,7 @@ export default function ConfidentialChatModal({
 
                           <div className="flex flex-col max-w-[78%]">
                             {!isMe && isFirst && (
-                              <span className="text-[10px] text-gray-400 ml-1 mb-1 font-medium">
+                              <span className="text-[10px] text-[color:var(--mb-muted)] ml-1 mb-1 font-medium">
                                 {msg.senderName || "Counselor"}
                               </span>
                             )}
@@ -297,7 +297,7 @@ export default function ConfidentialChatModal({
                             <div
                               className={`px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
                                 isMe
-                                  ? `bg-cyan-600 text-white ${
+                                  ? `bg-[color:var(--mb-panel)] text-white ${
                                       isFirst && isLast
                                         ? "rounded-2xl"
                                         : isFirst
@@ -306,7 +306,7 @@ export default function ConfidentialChatModal({
                                         ? "rounded-2xl rounded-tr-md"
                                         : "rounded-lg rounded-r-md"
                                     }`
-                                  : `bg-gray-800/90 border border-white/[0.08] text-gray-100 ${
+                                  : `bg-[color:var(--mb-surface-2)]/90 border border-[color:var(--mb-line)] text-[color:var(--mb-ink)] ${
                                       isFirst && isLast
                                         ? "rounded-2xl"
                                         : isFirst
@@ -321,7 +321,7 @@ export default function ConfidentialChatModal({
                             </div>
 
                             {isLast && (
-                              <span className={`text-[10px] text-gray-500 mt-0.5 ${isMe ? "text-right mr-1" : "ml-1"}`}>
+                              <span className={`text-[10px] text-[color:var(--mb-muted)] mt-0.5 ${isMe ? "text-right mr-1" : "ml-1"}`}>
                                 {formatTime(msg.timestamp)}
                               </span>
                             )}
@@ -337,7 +337,7 @@ export default function ConfidentialChatModal({
 
             {/* ── Quick Replies ── */}
             {!loading && (
-              <div className="px-3 py-2 border-t border-white/[0.08] bg-gray-950/40 overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
+              <div className="px-3 py-2 border-t border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
                 {quickReplies.map((reply) => (
                   <button
                     key={reply}
@@ -346,7 +346,7 @@ export default function ConfidentialChatModal({
                       setInputText(reply);
                       inputRef.current?.focus();
                     }}
-                    className="min-h-[36px] shrink-0 whitespace-nowrap rounded-xl border border-white/10 bg-gray-800/80 px-3 py-1.5 text-xs text-gray-300 hover:border-cyan-500/40 hover:text-white hover:bg-gray-800 transition interactive-tap"
+                    className="min-h-[36px] shrink-0 whitespace-nowrap rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3 py-1.5 text-xs text-[color:var(--mb-muted)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)] transition interactive-tap"
                   >
                     {reply}
                   </button>
@@ -357,7 +357,7 @@ export default function ConfidentialChatModal({
             {/* ── Input Bar ── */}
             <form
               onSubmit={handleSend}
-              className="flex items-end gap-2.5 px-3 py-3 bg-gray-950/80 border-t border-white/[0.08] shrink-0"
+              className="flex items-end gap-2.5 px-3 py-3 bg-[color:var(--mb-ground)] border-t border-[color:var(--mb-line)] shrink-0"
             >
               <div className="flex-1 relative">
                 <textarea
@@ -371,7 +371,7 @@ export default function ConfidentialChatModal({
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Type a confidential message…"
-                  className="w-full resize-none overflow-hidden rounded-2xl border border-white/10 bg-gray-900 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition leading-relaxed min-h-[44px]"
+                  className="w-full resize-none overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-4 py-2.5 text-sm text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] transition leading-relaxed min-h-[44px]"
                   style={{ height: "44px" }}
                 />
               </div>
@@ -379,7 +379,7 @@ export default function ConfidentialChatModal({
               <button
                 type="submit"
                 disabled={!inputText.trim() || sending}
-                className="shrink-0 h-11 w-11 rounded-2xl bg-cyan-600 flex items-center justify-center text-white hover:bg-cyan-500 transition disabled:opacity-40 shadow-lg disabled:shadow-none interactive-tap"
+                className="shrink-0 h-11 w-11 rounded-md bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-40 shadow-sm disabled:shadow-none interactive-tap"
                 aria-label="Send message"
               >
                 {sending ? (

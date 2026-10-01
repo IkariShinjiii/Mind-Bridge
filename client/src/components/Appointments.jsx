@@ -222,15 +222,12 @@ export default function Appointments() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-gray-800 pb-5">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[color:var(--mb-line)] pb-5">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-cyan-400 font-semibold mb-1">
-            {isCounselor ? "Counselor Session Queue" : "Student Appointments"}
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-3xl">
             Counseling Appointments
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[color:var(--mb-muted)] mt-1">
             {isCounselor
               ? "Review, confirm, reschedule, or manage confidential counseling sessions with students."
               : "Manage and book confidential counseling sessions with University guidance counselors."}
@@ -240,7 +237,7 @@ export default function Appointments() {
         {!isCounselor && (
           <button
             onClick={openBookingModal}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-teal-500 hover:scale-[1.01] active:scale-[0.99] self-start sm:self-auto interactive-tap"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-sm font-semibold text-[color:var(--mb-panel-ink)] shadow-sm transition-all hover:bg-[color:var(--mb-panel)] hover:scale-[1.01] active:scale-[0.99] self-start sm:self-auto interactive-tap"
           >
             <Plus className="h-4 w-4" />
             <span>Book New Appointment</span>
@@ -251,16 +248,16 @@ export default function Appointments() {
       {/* Global Feedback Banner */}
       {feedback.message && (
         <div
-          className={`mb-6 rounded-xl border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${
+          className={`mb-6 rounded-md border p-4 text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${
             feedback.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-rose-500/30 bg-rose-500/10 text-rose-300"
+              ? "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
+              : "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
           }`}
         >
           {feedback.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="h-4 w-4 text-[color:var(--mb-safe)] shrink-0" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+            <AlertCircle className="h-4 w-4 text-[color:var(--mb-urgent)] shrink-0" />
           )}
           <span>{feedback.message}</span>
         </div>
@@ -281,8 +278,8 @@ export default function Appointments() {
             onClick={() => setFilter(val)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
               filter === val
-                ? "bg-teal-600 text-white shadow-sm font-semibold"
-                : "border border-gray-800 bg-gray-900 text-gray-400 hover:border-gray-700 hover:text-white"
+                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-sm font-semibold"
+                : "border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-line)] hover:text-[color:var(--mb-ink)]"
             }`}
           >
             {label}
@@ -292,17 +289,17 @@ export default function Appointments() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/60 p-8 text-gray-400 gap-3">
-          <Spinner size={20} className="text-teal-400" />
+        <div className="flex min-h-[300px] items-center justify-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)] gap-3">
+          <Spinner size={20} className="text-[color:var(--mb-brand)]" />
           <span className="text-sm">Loading appointment records...</span>
         </div>
       ) : filteredAppointments.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-800 bg-gray-900/40 p-12 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-800 text-teal-400">
+        <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-md bg-[color:var(--mb-surface-2)] text-[color:var(--mb-brand)]">
             <Calendar className="h-7 w-7" />
           </div>
-          <h3 className="text-base font-semibold text-white">No Appointments Found</h3>
-          <p className="mt-1 text-sm text-gray-400 max-w-md mx-auto">
+          <h3 className="text-base font-semibold text-[color:var(--mb-ink)]">No Appointments Found</h3>
+          <p className="mt-1 text-sm text-[color:var(--mb-muted)] max-w-md mx-auto">
             {isCounselor
               ? "There are currently no appointment requests matching this filter."
               : "You do not have any appointments scheduled in this category. Click 'Book New Appointment' to schedule a time slot."}
@@ -310,7 +307,7 @@ export default function Appointments() {
           {!isCounselor && (
             <button
               onClick={openBookingModal}
-              className="mt-5 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-500 transition interactive-tap"
+              className="mt-5 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition interactive-tap"
             >
               Book Counselor Session
             </button>
@@ -331,39 +328,39 @@ export default function Appointments() {
             return (
               <div
                 key={apt.id}
-                className="flex flex-col gap-3 rounded-2xl border border-gray-800 bg-gray-900/90 p-4 sm:p-5 transition hover:border-gray-700 shadow-sm"
+                className="flex flex-col gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:p-5 transition hover:border-[color:var(--mb-line)] shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold text-white text-base">
+                      <h3 className="font-semibold text-[color:var(--mb-ink)] text-base">
                         {apt.title || "Counseling Session"}
                       </h3>
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
                           isConfirmed
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            ? "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]"
                             : isPending
-                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
                             : isRescheduled
-                            ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                            ? "bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)] border border-[color:var(--mb-violet)]"
                             : isCompleted
-                            ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                            ? "bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border border-[color:var(--mb-brand)]"
                             : isDeclined
-                            ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                            ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)]"
                             : isCancelled
-                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                            : "bg-gray-800 text-gray-300 border border-gray-700"
+                            ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border border-[color:var(--mb-urgent)]"
+                            : "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border border-[color:var(--mb-line)]"
                         }`}
                       >
                         {status}
                       </span>
                     </div>
 
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[color:var(--mb-muted)]">
                       <div>
                         {isCounselor ? "Student:" : "Counselor:"}{" "}
-                        <span className="text-gray-200 font-medium">
+                        <span className="text-[color:var(--mb-ink)] font-medium">
                           {isCounselor
                             ? apt.studentName || "Student"
                             : apt.counselorName || "Assigned Counselor"}
@@ -371,12 +368,12 @@ export default function Appointments() {
                       </div>
                       {apt.studentEmail && (
                         <div>
-                          Email: <span className="text-cyan-300 font-mono">{apt.studentEmail}</span>
+                          Email: <span className="text-[color:var(--mb-brand)] font-mono">{apt.studentEmail}</span>
                         </div>
                       )}
                       <div>
                         Time:{" "}
-                        <span className="text-cyan-300 font-medium">
+                        <span className="text-[color:var(--mb-brand)] font-medium">
                           {safeFormatDate(apt.start || apt.date)}
                           {apt.end ? ` - ${safeFormatDate(apt.end)}` : ""}
                         </span>
@@ -394,19 +391,19 @@ export default function Appointments() {
                             <button
                               onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
                               disabled={updatingId === apt.id}
-                              className="rounded-xl bg-cyan-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-cyan-500 transition disabled:opacity-50"
+                              className="rounded-md bg-[color:var(--mb-panel)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition disabled:opacity-50"
                             >
                               {updatingId === apt.id ? "Confirming…" : "✓ Confirm"}
                             </button>
                             <button
                               onClick={() => openActionModal("reschedule", apt)}
-                              className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+                              className="rounded-md border border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-violet)] hover:bg-[color:var(--mb-violet-bg)] transition"
                             >
                               🗓️ Reschedule
                             </button>
                             <button
                               onClick={() => openActionModal("decline", apt)}
-                              className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition"
+                              className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)] transition"
                             >
                               ✕ Decline
                             </button>
@@ -419,19 +416,19 @@ export default function Appointments() {
                             <button
                               onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
                               disabled={updatingId === apt.id}
-                              className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 transition disabled:opacity-50"
+                              className="rounded-md bg-[color:var(--mb-safe-solid)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-safe-solid)] transition disabled:opacity-50"
                             >
                               {updatingId === apt.id ? "Updating…" : "✓ Mark Completed"}
                             </button>
                             <button
                               onClick={() => openActionModal("reschedule", apt)}
-                              className="rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+                              className="rounded-md border border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-violet)] hover:bg-[color:var(--mb-violet-bg)] transition"
                             >
                               🗓️ Reschedule
                             </button>
                             <button
                               onClick={() => openActionModal("cancel", apt)}
-                              className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/20 transition"
+                              className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-3 py-1.5 text-xs font-semibold text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)] transition"
                             >
                               ✕ Cancel
                             </button>
@@ -440,7 +437,7 @@ export default function Appointments() {
 
                         {/* Completed or Cancelled notes */}
                         {(isCompleted || isDeclined || isCancelled) && (
-                          <span className="text-xs text-gray-500 italic">Archived session</span>
+                          <span className="text-xs text-[color:var(--mb-muted)] italic">Archived session</span>
                         )}
                       </>
                     ) : (
@@ -449,7 +446,7 @@ export default function Appointments() {
                         {(isPending || isConfirmed || isRescheduled) && (
                           <button
                             onClick={() => openActionModal("cancel", apt)}
-                            className="rounded-xl border border-gray-700 bg-gray-800/80 px-3 py-1.5 text-xs font-medium text-red-300 hover:bg-red-500/10 hover:border-red-500/30 transition"
+                            className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3 py-1.5 text-xs font-medium text-[color:var(--mb-urgent)] hover:bg-[color:var(--mb-urgent-bg)] hover:border-[color:var(--mb-urgent)] transition"
                           >
                             Cancel Booking
                           </button>
@@ -461,29 +458,29 @@ export default function Appointments() {
 
                 {/* CALLOUT NOTES / REASONS */}
                 {apt.declineReason && (
-                  <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-200">
-                    <span className="font-semibold text-rose-300">Decline Reason:</span>{" "}
+                  <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-3 text-xs text-[color:var(--mb-urgent)]">
+                    <span className="font-semibold text-[color:var(--mb-urgent)]">Decline Reason:</span>{" "}
                     {apt.declineReason}
                   </div>
                 )}
 
                 {apt.cancellationReason && (
-                  <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-200">
-                    <span className="font-semibold text-red-300">Cancellation Reason:</span>{" "}
+                  <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-3 text-xs text-[color:var(--mb-urgent)]">
+                    <span className="font-semibold text-[color:var(--mb-urgent)]">Cancellation Reason:</span>{" "}
                     {apt.cancellationReason}
                   </div>
                 )}
 
                 {apt.rescheduleReason && (
-                  <div className="rounded-xl border border-purple-500/20 bg-purple-500/10 p-3 text-xs text-purple-200">
-                    <span className="font-semibold text-purple-300">Reschedule Note:</span>{" "}
+                  <div className="rounded-md border border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] p-3 text-xs text-[color:var(--mb-violet)]">
+                    <span className="font-semibold text-[color:var(--mb-violet)]">Reschedule Note:</span>{" "}
                     {apt.rescheduleReason}
                   </div>
                 )}
 
                 {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
-                  <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-xs text-cyan-200">
-                    <span className="font-semibold text-cyan-300">Counselor Note:</span>{" "}
+                  <div className="rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-3 text-xs text-[color:var(--mb-brand)]">
+                    <span className="font-semibold text-[color:var(--mb-brand)]">Counselor Note:</span>{" "}
                     {apt.counselorNote}
                   </div>
                 )}
@@ -504,18 +501,18 @@ export default function Appointments() {
           <button
             type="button"
             onClick={() => setShowModal(false)}
-            className="min-h-[44px] rounded-xl border border-gray-700 px-5 text-xs font-medium text-gray-400 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
+            className="min-h-[44px] rounded-md border border-[color:var(--mb-line)] px-5 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
           >
             Cancel
           </button>
         }
       >
         {loadingSlots ? (
-          <div className="py-8 text-center text-gray-400 flex items-center justify-center gap-2 text-xs sm:text-sm">
+          <div className="py-8 text-center text-[color:var(--mb-muted)] flex items-center justify-center gap-2 text-xs sm:text-sm">
             <Spinner size={18} /> Loading open counselor slots...
           </div>
         ) : availableSlots.length === 0 ? (
-          <div className="py-8 text-center text-gray-400 border border-dashed border-white/10 rounded-2xl p-4 text-xs sm:text-sm">
+          <div className="py-8 text-center text-[color:var(--mb-muted)] border border-dashed border-[color:var(--mb-line)] rounded-md p-4 text-xs sm:text-sm">
             No open counselor slots available right now. Please check back soon or visit the
             University Guidance Office directly.
           </div>
@@ -528,20 +525,20 @@ export default function Appointments() {
               return (
                 <div
                   key={slot.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-gray-800/50 p-3.5 sm:p-4 text-xs sm:text-sm hover:border-cyan-500/30 transition"
+                  className="flex items-center justify-between rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] p-3.5 sm:p-4 text-xs sm:text-sm hover:border-[color:var(--mb-brand)] transition"
                 >
                   <div className="pr-2">
-                    <div className="font-medium text-white">
+                    <div className="font-medium text-[color:var(--mb-ink)]">
                       Counselor: {slot.counselorName || "Assigned Counselor"}
                     </div>
-                    <div className="text-cyan-400 mt-0.5 font-medium text-xs">
+                    <div className="text-[color:var(--mb-brand)] mt-0.5 font-medium text-xs">
                       {startTime} {endTime ? `to ${endTime}` : ""}
                     </div>
                   </div>
                   <button
                     onClick={() => handleBookSlot(slot)}
                     disabled={bookingId === slot.id}
-                    className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-500 disabled:opacity-50 interactive-tap shrink-0"
+                    className="min-h-[44px] inline-flex items-center justify-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-4 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] disabled:opacity-50 interactive-tap shrink-0"
                   >
                     {bookingId === slot.id ? <Spinner size={14} /> : "Book Slot"}
                   </button>
@@ -576,9 +573,9 @@ export default function Appointments() {
           <form onSubmit={handleActionSubmit} className="space-y-4">
             {/* Reschedule Date & Time Inputs */}
             {actionModal.type === "reschedule" && (
-              <div className="space-y-3 rounded-2xl border border-white/[0.08] bg-gray-950/60 p-3.5">
+              <div className="space-y-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3.5">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
+                  <label className="block text-xs font-semibold text-[color:var(--mb-muted)] mb-1">
                     New Start Date & Time
                   </label>
                   <input
@@ -586,19 +583,19 @@ export default function Appointments() {
                     value={rescheduleStart}
                     onChange={(e) => setRescheduleStart(e.target.value)}
                     required
-                    className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-h-[44px]"
+                    className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3 py-2 text-xs sm:text-sm text-[color:var(--mb-ink)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] min-h-[44px]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1">
-                    New End Date & Time <span className="text-[10px] text-gray-500">(Optional)</span>
+                  <label className="block text-xs font-semibold text-[color:var(--mb-muted)] mb-1">
+                    New End Date & Time <span className="text-[10px] text-[color:var(--mb-muted)]">(Optional)</span>
                   </label>
                   <input
                     type="datetime-local"
                     value={rescheduleEnd}
                     onChange={(e) => setRescheduleEnd(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3 py-2 text-xs sm:text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 min-h-[44px]"
+                    className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3 py-2 text-xs sm:text-sm text-[color:var(--mb-ink)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)] min-h-[44px]"
                   />
                 </div>
               </div>
@@ -607,7 +604,7 @@ export default function Appointments() {
             {/* Quick Presets for Decline or Cancel */}
             {actionModal.type === "decline" && (
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                <label className="block text-xs font-medium text-[color:var(--mb-muted)] mb-1.5">
                   Quick Reason Presets:
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -616,7 +613,7 @@ export default function Appointments() {
                       type="button"
                       key={preset}
                       onClick={() => setActionReason(preset)}
-                      className="min-h-[36px] rounded-xl border border-white/10 bg-gray-800/80 px-2.5 py-1 text-[11px] text-gray-300 hover:border-cyan-500/40 hover:text-white transition interactive-tap"
+                      className="min-h-[36px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2.5 py-1 text-[11px] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                     >
                       {preset}
                     </button>
@@ -627,7 +624,7 @@ export default function Appointments() {
 
             {actionModal.type === "cancel" && isCounselor && (
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                <label className="block text-xs font-medium text-[color:var(--mb-muted)] mb-1.5">
                   Quick Reason Presets:
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -636,7 +633,7 @@ export default function Appointments() {
                       type="button"
                       key={preset}
                       onClick={() => setActionReason(preset)}
-                      className="min-h-[36px] rounded-xl border border-white/10 bg-gray-800/80 px-2.5 py-1 text-[11px] text-gray-300 hover:border-cyan-500/40 hover:text-white transition interactive-tap"
+                      className="min-h-[36px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-2.5 py-1 text-[11px] text-[color:var(--mb-muted)] hover:border-[color:var(--mb-brand)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
                     >
                       {preset}
                     </button>
@@ -647,7 +644,7 @@ export default function Appointments() {
 
             {/* Notes / Reason Textarea */}
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1.5">
+              <label className="block text-xs font-medium text-[color:var(--mb-muted)] mb-1.5">
                 {actionModal.type === "reschedule"
                   ? "Reschedule Explanation / Note to Student:"
                   : actionModal.type === "decline"
@@ -665,29 +662,29 @@ export default function Appointments() {
                     ? "e.g. Please choose another slot on Wednesday afternoon..."
                     : "e.g. Conflict with examination schedule..."
                 }
-                className="w-full rounded-xl border border-white/10 bg-gray-800/90 px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-gray-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 py-2.5 text-xs sm:text-sm text-[color:var(--mb-ink)] placeholder:text-[color:var(--mb-muted)] focus:border-[color:var(--mb-brand)] focus:outline-none focus:ring-1 focus:ring-[color:var(--mb-focus)]"
               />
             </div>
 
             {/* Buttons */}
-            <div className="mt-5 flex justify-end gap-2 pt-3 border-t border-white/[0.08]">
+            <div className="mt-5 flex justify-end gap-2 pt-3 border-t border-[color:var(--mb-line)]">
               <button
                 type="button"
                 onClick={closeActionModal}
                 disabled={actionSubmitting}
-                className="min-h-[44px] rounded-xl border border-gray-700 px-4 text-xs font-medium text-gray-400 hover:bg-white/[0.06] hover:text-white transition interactive-tap"
+                className="min-h-[44px] rounded-md border border-[color:var(--mb-line)] px-4 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={actionSubmitting}
-                className={`min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl px-5 text-xs font-semibold text-white transition interactive-tap ${
+                className={`min-h-[44px] inline-flex items-center justify-center gap-2 rounded-md px-5 text-xs font-semibold text-[color:var(--mb-ink)] transition interactive-tap ${
                   actionModal.type === "decline"
-                    ? "bg-rose-600 hover:bg-rose-500"
+                    ? "bg-[color:var(--mb-urgent-solid)] hover:bg-[color:var(--mb-urgent-solid)]"
                     : actionModal.type === "cancel"
-                    ? "bg-red-600 hover:bg-red-500"
-                    : "bg-purple-600 hover:bg-purple-500"
+                    ? "bg-[color:var(--mb-urgent-solid)] hover:bg-[color:var(--mb-urgent-solid)]"
+                    : "bg-[color:var(--mb-violet-solid)] hover:bg-[color:var(--mb-violet-solid)]"
                 } disabled:opacity-50`}
               >
                 {actionSubmitting && <Spinner size={14} />}

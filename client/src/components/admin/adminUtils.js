@@ -1,19 +1,19 @@
 export const RISK_STYLES = {
-  high: "bg-red-500/10 text-red-400 border-red-500/20",
-  medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  high: "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border-[color:var(--mb-urgent)]",
+  medium: "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-[color:var(--mb-warn)]",
+  low: "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-[color:var(--mb-safe)]",
 };
 
 export const STATUS_STYLES = {
-  open: "bg-gray-800 text-gray-300 border-gray-700",
-  reviewed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  escalated: "bg-red-500/10 text-red-400 border-red-500/20",
+  open: "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border-[color:var(--mb-line)]",
+  reviewed: "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-[color:var(--mb-safe)]",
+  escalated: "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border-[color:var(--mb-urgent)]",
 };
 
 export const ROLE_BADGE = {
-  student: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  counselor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  admin: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+  student: "bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border-[color:var(--mb-brand)]",
+  counselor: "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-[color:var(--mb-warn)]",
+  admin: "bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)] border-[color:var(--mb-violet)]",
 };
 
 export const CHART_COLORS = ["#1fbf9f", "#f5b84c", "#ef5d5d"];

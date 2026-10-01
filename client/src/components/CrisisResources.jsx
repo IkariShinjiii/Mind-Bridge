@@ -30,14 +30,11 @@ export default function CrisisResources() {
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-10">
       {/* Header */}
-      <div className="border-b border-gray-800 pb-5">
-        <p className="text-xs uppercase tracking-[0.2em] text-teal-400 font-semibold mb-1">
-          Support & Safety Network
-        </p>
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl font-display">
+      <div className="border-b border-[color:var(--mb-line)] pb-5">
+        <h1 className="text-2xl font-bold tracking-tight text-[color:var(--mb-ink)] sm:text-3xl font-display">
           Mental Health & Crisis Resources
         </h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-[color:var(--mb-muted)] mt-1">
           Free, confidential, and 24/7 support lines for students in distress, plus guided grounding exercises.
         </p>
       </div>
@@ -45,82 +42,82 @@ export default function CrisisResources() {
       {/* Immediate Crisis Hotlines Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* NCMH Hotline */}
-        <div className="rounded-2xl border border-red-500/30 bg-red-950/20 p-6 flex flex-col justify-between">
+        <div className="rounded-md border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider bg-red-600/80 text-white px-2.5 py-0.5 rounded-full">
+              <span className="text-xs font-bold uppercase tracking-wider bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)] px-2.5 py-0.5 rounded-full">
                 24/7 Nationwide Toll-Free
               </span>
-              <div className="h-9 w-9 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                <PhoneCall className="h-5 w-5 text-rose-400" />
+              <div className="h-9 w-9 rounded-md bg-[color:var(--mb-urgent-bg)] border border-[color:var(--mb-urgent)] flex items-center justify-center">
+                <PhoneCall className="h-5 w-5 text-[color:var(--mb-urgent)]" />
               </div>
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">NCMH Crisis Hotline</h3>
-            <p className="text-xs text-gray-300 mb-4">
+            <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-1">NCMH Crisis Hotline</h3>
+            <p className="text-xs text-[color:var(--mb-muted)] mb-4">
               National Center for Mental Health free psychiatric & crisis counseling support.
             </p>
           </div>
-          <div className="space-y-1.5 pt-3 border-t border-red-500/20 text-xs font-mono text-teal-300">
-            <div>• Toll-Free: <strong className="text-white font-bold text-sm">1553</strong></div>
-            <div>• Globe/TM: <strong className="text-white font-bold text-sm">0917-899-8727</strong></div>
-            <div>• Smart/Sun/TNT: <strong className="text-white font-bold text-sm">0966-351-4518</strong></div>
+          <div className="space-y-1.5 pt-3 border-t border-[color:var(--mb-urgent)] text-xs font-mono text-[color:var(--mb-brand)]">
+            <div>• Toll-Free: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">1553</strong></div>
+            <div>• Globe/TM: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0917-899-8727</strong></div>
+            <div>• Smart/Sun/TNT: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0966-351-4518</strong></div>
           </div>
         </div>
 
         {/* Hopeline PH */}
-        <div className="rounded-2xl border border-teal-500/30 bg-teal-950/20 p-6 flex flex-col justify-between">
+        <div className="rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold uppercase tracking-wider bg-teal-600/80 text-white px-2.5 py-0.5 rounded-full">
+              <span className="text-xs font-bold uppercase tracking-wider bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] px-2.5 py-0.5 rounded-full">
                 24/7 Crisis & Suicide Prevention
               </span>
-              <div className="h-9 w-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-                <HeartHandshake className="h-5 w-5 text-teal-400" />
+              <div className="h-9 w-9 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
+                <HeartHandshake className="h-5 w-5 text-[color:var(--mb-brand)]" />
               </div>
             </div>
-            <h3 className="text-lg font-bold text-white mb-1">Hopeline Philippines</h3>
-            <p className="text-xs text-gray-300 mb-4">
+            <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-1">Hopeline Philippines</h3>
+            <p className="text-xs text-[color:var(--mb-muted)] mb-4">
               24/7 suicide prevention and emotional crisis support hotline in the Philippines.
             </p>
           </div>
-          <div className="space-y-1.5 pt-3 border-t border-teal-500/20 text-xs font-mono text-teal-300">
-            <div>• Mobile: <strong className="text-white font-bold text-sm">0917-558-4673</strong></div>
-            <div>• Smart: <strong className="text-white font-bold text-sm">0918-873-4673</strong></div>
-            <div>• PLDT Landline: <strong className="text-white font-bold text-sm">(02) 8804-4673</strong></div>
+          <div className="space-y-1.5 pt-3 border-t border-[color:var(--mb-brand)] text-xs font-mono text-[color:var(--mb-brand)]">
+            <div>• Mobile: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0917-558-4673</strong></div>
+            <div>• Smart: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">0918-873-4673</strong></div>
+            <div>• PLDT Landline: <strong className="text-[color:var(--mb-ink)] font-bold text-sm">(02) 8804-4673</strong></div>
           </div>
         </div>
       </div>
 
       {/* University of San Agustin Guidance Center Section */}
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/90 p-6 sm:p-8">
+      <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-teal-400" />
+          <div className="h-10 w-10 rounded-md bg-[color:var(--mb-brand-bg)] border border-[color:var(--mb-brand)] flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-[color:var(--mb-brand)]" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">University of San Agustin Guidance Center</h3>
-            <p className="text-xs text-teal-300">Center for Guidance & Counseling Services (CGCS)</p>
+            <h3 className="text-lg font-bold text-[color:var(--mb-ink)]">University of San Agustin Guidance Center</h3>
+            <p className="text-xs text-[color:var(--mb-brand)]">Center for Guidance & Counseling Services (CGCS)</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-300 mb-6">
-          <div className="p-3 rounded-xl border border-gray-800 bg-gray-950/60">
-            <span className="font-semibold text-gray-400 block mb-1">Location</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-[color:var(--mb-muted)] mb-6">
+          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
+            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Location</span>
             Main Campus, Ground Floor, Blanco Hall
           </div>
-          <div className="p-3 rounded-xl border border-gray-800 bg-gray-950/60">
-            <span className="font-semibold text-gray-400 block mb-1">Office Hours</span>
+          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
+            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Office Hours</span>
             Monday – Friday, 8:00 AM – 5:00 PM
           </div>
-          <div className="p-3 rounded-xl border border-gray-800 bg-gray-950/60">
-            <span className="font-semibold text-gray-400 block mb-1">Confidentiality</span>
+          <div className="p-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)]">
+            <span className="font-semibold text-[color:var(--mb-muted)] block mb-1">Confidentiality</span>
             Protected under RA 11036 (Mental Health Act)
           </div>
         </div>
 
         <Link
           to="/appointments"
-          className="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-500 transition shadow-md interactive-tap"
+          className="inline-flex items-center gap-2 rounded-md bg-[color:var(--mb-panel)] px-5 py-2.5 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm interactive-tap"
         >
           <Calendar className="h-4 w-4" />
           <span>Book an On-Campus Counseling Session</span>
@@ -128,26 +125,23 @@ export default function CrisisResources() {
       </div>
 
       {/* Interactive Box Breathing Grounding Tool */}
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/80 p-6 sm:p-8 text-center">
+      <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8 text-center">
         <div className="max-w-md mx-auto">
-          <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold mb-1">
-            Quick Grounding Exercise
-          </p>
-          <h3 className="text-lg font-bold text-white mb-2">Box Breathing (4-4-4 Technique)</h3>
-          <p className="text-xs text-gray-400 mb-6">
+          <h3 className="text-lg font-bold text-[color:var(--mb-ink)] mb-2">Box Breathing (4-4-4 Technique)</h3>
+          <p className="text-xs text-[color:var(--mb-muted)] mb-6">
             Calm your nervous system in 60 seconds with guided rhythmic breathing.
           </p>
 
           <div className="relative flex items-center justify-center my-8">
             <div
-              className={`h-36 w-36 rounded-full border-4 flex items-center justify-center transition-all duration-1000 shadow-2xl ${
+              className={`h-36 w-36 rounded-full border-4 flex items-center justify-center transition-all duration-1000 shadow-sm ${
                 breathingState === "inhale"
-                  ? "scale-125 border-cyan-400 bg-cyan-500/20 text-cyan-200"
+                  ? "scale-125 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
                   : breathingState === "hold"
-                  ? "scale-125 border-purple-400 bg-purple-500/20 text-purple-200"
+                  ? "scale-125 border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)]"
                   : breathingState === "exhale"
-                  ? "scale-90 border-blue-400 bg-blue-500/20 text-blue-200"
-                  : "border-gray-700 bg-gray-800 text-gray-400"
+                  ? "scale-90 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                  : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
               }`}
             >
               <div className="text-center font-bold">
@@ -168,14 +162,14 @@ export default function CrisisResources() {
             {breathingState === "idle" ? (
               <button
                 onClick={() => setBreathingState("inhale")}
-                className="rounded-xl bg-cyan-600 px-6 py-2 text-xs font-semibold text-white hover:bg-cyan-500 transition shadow-md"
+                className="rounded-md bg-[color:var(--mb-panel)] px-6 py-2 text-xs font-semibold text-[color:var(--mb-panel-ink)] hover:bg-[color:var(--mb-panel)] transition shadow-sm"
               >
                 Start Breathing Exercise
               </button>
             ) : (
               <button
                 onClick={() => setBreathingState("idle")}
-                className="rounded-xl border border-gray-700 bg-gray-800 px-5 py-2 text-xs font-medium text-gray-300 hover:bg-gray-700 transition"
+                className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-5 py-2 text-xs font-medium text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-line)] transition"
               >
                 Reset
               </button>

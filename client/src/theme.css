@@ -16,6 +16,19 @@
   --mb-focus: #0b6bcb;
   --mb-error-bg: #fbe9e7;
   --mb-error-ink: #7a1f14;
+  --mb-surface-2: #e8eeec;
+  --mb-urgent-solid: #a3271b;
+  --mb-safe-solid: #1e7a56;
+  --mb-violet-solid: #5b3fa0;
+  --mb-urgent: #a3271b;
+  --mb-urgent-bg: #fbe9e7;
+  --mb-warn: #7a4f00;
+  --mb-warn-bg: #fdf1d6;
+  --mb-safe-bg: #e3f2ea;
+  --mb-brand: #0f4a55;
+  --mb-brand-bg: #e0eeee;
+  --mb-violet: #5b3fa0;
+  --mb-violet-bg: #ece7f6;
 
   background: var(--mb-ground);
   color: var(--mb-ink);
@@ -39,6 +52,20 @@
   --mb-focus: #ffc857;
   --mb-error-bg: #3a1a17;
   --mb-error-ink: #ffd5cf;
+  --mb-surface-2: #1b3037;
+  --mb-urgent-solid: #c9382b;
+  --mb-safe-solid: #1e7a56;
+  --mb-violet-solid: #6c4fc0;
+  --mb-urgent: #ff9d92;
+  --mb-urgent-bg: #3a1a17;
+  --mb-warn: #ffc857;
+  --mb-warn-bg: #3a2d0c;
+  --mb-safe: #6fd3a8;
+  --mb-safe-bg: #14352a;
+  --mb-brand: #8dd3d9;
+  --mb-brand-bg: #12363d;
+  --mb-violet: #cdbcff;
+  --mb-violet-bg: #2a2144;
   color-scheme: dark;
 }
 
@@ -129,3 +156,9 @@
   .mb-route::after, .mb-stop { position: relative; z-index: 1; animation: none; }
   .mb-btn { transition: none; }
 }
+
+/* Pages migrated from the old dark theme keep a few legacy font utilities. */
+.mb .font-display { font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif; }
+.mb .font-sans { font-family: inherit; }
+.mb .animate-fade-up { animation: mb-lift .4s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce) { .mb .animate-fade-up { animation: none; } }
