@@ -4,16 +4,31 @@ import Spinner from "../../components/ui/Spinner";
 import { validateAvailabilityWindow } from "../../lib/validation";
 import { friendlyError } from "../../lib/errors";
 
+/**
+ * Parses a stored date.
+ * @param {string|number|Date} val
+ * @returns {Date|null} null when missing or invalid
+ */
 function parseDate(val) {
   if (!val) return null;
   const d = new Date(val);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/**
+ * Clock time such as "9:30 AM".
+ * @param {Date} d
+ * @returns {string}
+ */
 function formatTime(d) {
   return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
+/**
+ * Reads a slot start and end from the several field names older data may use.
+ * @param {object} s - availability document
+ * @returns {{ start: Date|null, end: Date|null }}
+ */
 function slotWhen(s) {
   const start = parseDate(s.start || s.date || s.time);
   const end = parseDate(s.end || s.to);

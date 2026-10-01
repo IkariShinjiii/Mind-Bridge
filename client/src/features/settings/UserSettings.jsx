@@ -28,6 +28,7 @@ import Spinner from "../../components/ui/Spinner";
 import PanelHead from "../../components/ui/PanelHead";
 import { validateEmergencyContact, validatePasswordChange, isPhone } from "../../lib/validation";
 import { friendlyError } from "../../lib/errors";
+import { formatDateTime } from "../../lib/dates";
 
 const PRESET_GOALS = [
   "Manage academic stress and burnout",
@@ -41,15 +42,11 @@ const PRESET_GOALS = [
 ];
 const MAX_GOALS = 5;
 
-function safeFormatDate(val) {
-  if (!val) return "Not specified";
-  if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
-  const date = new Date(val);
-  return Number.isNaN(date.getTime())
-    ? val
-    : date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-}
-
+/**
+ * Badge classes for an appointment status in the session history.
+ * @param {string} [status]
+ * @returns {string} Tailwind classes
+ */
 function statusTone(status) {
   const s = (status || "").toLowerCase();
   if (s.includes("confirm")) return "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]";
@@ -821,7 +818,7 @@ export default function UserSettings() {
                             {apt.title || "Counseling session"}
                           </p>
                           <p className="text-[color:var(--mb-muted)]">
-                            {apt.counselorName || "Assigned counselor"} · {safeFormatDate(apt.start || apt.date)}
+                            {apt.counselorName || "Assigned counselor"} · {formatDateTime(apt.start || apt.date)}
                           </p>
                         </div>
                         <span className={`self-start rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}>

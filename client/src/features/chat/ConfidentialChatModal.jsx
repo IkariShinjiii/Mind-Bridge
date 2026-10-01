@@ -6,6 +6,11 @@ import { X, Lock, AlertTriangle, Send } from "lucide-react";
 import Spinner from "../../components/ui/Spinner";
 import useFocusTrap from "../../lib/useFocusTrap";
 
+/**
+ * Clock time for a chat bubble, e.g. "9:30 AM".
+ * @param {string|number|Date} val
+ * @returns {string} empty when the value is not a date
+ */
 function formatTime(val) {
   if (!val) return "";
   const date = new Date(val);
@@ -13,6 +18,11 @@ function formatTime(val) {
   return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
+/**
+ * Day heading for a group of messages: "Today", "Yesterday", or a short date.
+ * @param {string|number|Date} val
+ * @returns {string} empty when the value is not a date
+ */
 function formatDayLabel(val) {
   if (!val) return "";
   const date = new Date(val);
@@ -33,7 +43,11 @@ function formatDayLabel(val) {
   return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
-// Groups messages by calendar day
+/**
+ * Groups messages (already in time order) by calendar day.
+ * @param {Array<{ timestamp?: string }>} messages
+ * @returns {Array<{ day: string, messages: Array<object> }>}
+ */
 function groupByDay(messages) {
   const groups = [];
   let currentDay = null;

@@ -14,19 +14,13 @@ import BookingFlow from "./BookingFlow";
 import { toLocalInputValue } from "../../lib/dates";
 import { friendlyError } from "../../lib/errors";
 import { validateAvailabilityWindow } from "../../lib/validation";
+import { formatDateTime } from "../../lib/dates";
 
-function safeFormatDate(val) {
-  if (!val) return "Not specified";
-  if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
-  const date = new Date(val);
-  return Number.isNaN(date.getTime())
-    ? val
-    : date.toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-}
-
+/**
+ * Splits a date into the month, day and time shown on the appointment date plate.
+ * @param {string|number|Date} val
+ * @returns {{ month: string, day: number, time: string }|null} null when the date is invalid
+ */
 function plateParts(val) {
   const d = val ? new Date(val) : null;
   if (!d || Number.isNaN(d.getTime())) return null;
@@ -37,6 +31,12 @@ function plateParts(val) {
   };
 }
 
+/**
+ * Normalises a free-text appointment status into one of: confirmed, pending, rescheduled, completed,
+ * declined, cancelled, other.
+ * @param {string} [status]
+ * @returns {string}
+ */
 function statusKind(status) {
   const s = (status || "Pending Review").toLowerCase();
   if (s.includes("confirm")) return "confirmed";
@@ -57,6 +57,12 @@ const FILTERS = [
   ["cancelled_declined", "Declined or cancelled"],
 ];
 
+/**
+ * True when an appointment belongs under the selected filter tab.
+ * @param {{ status?: string }} apt
+ * @param {string} filter - "all" or a FILTERS value
+ * @returns {boolean}
+ */
 function matchesFilter(apt, filter) {
   const kind = statusKind(apt.status);
   if (filter === "cancelled_declined") return kind === "declined" || kind === "cancelled";
@@ -437,8 +443,8 @@ export default function Appointments() {
                     <div className="flex gap-2">
                       <dt className="text-[color:var(--mb-muted)]">When</dt>
                       <dd className="font-semibold text-[color:var(--mb-ink)]">
-                        {safeFormatDate(apt.start || apt.date)}
-                        {apt.end ? ` to ${safeFormatDate(apt.end)}` : ""}
+                        {formatDateTime(apt.start || apt.date)}
+                        {apt.end ? ` to ${formatDateTime(apt.end)}` : ""}
                       </dd>
                     </div>
                     {isCounselor && apt.studentEmail && (
@@ -570,7 +576,7 @@ export default function Appointments() {
         }
         description={
           actionModal?.apt
-            ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${safeFormatDate(
+            ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${formatDateTime(
                 actionModal.apt.start || actionModal.apt.date
               )}`
             : undefined

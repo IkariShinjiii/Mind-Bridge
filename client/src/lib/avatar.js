@@ -8,4 +8,9 @@ export const AVATAR_COLORS = [
   { id: "rose", name: "Plum", color: "#8a3b62" },
 ];
 
+/**
+ * Looks up the background colour for a saved avatar id; unknown or missing ids fall back to teal.
+ * @param {string} [id] - one of the AVATAR_COLORS ids
+ * @returns {string} hex colour
+ */
 export const avatarColor = (id) => (AVATAR_COLORS.find((c) => c.id === id) || AVATAR_COLORS[0]).color;

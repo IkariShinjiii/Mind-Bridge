@@ -2,6 +2,13 @@
 // functions/index.js applies the same rules (high >= 60% of max, or any
 // crisis item above zero) when it decides whether to alert staff.
 
+/**
+ * Scores a check-in. Each answer is 0 to 3; risk is "high" when any crisis item is above zero or the
+ * total reaches 60% of the maximum, "medium" from 30%, otherwise "low".
+ * @param {Array<number|string|null>} answers - one value per question (null counts as 0)
+ * @param {Array<{ isCrisisItem?: boolean }>} [questions] - question metadata, same order as answers
+ * @returns {{ total: number, maxScore: number, riskLevel: "low"|"medium"|"high", flaggedForImmediateReview: boolean }}
+ */
 export function scoreAnswers(answers, questions = []) {
   const count = questions.length || answers.length;
   const total = answers.reduce((sum, v) => sum + (Number(v) || 0), 0);

@@ -35,20 +35,13 @@ import Spinner from "../../components/ui/Spinner";
 import ConfidentialChatModal from "../chat/ConfidentialChatModal";
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "../appointments/BookingFlow";
+import { formatDateTime } from "../../lib/dates";
 
-// Safely formats dates to prevent the "Invalid Date" error
-function safeFormatDate(val) {
-  if (!val) return null;
-  if (typeof val === "string" && !val.includes("-") && !val.includes("/")) return val;
-  const date = new Date(val);
-  return Number.isNaN(date.getTime())
-    ? val
-    : date.toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-}
-
+/**
+ * Short axis label for the trend chart, e.g. "Oct 2".
+ * @param {string|number|Date} val
+ * @returns {string} empty when the value is not a date
+ */
 function formatShortDate(val) {
   if (!val) return "";
   const date = new Date(val);
@@ -268,7 +261,7 @@ export default function StudentDashboard() {
         id: item.id || `checkin-${index}`,
         rawDate: item.createdAt,
         formattedDate: formatShortDate(item.createdAt) || `Check-in ${index + 1}`,
-        fullDate: safeFormatDate(item.createdAt),
+        fullDate: formatDateTime(item.createdAt, ""),
         score,
         riskLevel: item.riskLevel || "low",
         max: item.maxScore || 21,
@@ -410,7 +403,7 @@ export default function StudentDashboard() {
               </div>
               <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">
                 {appointments.length > 0
-                  ? safeFormatDate(appointments[0].start || appointments[0].date)
+                  ? formatDateTime(appointments[0].start || appointments[0].date)
                   : "None scheduled"}
               </div>
             </div>
@@ -815,7 +808,7 @@ export default function StudentDashboard() {
                   className="flex flex-wrap items-center justify-between gap-2 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3"
                 >
                   <div>
-                    <span className="font-bold text-[color:var(--mb-ink)]">{safeFormatDate(item.createdAt)}</span>
+                    <span className="font-bold text-[color:var(--mb-ink)]">{formatDateTime(item.createdAt)}</span>
                     <span className="ml-2 text-[color:var(--mb-muted)]">
                       Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> / {item.maxScore || 21}
                     </span>
@@ -880,7 +873,7 @@ export default function StudentDashboard() {
                     </span>
                   </div>
                   <div className="mt-1 text-[color:var(--mb-muted)]">
-                    {safeFormatDate(apt.start || apt.date) || "Scheduled"}
+                    {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
                   </div>
                   {apt.counselorName && (
                     <div className="mt-0.5 text-[color:var(--mb-brand)] font-bold">

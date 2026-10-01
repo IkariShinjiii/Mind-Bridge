@@ -18,21 +18,42 @@ manage appointments.
 
 ```
 client/src/
-  App.jsx, main.jsx      routes and entry point
-  lib/                   Firestore/Auth calls (api.js), Firebase init, risk scoring + tests
+  App.jsx, main.jsx      routes (lazy-loaded) and entry point, wrapped in an ErrorBoundary
+  lib/                   api.js (all Firestore/Auth calls), firebase.js (init),
+                         scoring.js (risk rules), validation.js (form rules),
+                         errors.js (Firebase error -> plain sentence), dates.js (date formatting),
+                         avatar.js, useFocusTrap.js (dialog keyboard handling); *.test.js beside each
   context/               AuthContext (current user and role)
   styles/                index.css (Tailwind base), theme.css (design tokens, see DESIGN.md)
-  components/ui/         shared pieces: Modal, Spinner, PublicShell, AuthFrame, CookieConsent
-  components/layout/     DashboardLayout (signed-in app shell)
+  components/ui/         shared pieces: Modal, PanelHead, Spinner, PageLoader, ErrorBoundary,
+                         PublicShell, AuthFrame (Field), CookieConsent
+  components/layout/     DashboardLayout (signed-in app shell: nav, account menu, skip link)
   pages/                 public pages (home, legal, 404) and pages/auth (login, signup)
   features/student/      check-in dashboard and crisis resources
   features/appointments/ appointments list and the booking flow
-  features/staff/        admin and counselor dashboard, availability
+  features/staff/        admin and counselor dashboard, availability, CSV export helpers
   features/settings/     user settings
   features/chat/         confidential chat dialog
 functions/               Cloud Function for high-risk email alerts (not deployed yet)
 firestore.rules          access control
 ```
+
+## Conventions
+
+- **Cards:** every page uses the same card: `rounded-md border-2 border-[color:var(--mb-line)]
+  bg-[color:var(--mb-surface)] p-5 sm:p-6`, with a `PanelHead` (title + one line, underlined with a 2px
+  rule). Page headers are `text-3xl sm:text-4xl` with a Back button on sub-pages. Buttons are
+  `mb-btn mb-btn-solid` / `mb-btn-line`, inputs are `mb-field`.
+- **Forms:** forms use `noValidate` and the rules in `lib/validation.js`. Errors appear next to the
+  field (`role="alert"`, linked with `aria-describedby`) and focus moves to the first invalid field.
+  Buttons that start async work disable themselves and show a `Spinner` with an "-ing" label.
+- **Errors:** never show raw Firebase text. Pass the error through `friendlyError()` from `lib/errors.js`.
+  Failed loads show a message with a retry button instead of an empty list.
+- **Accessibility:** target is WCAG 2.2 AA. Text colours in `theme.css` are all at least 4.5:1;
+  input borders use `--mb-field-line` (3:1+). Tap targets are 44px. Dialogs use `Modal` or
+  `useFocusTrap` so focus is trapped and returned to the opener.
+- **Dates:** use `formatDateTime` / `toLocalInputValue` from `lib/dates.js`. Do not build
+  `datetime-local` values with `toISOString()` (that is UTC and shifts the hour).
 
 ## Roles
 
@@ -57,6 +78,17 @@ VITE_FIREBASE_API_KEY=...
 VITE_FIREBASE_AUTH_DOMAIN=...
 VITE_FIREBASE_PROJECT_ID=...
 ```
+
+## Test and build
+
+```bash
+cd client
+npm test          # vitest: scoring, validation, errors, dates
+npm run build     # production build into client/dist
+```
+
+Bundle note: the main chunk (about 900 KB, 245 KB gzipped) is mostly the Firebase SDK, which every
+page needs for sign-in. Route pages, charts and the animation library load on demand.
 
 ## Deploy
 
