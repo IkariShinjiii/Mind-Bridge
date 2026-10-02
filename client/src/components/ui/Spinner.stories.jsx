@@ -50,7 +50,7 @@ export const LoadingRegion = {
   render: () => (
     <div
       role="status"
-      className="flex min-h-[160px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)]"
+      className="flex min-h-[160px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-muted)]"
     >
       <Spinner size={20} /> Loading your sessions...
     </div>

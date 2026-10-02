@@ -46,34 +46,42 @@ export function useToast() {
 
 function ToastItem({ toast, onDismiss }) {
   const [paused, setPaused] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const isError = toast.type === "error";
+
+  // Slide out first, then remove; the short delay matches the exit animation in theme.css.
+  const leave = useCallback(() => {
+    setLeaving(true);
+    setTimeout(() => onDismiss(toast.id), 180);
+  }, [onDismiss, toast.id]);
 
   // Hovering or focusing a toast holds it open so it can be read, and it never vanishes under the pointer.
   useEffect(() => {
     if (paused) return undefined;
-    const t = setTimeout(() => onDismiss(toast.id), DURATION_MS[toast.type]);
+    const t = setTimeout(leave, DURATION_MS[toast.type]);
     return () => clearTimeout(t);
-  }, [paused, toast.id, toast.type, onDismiss]);
+  }, [paused, toast.type, leave]);
 
   const Icon = isError ? AlertCircle : CheckCircle2;
   return (
     <div
+      data-leaving={leaving || undefined}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className={`mb-toast pointer-events-auto flex items-start gap-3 rounded-md border-2 bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-[0_6px_18px_-8px_rgba(0,0,0,0.35)] ${
+      className={`mb-toast pointer-events-auto flex items-start gap-3 rounded-lg border border-l-4 bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-mb-lg ${
         isError ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-safe)]"
       }`}
     >
       <Icon
-        className={`mt-0.5 h-5 w-5 shrink-0 ${isError ? "text-[color:var(--mb-urgent)]" : "text-[color:var(--mb-safe)]"}`}
+        className={`mt-1 h-5 w-5 shrink-0 ${isError ? "text-[color:var(--mb-urgent)]" : "text-[color:var(--mb-safe)]"}`}
         aria-hidden="true"
       />
-      <p className="min-w-0 flex-1 pt-0.5 font-medium text-[color:var(--mb-ink)]">{toast.message}</p>
+      <p className="min-w-0 flex-1 pt-1 font-medium text-[color:var(--mb-ink)]">{toast.message}</p>
       <button
         type="button"
-        onClick={() => onDismiss(toast.id)}
+        onClick={leave}
         aria-label={`Dismiss: ${toast.message}`}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)]"
       >

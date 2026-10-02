@@ -41,7 +41,7 @@ export default function Modal({
     <LazyMotion features={domAnimation} strict>
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             {/* Backdrop */}
             <m.div
               initial={{ opacity: 0 }}
@@ -50,7 +50,7 @@ export default function Modal({
               transition={{ duration: 0.2 }}
               onClick={onClose}
               aria-hidden="true"
-              className="fixed inset-0 bg-black/80 "
+              className="mb-backdrop-blur fixed inset-0"
             />
 
             {/* Modal Dialog Card */}
@@ -60,15 +60,15 @@ export default function Modal({
               role="dialog"
               aria-modal="true"
               aria-labelledby={title ? titleId : undefined}
-              initial={{ opacity: 0, scale: 0.95, y: 14 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-              className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden focus:outline-none`}
+              exit={{ opacity: 0, scale: 0.97, y: 8 }}
+              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+              className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-lg overflow-hidden focus:outline-none`}
             >
               {/* Header */}
               {(title || description) && (
-                <div className="flex items-start justify-between border-b-2 border-[color:var(--mb-line)] px-5 py-4 sm:px-6 sm:py-5 shrink-0 bg-[color:var(--mb-ground)]">
+                <div className="flex items-start justify-between border-b border-[color:var(--mb-line)] px-6 py-4 sm:px-6 sm:py-6 shrink-0 bg-[color:var(--mb-ground)]">
                   <div className="space-y-1 pr-4">
                     {title && (
                       <h2 id={titleId} className="text-xl font-bold text-[color:var(--mb-ink)] sm:text-2xl">
@@ -82,7 +82,7 @@ export default function Modal({
                     type="button"
                     onClick={onClose}
                     aria-label="Close dialog"
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition interactive-tap"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-[color:var(--mb-muted)] hover:bg-[color:var(--mb-surface-2)] hover:text-[color:var(--mb-ink)] transition-colors"
                   >
                     <svg
                       className="h-5 w-5"
@@ -105,7 +105,7 @@ export default function Modal({
 
               {/* Optional Footer */}
               {footer && (
-                <div className="border-t-2 border-[color:var(--mb-line)] px-5 py-3.5 sm:px-6 sm:py-4 bg-[color:var(--mb-ground)] shrink-0 flex items-center justify-end gap-3">
+                <div className="border-t border-[color:var(--mb-line)] px-6 py-4 sm:px-6 sm:py-4 bg-[color:var(--mb-ground)] shrink-0 flex items-center justify-end gap-3">
                   {footer}
                 </div>
               )}

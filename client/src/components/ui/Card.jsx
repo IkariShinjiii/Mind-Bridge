@@ -3,21 +3,22 @@ import PanelHead from "./PanelHead";
 import Spinner from "./Spinner";
 
 const TONES = {
-  default: "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)]",
-  brand: "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)]",
-  safe: "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)]",
-  warn: "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)]",
-  urgent: "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)]",
+  default: "",
+  brand: "!border-[color:var(--mb-brand)] !bg-[color:var(--mb-brand-bg)]",
+  safe: "!border-[color:var(--mb-safe)] !bg-[color:var(--mb-safe-bg)]",
+  warn: "!border-[color:var(--mb-warn)] !bg-[color:var(--mb-warn-bg)]",
+  urgent: "!border-[color:var(--mb-urgent)] !bg-[color:var(--mb-urgent-bg)]",
 };
 
 /**
- * The app card: a 2px-bordered surface with an optional heading, body and footer.
+ * The app card: a softly shadowed, 1px-bordered surface with an optional heading, body and footer.
  *
  * States:
  * - `loading`: replaces the body with a spinner and `loadingLabel`, and sets `aria-busy`.
  * - `error`: replaces the body with an alert message; pass `onRetry` to add a "Try again" button.
  * - `disabled`: dims the card and marks it `aria-disabled` (the section is unavailable, not just inert).
  * - `dashed`: dashed border for empty states.
+ * - `interactive`: lifts on hover; use when the whole card is a link or button target.
  *
  * @param {object} props
  * @param {"default"|"brand"|"safe"|"warn"|"urgent"} [props.tone="default"]
@@ -30,6 +31,7 @@ const TONES = {
  * @param {() => void} [props.onRetry]
  * @param {boolean} [props.disabled]
  * @param {boolean} [props.dashed]
+ * @param {boolean} [props.interactive]
  * @param {React.ReactNode} [props.footer] - actions row, separated by a rule
  * @param {React.ElementType} [props.as="section"]
  * @param {string} [props.className]
@@ -45,6 +47,7 @@ export default function Card({
   onRetry,
   disabled = false,
   dashed = false,
+  interactive = false,
   footer,
   as: Tag = "section",
   className = "",
@@ -78,9 +81,9 @@ export default function Card({
     <Tag
       aria-busy={loading || undefined}
       aria-disabled={disabled || undefined}
-      className={`rounded-md border-2 ${dashed ? "border-dashed" : ""} p-5 sm:p-6 ${TONES[tone] || TONES.default}${
-        disabled ? " opacity-60" : ""
-      }${className ? ` ${className}` : ""}`}
+      className={`mb-card${dashed ? " !border-dashed !shadow-none" : ""}${interactive ? " mb-card-interactive" : ""} ${
+        TONES[tone] || TONES.default
+      }${disabled ? " opacity-60" : ""}${className ? ` ${className}` : ""}`}
       {...rest}
     >
       {title && (
@@ -90,7 +93,7 @@ export default function Card({
       )}
       {body}
       {footer && !loading && (
-        <div className="mt-5 flex flex-wrap justify-end gap-3 border-t-2 border-[color:var(--mb-line)] pt-4">
+        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-[color:var(--mb-line)] pt-4">
           {footer}
         </div>
       )}

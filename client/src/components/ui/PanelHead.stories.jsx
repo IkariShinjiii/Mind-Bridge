@@ -38,7 +38,7 @@ export const LongDescription = {
 export const InsideCard = {
   name: "Inside a settings card",
   render: () => (
-    <section className="max-w-xl rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+    <section className="max-w-xl mb-card">
       <PanelHead title="Profile">Your name appears on appointments and in messages to your counselor.</PanelHead>
       <label htmlFor="ph-name" className="mb-1 block font-bold">
         Full name

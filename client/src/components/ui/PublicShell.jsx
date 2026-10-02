@@ -44,7 +44,7 @@ export function Brand({ small = false }) {
 
 export function CrisisStrip() {
   return (
-    <div className="mb-plate-amber">
+    <div className="mb-plate-amber !rounded-none">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
         <p className="font-semibold">In crisis right now? The NCMH hotline is free and open 24/7.</p>
         <a
@@ -60,19 +60,19 @@ export function CrisisStrip() {
   );
 }
 
-export default function PublicShell({ children, showAuthLinks = true }) {
+export default function PublicShell({ children, showAuthLinks = true, calm = false }) {
   const [theme, toggle] = useTheme();
   const { currentUser, userRole, logout } = useAuth();
   const dashboard = userRole === "admin" || userRole === "counselor" ? "/admin/dashboard" : "/student/dashboard";
   const next = theme === "dark" ? "light" : "dark";
 
   return (
-    <div className="mb h-[100dvh] overflow-y-auto overflow-x-hidden" data-theme={theme}>
+    <div className={`mb h-[100dvh] overflow-y-auto overflow-x-hidden${calm ? " mb-calm-bg" : ""}`} data-theme={theme}>
       <a href="#main-content" className="mb-skip">
         Skip to main content
       </a>
       <CrisisStrip />
-      <header className="border-b-2 border-[color:var(--mb-line)]">
+      <header className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Brand />
           <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
@@ -118,8 +118,8 @@ export default function PublicShell({ children, showAuthLinks = true }) {
         {children}
       </main>
 
-      <footer className="mt-20 border-t-2 border-[color:var(--mb-line)]">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1fr_auto]">
+      <footer className="mt-16 border-t border-[color:var(--mb-line)]">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto]">
           <address className="not-italic text-[color:var(--mb-muted)]">
             <p className="font-bold text-[color:var(--mb-ink)]">University of San Agustin, Guidance Services</p>
             <p>General Luna Street, City Proper, Iloilo City 5000</p>
