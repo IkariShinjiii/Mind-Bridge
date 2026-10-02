@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
-import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
+import { dialogPreset, fadePreset, useMotionPreset } from "../../lib/motion";
 import { listenToStudentMessages, sendStudentMessage } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import { X, Lock, AlertTriangle, Send } from "lucide-react";
@@ -186,21 +187,16 @@ export default function ConfidentialChatModal({
 
   const quickReplies = isCounselorView ? quickRepliesCounselor : quickRepliesStudent;
 
+  const backdropMotion = useMotionPreset(fadePreset);
+  const dialogMotion = useMotionPreset(dialogPreset);
+
   return (
-    <LazyMotion features={domAnimation} strict>
+    <>
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
             {/* Backdrop */}
-            <m.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={onClose}
-              aria-hidden="true"
-              className="fixed inset-0 bg-black/80"
-            />
+            <m.div {...backdropMotion} onClick={onClose} aria-hidden="true" className="fixed inset-0 bg-black/80" />
 
             {/* Modal Container */}
             <m.div
@@ -208,10 +204,7 @@ export default function ConfidentialChatModal({
               role="dialog"
               aria-modal="true"
               aria-label={`Confidential chat with ${recipientName || (isCounselorView ? "student" : "your counselor")}`}
-              initial={{ opacity: 0, scale: 0.95, y: 14 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              transition={{ type: "spring", duration: 0.35, bounce: 0 }}
+              {...dialogMotion}
               className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
             >
               {/* ── Header ── */}
@@ -423,6 +416,6 @@ export default function ConfidentialChatModal({
           </div>
         )}
       </AnimatePresence>
-    </LazyMotion>
+    </>
   );
 }

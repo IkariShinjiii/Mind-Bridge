@@ -1,4 +1,5 @@
 import React from "react";
+import { LazyMotion, MotionConfig, domAnimation } from "framer-motion";
 import "../src/styles/index.css";
 import "../src/styles/theme.css";
 import "./preview.css";
@@ -23,9 +24,13 @@ export default {
   decorators: [
     // Every component styles itself from the --mb-* tokens, which only exist inside .mb.
     (Story, { globals }) => (
-      <div className="mb p-6" data-theme={globals.theme} style={{ minHeight: "100vh" }}>
-        <Story />
-      </div>
+      <MotionConfig reducedMotion="user">
+        <LazyMotion features={domAnimation} strict>
+          <div className="mb p-6" data-theme={globals.theme} style={{ minHeight: "100vh" }}>
+            <Story />
+          </div>
+        </LazyMotion>
+      </MotionConfig>
     ),
   ],
   parameters: {

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
-import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
+import { dialogPreset, fadePreset, useMotionPreset } from "../../lib/motion";
 import useFocusTrap from "../../hooks/useFocusTrap";
 
 export interface ModalProps {
@@ -49,17 +50,17 @@ export default function Modal({
     };
   }, [isOpen]);
 
+  const backdropMotion = useMotionPreset(fadePreset);
+  const dialogMotion = useMotionPreset(dialogPreset);
+
   return (
-    <LazyMotion features={domAnimation} strict>
+    <>
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             {/* Backdrop */}
             <m.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              {...backdropMotion}
               onClick={onClose}
               aria-hidden="true"
               className="mb-backdrop-blur fixed inset-0"
@@ -72,10 +73,7 @@ export default function Modal({
               role="dialog"
               aria-modal="true"
               aria-labelledby={title ? titleId : undefined}
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: 8 }}
-              transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+              {...dialogMotion}
               className={`relative z-10 flex w-full ${maxWidth} max-h-[90dvh] flex-col rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-lg overflow-hidden focus:outline-none`}
             >
               {/* Header */}
@@ -125,6 +123,6 @@ export default function Modal({
           </div>
         )}
       </AnimatePresence>
-    </LazyMotion>
+    </>
   );
 }
