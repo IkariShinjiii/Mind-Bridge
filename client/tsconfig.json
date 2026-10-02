@@ -23,5 +23,5 @@
     "useUnknownInCatchVariables": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "e2e", "vite.config.ts", "tailwind.config.ts", "playwright.config.ts", ".storybook"]
+  "include": ["src", "api", "e2e", "vite.config.ts", "tailwind.config.ts", "playwright.config.ts", ".storybook"]
 }

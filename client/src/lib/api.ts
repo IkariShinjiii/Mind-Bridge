@@ -93,6 +93,26 @@ export interface SubmitOptions {
 }
 
 /**
+ * Asks the optional alert route (`client/api/alert-high-risk.ts`) to email staff. Off unless
+ * `VITE_ALERT_ENABLED` is "true". Fire and forget: it can never delay or fail a check-in.
+ */
+async function notifyHighRisk(assessmentId: string): Promise<void> {
+  if (import.meta.env.VITE_ALERT_ENABLED !== "true") return;
+  try {
+    const token = await getAuth().currentUser?.getIdToken();
+    if (!token) return;
+    await fetch("/api/alert-high-risk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ assessmentId }),
+      keepalive: true,
+    });
+  } catch (error) {
+    console.warn("High-risk alert request failed", error);
+  }
+}
+
+/**
  * Scores and stores a check-in for the signed-in student.
  * @param answers - one 0-3 value per question (null counts as 0)
  */
@@ -130,6 +150,7 @@ export const submitResponse = (
     };
 
     const docRef = await addDoc(collection(db, "assessments"), payload);
+    if (riskLevel === "high" || flaggedForImmediateReview) void notifyHighRisk(docRef.id);
     return { id: docRef.id, ...payload };
   });
 

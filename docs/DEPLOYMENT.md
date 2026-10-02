@@ -10,6 +10,7 @@ procedures and troubleshooting. For the system design see [`ARCHITECTURE.md`](AR
 | Web app (static) | Vercel | `client/` | Git push to `main` |
 | Security rules | Firebase | `firestore.rules` | `firebase deploy --only firestore:rules` |
 | Alert function (optional) | Firebase Cloud Functions | `functions/` | `firebase deploy --only functions` |
+| Alert route (optional, free alternative) | Vercel serverless | `client/api/` | Git push to `main`, once configured (4.4) |
 | Auth and database | Firebase | Console configuration | Manual, once |
 
 The three parts deploy independently. The app works without the function. The app does **not**
@@ -132,6 +133,33 @@ SMTP provider must allow the `SMTP_FROM` address as a sender.
 Test it by submitting a check-in that includes the self-harm item (the crisis flag forces a high
 result), then watch `firebase functions:log`.
 
+### 4.4 Alert route on Vercel (optional, free alternative to 4.3)
+
+`client/api/alert-high-risk.ts` does the same job as the Cloud Function without the Blaze plan. It
+ships with the app but is **inert until configured**: with no settings it answers `503` and the app
+never calls it. **Use 4.3 or 4.4, not both**, or staff get two emails.
+
+1. In Firebase console > Project settings > Service accounts, generate a private key (JSON).
+2. In Vercel > Settings > Environment Variables (Production), add:
+
+   | Variable | Value |
+   |---|---|
+   | `FIREBASE_SERVICE_ACCOUNT` | the whole JSON key, pasted as one value |
+   | `SMTP_URL` | `smtps://user:app-password@smtp.gmail.com:465` (Gmail needs an app password), or your provider's SMTP URL |
+   | `SMTP_FROM` | optional, `Mind Bridge <you@example.com>`; must be an address your SMTP account may send as |
+   | `APP_URL` | optional, your production URL |
+   | `VITE_ALERT_ENABLED` | `true` (turns on the app's call to the route) |
+
+3. **Redeploy**, because `VITE_ALERT_ENABLED` is inlined at build time.
+4. Test: sign in as a student and submit a check-in with the self-harm item answered. Staff should
+   get one email. Submitting again for the same check-in never sends a second one.
+
+How it stays safe: the caller must send their Firebase ID token, only the student who owns the
+check-in can trigger its alert, risk is recomputed on the server, each check-in alerts at most once
+(`alertSentAt`, cleared again if the send fails so a retry works), and the email carries the name, score
+and a dashboard link but never the answers. The service account and SMTP URL are real secrets: keep
+them out of `VITE_*` variables and out of git.
+
 ## 5. Environment configuration
 
 | Variable | Where | Required | Description |
@@ -139,9 +167,11 @@ result), then watch `firebase functions:log`.
 | `VITE_FIREBASE_API_KEY` | Vercel, `client/.env.local` | Yes | Firebase web API key |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Vercel, `client/.env.local` | Yes | `<project>.firebaseapp.com` |
 | `VITE_FIREBASE_PROJECT_ID` | Vercel, `client/.env.local` | Yes | Firebase project ID |
-| `SMTP_URL` | Firebase secret | For alerts | SMTP connection string |
-| `SMTP_FROM` | Function parameter | No | Sender address |
-| `APP_URL` | Function parameter | No | Link base used in alert emails |
+| `SMTP_URL` | Firebase secret, or Vercel (4.4) | For alerts | SMTP connection string |
+| `SMTP_FROM` | Function parameter, or Vercel (4.4) | No | Sender address |
+| `APP_URL` | Function parameter, or Vercel (4.4) | No | Link base used in alert emails |
+| `FIREBASE_SERVICE_ACCOUNT` | Vercel (server only) | For route 4.4 | Service account JSON; never a `VITE_*` variable |
+| `VITE_ALERT_ENABLED` | Vercel | For route 4.4 | `true` makes the app call `/api/alert-high-risk` |
 
 Notes:
 

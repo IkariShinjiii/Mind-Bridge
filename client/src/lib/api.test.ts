@@ -142,6 +142,46 @@ describe("submitResponse", () => {
     expect(r).toMatchObject({ riskLevel: "high", flaggedForImmediateReview: true, total: 1 });
   });
 
+  describe("high-risk alert request", () => {
+    const fetchMock = vi.fn();
+    beforeEach(() => {
+      fetchMock.mockReset().mockResolvedValue({ ok: true });
+      vi.stubGlobal("fetch", fetchMock);
+      signIn({ ...ana, getIdToken: async () => "tok" });
+    });
+    afterEach(() => {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    });
+
+    it("is not sent unless VITE_ALERT_ENABLED is true", async () => {
+      await api.submitResponse([0, 0, 1], { questions: qs });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("asks the route to alert staff for a high-risk check-in, with the student's token", async () => {
+      vi.stubEnv("VITE_ALERT_ENABLED", "true");
+      await api.submitResponse([0, 0, 1], { questions: qs });
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+      const [url, init] = fetchMock.mock.calls[0]!;
+      expect(url).toBe("/api/alert-high-risk");
+      expect(init).toMatchObject({ method: "POST", headers: { Authorization: "Bearer tok" } });
+      expect(JSON.parse(init.body)).toEqual({ assessmentId: "new1" });
+    });
+
+    it("is not sent for a low-risk check-in", async () => {
+      vi.stubEnv("VITE_ALERT_ENABLED", "true");
+      await api.submitResponse([0, 0, 0], { questions: qs });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("never fails the check-in when the request errors", async () => {
+      vi.stubEnv("VITE_ALERT_ENABLED", "true");
+      fetchMock.mockRejectedValue(new Error("offline"));
+      await expect(api.submitResponse([0, 0, 1], { questions: qs })).resolves.toMatchObject({ id: "new1" });
+    });
+  });
+
   it("the caller can force high risk / review even when scoring says low", async () => {
     const r = await api.submitResponse([0, 0, 0], { questions: qs, flaggedForImmediateReview: true });
     expect(r).toMatchObject({ riskLevel: "high", flaggedForImmediateReview: true });
