@@ -399,7 +399,9 @@ export default function UserSettings() {
         </button>
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Settings</h1>
-          <p className="max-w-[65ch] text-[color:var(--mb-muted)]">Your profile, security and what others can see.</p>
+          <p className="max-w-[65ch] text-[color:var(--mb-muted)]">
+            Your profile, appearance, security and what others can see.
+          </p>
         </div>
       </div>
 

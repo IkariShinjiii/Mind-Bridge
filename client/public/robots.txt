@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /student/
+Disallow: /admin/
+Disallow: /settings
+Disallow: /appointments
+Disallow: /resources

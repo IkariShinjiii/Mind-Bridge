@@ -41,6 +41,7 @@ import {
   downloadAssessmentsCsv,
 } from "../../utils/adminExport";
 import { friendlyError } from "../../utils/errors";
+import { plural } from "../../utils/plural";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
 import { caseReviewSchema } from "../../lib/schemas";
@@ -625,8 +626,8 @@ export default function AdminPanel() {
                   Risk across all check-ins
                 </h2>
                 <p className="text-[color:var(--mb-muted)]">
-                  {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a
-                  diagnosis.
+                  {plural(analytics.totalAssessments, "check-in")} from {plural(analytics.totalStudents, "student")}.
+                  Screening aid, not a diagnosis.
                 </p>
               </div>
 

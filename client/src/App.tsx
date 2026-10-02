@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, m } from "framer-motion";
 import { pagePreset, useMotionPreset } from "./lib/motion";
@@ -21,6 +21,7 @@ import CookieConsent from "./components/ui/CookieConsent";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import PageLoader from "./components/ui/PageLoader";
 import type { UserRole } from "./types";
+import { pageTitle } from "./utils/pageTitle";
 
 function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: UserRole[] }) {
   const { currentUser, userRole, loading } = useAuth();
@@ -59,6 +60,10 @@ function PublicOnlyRoute({ children }: { children: ReactNode }) {
 export default function App() {
   const location = useLocation();
   const page = useMotionPreset(pagePreset);
+
+  useEffect(() => {
+    document.title = pageTitle(location.pathname);
+  }, [location.pathname]);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
