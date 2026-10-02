@@ -160,6 +160,14 @@ check-in can trigger its alert, risk is recomputed on the server, each check-in 
 and a dashboard link but never the answers. The service account and SMTP URL are real secrets: keep
 them out of `VITE_*` variables and out of git.
 
+### 4.5 Security headers and the CSP
+
+`client/vercel.json` sets the response headers on every route. The Content Security Policy is
+`Content-Security-Policy-Report-Only`, so it logs violations in the browser console without blocking anything.
+Before enforcing it, open a deployed preview with DevTools open, sign in with Google, load a dashboard
+and book a slot. If no `[Report Only]` messages appear, rename the header to `Content-Security-Policy`.
+If some do, add only the origin the message names. See `SECURITY_AUDIT.md` F-05 and section 12.
+
 ## 5. Environment configuration
 
 | Variable | Where | Required | Description |

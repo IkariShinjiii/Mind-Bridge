@@ -491,5 +491,19 @@ gap. The "Now" items in section 9 are each small and together close F-01 and F-0
 F-04 process work follow. Once they are done, a follow-up review should test the live Firebase
 configuration, which this audit could not see.
 
+## 12. Remediation log
+
+Changes made after the review. Nothing here has been verified against the live Firebase project.
+
+| Finding | Status | What changed |
+|---|---|---|
+| F-05 | **Partly fixed** (2026-10-03) | `client/vercel.json` now sends `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` and `Strict-Transport-Security`, plus the CSP from section 6 in **report-only** mode. Zod's JIT probe (`new Function`) was the only violation found on the public pages, so it is switched off in `src/lib/zodConfig.ts`. **Still to do:** sign in with Google and use Firestore on a deployed preview with the browser console open; if no `[Report Only]` messages appear, rename the header to `Content-Security-Policy`. `Cross-Origin-Opener-Policy` is deliberately not set: a strict value breaks the Google sign-in popup. |
+| F-08 | **Code ready, not live** (2026-10-03) | An opt-in Vercel route (`client/api/alert-high-risk.ts`) can send the alert without the Blaze plan. It does nothing until its environment variables are set; see `DEPLOYMENT.md` section 4.4. The Cloud Function in `functions/` is unchanged. |
+| (unlisted) | Fixed (2026-10-03) | `bookAppointment` did not check for a signed-in user and relied on the SDK to reject an undefined `studentId`. It now fails fast with an `unauthenticated` error. |
+
+F-01, F-02, F-03, F-04, F-06, F-07, F-09 and F-10 are unchanged. F-01 in particular cannot be enforced in
+`firestore.rules` yet: the sign-up flow does not send a verification email, so requiring `email_verified`
+would lock every existing user out.
+
 *Method: static code review and automated checks on 2026-10-02. This report assesses technical controls
 and is not a legal opinion or a penetration test.*
