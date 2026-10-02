@@ -181,9 +181,9 @@ describe("appointments and availability", () => {
     expect(Date.parse(a.date)).toBeGreaterThan(Date.now());
   });
 
-  it("bookAppointment signed-out is rejected (client-side: studentId is undefined, so the write never reaches the rules)", async () => {
+  it("bookAppointment signed-out is rejected as unauthenticated before any write is attempted", async () => {
     logout();
-    await expect(api.bookAppointment({ counselorId: "cou1", start: "a", end: "b" })).rejects.toMatchObject({ code: "invalid-argument" });
+    await expect(api.bookAppointment({ counselorId: "cou1", start: "a", end: "b" })).rejects.toMatchObject({ code: "unauthenticated" });
   });
 
   it("getAppointments returns only the caller's; no user -> []", async () => {

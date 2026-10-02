@@ -199,6 +199,7 @@ export type BookingSlot = Partial<Pick<AvailabilitySlot, "id" | "counselorId" | 
 export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<DocumentData>> =>
   guard(async () => {
     const uid = getCurrentUserId();
+    if (!uid) throw new AppError("unauthenticated", "Log in to continue.", { message: "No authenticated user" });
     const authUser = getAuth().currentUser;
 
     let realName = authUser?.displayName;

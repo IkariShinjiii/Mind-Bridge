@@ -344,11 +344,11 @@ describe("bookAppointment", () => {
     expect(lastWrite(fs.addDoc)[1]).toMatchObject({ studentName: "Student", studentEmail: "" });
   });
 
-  it("does not read the profile when signed out (studentId is then undefined)", async () => {
+  it("rejects as unauthenticated when signed out, without reading or writing anything", async () => {
     signIn(null);
-    await api.bookAppointment();
+    await expect(api.bookAppointment()).rejects.toMatchObject({ code: "unauthenticated" });
     expect(fs.getDoc).not.toHaveBeenCalled();
-    expect(lastWrite(fs.addDoc)[1].studentId).toBeUndefined();
+    expect(fs.addDoc).not.toHaveBeenCalled();
   });
 
   it("propagates a failed appointment write", async () => {
