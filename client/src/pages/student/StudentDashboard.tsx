@@ -384,7 +384,7 @@ export default function StudentDashboard() {
       <div className="flex flex-col gap-6 lg:flex-row items-start">
         <section className="lg:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))]">
             {/* Gauge / Status Card */}
             <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
