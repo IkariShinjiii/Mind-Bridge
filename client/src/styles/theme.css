@@ -51,6 +51,8 @@
   --mb-shadow-md: 0 4px 12px -2px rgba(13, 70, 82, 0.1), 0 2px 6px -2px rgba(13, 70, 82, 0.08);
   --mb-shadow-lg: 0 16px 40px -12px rgba(13, 70, 82, 0.28), 0 6px 16px -6px rgba(13, 70, 82, 0.12);
   --mb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Dialog backdrop. Dark in both themes: --mb-ink is light text in dark mode and would wash the page out. */
+  --mb-scrim: rgb(16 37 43 / 0.55);
   --mb-fast: 150ms;
   --mb-base: 220ms;
 
@@ -65,6 +67,7 @@
 }
 
 .mb[data-theme="dark"] {
+  --mb-scrim: rgb(2 8 10 / 0.72);
   --mb-ground: #0b171b;
   --mb-surface: #112127;
   --mb-surface-2: #1a2f36;
@@ -536,7 +539,7 @@ textarea.mb-field {
 /* ── Backdrops and page backgrounds ──────────────────────────────────────── */
 
 .mb-backdrop-blur {
-  background: color-mix(in srgb, var(--mb-ink) 55%, transparent);
+  background: var(--mb-scrim);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }

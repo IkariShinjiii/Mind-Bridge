@@ -88,7 +88,7 @@ The scale lives in `tailwind.config.js` (`text-xs` to `text-4xl`), and bare `h1`
 - **Cards** (`mb-card`, `Card`): surface, hairline border, `shadow-mb-sm`, 24px padding. `mb-tile` is the quiet inset block inside a card.
 - **Inputs** (`mb-field`, `Input`): 12px radius, 2px `field-line` border, a soft 4px focus halo, red border plus an icon and message on error (the message fades in), grey and read-only look when disabled.
 - **Badges and chips:** `mb-badge` (+ `-safe`, `-warn`, `-urgent`, `-brand`) are tinted status labels. `mb-chip` is the filter pill; `aria-pressed` or `aria-current="page"` makes it a filled teal pill.
-- **Dialogs:** blurred ink backdrop, 16px radius, `shadow-mb-lg`, a 300ms scale-and-fade entrance. Escape and focus trapping are unchanged.
+- **Dialogs:** blurred dark scrim (`--mb-scrim`, near-black in dark mode so a dialog never brightens the screen), 16px radius, `shadow-mb-lg`, a 300ms scale-and-fade entrance. Escape and focus trapping are unchanged.
 - **Navigation:** active item is a filled teal pill, hover is a light teal wash. The bottom bar (phones and tablets) uses the same pill.
 - **Toasts:** slide in from the right in 240ms, slide out in 180ms, with a coloured left edge. Errors stay up longer than successes.
 - **Loading:** `mb-skeleton` shimmer blocks for content areas, `Spinner` for buttons and fields.

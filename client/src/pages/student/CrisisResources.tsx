@@ -83,10 +83,14 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
   return (
     <section
       aria-labelledby={`hotline-${hotline.id}`}
-      className={`mb-card mb-card-interactive flex flex-col border-t-4 ${edge}`}
+      className={`mb-card mb-card-interactive flex min-w-0 flex-col border-t-4 ${edge}`}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
-        <span className={`mb-badge ${urgent ? "mb-badge-urgent" : "mb-badge-brand"}`}>{badge}</span>
+        <span
+          className={`mb-badge min-w-0 !whitespace-normal max-sm:!rounded-lg ${urgent ? "mb-badge-urgent" : "mb-badge-brand"}`}
+        >
+          {badge}
+        </span>
         <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-md ${wash} ${ink}`}>
           <Icon className="h-6 w-6" aria-hidden="true" />
         </span>
@@ -156,7 +160,7 @@ export default function CrisisResources() {
         If you or someone near you is in immediate danger, call your local emergency number now.
       </p>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {HOTLINES.map((h) => (
           <HotlineCard key={h.id} hotline={h} />
         ))}
