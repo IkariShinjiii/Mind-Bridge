@@ -70,7 +70,7 @@ export default function HomePage() {
           STORY: you are here, four stops to a counselor, and the crisis line is always one tap away.
           FIRST VIEWPORT: amber crisis strip, headline and two actions left, four-stop route board right.
           FORM: calm wayfinding (assigned roll, seed ea2f1600). */}
-      <section className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-20">
+      <section className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-16">
         <div>
           <h1 className="mb-sign text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl [text-wrap:balance]">
             Ask for help quietly. Reach a counselor sooner.
@@ -119,14 +119,16 @@ export default function HomePage() {
             <Link
               key={who}
               to={to}
-              className="group flex flex-col justify-between gap-6 rounded-md border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-5 text-[color:var(--mb-ink)] no-underline transition-colors hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
+              className="mb-card mb-card-interactive group flex flex-col justify-between gap-6 text-[color:var(--mb-ink)] no-underline"
             >
               <div>
-                <Icon className="h-8 w-8" aria-hidden="true" />
+                <span className="grid h-12 w-12 place-items-center rounded-md bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]">
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                </span>
                 <h3 className="mb-sign mt-3 text-2xl font-bold">{who}</h3>
-                <p className="mt-1 opacity-80">{what}</p>
+                <p className="mt-1 text-[color:var(--mb-muted)]">{what}</p>
               </div>
-              <span className="mb-sign inline-flex items-center gap-2 text-lg font-bold">
+              <span className="mb-sign inline-flex items-center gap-2 text-lg font-bold text-[color:var(--mb-brand)]">
                 {cta}{" "}
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </span>
@@ -136,7 +138,7 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6" aria-labelledby="private-h">
-        <div className="grid gap-6 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 md:grid-cols-[auto_1fr] md:gap-10 md:p-8">
+        <div className="mb-card grid gap-6 md:grid-cols-[auto_1fr] md:gap-12 md:!p-8">
           <h2 id="private-h" className="mb-sign text-3xl font-bold">
             Who can see your answers
           </h2>

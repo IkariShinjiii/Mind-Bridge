@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { PhoneCall, HeartHandshake, Building2, Calendar, ArrowLeft, type LucideIcon } from "lucide-react";
+import { PhoneCall, Phone, HeartHandshake, Building2, Calendar, ArrowLeft, type LucideIcon } from "lucide-react";
 import PanelHead from "../../components/ui/PanelHead";
 
 interface HotlineNumber {
@@ -81,12 +81,12 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
   return (
     <section
       aria-labelledby={`hotline-${hotline.id}`}
-      className={`flex flex-col rounded-md border-2 p-5 sm:p-6 ${edge} ${wash}`}
+      className={`mb-card mb-card-interactive flex flex-col border-t-4 ${edge}`}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <span className={`rounded-md border-2 px-2.5 py-1 text-sm font-bold ${edge} ${ink}`}>{badge}</span>
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-2 ${edge} ${ink}`}>
-          <Icon className="h-5 w-5" aria-hidden="true" />
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <span className={`mb-badge ${urgent ? "mb-badge-urgent" : "mb-badge-brand"}`}>{badge}</span>
+        <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-md ${wash} ${ink}`}>
+          <Icon className="h-6 w-6" aria-hidden="true" />
         </span>
       </div>
       <h2 id={`hotline-${hotline.id}`} className="text-2xl font-bold text-[color:var(--mb-ink)]">
@@ -94,16 +94,25 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
       </h2>
       <p className="mt-1 text-[color:var(--mb-muted)]">{blurb}</p>
 
-      <ul className={`mt-4 divide-y-2 border-t-2 ${edge} divide-[color:var(--mb-line)]`}>
-        {numbers.map((n) => (
-          <li key={n.tel} className="flex flex-wrap items-center justify-between gap-2 py-0.5">
-            <span className="text-[color:var(--mb-muted)]">{n.label}</span>
+      <ul className="mt-6 space-y-3">
+        {numbers.map((n, i) => (
+          <li key={n.tel}>
             <a
               href={`tel:${n.tel}`}
               aria-label={`Call ${name}, ${n.label}, ${n.display}`}
-              className="inline-flex min-h-[44px] items-center font-bold tabular-nums text-[color:var(--mb-ink)] underline"
+              className={`group flex min-h-[56px] flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border px-4 py-2 no-underline transition-colors ${edge} ${
+                i === 0
+                  ? urgent
+                    ? "bg-[color:var(--mb-urgent-solid)] text-white hover:brightness-110"
+                    : "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] hover:brightness-110"
+                  : `${wash} text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface)]`
+              }`}
             >
-              {n.display}
+              <span className="flex items-center gap-3">
+                <Phone className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="text-sm font-bold">{n.label}</span>
+              </span>
+              <span className="mb-sign whitespace-nowrap text-2xl font-bold tabular-nums">{n.display}</span>
             </a>
           </li>
         ))}
@@ -126,7 +135,7 @@ export default function CrisisResources() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-4 border-b-2 border-[color:var(--mb-line)] pb-5">
+      <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           Back
@@ -151,12 +160,9 @@ export default function CrisisResources() {
       </div>
 
       {/* Campus guidance center */}
-      <section
-        aria-labelledby="campus-heading"
-        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
-      >
-        <div className="mb-5 flex items-start gap-4 border-b-2 border-[color:var(--mb-line)] pb-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-2 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]">
+      <section aria-labelledby="campus-heading" className="mb-card">
+        <div className="mb-6 flex items-start gap-4 border-b border-[color:var(--mb-line)] pb-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]">
             <Building2 className="h-5 w-5" aria-hidden="true" />
           </span>
           <div>
@@ -169,17 +175,14 @@ export default function CrisisResources() {
 
         <dl className="grid gap-4 sm:grid-cols-3">
           {CAMPUS_FACTS.map((f) => (
-            <div
-              key={f.label}
-              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
-            >
+            <div key={f.label} className="mb-tile">
               <dt className="font-bold text-[color:var(--mb-ink)]">{f.label}</dt>
               <dd className="mt-1 text-[color:var(--mb-muted)]">{f.value}</dd>
             </div>
           ))}
         </dl>
 
-        <div className="mt-5 flex justify-end">
+        <div className="mt-6 flex justify-end">
           <Link to="/appointments" className="mb-btn mb-btn-solid w-full sm:w-auto">
             <Calendar className="h-5 w-5" aria-hidden="true" />
             Book an on-campus session
@@ -188,10 +191,7 @@ export default function CrisisResources() {
       </section>
 
       {/* Box breathing */}
-      <section
-        aria-label="Box breathing exercise"
-        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
-      >
+      <section aria-label="Box breathing exercise" className="mb-card">
         <PanelHead title="Box breathing (4-4-4)">
           Breathe in, hold, and breathe out for four seconds each. A minute of this can settle a racing mind.
         </PanelHead>

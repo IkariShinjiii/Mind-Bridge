@@ -4,7 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, signOut
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
-import { validateSignup, SCHOOL_EMAIL_DOMAIN } from "../../utils/validation";
+import { validateSignup, passwordStrength, SCHOOL_EMAIL_DOMAIN } from "../../utils/validation";
 import { friendlyError, isPopupDismissed } from "../../utils/errors";
 import { focusById } from "../../utils/dom";
 import type { FieldErrors } from "../../types";
@@ -15,6 +15,8 @@ export default function Signup() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [password, setPassword] = useState("");
+  const strength = passwordStrength(password);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -117,13 +119,13 @@ export default function Signup() {
     >
       <div aria-live="polite">
         {errorMessage ? (
-          <div className="mb-alert mb-5" role="alert">
+          <div className="mb-alert mb-6" role="alert">
             {errorMessage}
           </div>
         ) : null}
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <Field id="name" label="Full name" type="text" autoComplete="name" required error={fieldErrors.name} />
         <Field
           id="email"
@@ -139,10 +141,23 @@ export default function Signup() {
           label="Password"
           type="password"
           autoComplete="new-password"
-          hint="At least 6 characters."
+          hint="At least 6 characters. A longer phrase with numbers and capitals is stronger."
           required
           error={fieldErrors.password}
-        />
+          onChange={(e) => setPassword(e.target.value)}
+        >
+          <div className="mt-3">
+            <div className="mb-meter" data-level={strength.level} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+            <p aria-live="polite" className="mt-2 min-h-[1.5rem] text-sm font-bold text-[color:var(--mb-muted)]">
+              {strength.label ? `Password strength: ${strength.label}` : ""}
+            </p>
+          </div>
+        </Field>
 
         <div>
           <div className="flex items-start gap-3">
@@ -153,7 +168,7 @@ export default function Signup() {
               required
               aria-invalid={fieldErrors.consent ? true : undefined}
               aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-              className="mt-1 h-5 w-5 shrink-0 accent-[color:var(--mb-panel)]"
+              className="mt-1 h-5 w-5 shrink-0 rounded accent-[color:var(--mb-panel)]"
             />
             <label htmlFor="consent" className="text-[color:var(--mb-muted)]">
               I agree to the{" "}
@@ -168,7 +183,7 @@ export default function Signup() {
             </label>
           </div>
           {fieldErrors.consent && (
-            <p id="consent-error" role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
+            <p id="consent-error" role="alert" className="mb-field-error">
               {fieldErrors.consent}
             </p>
           )}

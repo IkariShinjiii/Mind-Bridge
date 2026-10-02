@@ -114,9 +114,9 @@ function Row({
   const ratio = ready ? contrast(fg, bg) : null;
   const pass = ratio !== null && min ? ratio >= min : null;
   return (
-    <li className="grid grid-cols-[3.5rem_1fr_auto] items-center gap-4 border-t-2 border-[color:var(--mb-line)] py-3 first:border-t-0">
+    <li className="grid grid-cols-[3.5rem_1fr_auto] items-center gap-4 border-t border-[color:var(--mb-line)] py-3 first:border-t-0">
       <span
-        className="grid h-14 w-14 place-items-center rounded-md border-2 border-[color:var(--mb-line)] text-2xl font-bold"
+        className="grid h-14 w-14 place-items-center rounded-md border border-[color:var(--mb-line)] text-2xl font-bold"
         style={{ background: `var(--mb-${on})`, color: `var(--mb-${token})` }}
         aria-hidden="true"
       >
@@ -155,10 +155,7 @@ export const Colour: Story = {
       return (
         <div ref={ref} className="grid max-w-4xl gap-6 lg:grid-cols-2">
           {GROUPS.map((g) => (
-            <section
-              key={g.title}
-              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5"
-            >
+            <section key={g.title} className="mb-card">
               <h2 className="text-2xl font-bold">{g.title}</h2>
               <p className="mb-3 mt-1 text-[color:var(--mb-muted)]">{g.note}</p>
               <ul>
@@ -223,18 +220,17 @@ export const Signage: Story = {
         </a>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4">
-          <p className="font-bold">6px corners</p>
-          <p className="text-[color:var(--mb-muted)]">Small, like a routed sign. Never pills.</p>
+        <div className="mb-card mb-card-sm">
+          <p className="font-bold">8 / 12 / 16px corners</p>
+          <p className="text-[color:var(--mb-muted)]">Soft but structured. Pills only for filters and badges.</p>
         </div>
-        <div className="rounded-md border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4">
-          <p className="font-bold">2px borders</p>
-          <p className="text-[color:var(--mb-muted)]">Edges do the work shadows would.</p>
+        <div className="mb-card mb-card-sm mb-card-interactive">
+          <p className="font-bold">1px border, soft shadow</p>
+          <p className="text-[color:var(--mb-muted)]">
+            Hover to see the lift. Inputs keep a 2px border for 3:1 contrast.
+          </p>
         </div>
-        <button
-          type="button"
-          className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 text-left"
-        >
+        <button type="button" className="mb-card mb-card-sm text-left">
           <span className="block font-bold">3px focus ring</span>
           <span className="block text-[color:var(--mb-muted)]">Tab to this card to see it.</span>
         </button>

@@ -212,10 +212,10 @@ export default function ConfidentialChatModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", duration: 0.35, bounce: 0 }}
-              className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
+              className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
             >
               {/* ── Header ── */}
-              <div className="flex items-center gap-3 bg-[color:var(--mb-ground)] px-4 py-3.5 sm:px-5 sm:py-4 border-b-2 border-[color:var(--mb-line)] shrink-0">
+              <div className="flex items-center gap-3 bg-[color:var(--mb-ground)] px-4 py-4 sm:px-6 sm:py-4 border-b border-[color:var(--mb-line)] shrink-0">
                 {/* Avatar */}
                 <div className="relative shrink-0">
                   <div className="h-11 w-11 rounded-full border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] font-bold">
@@ -229,11 +229,11 @@ export default function ConfidentialChatModal({
                     <span className="font-bold text-[color:var(--mb-ink)] truncate">
                       {recipientName || (isCounselorView ? "Student" : "Your Counselor")}
                     </span>
-                    <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-0.5 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
+                    <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-1 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
                       {recipientRole}
                     </span>
                   </div>
-                  <p className="text-sm text-[color:var(--mb-muted)] flex items-center gap-1.5 truncate">
+                  <p className="text-sm text-[color:var(--mb-muted)] flex items-center gap-2 truncate">
                     <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     Private and confidential
                   </p>
@@ -271,7 +271,7 @@ export default function ConfidentialChatModal({
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center text-center gap-3 px-6">
-                    <div className="h-14 w-14 rounded-md bg-[color:var(--mb-brand-bg)] flex items-center justify-center border-2 border-[color:var(--mb-brand)]">
+                    <div className="h-14 w-14 rounded-md bg-[color:var(--mb-brand-bg)] flex items-center justify-center border border-[color:var(--mb-brand)]">
                       <Lock className="h-6 w-6 text-[color:var(--mb-brand)]" aria-hidden="true" />
                     </div>
                     <div>
@@ -303,11 +303,11 @@ export default function ConfidentialChatModal({
                         return (
                           <div
                             key={msg.id}
-                            className={`flex ${isMe ? "justify-end" : "justify-start"} ${isFirst ? "mt-3" : "mt-0.5"}`}
+                            className={`flex ${isMe ? "justify-end" : "justify-start"} ${isFirst ? "mt-3" : "mt-1"}`}
                           >
                             {/* Avatar for other person */}
                             {!isMe && (
-                              <div className={`w-6 mr-1.5 flex items-end ${isLast ? "opacity-100" : "opacity-0"}`}>
+                              <div className={`w-6 mr-2 flex items-end ${isLast ? "opacity-100" : "opacity-0"}`}>
                                 <div className="h-6 w-6 rounded-full bg-[color:var(--mb-panel)] flex items-center justify-center text-[color:var(--mb-panel-ink)] text-xs font-bold shrink-0">
                                   {(msg.senderName || "?").slice(0, 1).toUpperCase()}
                                 </div>
@@ -322,7 +322,7 @@ export default function ConfidentialChatModal({
                               )}
 
                               <div
-                                className={`px-3.5 py-2.5 whitespace-pre-wrap break-words ${
+                                className={`px-4 py-3 whitespace-pre-wrap break-words ${
                                   isMe
                                     ? `bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] ${
                                         isFirst && isLast
@@ -333,7 +333,7 @@ export default function ConfidentialChatModal({
                                               ? "rounded-2xl rounded-tr-md"
                                               : "rounded-lg rounded-r-md"
                                       }`
-                                    : `bg-[color:var(--mb-surface)] border-2 border-[color:var(--mb-line)] text-[color:var(--mb-ink)] ${
+                                    : `bg-[color:var(--mb-surface)] border border-[color:var(--mb-line)] text-[color:var(--mb-ink)] ${
                                         isFirst && isLast
                                           ? "rounded-2xl"
                                           : isFirst
@@ -349,7 +349,7 @@ export default function ConfidentialChatModal({
 
                               {isLast && (
                                 <span
-                                  className={`text-sm text-[color:var(--mb-muted)] mt-0.5 ${isMe ? "text-right mr-1" : "ml-1"}`}
+                                  className={`text-sm text-[color:var(--mb-muted)] mt-1 ${isMe ? "text-right mr-1" : "ml-1"}`}
                                 >
                                   {formatTime(msg.timestamp)}
                                 </span>
@@ -366,7 +366,7 @@ export default function ConfidentialChatModal({
 
               {/* ── Quick Replies ── */}
               {!loading && (
-                <div className="px-3 py-2 border-t-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
+                <div className="px-3 py-2 border-t border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] overflow-x-auto custom-scrollbar flex gap-2 shrink-0">
                   {quickReplies.map((reply) => (
                     <button
                       key={reply}
@@ -375,7 +375,7 @@ export default function ConfidentialChatModal({
                         setInputText(reply);
                         inputRef.current?.focus();
                       }}
-                      className="min-h-[44px] shrink-0 whitespace-nowrap rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-3 py-1.5 text-sm text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)] transition"
+                      className="min-h-[44px] shrink-0 whitespace-nowrap rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] px-3 py-2 text-sm text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)] transition"
                     >
                       {reply}
                     </button>
@@ -386,7 +386,7 @@ export default function ConfidentialChatModal({
               {/* ── Input Bar ── */}
               <form
                 onSubmit={handleSend}
-                className="flex items-end gap-2.5 px-3 py-3 bg-[color:var(--mb-ground)] border-t-2 border-[color:var(--mb-line)] shrink-0"
+                className="flex items-end gap-3 px-3 py-3 bg-[color:var(--mb-ground)] border-t border-[color:var(--mb-line)] shrink-0"
               >
                 <div className="flex-1 relative">
                   <label htmlFor="chat-message" className="sr-only">

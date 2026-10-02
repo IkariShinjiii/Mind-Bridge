@@ -8,7 +8,14 @@ import {
 } from "../lib/schemas";
 import type { FieldErrors } from "../types";
 
-export { SCHOOL_EMAIL_DOMAIN, MIN_PASSWORD_LENGTH, isEmail, isSchoolEmail, isPhone } from "./predicates";
+export {
+  SCHOOL_EMAIL_DOMAIN,
+  MIN_PASSWORD_LENGTH,
+  passwordStrength,
+  isEmail,
+  isSchoolEmail,
+  isPhone,
+} from "./predicates";
 
 /** Raw values as read from a form: any field may be missing or not a string. */
 type Raw<K extends string> = Partial<Record<K, unknown>>;

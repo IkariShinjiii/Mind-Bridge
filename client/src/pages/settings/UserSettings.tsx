@@ -383,7 +383,7 @@ export default function UserSettings() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center gap-4 border-b-2 border-[color:var(--mb-line)] pb-5">
+      <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
           Back
@@ -395,7 +395,7 @@ export default function UserSettings() {
       </div>
 
       {loading ? (
-        <div className="flex min-h-[320px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+        <div className="flex min-h-[320px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
           <Spinner size={20} className="text-[color:var(--mb-brand)]" />
           <span>Loading your settings…</span>
         </div>
@@ -415,11 +415,7 @@ export default function UserSettings() {
                   setActiveTab(id);
                 }}
                 aria-current={activeTab === id ? "page" : undefined}
-                className={`inline-flex min-h-[48px] shrink-0 items-center gap-2 whitespace-nowrap rounded-md border-2 px-4 text-left font-bold transition-colors ${
-                  activeTab === id
-                    ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-                }`}
+                className="mb-chip"
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {label}
@@ -427,15 +423,15 @@ export default function UserSettings() {
             ))}
           </nav>
 
-          <div className="min-w-0 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
+          <div className="min-w-0 mb-card">
             {/* PROFILE */}
             {activeTab === "profile" && (
-              <form onSubmit={handleSaveProfile} noValidate className="space-y-5">
+              <form onSubmit={handleSaveProfile} noValidate className="space-y-6">
                 <PanelHead title="Profile">How your name and picture appear in Mind Bridge.</PanelHead>
 
-                <fieldset className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+                <fieldset className="mb-tile">
                   <legend className="px-1 font-bold text-[color:var(--mb-ink)]">Picture</legend>
-                  <div className="flex flex-wrap items-center gap-5">
+                  <div className="flex flex-wrap items-center gap-6">
                     <div
                       style={
                         useGoogleAvatar && currentUser?.photoURL
@@ -540,7 +536,7 @@ export default function UserSettings() {
                   </Field>
                   <div>
                     <p className="mb-1 font-bold text-[color:var(--mb-ink)]">Account type</p>
-                    <p className="flex min-h-[48px] items-center rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-3.5 font-bold capitalize text-[color:var(--mb-ink)]">
+                    <p className="flex min-h-[48px] items-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 font-bold capitalize text-[color:var(--mb-ink)]">
                       {userRole || "student"}
                     </p>
                   </div>
@@ -566,11 +562,11 @@ export default function UserSettings() {
 
             {/* PASSWORD */}
             {activeTab === "password" && (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <PanelHead title="Password">Use a password you don't use anywhere else.</PanelHead>
 
                 {isGoogleUser ? (
-                  <div className="flex gap-4 rounded-md border-2 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-5">
+                  <div className="flex gap-4 rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6">
                     <KeyRound className="mt-1 h-6 w-6 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
                     <div>
                       <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">You sign in with Google</h3>
@@ -636,7 +632,7 @@ export default function UserSettings() {
 
             {/* PRIVACY: a statement of what is true, not switches */}
             {activeTab === "privacy" && (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <PanelHead title="Who can see your information">
                   What Mind Bridge shares, and with whom. There are no hidden settings behind this page.
                 </PanelHead>
@@ -655,10 +651,7 @@ export default function UserSettings() {
                         "Staff can export a report with names and emails removed. It lists risk level and score only.",
                       ],
                     ].map(([title, body]) => (
-                      <li
-                        key={title}
-                        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
-                      >
+                      <li key={title} className="mb-tile">
                         <p className="font-bold text-[color:var(--mb-ink)]">{title}</p>
                         <p className="text-[color:var(--mb-muted)]">{body}</p>
                       </li>
@@ -666,7 +659,7 @@ export default function UserSettings() {
                   </ul>
                 ) : (
                   <ul className="space-y-3">
-                    <li className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+                    <li className="mb-tile">
                       <p className="font-bold text-[color:var(--mb-ink)]">Your profile</p>
                       <p className="text-[color:var(--mb-muted)]">
                         Your name, email and role are visible to other approved staff and to students you are assigned
@@ -676,7 +669,7 @@ export default function UserSettings() {
                   </ul>
                 )}
 
-                <div className="rounded-md border-2 border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 text-[color:var(--mb-warn)]">
+                <div className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 text-[color:var(--mb-warn)]">
                   <p className="flex items-center gap-2 font-bold">
                     <Shield className="h-5 w-5" aria-hidden="true" /> Confidentiality notice
                   </p>
@@ -699,7 +692,7 @@ export default function UserSettings() {
 
             {/* EMERGENCY CONTACT (students) */}
             {activeTab === "emergency" && (
-              <form onSubmit={handleSaveEmergencyContact} noValidate className="space-y-5">
+              <form onSubmit={handleSaveEmergencyContact} noValidate className="space-y-6">
                 <PanelHead title="Emergency contact">
                   Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in
                   an emergency.
@@ -773,7 +766,7 @@ export default function UserSettings() {
 
             {/* GOALS (students) */}
             {activeTab === "goals" && (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <PanelHead title="Wellness goals">
                   Pick up to {MAX_GOALS} things you want to work on. Only you see this list.
                 </PanelHead>
@@ -792,7 +785,7 @@ export default function UserSettings() {
                         type="button"
                         onClick={() => handleToggleGoal(goal)}
                         aria-pressed={selected}
-                        className={`flex min-h-[56px] items-center justify-between gap-3 rounded-md border-2 p-3 text-left font-medium transition-colors ${
+                        className={`flex min-h-[56px] items-center justify-between gap-3 rounded-md border p-3 text-left font-medium transition-colors ${
                           selected
                             ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-ink)]"
                             : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
@@ -800,7 +793,7 @@ export default function UserSettings() {
                       >
                         <span>{goal}</span>
                         <span
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 ${
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border ${
                             selected
                               ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                               : "border-[color:var(--mb-line)]"
@@ -840,16 +833,16 @@ export default function UserSettings() {
 
             {/* SESSION HISTORY (students) */}
             {activeTab === "sessions" && (
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <PanelHead title="Session history">Your appointments with guidance counselors.</PanelHead>
 
                 {loadingApts ? (
-                  <div className="flex items-center justify-center gap-2 py-10 text-[color:var(--mb-muted)]">
+                  <div className="flex items-center justify-center gap-2 py-12 text-[color:var(--mb-muted)]">
                     <Spinner size={18} className="text-[color:var(--mb-brand)]" />
                     <span>Loading your sessions…</span>
                   </div>
                 ) : appointmentsList.length === 0 ? (
-                  <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] p-8 text-center">
+                  <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center">
                     <div className="mb-plate mx-auto mb-3 flex h-12 w-12 items-center justify-center">
                       <Calendar className="h-6 w-6" aria-hidden="true" />
                     </div>
@@ -870,7 +863,7 @@ export default function UserSettings() {
                     {appointmentsList.map((apt) => (
                       <li
                         key={apt.id}
-                        className="flex flex-col gap-2 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 mb-tile sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div>
                           <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
@@ -881,7 +874,7 @@ export default function UserSettings() {
                           </p>
                         </div>
                         <span
-                          className={`self-start rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}
+                          className={`self-start rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}
                         >
                           {apt.status || "Pending Review"}
                         </span>

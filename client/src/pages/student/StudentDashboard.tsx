@@ -11,6 +11,8 @@ import {
   MessageSquare,
   ArrowRight,
   Check,
+  LifeBuoy,
+  Phone,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from "recharts";
 import { getAppointments, bookAppointment, submitResponse, getAvailability, getMyAssessments } from "../../lib/api";
@@ -238,6 +240,9 @@ export default function StudentDashboard() {
     setLastSubmission(null);
   }
 
+  const answeredCount = answers.filter((a) => a !== null).length;
+  const progressPct = Math.round((answeredCount / SCREENING_QUESTIONS.length) * 100);
+
   const currentQ = SCREENING_QUESTIONS[qIndex];
   const latestAssessment = pastAssessments[0] || lastSubmission;
   const latestRisk = lastSubmission?.riskLevel || latestAssessment?.riskLevel || "low";
@@ -299,6 +304,24 @@ export default function StudentDashboard() {
     }
   }, [chartData]);
 
+  // Risk styling: the colour is always paired with words, never used alone
+  const riskBadge =
+    latestScore === null
+      ? ""
+      : latestRisk === "high"
+        ? "mb-badge-urgent"
+        : latestRisk === "medium"
+          ? "mb-badge-warn"
+          : "mb-badge-safe";
+  const riskBar =
+    latestScore === null
+      ? "bg-[color:var(--mb-line)]"
+      : latestRisk === "high"
+        ? "bg-[color:var(--mb-urgent-solid)]"
+        : latestRisk === "medium"
+          ? "bg-[color:var(--mb-amber)]"
+          : "bg-[color:var(--mb-safe-solid)]";
+
   // Gauge Percentage
   const gaugePct = latestScore !== null ? Math.min(100, Math.round((latestScore / maxScore) * 100)) : 0;
 
@@ -309,20 +332,33 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-6 animate-fade-up relative">
       {/* Top Welcome Header */}
-      <div className="border-b-2 border-[color:var(--mb-line)] pb-5">
-        <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Welcome back, {displayName}</h1>
-        <p className="max-w-[65ch] text-[color:var(--mb-muted)]">
-          How are you feeling today? Take a quick confidential check-in.
-        </p>
+      <div className="flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Welcome back, {displayName}</h1>
+          <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+            How are you feeling today? Take a quick confidential check-in.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link to="/appointments" className="mb-btn mb-btn-solid">
+            <Calendar className="h-5 w-5" aria-hidden="true" />
+            My appointments
+          </Link>
+          <Link to="/resources" className="mb-btn mb-btn-line">
+            <LifeBuoy className="h-5 w-5" aria-hidden="true" />
+            Crisis resources
+          </Link>
+        </div>
       </div>
 
       {/* Main 2-Column Dashboard Grid */}
       <div className="flex flex-col gap-6 lg:flex-row items-start">
         <section className="lg:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-4">
             {/* Gauge / Status Card */}
-            <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between">
+            <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden">
+              <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold">Latest Wellness Index</div>
                 <div className="mt-2 flex items-center justify-between">
@@ -330,23 +366,15 @@ export default function StudentDashboard() {
                     <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
                       {latestScore !== null ? `${latestScore} / ${maxScore}` : "No check-in"}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1.5">
-                      <span
-                        aria-hidden="true"
-                        className={`inline-block h-2.5 w-2.5 rounded-full ${
-                          latestRisk === "high"
-                            ? "bg-[color:var(--mb-urgent-solid)] motion-safe:animate-pulse"
+                    <div className="mt-2">
+                      <span className={`mb-badge ${riskBadge}`}>
+                        {latestScore === null
+                          ? "Not taken yet"
+                          : latestRisk === "high"
+                            ? "Needs Attention"
                             : latestRisk === "medium"
-                              ? "bg-[color:var(--mb-amber)]"
-                              : "bg-[color:var(--mb-safe-solid)]"
-                        }`}
-                      />
-                      <span className="text-sm font-bold text-[color:var(--mb-ink)]">
-                        {latestRisk === "high"
-                          ? "Needs Attention"
-                          : latestRisk === "medium"
-                            ? "Elevated Stress"
-                            : "Balanced / Stable"}
+                              ? "Elevated Stress"
+                              : "Balanced / Stable"}
                       </span>
                     </div>
                   </div>
@@ -392,7 +420,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Next Appointment Card */}
-            <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:p-5 flex flex-col justify-between">
+            <div className="mb-card mb-card-sm flex flex-col justify-between">
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold">Next Appointment</div>
                 <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">
@@ -401,25 +429,30 @@ export default function StudentDashboard() {
                     : "None scheduled"}
                 </div>
               </div>
-              <div className="mt-2 text-sm text-[color:var(--mb-muted)] flex items-center justify-between">
-                <span>Status:</span>
-                <span className="font-bold text-[color:var(--mb-brand)] capitalize">
-                  {appointments[0]?.status || "Open"}
-                </span>
-              </div>
+              {appointments.length > 0 ? (
+                <div className="mt-2 flex items-center justify-between text-sm text-[color:var(--mb-muted)]">
+                  <span>Status</span>
+                  <span className="font-bold text-[color:var(--mb-brand)] capitalize">{appointments[0].status}</span>
+                </div>
+              ) : (
+                <Link
+                  to="/appointments"
+                  className="mt-2 inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                >
+                  Book a session
+                </Link>
+              )}
             </div>
 
             {/* Assigned Counselor Card */}
-            <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:p-5 flex flex-col justify-between">
+            <div className="mb-card mb-card-sm flex flex-col justify-between">
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold flex items-center justify-between">
                   <span>Guidance Counselor</span>
-                  <span className="text-xs px-1.5 py-0.5 rounded-md bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)] font-bold uppercase">
-                    Assigned
-                  </span>
+                  <span className="mb-badge mb-badge-brand uppercase">Assigned</span>
                 </div>
                 <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">{assignedCounselorName}</div>
-                <div className="mt-0.5 text-sm text-[color:var(--mb-muted)]">100% confidential student channel</div>
+                <div className="mt-1 text-sm text-[color:var(--mb-muted)]">100% confidential student channel</div>
               </div>
               <button
                 type="button"
@@ -433,11 +466,8 @@ export default function StudentDashboard() {
           </div>
 
           {/* CHECK-IN: one question per screen, shown as stops on a route (Calm Wayfinding) */}
-          <section
-            className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
-            aria-labelledby="checkin-h"
-          >
-            <div className="mb-5">
+          <section className="mb-card" aria-labelledby="checkin-h">
+            <div className="mb-6">
               <h2 id="checkin-h" className="mb-sign text-3xl font-bold">
                 Check-in
               </h2>
@@ -445,7 +475,7 @@ export default function StudentDashboard() {
                 Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved
                 guidance staff only.
               </p>
-              <p className="mt-1 max-w-[65ch] text-sm text-[color:var(--mb-muted)]">
+              <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
                 By taking part, you consent to your answers being collected and processed for triage and support.
               </p>
             </div>
@@ -457,7 +487,7 @@ export default function StudentDashboard() {
                 const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
                 return (
                   <div className="space-y-4 animate-fade-up" aria-live="polite">
-                    <div className="mb-plate p-5 sm:p-6">
+                    <div className="mb-plate p-6 sm:p-6">
                       <div className="flex items-start gap-4">
                         <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
                           <Icon className="h-6 w-6" aria-hidden="true" />
@@ -489,7 +519,7 @@ export default function StudentDashboard() {
                     </div>
 
                     {high && (
-                      <div className="mb-plate-amber p-5">
+                      <div className="mb-plate-amber p-6">
                         <p className="mb-sign text-2xl font-bold">If you need to talk to someone right now</p>
                         <ul className="mt-2 space-y-1">
                           <li>
@@ -537,7 +567,7 @@ export default function StudentDashboard() {
                   const firstOpen = answers.findIndex((a) => a === null);
                   const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
                   return (
-                    <ol className="mb-5 flex gap-2" aria-label="Check-in progress">
+                    <ol className="mb-6 flex gap-2" aria-label="Check-in progress">
                       {SCREENING_QUESTIONS.map((q, i) => {
                         const done = answers[i] !== null;
                         const here = i === qIndex;
@@ -549,7 +579,7 @@ export default function StudentDashboard() {
                               disabled={i > reach}
                               aria-current={here ? "step" : undefined}
                               aria-label={`Question ${i + 1}${done ? ", answered" : ""}`}
-                              className={`mb-sign grid h-11 w-full place-items-center rounded border-2 text-xl font-bold disabled:cursor-not-allowed disabled:opacity-50 ${
+                              className={`mb-sign grid h-11 w-full place-items-center rounded border text-xl font-bold disabled:cursor-not-allowed disabled:opacity-50 ${
                                 here
                                   ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                                   : done
@@ -566,7 +596,21 @@ export default function StudentDashboard() {
                   );
                 })()}
 
-                <div className="mb-plate p-5 sm:p-6">
+                <div
+                  className="mb-6 h-2 overflow-hidden rounded-full bg-[color:var(--mb-line)]"
+                  role="progressbar"
+                  aria-label="Questions answered"
+                  aria-valuemin={0}
+                  aria-valuemax={SCREENING_QUESTIONS.length}
+                  aria-valuenow={answeredCount}
+                >
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[color:var(--mb-accent)] to-[color:var(--mb-brand)] transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+
+                <div key={qIndex} className="mb-plate mb-step p-6 sm:p-8">
                   <p className="mb-sign text-lg font-bold opacity-90">
                     You are on question {qIndex + 1} of {SCREENING_QUESTIONS.length}
                   </p>
@@ -584,7 +628,7 @@ export default function StudentDashboard() {
                   )}
                 </div>
 
-                <fieldset className="mt-5">
+                <fieldset key={`opts-${qIndex}`} className="mb-step mt-6">
                   <legend className="sr-only">{currentQ.text}</legend>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {SCALE_OPTIONS.map((opt) => {
@@ -600,10 +644,10 @@ export default function StudentDashboard() {
                             className="peer sr-only"
                           />
                           <span
-                            className={`flex items-center gap-4 rounded-md border-2 p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
+                            className={`flex items-center gap-4 rounded-md border p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
                               selected
                                 ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                                : "border-[color:var(--mb-line)] hover:border-[color:var(--mb-ink)]"
+                                : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] hover:border-[color:var(--mb-brand)] hover:shadow-mb-sm"
                             }`}
                           >
                             <span
@@ -632,12 +676,12 @@ export default function StudentDashboard() {
                 </fieldset>
 
                 {submitError && (
-                  <p role="alert" className="mb-alert mt-5 font-medium">
+                  <p role="alert" className="mb-alert mt-6 font-medium">
                     {submitError}
                   </p>
                 )}
 
-                <div className="mt-6 flex items-center justify-between gap-3 border-t-2 border-[color:var(--mb-line)] pt-5">
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-[color:var(--mb-line)] pt-6">
                   <button
                     type="button"
                     onClick={() => setQIndex(Math.max(0, qIndex - 1))}
@@ -671,11 +715,11 @@ export default function StudentDashboard() {
           </section>
 
           {/* WELLNESS TREND LINE CHART & HISTORY SECTION */}
-          <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
-            <div className="mb-5 flex flex-col gap-3 border-b-2 border-[color:var(--mb-line)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-card">
+            <div className="mb-6 flex flex-col gap-3 border-b border-[color:var(--mb-line)] pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)]">
                     <TrendingUp className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
                   </span>
                   <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">My wellness trend</h2>
@@ -687,7 +731,7 @@ export default function StudentDashboard() {
                 <div
                   role="group"
                   aria-label="Trend view"
-                  className="flex items-center gap-1 self-start rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1"
+                  className="flex items-center gap-1 self-start rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1"
                 >
                   <button
                     type="button"
@@ -718,11 +762,12 @@ export default function StudentDashboard() {
             </div>
 
             {loadingHistory ? (
-              <div role="status" className="flex h-56 items-center justify-center gap-2 text-[color:var(--mb-muted)]">
-                <Spinner size={18} /> Loading your trend…
+              <div role="status" aria-label="Loading your trend" className="space-y-3">
+                <span className="mb-skeleton h-6 w-1/3" />
+                <span className="mb-skeleton h-48 w-full" />
               </div>
             ) : chartData.length === 0 ? (
-              <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]">
+              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]">
                 <BarChart2 className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
                 <p className="text-lg font-bold text-[color:var(--mb-ink)]">No check-ins yet</p>
                 <p className="mx-auto mt-1 max-w-sm">
@@ -733,15 +778,15 @@ export default function StudentDashboard() {
               <div>
                 {/* Score Benchmark Legend */}
                 <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)]" />
                     <span>0 to 6: balanced</span>
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-amber)]" />
                     <span>7 to 12: moderate</span>
                   </span>
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-urgent-solid)]" />
                     <span>13 to 21: priority</span>
                   </span>
@@ -782,7 +827,7 @@ export default function StudentDashboard() {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
                             return (
-                              <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
+                              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
                                 <div className="font-bold text-[color:var(--mb-ink)]">
                                   {data.fullDate || data.formattedDate}
                                 </div>
@@ -791,12 +836,12 @@ export default function StudentDashboard() {
                                     Score: {data.score} / {data.max}
                                   </span>
                                   <span
-                                    className={`rounded-md px-2 py-0.5 text-xs font-bold uppercase ${
+                                    className={`mb-badge capitalize ${
                                       data.riskLevel === "high"
-                                        ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
+                                        ? "mb-badge-urgent"
                                         : data.riskLevel === "medium"
-                                          ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]"
-                                          : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"
+                                          ? "mb-badge-warn"
+                                          : "mb-badge-safe"
                                     }`}
                                   >
                                     {data.riskLevel}
@@ -827,10 +872,7 @@ export default function StudentDashboard() {
               /* Table History View */
               <div className="space-y-2">
                 {pastAssessments.slice(0, 6).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3"
-                  >
+                  <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 mb-tile mb-tile-sm">
                     <div>
                       <span className="font-bold text-[color:var(--mb-ink)]">{formatDateTime(item.createdAt)}</span>
                       <span className="ml-2 text-[color:var(--mb-muted)]">
@@ -839,12 +881,12 @@ export default function StudentDashboard() {
                       </span>
                     </div>
                     <span
-                      className={`rounded-md px-2.5 py-0.5 text-xs font-bold uppercase ${
+                      className={`mb-badge capitalize ${
                         item.riskLevel === "high"
-                          ? "bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] border-2 border-[color:var(--mb-urgent)]"
+                          ? "mb-badge-urgent"
                           : item.riskLevel === "medium"
-                            ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
-                            : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]"
+                            ? "mb-badge-warn"
+                            : "mb-badge-safe"
                       }`}
                     >
                       {item.riskLevel} risk
@@ -858,8 +900,26 @@ export default function StudentDashboard() {
 
         {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
         <aside className="lg:w-1/3 space-y-6 w-full">
-          <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-2 border-b-2 border-[color:var(--mb-line)] pb-3">
+          {/* Crisis help stays one tap away, in amber, on every visit */}
+          <section aria-labelledby="crisis-card-h" className="mb-plate-amber p-6 shadow-mb-md">
+            <h2 id="crisis-card-h" className="mb-sign text-2xl font-bold">
+              Need to talk to someone now?
+            </h2>
+            <p className="mt-1">Free, confidential and open 24/7. You do not need to be in crisis to call.</p>
+            <a
+              href="tel:1553"
+              className="mb-sign mt-4 inline-flex min-h-[48px] items-center gap-3 rounded-md bg-[color:var(--mb-amber-ink)] px-6 text-2xl font-bold text-[color:var(--mb-amber)] no-underline transition-transform hover:-translate-y-px"
+            >
+              <Phone className="h-5 w-5" aria-hidden="true" />
+              Call 1553
+            </a>
+            <Link to="/resources" className="mt-3 flex min-h-[44px] items-center font-bold underline">
+              See all crisis resources
+            </Link>
+          </section>
+
+          <div className="mb-card">
+            <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
               <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
                 <Calendar className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
                 <span>Sessions</span>
@@ -872,30 +932,28 @@ export default function StudentDashboard() {
               </Link>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {loadingAppointments ? (
-                <div role="status" className="flex items-center gap-2 py-4 text-[color:var(--mb-muted)]">
-                  <Spinner size={18} /> Loading sessions…
+                <div role="status" aria-label="Loading sessions" className="space-y-3">
+                  <span className="mb-skeleton h-16 w-full" />
+                  <span className="mb-skeleton h-16 w-full" />
                 </div>
               ) : appointments.length === 0 ? (
-                <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
-                  No sessions scheduled.
+                <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
+                  No sessions yet. Book one whenever you feel ready.
                 </div>
               ) : (
                 appointments.slice(0, 3).map((apt) => (
-                  <div
-                    key={apt.id}
-                    className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3"
-                  >
+                  <div key={apt.id} className="mb-tile mb-tile-sm">
                     <div className="flex justify-between items-start gap-2">
                       <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Counseling Session"}</div>
                       <span
-                        className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-bold uppercase ${
+                        className={`mb-badge shrink-0 capitalize ${
                           (apt.status || "").toLowerCase().includes("confirm")
-                            ? "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]"
+                            ? "mb-badge-safe"
                             : (apt.status || "").toLowerCase().includes("pending")
-                              ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
-                              : "bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)] border-2 border-[color:var(--mb-line)]"
+                              ? "mb-badge-warn"
+                              : ""
                         }`}
                       >
                         {apt.status || "Pending"}
@@ -905,7 +963,7 @@ export default function StudentDashboard() {
                       {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
                     </div>
                     {apt.counselorName && (
-                      <div className="mt-0.5 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
+                      <div className="mt-1 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
                     )}
                   </div>
                 ))
@@ -924,8 +982,8 @@ export default function StudentDashboard() {
           </div>
 
           {/* My Wellness Focus Goals */}
-          <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-2 border-b-2 border-[color:var(--mb-line)] pb-3">
+          <div className="mb-card">
+            <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
               <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
                 <Target className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
                 <span>My goals</span>
@@ -941,17 +999,14 @@ export default function StudentDashboard() {
             {Array.isArray(userData?.wellnessGoals) && userData.wellnessGoals.length > 0 ? (
               <ul className="space-y-2">
                 {userData.wellnessGoals.map((goal) => (
-                  <li
-                    key={goal}
-                    className="flex items-center gap-2 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-3 text-[color:var(--mb-ink)]"
-                  >
+                  <li key={goal} className="flex items-center gap-2 mb-tile mb-tile-sm text-[color:var(--mb-ink)]">
                     <Check className="h-4 w-4 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
                     <span>{goal}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
+              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
                 No goals chosen yet.{" "}
                 <Link to="/settings" className="font-bold text-[color:var(--mb-brand)] underline">
                   Pick your goals

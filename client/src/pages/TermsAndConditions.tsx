@@ -49,7 +49,7 @@ export default function TermsAndConditions() {
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">4. User Responsibilities</h2>
               <p>You agree to:</p>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
+              <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Provide accurate and truthful information during check-ins and appointment requests.</li>
                 <li>Maintain the confidentiality of your account credentials.</li>
                 <li>Use the platform only for its intended purpose and not for any unlawful activities.</li>

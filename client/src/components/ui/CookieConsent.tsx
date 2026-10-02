@@ -21,7 +21,7 @@ export default function CookieConsent() {
 
   return (
     <div
-      className="mb fixed bottom-0 left-0 right-0 z-50 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4"
+      className="mb fixed bottom-0 left-0 right-0 z-50 border-t border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4"
       data-theme="light"
       role="region"
       aria-label="Cookie notice"

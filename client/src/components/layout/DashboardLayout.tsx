@@ -141,13 +141,13 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
       <a href="#main-content" className="mb-skip">
         Skip to main content
       </a>
-      <header className="shrink-0 border-b-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)]">
+      <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
           <Link
             to="/"
-            className="flex min-h-[44px] shrink-0 items-center gap-2.5 text-[color:var(--mb-ink)] no-underline"
+            className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
           >
-            <img src={icon} alt="" className="h-8 w-8 rounded" />
+            <img src={icon} alt="" className="h-8 w-8 rounded-md" />
             <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
           </Link>
 
@@ -157,10 +157,10 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                 key={to}
                 to={to}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[44px] items-center rounded px-4 font-bold no-underline transition-colors ${
+                className={`flex min-h-[44px] items-center rounded-md px-4 font-bold no-underline transition-colors ${
                   active
-                    ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                    : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-ground)]"
+                    ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-mb-sm"
+                    : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
                 }`}
               >
                 {label}
@@ -199,7 +199,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               aria-haspopup="menu"
               aria-expanded={menuOpen}
               aria-label="Account menu"
-              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-ink)]"
+              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-brand)] transition-shadow hover:shadow-mb-md"
             >
               {showGoogleAvatar ? (
                 <img
@@ -223,9 +223,9 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                 role="menu"
                 aria-label="Account"
                 onKeyDown={onMenuKeyDown}
-                className="absolute right-0 top-14 z-50 w-64 rounded-md border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-2"
+                className="animate-fade-up absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
               >
-                <div className="border-b-2 border-[color:var(--mb-line)] px-3 py-2">
+                <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
                   <p className="truncate font-bold">{safeName}</p>
                   <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
                   <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
@@ -237,7 +237,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                     setMenuOpen(false);
                     navigate("/settings");
                   }}
-                  className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded px-3 font-bold hover:bg-[color:var(--mb-ground)]"
+                  className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
                 >
                   <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
                 </button>
@@ -246,7 +246,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                   role="menuitem"
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="flex min-h-[44px] w-full items-center gap-3 rounded px-3 font-bold text-[color:var(--mb-error-ink)] hover:bg-[color:var(--mb-error-bg)]"
+                  className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
                 >
                   {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
                   {loggingOut ? "Signing out…" : "Sign out"}
@@ -272,18 +272,20 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
 
       <nav
         aria-label="Main"
-        className="fixed bottom-0 left-0 right-0 z-40 border-t-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-lg lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="flex h-16 items-stretch justify-around">
+        <div className="flex h-16 items-stretch justify-around gap-1 p-1">
           {[...links, { to: "/settings", short: "Settings", icon: Settings, active: isHere("/settings") }].map(
             ({ to, short, icon: Icon, active }) => (
               <Link
                 key={to}
                 to={to}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-w-[64px] flex-1 flex-col items-center justify-center gap-0.5 no-underline ${
-                  active ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]" : "text-[color:var(--mb-ink)]"
+                className={`flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 rounded-md no-underline transition-colors ${
+                  active
+                    ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                    : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
                 }`}
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />

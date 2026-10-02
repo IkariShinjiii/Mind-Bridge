@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import PublicShell from "./PublicShell";
+import icon from "../../assets/mindbridge-icon.png";
 
 export function GoogleIcon() {
   return (
@@ -36,7 +37,7 @@ export function Spinner() {
 // Labelled text input used by the auth forms; same component as the rest of the app.
 export { default as Field } from "./Input";
 
-// Signage-style frame: a teal plate states where you are, the form sits on a plain surface beside it.
+// Calm, centred frame: a short welcome above one 450px card. The gradient background is the only decoration.
 export interface AuthFrameProps {
   title: string;
   intro: string;
@@ -46,19 +47,17 @@ export interface AuthFrameProps {
 
 export default function AuthFrame({ title, intro, children, footer }: AuthFrameProps) {
   return (
-    <PublicShell showAuthLinks={false}>
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:py-16">
-        <div className="mb-plate flex flex-col justify-between gap-10 p-8 lg:min-h-[28rem]">
-          <p className="mb-sign text-xl font-bold opacity-90">You are here</p>
-          <div>
-            <h1 className="mb-sign text-5xl font-bold leading-none sm:text-6xl">{title}</h1>
-            <p className="mt-4 max-w-[40ch] text-lg text-[color:var(--mb-panel-soft)]">{intro}</p>
-          </div>
+    <PublicShell showAuthLinks={false} calm>
+      <div className="mx-auto w-full max-w-[450px] px-4 py-12 sm:py-16">
+        <div className="mb-8 text-center">
+          <img src={icon} alt="" className="mx-auto mb-4 h-14 w-14 rounded-lg shadow-mb-md" />
+          <h1 className="mb-sign text-4xl font-bold">{title}</h1>
+          <p className="mx-auto mt-2 max-w-[40ch] text-[color:var(--mb-muted)]">{intro}</p>
         </div>
 
-        <div className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-6 sm:p-8">
+        <div className="mb-card shadow-mb-md sm:!p-8">
           {children}
-          {footer ? <div className="mt-6 border-t-2 border-[color:var(--mb-line)] pt-5">{footer}</div> : null}
+          {footer ? <div className="mt-8 border-t border-[color:var(--mb-line)] pt-6 text-center">{footer}</div> : null}
         </div>
       </div>
     </PublicShell>

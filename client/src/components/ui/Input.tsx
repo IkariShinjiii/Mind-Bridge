@@ -1,11 +1,13 @@
-import { forwardRef, useId, type InputHTMLAttributes } from "react";
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from "react";
+import { AlertCircle } from "lucide-react";
 import Spinner from "./Spinner";
 
 /**
- * Labelled text input. Uses the `mb-field` class (3:1 border, 48px tall) from `styles/theme.css`.
+ * Labelled text input. Uses the `mb-field` class (3:1 border, 48px tall, rounded) from `styles/theme.css`.
  *
  * The hint and error render under the input and are linked with `aria-describedby`; an error also sets
- * `aria-invalid` and is announced as an alert. `loading` makes the field read-only, shows a spinner and sets
+ * `aria-invalid` (which turns the border red) and is announced as an alert with an icon, so it never relies on
+ * colour alone. `loading` makes the field read-only, shows a spinner and sets
  * `aria-busy` (use while a value is being checked or saved). Every other prop (`type`, `autoComplete`,
  * `required`, `disabled`, `value`/`onChange`...) goes to the `<input>`.
  *
@@ -26,10 +28,12 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string | undefined;
   /** Read-only with a spinner while a value is checked or saved. */
   loading?: boolean;
+  /** Extra content under the field, inside the same group (e.g. a strength meter). */
+  children?: ReactNode;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, id: idProp, hint, error, loading = false, required, className = "", style, ...rest },
+  { label, id: idProp, hint, error, loading = false, required, className = "", style, children, ...rest },
   ref,
 ) {
   const generated = useId();
@@ -38,7 +42,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block font-bold">
+      <label htmlFor={id} className="mb-2 block font-bold">
         {label}
         {required && <span aria-hidden="true"> *</span>}
       </label>
@@ -52,26 +56,28 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           aria-busy={loading || undefined}
-          className={`mb-field${loading ? " pr-11" : ""}${className ? ` ${className}` : ""}`}
-          style={error ? { borderColor: "var(--mb-urgent)", ...style } : style}
+          className={`mb-field${loading ? " pr-12" : ""}${className ? ` ${className}` : ""}`}
+          style={style}
           {...rest}
         />
         {loading && (
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[color:var(--mb-brand)]">
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[color:var(--mb-brand)]">
             <Spinner size={18} />
           </span>
         )}
       </div>
       {error ? (
-        <p id={`${id}-error`} role="alert" className="mt-1 font-medium text-[color:var(--mb-urgent)]">
-          {error}
+        <p id={`${id}-error`} role="alert" className="mb-field-error">
+          <AlertCircle className="mt-[3px] h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>{error}</span>
         </p>
       ) : null}
       {hint ? (
-        <p id={`${id}-hint`} className="mt-1 text-sm text-[color:var(--mb-muted)]">
+        <p id={`${id}-hint`} className="mt-2 text-sm text-[color:var(--mb-muted)]">
           {hint}
         </p>
       ) : null}
+      {children}
     </div>
   );
 });
