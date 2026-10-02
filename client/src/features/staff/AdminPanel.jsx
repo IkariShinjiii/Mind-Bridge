@@ -49,7 +49,7 @@ function Stat({ label, value, note, tone, className = "" }) {
   const urgent = tone === "urgent";
   return (
     <div
-      className={`rounded-md border-2 p-4 ${
+      className={`rounded-md border p-4 ${
         urgent
           ? "border-[color:var(--mb-urgent-solid)] bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
           : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)]"
@@ -66,7 +66,7 @@ function RiskTag({ risk }) {
   const Icon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded border-2 px-2 py-1 font-bold capitalize ${RISK_STYLES[risk] || RISK_STYLES.low}`}
+      className={`inline-flex items-center gap-2 rounded border px-2 py-1 font-bold capitalize ${RISK_STYLES[risk] || RISK_STYLES.low}`}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
       {risk} risk
@@ -347,7 +347,7 @@ export default function AdminPanel() {
   return (
     <div className="mx-auto max-w-7xl animate-fade-up space-y-8 pb-12">
       {/* Header */}
-      <div className="border-b-2 border-[color:var(--mb-line)] pb-5">
+      <div className="border-b border-[color:var(--mb-line)] pb-6">
         <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Staff dashboard</h1>
         <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
           Triage student check-ins, manage accounts and availability, and review system-wide trends.
@@ -381,7 +381,7 @@ export default function AdminPanel() {
       {mainTab !== "accounts" && (
         <nav
           aria-label="Dashboard sections"
-          className="flex flex-wrap gap-2 border-b-2 border-[color:var(--mb-line)] pb-4"
+          className="flex flex-wrap gap-2 border-b border-[color:var(--mb-line)] pb-4"
         >
           {[
             ["cases", ClipboardList, "Cases and triage"],
@@ -393,11 +393,7 @@ export default function AdminPanel() {
               type="button"
               onClick={() => handleTabSelect(tab)}
               aria-current={mainTab === tab ? "page" : undefined}
-              className={`inline-flex min-h-[48px] items-center gap-2 rounded-md border-2 px-4 font-bold transition-colors ${
-                mainTab === tab
-                  ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                  : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-              }`}
+              className="mb-chip"
             >
               <Icon className="h-5 w-5" aria-hidden="true" />
               {label}
@@ -410,7 +406,7 @@ export default function AdminPanel() {
       {/* TAB 1: STUDENT CASES & CLINICAL TRIAGE                    */}
       {/* ======================================================== */}
       {mainTab === "cases" && (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
               {[
@@ -427,11 +423,7 @@ export default function AdminPanel() {
                   type="button"
                   onClick={() => setFilter(value)}
                   aria-pressed={filter === value}
-                  className={`min-h-[44px] rounded border-2 px-3.5 font-bold transition-colors ${
-                    filter === value
-                      ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                      : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-ink)]"
-                  }`}
+                  className="mb-chip"
                 >
                   {label}
                 </button>
@@ -440,11 +432,7 @@ export default function AdminPanel() {
                 type="button"
                 onClick={() => setAssignedOnly(!assignedOnly)}
                 aria-pressed={assignedOnly}
-                className={`min-h-[44px] rounded border-2 px-3.5 font-bold transition-colors ${
-                  assignedOnly
-                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-ink)]"
-                }`}
+                className="mb-chip"
               >
                 {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
               </button>
@@ -455,12 +443,12 @@ export default function AdminPanel() {
           </div>
 
           {loading ? (
-            <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+            <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
               <Spinner size={20} className="text-[color:var(--mb-brand)]" />
               <span>Loading student check-ins...</span>
             </div>
           ) : triageCases.length === 0 ? (
-            <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-10 text-center text-[color:var(--mb-muted)]">
+            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center text-[color:var(--mb-muted)]">
               No cases match this filter.
             </div>
           ) : (
@@ -476,18 +464,18 @@ export default function AdminPanel() {
                   risk === "high"
                     ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
                     : risk === "medium"
-                      ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border-2 border-[color:var(--mb-warn)]"
-                      : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border-2 border-[color:var(--mb-safe)]";
+                      ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                      : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
 
                 return (
                   <li
                     key={item.id}
-                    className={`grid gap-4 rounded-md border-2 bg-[color:var(--mb-surface)] p-3 sm:grid-cols-[7.5rem_1fr_auto] sm:items-center ${
-                      immediate ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-line)]"
+                    className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
+                      immediate ? "border-[color:var(--mb-urgent)] border-l-4" : "border-[color:var(--mb-line)]"
                     }`}
                   >
                     <div
-                      className={`flex flex-row items-center gap-3 rounded p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
+                      className={`flex flex-row items-center gap-3 rounded-md p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
                     >
                       <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
                       <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
@@ -503,7 +491,7 @@ export default function AdminPanel() {
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span
-                          className={`inline-flex rounded border px-2 py-0.5 text-sm font-bold capitalize ${
+                          className={`inline-flex rounded border px-2 py-1 text-sm font-bold capitalize ${
                             STATUS_STYLES[status] ||
                             "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
                           }`}
@@ -511,7 +499,7 @@ export default function AdminPanel() {
                           {status}
                         </span>
                         {immediate && (
-                          <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-0.5 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                          <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
                             <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
                           </span>
                         )}
@@ -559,11 +547,8 @@ export default function AdminPanel() {
       {/* ======================================================== */}
       {mainTab === "analytics" && (
         <div className="space-y-8">
-          <section
-            aria-labelledby="risk-heading"
-            className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
-          >
-            <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <section aria-labelledby="risk-heading" className="mb-card">
+            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <h2 id="risk-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
                 Risk across all check-ins
               </h2>
@@ -582,7 +567,7 @@ export default function AdminPanel() {
                 const n = analytics.riskCounts[risk];
                 const pct = analytics.totalAssessments ? Math.round((n / analytics.totalAssessments) * 100) : 0;
                 return (
-                  <div key={risk} className={`rounded-md border-2 p-4 ${RISK_STYLES[risk]}`}>
+                  <div key={risk} className={`rounded-md border p-4 ${RISK_STYLES[risk]}`}>
                     <p className="flex items-center gap-2 font-bold">
                       <Icon className="h-5 w-5" aria-hidden="true" />
                       {label}
@@ -637,10 +622,7 @@ export default function AdminPanel() {
           </section>
 
           {/* Export */}
-          <section
-            aria-labelledby="export-heading"
-            className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5 sm:p-6"
-          >
+          <section aria-labelledby="export-heading" className="mb-card">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 id="export-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
@@ -690,11 +672,7 @@ export default function AdminPanel() {
                 type="button"
                 onClick={() => setAccountSubTab(val)}
                 aria-pressed={accountSubTab === val}
-                className={`min-h-[48px] rounded-md border-2 px-4 font-bold transition-colors ${
-                  accountSubTab === val
-                    ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                    : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-                }`}
+                className="mb-chip"
               >
                 {label}
               </button>
@@ -705,7 +683,7 @@ export default function AdminPanel() {
           {accountSubTab === "staff" && pendingStaff.length > 0 && (
             <section
               aria-labelledby="pending-heading"
-              className="rounded-md border-2 border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 sm:p-5"
+              className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 sm:p-6"
             >
               <h3 id="pending-heading" className="mb-3 text-xl font-bold text-[color:var(--mb-warn)]">
                 Waiting for approval ({pendingStaff.length})
@@ -714,7 +692,7 @@ export default function AdminPanel() {
                 {pendingStaff.map((u) => (
                   <li
                     key={u.id}
-                    className="flex flex-col gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-3 mb-card mb-card-sm sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
                       <p className="font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed staff"}</p>
@@ -748,13 +726,13 @@ export default function AdminPanel() {
           <section aria-labelledby="accounts-heading">
             <h3
               id="accounts-heading"
-              className="mb-3 border-b-2 border-[color:var(--mb-line)] pb-2 text-xl font-bold text-[color:var(--mb-ink)]"
+              className="mb-3 border-b border-[color:var(--mb-line)] pb-2 text-xl font-bold text-[color:var(--mb-ink)]"
             >
               {accountSubTab === "staff" ? "Staff and administrators" : "Students"}
             </h3>
 
             {filteredUsers.length === 0 ? (
-              <p className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
+              <p className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
                 No accounts in this category.
               </p>
             ) : (
@@ -766,20 +744,20 @@ export default function AdminPanel() {
                   return (
                     <li
                       key={u.id}
-                      className="flex flex-col gap-4 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4 lg:flex-row lg:items-center lg:justify-between"
+                      className="flex flex-col gap-4 mb-card mb-card-sm lg:flex-row lg:items-center lg:justify-between"
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="text-lg font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed user"}</p>
                           <span
-                            className={`rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
+                            className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${
                               ROLE_BADGE[u.role || "student"] || ROLE_BADGE.student
                             }`}
                           >
                             {roleLabel(u.role)}
                           </span>
                           {deactivated && (
-                            <span className="rounded border-2 border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-[color:var(--mb-urgent)]">
+                            <span className="rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--mb-urgent)]">
                               Deactivated
                             </span>
                           )}
@@ -900,17 +878,17 @@ export default function AdminPanel() {
                     return (
                       <li
                         key={idx}
-                        className={`flex items-start justify-between gap-3 rounded-md border-2 p-3 ${
+                        className={`flex items-start justify-between gap-3 rounded-md border p-3 ${
                           crisisHit
                             ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
                             : "border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] text-[color:var(--mb-ink)]"
                         }`}
                       >
                         <p className="min-w-0 flex-1">
-                          <span className="mr-1.5 font-bold">{idx + 1}.</span>
+                          <span className="mr-2 font-bold">{idx + 1}.</span>
                           {q.text}
                           {q.isCrisisItem && (
-                            <span className="ml-2 inline-block rounded border-2 border-current px-1.5 text-xs font-bold uppercase">
+                            <span className="ml-2 inline-block rounded border border-current px-2 text-xs font-bold uppercase">
                               Safety question
                             </span>
                           )}
@@ -925,10 +903,7 @@ export default function AdminPanel() {
               )}
             </section>
 
-            <section
-              aria-labelledby="contact-heading"
-              className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4"
-            >
+            <section aria-labelledby="contact-heading" className="mb-tile">
               <h3 id="contact-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
                 Emergency contact
               </h3>
@@ -1012,7 +987,7 @@ export default function AdminPanel() {
                       onClick={() => markAssessmentStatus(activeCase.id, st)}
                       disabled={Boolean(updatingAssessmentId)}
                       aria-pressed={(activeCase.status || "open") === st}
-                      className={`min-h-[44px] rounded-md border-2 px-3 font-bold capitalize transition-colors disabled:opacity-60 ${
+                      className={`min-h-[44px] rounded-md border px-3 font-bold capitalize transition-colors disabled:opacity-60 ${
                         (activeCase.status || "open") === st
                           ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                           : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"

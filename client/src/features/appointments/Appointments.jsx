@@ -92,7 +92,7 @@ const DANGER_LINE =
 
 function Note({ tone, label, children }) {
   return (
-    <p className={`rounded-md border-2 px-3 py-2 text-sm ${NOTE_TONE[tone]}`}>
+    <p className={`rounded-md border px-3 py-2 text-sm ${NOTE_TONE[tone]}`}>
       <span className="font-bold">{label}:</span> {children}
     </p>
   );
@@ -294,7 +294,7 @@ export default function Appointments() {
   return (
     <div className="mx-auto max-w-5xl animate-fade-up">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 border-b-2 border-[color:var(--mb-line)] pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">
             {isCounselor ? "Appointment requests" : "My appointments"}
@@ -322,11 +322,7 @@ export default function Appointments() {
             type="button"
             aria-pressed={filter === val}
             onClick={() => setFilter(val)}
-            className={`min-h-[44px] rounded-md border-2 px-4 text-sm font-bold transition-colors ${
-              filter === val
-                ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-            }`}
+            className="mb-chip"
           >
             {label}
             <span className="ml-2 font-display text-base tabular-nums opacity-80">{counts[val]}</span>
@@ -344,12 +340,12 @@ export default function Appointments() {
         </div>
       )}
       {loading ? (
-        <div className="flex min-h-[240px] items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+        <div className="flex min-h-[240px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
           <Spinner size={20} className="text-[color:var(--mb-brand)]" />
           <span>Loading appointments…</span>
         </div>
       ) : filteredAppointments.length === 0 ? (
-        <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-10 text-center">
+        <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center">
           <div className="mb-plate mx-auto mb-4 flex h-14 w-14 items-center justify-center">
             <Calendar className="h-7 w-7" aria-hidden="true" />
           </div>
@@ -362,7 +358,7 @@ export default function Appointments() {
                 : "You have no appointments in this category."}
           </p>
           {!isCounselor && filter === "all" && (
-            <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-5">
+            <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-6">
               Book a counselor
             </button>
           )}
@@ -381,10 +377,10 @@ export default function Appointments() {
             return (
               <li
                 key={apt.id}
-                className="flex flex-col overflow-hidden rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row"
+                className="flex flex-col overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row"
               >
                 {/* Date plate */}
-                <div className="mb-plate flex shrink-0 items-center justify-center gap-3 rounded-none px-5 py-3 text-center sm:w-32 sm:flex-col sm:gap-0 sm:py-5">
+                <div className="mb-plate flex shrink-0 items-center justify-center gap-3 rounded-none px-6 py-3 text-center sm:w-32 sm:flex-col sm:gap-0 sm:py-6">
                   {plate ? (
                     <>
                       <span className="text-sm font-bold uppercase tracking-widest opacity-90">{plate.month}</span>
@@ -396,13 +392,13 @@ export default function Appointments() {
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1 p-4 sm:p-5">
+                <div className="min-w-0 flex-1 p-4 sm:p-6">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                     <h2 className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
                       {apt.title || "Counseling session"}
                     </h2>
                     <span
-                      className={`rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
+                      className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
                     >
                       {status}
                     </span>
@@ -578,7 +574,7 @@ export default function Appointments() {
         maxWidth="max-w-lg"
       >
         {actionModal && (
-          <form onSubmit={handleActionSubmit} noValidate className="space-y-5">
+          <form onSubmit={handleActionSubmit} noValidate className="space-y-6">
             {actionError && (
               <p role="alert" className="mb-alert font-medium">
                 {actionError}
@@ -586,7 +582,7 @@ export default function Appointments() {
             )}
 
             {actionModal.type === "reschedule" && (
-              <div className="space-y-4 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-4">
+              <div className="space-y-4 mb-tile">
                 <div>
                   <label htmlFor="apt-new-start" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
                     New start <span aria-hidden="true">*</span>
@@ -625,11 +621,7 @@ export default function Appointments() {
                       key={preset}
                       onClick={() => setActionReason(preset)}
                       aria-pressed={actionReason === preset}
-                      className={`min-h-[44px] rounded-md border-2 px-3 text-left text-sm transition-colors ${
-                        actionReason === preset
-                          ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-brand-bg)] font-bold text-[color:var(--mb-ink)]"
-                          : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-                      }`}
+                      className="mb-chip"
                     >
                       {preset}
                     </button>
@@ -664,7 +656,7 @@ export default function Appointments() {
               />
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t-2 border-[color:var(--mb-line)] pt-4 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t border-[color:var(--mb-line)] pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeActionModal}

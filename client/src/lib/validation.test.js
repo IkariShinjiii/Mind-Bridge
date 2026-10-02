@@ -8,7 +8,8 @@ import {
   validateEmergencyContact,
   validatePasswordChange,
   validateAvailabilityWindow,
-} from "./validation";
+  passwordStrength,
+} from "./validation.js";
 import { friendlyError, isPopupDismissed } from "./errors";
 
 describe("email and phone checks", () => {
@@ -75,6 +76,22 @@ describe("form validators", () => {
     expect(validateAvailabilityWindow("2026-10-03T10:00", "2026-10-03T09:00", now)).toHaveProperty("end");
     expect(validateAvailabilityWindow("", "", now)).toHaveProperty("start");
     expect(validateAvailabilityWindow("2026-10-03T09:00", "2026-10-03T10:00", now)).toEqual({});
+  });
+});
+
+describe("passwordStrength", () => {
+  it("is level 0 when empty", () => {
+    expect(passwordStrength("")).toEqual({ level: 0, label: "" });
+  });
+  it("rates anything under the minimum length as weak", () => {
+    expect(passwordStrength("Ab1!")).toEqual({ level: 1, label: "Weak" });
+  });
+  it("climbs with length, case, digits and symbols", () => {
+    expect(passwordStrength("abcdefgh").level).toBe(1);
+    expect(passwordStrength("abcdefg1").level).toBe(2);
+    expect(passwordStrength("Abcdefg1").level).toBe(3);
+    expect(passwordStrength("Abcdefghij1!").level).toBe(4);
+    expect(passwordStrength("Abcdefghij1!").label).toBe("Strong");
   });
 });
 

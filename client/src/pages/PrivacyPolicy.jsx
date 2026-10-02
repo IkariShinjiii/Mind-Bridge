@@ -33,7 +33,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">2. Information We Collect</h2>
               <p>We only collect information that is strictly necessary for providing our services. This includes:</p>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
+              <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
                   <strong>Personal Identification Information:</strong> Name, university email address, student ID
                   number.
@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">3. How We Use Your Information</h2>
               <p>We use your information exclusively to:</p>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
+              <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Provide and maintain the Mind Bridge platform.</li>
                 <li>Assess emotional distress and prioritize counseling services.</li>
                 <li>Facilitate scheduling of appointments with the Guidance Services and Testing Center.</li>
@@ -83,7 +83,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">6. Your Rights</h2>
               <p>Under the Data Privacy Act of 2012, you have the right to:</p>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
+              <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Be informed about how your data is processed.</li>
                 <li>Access your personal data.</li>
                 <li>Object to the processing of your data.</li>
@@ -95,7 +95,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">7. Contact Us</h2>
               <p>If you have questions about this Privacy Policy, please contact us at:</p>
-              <div className="mt-2 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-4">
+              <div className="mt-2 mb-card mb-card-sm">
                 <p>
                   <strong>University of San Agustin - Guidance Services and Testing Center</strong>
                 </p>

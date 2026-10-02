@@ -40,7 +40,7 @@ export default function CookiePolicy() {
 
             <section>
               <h2 className="mb-sign mb-2 text-2xl font-bold">3. Types of Cookies We Use</h2>
-              <ul className="list-disc pl-5 mt-2 space-y-2">
+              <ul className="list-disc pl-6 mt-2 space-y-2">
                 <li>
                   <strong>Strictly Necessary Cookies:</strong> These cookies are essential for you to browse the website
                   and use its features, such as logging into your student or counselor dashboard. Without these cookies,

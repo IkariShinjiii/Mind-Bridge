@@ -51,14 +51,14 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 py-8 text-[color:var(--mb-muted)]">
-        <Spinner size={18} /> Loading open times...
+        <Spinner size={18} /> Finding open times…
       </div>
     );
   }
 
   if (slots.length === 0) {
     return (
-      <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] p-5 text-[color:var(--mb-muted)]">
+      <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-6 text-[color:var(--mb-muted)]">
         No counselor times are open right now. Please check back soon, or visit the Guidance Office in person.
       </div>
     );
@@ -78,7 +78,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
 
   return (
     <div>
-      <ol className="mb-5 flex gap-2" aria-label="Booking steps">
+      <ol className="mb-6 flex gap-2" aria-label="Booking steps">
         {STEPS.map((label, i) => {
           const n = i + 1;
           const here = n === step;
@@ -91,7 +91,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                 onClick={() => goTo(n)}
                 disabled={!done || skipped}
                 aria-current={here ? "step" : undefined}
-                className={`mb-sign flex h-11 w-full items-center justify-center gap-2 rounded border-2 text-lg font-bold disabled:cursor-default ${
+                className={`mb-sign flex h-11 w-full items-center justify-center gap-2 rounded border text-lg font-bold disabled:cursor-default ${
                   here
                     ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                     : done
@@ -117,7 +117,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                 key={c.key}
                 type="button"
                 onClick={() => setCounselorKey(c.key)}
-                className="flex w-full items-center justify-between gap-4 rounded-md border-2 border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4 text-left hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
+                className="flex w-full items-center justify-between gap-4 rounded-md border border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4 text-left hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
               >
                 <span>
                   <span className="mb-sign block text-2xl font-bold">{c.name}</span>
@@ -148,7 +148,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                         key={slot.id}
                         type="button"
                         onClick={() => setChosen(slot)}
-                        className="mb-sign min-h-[48px] rounded-md border-2 border-[color:var(--mb-line)] px-3 text-xl font-bold hover:border-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)]"
+                        className="mb-sign min-h-[48px] rounded-md border border-[color:var(--mb-line)] px-3 text-xl font-bold hover:border-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)]"
                       >
                         {timeLabel(s) || "Time to be confirmed"}
                         {e ? ` to ${timeLabel(e)}` : ""}
@@ -169,7 +169,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
 
       {step === 3 && chosen && (
         <div className="space-y-4">
-          <div className="mb-plate p-5">
+          <div className="mb-plate p-6">
             <p className="mb-sign text-lg font-bold opacity-90">Please check your booking</p>
             <p className="mb-sign mt-1 text-3xl font-bold leading-tight">{counselor.name}</p>
             <p className="mb-sign text-2xl font-bold">
@@ -199,7 +199,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
       )}
 
       {onCancel && (
-        <div className="mt-6 border-t-2 border-[color:var(--mb-line)] pt-4">
+        <div className="mt-6 border-t border-[color:var(--mb-line)] pt-4">
           <button type="button" onClick={onCancel} className="mb-btn mb-btn-line">
             Cancel
           </button>

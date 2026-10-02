@@ -115,11 +115,7 @@ export default function ManageAvailability() {
   return (
     <div className="space-y-8">
       {/* Publish a slot */}
-      <form
-        onSubmit={handleAdd}
-        noValidate
-        className="rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-5"
-      >
+      <form onSubmit={handleAdd} noValidate className="mb-card">
         <h2 className="font-display text-2xl font-bold text-[color:var(--mb-ink)]">Publish an open slot</h2>
         <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
           Students can book any open slot for a confidential on-campus session.
@@ -171,7 +167,7 @@ export default function ManageAvailability() {
 
       {/* Published slots */}
       <section aria-labelledby="slots-heading">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b-2 border-[color:var(--mb-line)] pb-2">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2 border-b border-[color:var(--mb-line)] pb-2">
           <h2 id="slots-heading" className="font-display text-2xl font-bold text-[color:var(--mb-ink)]">
             Your slots
           </h2>
@@ -190,7 +186,7 @@ export default function ManageAvailability() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-3 rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+          <div className="flex items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
             <Spinner size={20} className="text-[color:var(--mb-brand)]" />
             <span>Loading your slots…</span>
           </div>
@@ -199,7 +195,7 @@ export default function ManageAvailability() {
             {loadError}
           </p>
         ) : sorted.length === 0 ? (
-          <div className="rounded-md border-2 border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
+          <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
             No slots published yet. Add one above so students can book you.
           </div>
         ) : (
@@ -211,7 +207,7 @@ export default function ManageAvailability() {
               return (
                 <li
                   key={s.id}
-                  className="flex flex-col overflow-hidden rounded-md border-2 border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row sm:items-stretch"
+                  className="flex flex-col overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row sm:items-stretch"
                 >
                   <div className="mb-plate flex shrink-0 items-center gap-3 rounded-none px-4 py-2 sm:w-24 sm:flex-col sm:justify-center sm:gap-0 sm:py-3">
                     {sStart ? (
@@ -235,7 +231,7 @@ export default function ManageAvailability() {
                         )}
                       </p>
                       <p
-                        className={`mt-1 inline-block rounded border-2 px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
+                        className={`mt-1 inline-block rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${
                           s.isBooked
                             ? "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]"
                             : "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]"

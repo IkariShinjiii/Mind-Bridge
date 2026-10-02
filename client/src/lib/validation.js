@@ -4,6 +4,26 @@ export const SCHOOL_EMAIL_DOMAIN = "@usa.edu.ph";
 export const MIN_PASSWORD_LENGTH = 6;
 
 /**
+ * Rates a password for the sign-up strength meter. Advice only: the hard rule is MIN_PASSWORD_LENGTH.
+ * Points for length (8+, 12+), mixed case, a digit and a symbol, capped at 4.
+ * @param {string} password
+ * @returns {{ level: 0|1|2|3|4, label: string }} level 0 means nothing typed yet
+ */
+export function passwordStrength(password) {
+  const value = String(password || "");
+  if (!value) return { level: 0, label: "" };
+  let points = 0;
+  if (value.length >= 8) points += 1;
+  if (value.length >= 12) points += 1;
+  if (/[a-z]/.test(value) && /[A-Z]/.test(value)) points += 1;
+  if (/\d/.test(value)) points += 1;
+  if (/[^A-Za-z0-9]/.test(value)) points += 1;
+  // Under the minimum length is always the weakest rating, however varied the characters are.
+  const level = value.length < MIN_PASSWORD_LENGTH ? 1 : Math.min(4, Math.max(1, points));
+  return { level, label: ["", "Weak", "Fair", "Good", "Strong"][level] };
+}
+
+/**
  * Returns true when the string looks like an email address (one @, a dot in the domain, no spaces).
  * @param {string} value
  * @returns {boolean}

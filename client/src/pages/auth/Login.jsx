@@ -159,18 +159,18 @@ export default function Login() {
     >
       <div aria-live="polite">
         {errorMessage ? (
-          <div className="mb-alert mb-5" role="alert">
+          <div className="mb-alert mb-6" role="alert">
             {errorMessage}
           </div>
         ) : null}
         {infoMessage ? (
-          <div role="status" className="mb-5 rounded-md border-2 border-[color:var(--mb-safe)] px-4 py-3">
+          <div role="status" className="mb-notice mb-6">
             {infoMessage}
           </div>
         ) : null}
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <Field
           id="email"
           label="Email"

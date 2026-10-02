@@ -5,7 +5,7 @@ import PublicShell from "../components/ui/PublicShell";
 export default function NotFoundPage() {
   return (
     <PublicShell>
-      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
         <div className="mb-plate p-8">
           <p className="mb-sign text-7xl font-bold leading-none">404</p>
           <h1 className="mb-sign mt-4 text-4xl font-bold">This page is not on the map</h1>
