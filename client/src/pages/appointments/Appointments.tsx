@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo, type FormEvent, type ReactNode } from "react";
 import { Calendar, Plus } from "lucide-react";
+import { m, AnimatePresence, LazyMotion, type Variants } from "framer-motion";
+import { fadePreset, pagePreset, transition, useMotionPreset, useNoMotion } from "../../lib/motion";
 import {
   getAppointments,
   getAllAppointments,
@@ -109,6 +111,21 @@ function Note({ tone, label, children }: { tone: keyof typeof NOTE_TONE; label: 
   );
 }
 
+// Layout animation (filter changes) needs the domMax feature set. The root LazyMotion only carries domAnimation,
+// so this page loads domMax on demand and keeps it out of the main bundle.
+const loadLayoutFeatures = () => import("../../lib/motionLayout").then((mod) => mod.default);
+
+/** A card in the schedule. Delay by position, capped, so a filter change reads as one quick cascade. */
+const appointmentVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  show: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { ...transition.base, delay: Math.min(index, 5) * 0.05 },
+  }),
+  exit: { opacity: 0, transition: transition.exit },
+};
+
 const DECLINE_PRESETS = [
   "Schedule conflict with guidance department event",
   "Selected slot is no longer available",
@@ -148,6 +165,20 @@ export default function Appointments() {
   const [actionError, setActionError] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [loadError, setLoadError] = useState("");
+
+  const page = useMotionPreset(pagePreset);
+  const fade = useMotionPreset(fadePreset);
+  const noMotion = useNoMotion();
+  const itemMotion = noMotion
+    ? {}
+    : ({
+        variants: appointmentVariants,
+        initial: "hidden",
+        animate: "show",
+        exit: "exit",
+        layout: "position",
+        transition: { layout: transition.base },
+      } as const);
 
   const toast = useToast();
   const showFeedback = (type: "success" | "error", message: string) =>
@@ -315,399 +346,427 @@ export default function Appointments() {
     [appointments],
   );
 
+  // Reloading after an action keeps the current list on screen instead of swapping it for the spinner
+  const showSpinner = loading && appointments.length === 0;
+
   return (
-    <div className="animate-fade-up">
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">
-            {isCounselor ? "Appointment requests" : "My appointments"}
-          </h1>
-          <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-            {isCounselor
-              ? "Confirm, reschedule or close confidential sessions with students."
-              : "Your confidential sessions with university guidance counselors."}
-          </p>
-        </div>
-
-        {!isCounselor && (
-          <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
-            <Plus className="h-5 w-5" aria-hidden="true" />
-            Book a counselor
-          </button>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter appointments by status">
-        {FILTERS.map(([val, label]) => (
-          <button
-            key={val}
-            type="button"
-            aria-pressed={filter === val}
-            onClick={() => setFilter(val)}
-            className="mb-chip"
-          >
-            {label}
-            <span className="ml-2 font-display text-base tabular-nums opacity-80">{counts[val]}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Schedule */}
-      {loadError && !loading && (
-        <div role="alert" className="mb-alert mb-6 flex flex-wrap items-center justify-between gap-3 font-medium">
-          <span>{loadError}</span>
-          <button type="button" onClick={loadData} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
-            Try again
-          </button>
-        </div>
-      )}
-      {loading ? (
-        <div className="flex min-h-[240px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
-          <Spinner size={20} className="text-[color:var(--mb-brand)]" />
-          <span>Loading appointments…</span>
-        </div>
-      ) : filteredAppointments.length === 0 ? (
-        <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center">
-          <div className="mb-plate mx-auto mb-4 flex h-14 w-14 items-center justify-center">
-            <Calendar className="h-7 w-7" aria-hidden="true" />
+    <LazyMotion features={loadLayoutFeatures}>
+      <m.div {...page}>
+        {/* Header */}
+        <div className="mb-6 flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">
+              {isCounselor ? "Appointment requests" : "My appointments"}
+            </h1>
+            <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+              {isCounselor
+                ? "Confirm, reschedule or close confidential sessions with students."
+                : "Your confidential sessions with university guidance counselors."}
+            </p>
           </div>
-          <h2 className="font-display text-2xl font-bold text-[color:var(--mb-ink)]">Nothing here yet</h2>
-          <p className="mx-auto mt-1 max-w-[50ch] text-[color:var(--mb-muted)]">
-            {isCounselor
-              ? "No appointment requests match this filter."
-              : filter === "all"
-                ? "You have no appointments. Pick a counselor and a time that works for you."
-                : "You have no appointments in this category."}
-          </p>
-          {!isCounselor && filter === "all" && (
-            <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-6">
+
+          {!isCounselor && (
+            <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
+              <Plus className="h-5 w-5" aria-hidden="true" />
               Book a counselor
             </button>
           )}
         </div>
-      ) : (
-        <ul className="space-y-4">
-          {filteredAppointments.map((apt) => {
-            const kind = statusKind(apt.status);
-            const status = apt.status || "Pending Review";
-            const isPending = kind === "pending";
-            const isConfirmed = kind === "confirmed";
-            const isRescheduled = kind === "rescheduled";
-            const plate = plateParts(apt.start || apt.date);
-            const busy = updatingId === apt.id;
 
-            return (
-              <li
-                key={apt.id}
-                className="flex flex-col overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row"
-              >
-                {/* Date plate */}
-                <div className="mb-plate flex shrink-0 items-center justify-center gap-3 rounded-none px-6 py-3 text-center sm:w-32 sm:flex-col sm:gap-0 sm:py-6">
-                  {plate ? (
-                    <>
-                      <span className="text-sm font-bold uppercase tracking-widest opacity-90">{plate.month}</span>
-                      <span className="mb-sign text-4xl font-bold leading-none sm:text-5xl">{plate.day}</span>
-                      <span className="text-sm font-semibold opacity-90 sm:mt-1">{plate.time}</span>
-                    </>
-                  ) : (
-                    <span className="text-sm font-semibold">Time not set</span>
-                  )}
-                </div>
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter appointments by status">
+          {FILTERS.map(([val, label]) => (
+            <button
+              key={val}
+              type="button"
+              aria-pressed={filter === val}
+              onClick={() => setFilter(val)}
+              className="mb-chip"
+            >
+              {label}
+              <span className="ml-2 font-display text-base tabular-nums opacity-80">{counts[val]}</span>
+            </button>
+          ))}
+        </div>
 
-                <div className="min-w-0 flex-1 p-4 sm:p-6">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <h2 className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                      {apt.title || "Counseling session"}
-                    </h2>
-                    <span
-                      className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
-                    >
-                      {status}
-                    </span>
-                  </div>
-
-                  <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-                    <div className="flex gap-2">
-                      <dt className="text-[color:var(--mb-muted)]">{isCounselor ? "Student" : "Counselor"}</dt>
-                      <dd className="font-semibold text-[color:var(--mb-ink)]">
-                        {isCounselor ? apt.studentName || "Student" : apt.counselorName || "Assigned counselor"}
-                      </dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="text-[color:var(--mb-muted)]">When</dt>
-                      <dd className="font-semibold text-[color:var(--mb-ink)]">
-                        {formatDateTime(apt.start || apt.date)}
-                        {apt.end ? ` to ${formatDateTime(apt.end)}` : ""}
-                      </dd>
-                    </div>
-                    {isCounselor && apt.studentEmail && (
-                      <div className="flex gap-2 sm:col-span-2">
-                        <dt className="text-[color:var(--mb-muted)]">Email</dt>
-                        <dd className="break-all font-mono text-[color:var(--mb-ink)]">{apt.studentEmail}</dd>
-                      </div>
-                    )}
-                  </dl>
-
-                  {/* Reasons and notes: always labelled in words */}
-                  <div className="mt-3 space-y-2">
-                    {apt.declineReason && (
-                      <Note tone="urgent" label="Declined because">
-                        {apt.declineReason}
-                      </Note>
-                    )}
-                    {apt.cancellationReason && (
-                      <Note tone="urgent" label="Cancelled because">
-                        {apt.cancellationReason}
-                      </Note>
-                    )}
-                    {apt.rescheduleReason && (
-                      <Note tone="violet" label="Rescheduled because">
-                        {apt.rescheduleReason}
-                      </Note>
-                    )}
-                    {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
-                      <Note tone="brand" label="Counselor note">
-                        {apt.counselorNote}
-                      </Note>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    {isCounselor ? (
-                      <>
-                        {isPending && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
-                              disabled={busy}
-                              className="mb-btn mb-btn-solid !px-4 text-sm"
-                            >
-                              {busy && <Spinner size={16} />}
-                              {busy ? "Confirming…" : "Confirm"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openActionModal("reschedule", apt)}
-                              className="mb-btn mb-btn-line !px-4 text-sm"
-                            >
-                              Reschedule
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openActionModal("decline", apt)}
-                              className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                            >
-                              Decline
-                            </button>
-                          </>
-                        )}
-                        {(isConfirmed || isRescheduled) && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
-                              disabled={busy}
-                              className="mb-btn mb-btn-solid !px-4 text-sm"
-                            >
-                              {busy && <Spinner size={16} />}
-                              {busy ? "Updating…" : "Mark completed"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openActionModal("reschedule", apt)}
-                              className="mb-btn mb-btn-line !px-4 text-sm"
-                            >
-                              Reschedule
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openActionModal("cancel", apt)}
-                              className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                            >
-                              Cancel session
-                            </button>
-                          </>
-                        )}
-                        {!isPending && !isConfirmed && !isRescheduled && (
-                          <span className="text-sm text-[color:var(--mb-muted)]">Closed. No further actions.</span>
-                        )}
-                      </>
-                    ) : (
-                      (isPending || isConfirmed || isRescheduled) && (
-                        <button
-                          type="button"
-                          onClick={() => openActionModal("cancel", apt)}
-                          className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                        >
-                          Cancel booking
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* STUDENT BOOKING: counselor, time, confirm */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Book a counselor"
-        description="A confidential one-to-one session with university guidance counselors."
-        maxWidth="max-w-xl"
-      >
-        {bookingError && (
-          <p role="alert" className="mb-alert font-medium">
-            {bookingError}
-          </p>
+        {/* Schedule */}
+        {loadError && !loading && (
+          <div role="alert" className="mb-alert mb-6 flex flex-wrap items-center justify-between gap-3 font-medium">
+            <span>{loadError}</span>
+            <button type="button" onClick={loadData} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
+              Try again
+            </button>
+          </div>
         )}
-        <BookingFlow
-          slots={availableSlots}
-          loading={loadingSlots}
-          bookingId={bookingId}
-          onBook={handleBookSlot}
-          onCancel={() => setShowModal(false)}
-        />
-      </Modal>
-
-      {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}
-      <Modal
-        isOpen={Boolean(actionModal)}
-        onClose={closeActionModal}
-        title={
-          actionModal?.type === "decline"
-            ? "Decline this request"
-            : actionModal?.type === "cancel"
-              ? "Cancel this appointment"
-              : "Reschedule this session"
-        }
-        description={
-          actionModal?.apt
-            ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${formatDateTime(
-                actionModal.apt.start || actionModal.apt.date,
-              )}`
-            : undefined
-        }
-        maxWidth="max-w-lg"
-      >
-        {actionModal && (
-          <form onSubmit={handleActionSubmit} noValidate className="space-y-6">
-            {actionError && (
-              <p role="alert" className="mb-alert font-medium">
-                {actionError}
+        <AnimatePresence mode="wait" initial={false}>
+          {showSpinner ? (
+            <m.div
+              key="loading"
+              {...fade}
+              className="flex min-h-[240px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]"
+            >
+              <Spinner size={20} className="text-[color:var(--mb-brand)]" />
+              <span>Loading appointments…</span>
+            </m.div>
+          ) : filteredAppointments.length === 0 ? (
+            <m.div
+              key="empty"
+              {...fade}
+              className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center"
+            >
+              <div className="mb-plate mx-auto mb-4 flex h-14 w-14 items-center justify-center">
+                <Calendar className="h-7 w-7" aria-hidden="true" />
+              </div>
+              <h2 className="font-display text-2xl font-bold text-[color:var(--mb-ink)]">Nothing here yet</h2>
+              <p className="mx-auto mt-1 max-w-[50ch] text-[color:var(--mb-muted)]">
+                {isCounselor
+                  ? "No appointment requests match this filter."
+                  : filter === "all"
+                    ? "You have no appointments. Pick a counselor and a time that works for you."
+                    : "You have no appointments in this category."}
               </p>
-            )}
+              {!isCounselor && filter === "all" && (
+                <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-6">
+                  Book a counselor
+                </button>
+              )}
+            </m.div>
+          ) : (
+            // The list wrapper only fades out; each card reveals itself, so nothing animates twice
+            <m.ul
+              key="list"
+              exit={noMotion ? undefined : { opacity: 0, transition: transition.exit }}
+              className="relative space-y-4"
+            >
+              <AnimatePresence mode="popLayout" initial={true}>
+                {filteredAppointments.map((apt, index) => {
+                  const kind = statusKind(apt.status);
+                  const status = apt.status || "Pending Review";
+                  const isPending = kind === "pending";
+                  const isConfirmed = kind === "confirmed";
+                  const isRescheduled = kind === "rescheduled";
+                  const plate = plateParts(apt.start || apt.date);
+                  const busy = updatingId === apt.id;
 
-            {actionModal.type === "reschedule" && (
-              <div className="space-y-4 mb-tile">
-                <div>
-                  <label htmlFor="apt-new-start" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
-                    New start <span aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    id="apt-new-start"
-                    type="datetime-local"
-                    value={rescheduleStart}
-                    onChange={(e) => setRescheduleStart(e.target.value)}
-                    required
-                    className="mb-field"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="apt-new-end" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
-                    New end <span className="font-normal text-[color:var(--mb-muted)]">(optional)</span>
-                  </label>
-                  <input
-                    id="apt-new-end"
-                    type="datetime-local"
-                    value={rescheduleEnd}
-                    onChange={(e) => setRescheduleEnd(e.target.value)}
-                    className="mb-field"
-                  />
-                </div>
-              </div>
-            )}
-
-            {(actionModal.type === "decline" || (actionModal.type === "cancel" && isCounselor)) && (
-              <div>
-                <p className="mb-2 font-bold text-[color:var(--mb-ink)]">Quick reasons</p>
-                <div className="flex flex-wrap gap-2">
-                  {(actionModal.type === "decline" ? DECLINE_PRESETS : CANCELLATION_PRESETS).map((preset) => (
-                    <button
-                      type="button"
-                      key={preset}
-                      onClick={() => setActionReason(preset)}
-                      aria-pressed={actionReason === preset}
-                      className="mb-chip"
+                  return (
+                    <m.li
+                      key={apt.id}
+                      custom={index}
+                      {...itemMotion}
+                      className="flex flex-col overflow-hidden rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] sm:flex-row"
                     >
-                      {preset}
-                    </button>
-                  ))}
+                      {/* Date plate */}
+                      <div className="mb-plate flex shrink-0 items-center justify-center gap-3 rounded-none px-6 py-3 text-center sm:w-32 sm:flex-col sm:gap-0 sm:py-6">
+                        {plate ? (
+                          <>
+                            <span className="text-sm font-bold uppercase tracking-widest opacity-90">
+                              {plate.month}
+                            </span>
+                            <span className="mb-sign text-4xl font-bold leading-none sm:text-5xl">{plate.day}</span>
+                            <span className="text-sm font-semibold opacity-90 sm:mt-1">{plate.time}</span>
+                          </>
+                        ) : (
+                          <span className="text-sm font-semibold">Time not set</span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1 p-4 sm:p-6">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <h2 className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
+                            {apt.title || "Counseling session"}
+                          </h2>
+                          <span
+                            className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
+                          >
+                            {status}
+                          </span>
+                        </div>
+
+                        <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+                          <div className="flex gap-2">
+                            <dt className="text-[color:var(--mb-muted)]">{isCounselor ? "Student" : "Counselor"}</dt>
+                            <dd className="font-semibold text-[color:var(--mb-ink)]">
+                              {isCounselor ? apt.studentName || "Student" : apt.counselorName || "Assigned counselor"}
+                            </dd>
+                          </div>
+                          <div className="flex gap-2">
+                            <dt className="text-[color:var(--mb-muted)]">When</dt>
+                            <dd className="font-semibold text-[color:var(--mb-ink)]">
+                              {formatDateTime(apt.start || apt.date)}
+                              {apt.end ? ` to ${formatDateTime(apt.end)}` : ""}
+                            </dd>
+                          </div>
+                          {isCounselor && apt.studentEmail && (
+                            <div className="flex gap-2 sm:col-span-2">
+                              <dt className="text-[color:var(--mb-muted)]">Email</dt>
+                              <dd className="break-all font-mono text-[color:var(--mb-ink)]">{apt.studentEmail}</dd>
+                            </div>
+                          )}
+                        </dl>
+
+                        {/* Reasons and notes: always labelled in words */}
+                        <div className="mt-3 space-y-2">
+                          {apt.declineReason && (
+                            <Note tone="urgent" label="Declined because">
+                              {apt.declineReason}
+                            </Note>
+                          )}
+                          {apt.cancellationReason && (
+                            <Note tone="urgent" label="Cancelled because">
+                              {apt.cancellationReason}
+                            </Note>
+                          )}
+                          {apt.rescheduleReason && (
+                            <Note tone="violet" label="Rescheduled because">
+                              {apt.rescheduleReason}
+                            </Note>
+                          )}
+                          {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
+                            <Note tone="brand" label="Counselor note">
+                              {apt.counselorNote}
+                            </Note>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                          {isCounselor ? (
+                            <>
+                              {isPending && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
+                                    disabled={busy}
+                                    className="mb-btn mb-btn-solid !px-4 text-sm"
+                                  >
+                                    {busy && <Spinner size={16} />}
+                                    {busy ? "Confirming…" : "Confirm"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openActionModal("reschedule", apt)}
+                                    className="mb-btn mb-btn-line !px-4 text-sm"
+                                  >
+                                    Reschedule
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openActionModal("decline", apt)}
+                                    className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
+                                  >
+                                    Decline
+                                  </button>
+                                </>
+                              )}
+                              {(isConfirmed || isRescheduled) && (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
+                                    disabled={busy}
+                                    className="mb-btn mb-btn-solid !px-4 text-sm"
+                                  >
+                                    {busy && <Spinner size={16} />}
+                                    {busy ? "Updating…" : "Mark completed"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openActionModal("reschedule", apt)}
+                                    className="mb-btn mb-btn-line !px-4 text-sm"
+                                  >
+                                    Reschedule
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openActionModal("cancel", apt)}
+                                    className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
+                                  >
+                                    Cancel session
+                                  </button>
+                                </>
+                              )}
+                              {!isPending && !isConfirmed && !isRescheduled && (
+                                <span className="text-sm text-[color:var(--mb-muted)]">
+                                  Closed. No further actions.
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            (isPending || isConfirmed || isRescheduled) && (
+                              <button
+                                type="button"
+                                onClick={() => openActionModal("cancel", apt)}
+                                className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
+                              >
+                                Cancel booking
+                              </button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </m.li>
+                  );
+                })}
+              </AnimatePresence>
+            </m.ul>
+          )}
+        </AnimatePresence>
+
+        {/* STUDENT BOOKING: counselor, time, confirm */}
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title="Book a counselor"
+          description="A confidential one-to-one session with university guidance counselors."
+          maxWidth="max-w-xl"
+        >
+          {bookingError && (
+            <p role="alert" className="mb-alert font-medium">
+              {bookingError}
+            </p>
+          )}
+          <BookingFlow
+            slots={availableSlots}
+            loading={loadingSlots}
+            bookingId={bookingId}
+            onBook={handleBookSlot}
+            onCancel={() => setShowModal(false)}
+          />
+        </Modal>
+
+        {/* ACTION MODAL (DECLINE / CANCEL / RESCHEDULE) */}
+        <Modal
+          isOpen={Boolean(actionModal)}
+          onClose={closeActionModal}
+          title={
+            actionModal?.type === "decline"
+              ? "Decline this request"
+              : actionModal?.type === "cancel"
+                ? "Cancel this appointment"
+                : "Reschedule this session"
+          }
+          description={
+            actionModal?.apt
+              ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${formatDateTime(
+                  actionModal.apt.start || actionModal.apt.date,
+                )}`
+              : undefined
+          }
+          maxWidth="max-w-lg"
+        >
+          {actionModal && (
+            <form onSubmit={handleActionSubmit} noValidate className="space-y-6">
+              {actionError && (
+                <p role="alert" className="mb-alert font-medium">
+                  {actionError}
+                </p>
+              )}
+
+              {actionModal.type === "reschedule" && (
+                <div className="space-y-4 mb-tile">
+                  <div>
+                    <label htmlFor="apt-new-start" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
+                      New start <span aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="apt-new-start"
+                      type="datetime-local"
+                      value={rescheduleStart}
+                      onChange={(e) => setRescheduleStart(e.target.value)}
+                      required
+                      className="mb-field"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="apt-new-end" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
+                      New end <span className="font-normal text-[color:var(--mb-muted)]">(optional)</span>
+                    </label>
+                    <input
+                      id="apt-new-end"
+                      type="datetime-local"
+                      value={rescheduleEnd}
+                      onChange={(e) => setRescheduleEnd(e.target.value)}
+                      className="mb-field"
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div>
-              <label htmlFor="apt-reason" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
-                {actionModal.type === "reschedule"
-                  ? "Note to the student"
-                  : actionModal.type === "decline"
-                    ? "Explanation for the student"
-                    : "Reason for cancelling"}
-                {actionModal.type === "decline" && <span aria-hidden="true"> *</span>}
-              </label>
-              <textarea
-                id="apt-reason"
-                rows={3}
-                maxLength={500}
-                value={actionReason}
-                onChange={(e) => setActionReason(e.target.value)}
-                placeholder={
-                  actionModal.type === "reschedule"
-                    ? "e.g. Moved 30 minutes later because of a faculty assembly"
+              {(actionModal.type === "decline" || (actionModal.type === "cancel" && isCounselor)) && (
+                <div>
+                  <p className="mb-2 font-bold text-[color:var(--mb-ink)]">Quick reasons</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(actionModal.type === "decline" ? DECLINE_PRESETS : CANCELLATION_PRESETS).map((preset) => (
+                      <button
+                        type="button"
+                        key={preset}
+                        onClick={() => setActionReason(preset)}
+                        aria-pressed={actionReason === preset}
+                        className="mb-chip"
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="apt-reason" className="mb-1 block font-bold text-[color:var(--mb-ink)]">
+                  {actionModal.type === "reschedule"
+                    ? "Note to the student"
                     : actionModal.type === "decline"
-                      ? "e.g. Please choose another slot on Wednesday afternoon"
-                      : "e.g. Conflict with my exam schedule"
-                }
-                className="mb-field"
-              />
-            </div>
+                      ? "Explanation for the student"
+                      : "Reason for cancelling"}
+                  {actionModal.type === "decline" && <span aria-hidden="true"> *</span>}
+                </label>
+                <textarea
+                  id="apt-reason"
+                  rows={3}
+                  maxLength={500}
+                  value={actionReason}
+                  onChange={(e) => setActionReason(e.target.value)}
+                  placeholder={
+                    actionModal.type === "reschedule"
+                      ? "e.g. Moved 30 minutes later because of a faculty assembly"
+                      : actionModal.type === "decline"
+                        ? "e.g. Please choose another slot on Wednesday afternoon"
+                        : "e.g. Conflict with my exam schedule"
+                  }
+                  className="mb-field"
+                />
+              </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-[color:var(--mb-line)] pt-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeActionModal}
-                disabled={actionSubmitting}
-                className="mb-btn mb-btn-line"
-              >
-                Keep as is
-              </button>
-              <button
-                type="submit"
-                disabled={actionSubmitting}
-                aria-busy={actionSubmitting}
-                className={`mb-btn !text-[color:var(--mb-panel-ink)] ${
-                  actionModal.type === "reschedule"
-                    ? "!border-[color:var(--mb-violet-solid)] !bg-[color:var(--mb-violet-solid)]"
-                    : "!border-[color:var(--mb-urgent-solid)] !bg-[color:var(--mb-urgent-solid)]"
-                }`}
-              >
-                {actionSubmitting && <Spinner size={16} />}
-                {actionModal.type === "decline" && (actionSubmitting ? "Declining…" : "Decline request")}
-                {actionModal.type === "cancel" && (actionSubmitting ? "Cancelling…" : "Cancel appointment")}
-                {actionModal.type === "reschedule" && (actionSubmitting ? "Rescheduling…" : "Reschedule session")}
-              </button>
-            </div>
-          </form>
-        )}
-      </Modal>
-    </div>
+              <div className="flex flex-col-reverse gap-2 border-t border-[color:var(--mb-line)] pt-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={closeActionModal}
+                  disabled={actionSubmitting}
+                  className="mb-btn mb-btn-line"
+                >
+                  Keep as is
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionSubmitting}
+                  aria-busy={actionSubmitting}
+                  className={`mb-btn !text-[color:var(--mb-panel-ink)] ${
+                    actionModal.type === "reschedule"
+                      ? "!border-[color:var(--mb-violet-solid)] !bg-[color:var(--mb-violet-solid)]"
+                      : "!border-[color:var(--mb-urgent-solid)] !bg-[color:var(--mb-urgent-solid)]"
+                  }`}
+                >
+                  {actionSubmitting && <Spinner size={16} />}
+                  {actionModal.type === "decline" && (actionSubmitting ? "Declining…" : "Decline request")}
+                  {actionModal.type === "cancel" && (actionSubmitting ? "Cancelling…" : "Cancel appointment")}
+                  {actionModal.type === "reschedule" && (actionSubmitting ? "Rescheduling…" : "Reschedule session")}
+                </button>
+              </div>
+            </form>
+          )}
+        </Modal>
+      </m.div>
+    </LazyMotion>
   );
 }

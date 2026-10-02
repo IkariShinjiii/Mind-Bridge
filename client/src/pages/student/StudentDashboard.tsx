@@ -14,6 +14,16 @@ import {
   LifeBuoy,
   Phone,
 } from "lucide-react";
+import { m, AnimatePresence } from "framer-motion";
+import {
+  fadePreset,
+  pagePreset,
+  staggerChild,
+  staggerParent,
+  stepVariants,
+  useMotionPreset,
+  useNoMotion,
+} from "../../lib/motion";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from "recharts";
 import { getAppointments, bookAppointment, submitResponse, getAvailability, getMyAssessments } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -101,6 +111,8 @@ export default function StudentDashboard() {
   const displayName = userName.split(" ")[0] || "Student";
 
   const [qIndex, setQIndex] = useState(0);
+  // 1 slides the next question in from the right, -1 brings the previous one back from the left
+  const [dir, setDir] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Array<number | null>>(emptyAnswers);
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Assessment | null>(null);
@@ -108,10 +120,11 @@ export default function StudentDashboard() {
   const [submitError, setSubmitError] = useState("");
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loadingAppointments, setLoadingAppointments] = useState(false);
+  // Start true: loadData() runs on mount, and starting false would flash the empty state before the skeleton
+  const [loadingAppointments, setLoadingAppointments] = useState(true);
 
   const [pastAssessments, setPastAssessments] = useState<Assessment[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [trendView, setTrendView] = useState<"chart" | "table">("chart");
 
   // Modal & Slot Booking States
@@ -195,9 +208,15 @@ export default function StudentDashboard() {
     setAnswers(copy);
   }
 
+  function goToQuestion(index: number) {
+    if (index === qIndex) return;
+    setDir(index > qIndex ? 1 : -1);
+    setQIndex(index);
+  }
+
   async function handleNext() {
     if (qIndex < SCREENING_QUESTIONS.length - 1) {
-      setQIndex(qIndex + 1);
+      goToQuestion(qIndex + 1);
     } else {
       const check = validate(checkInSchema, { answers });
       if (!check.ok) {
@@ -235,6 +254,7 @@ export default function StudentDashboard() {
 
   function resetCheckIn() {
     setAnswers(emptyAnswers());
+    setDir(1);
     setQIndex(0);
     setSurveyCompleted(false);
     setLastSubmission(null);
@@ -329,8 +349,17 @@ export default function StudentDashboard() {
   const assignedCounselorName =
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Guidance Counselor";
 
+  const page = useMotionPreset(pagePreset);
+  const fade = useMotionPreset(fadePreset);
+  const noMotion = useNoMotion();
+  const stepMotion = noMotion
+    ? {}
+    : ({ variants: stepVariants, initial: "enter", animate: "center", exit: "exit", custom: dir } as const);
+  const listMotion = noMotion ? {} : ({ variants: staggerParent, initial: "hidden", animate: "show" } as const);
+  const itemMotion = noMotion ? {} : { variants: staggerChild };
+
   return (
-    <div className="space-y-6 animate-fade-up relative">
+    <m.div {...page} className="relative space-y-6">
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -480,238 +509,246 @@ export default function StudentDashboard() {
               </p>
             </div>
 
-            {surveyCompleted ? (
-              (() => {
-                const high = lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview;
-                const medium = !high && lastSubmission?.riskLevel === "medium";
-                const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
-                return (
-                  <div className="space-y-4 animate-fade-up" aria-live="polite">
-                    <div className="mb-plate p-6 sm:p-6">
-                      <div className="flex items-start gap-4">
-                        <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
-                          <Icon className="h-6 w-6" aria-hidden="true" />
-                        </span>
-                        <div>
-                          <p className="mb-sign text-lg font-bold opacity-90">
-                            {high
-                              ? "Priority support suggested"
-                              : medium
-                                ? "Some stress is showing"
-                                : "Steady right now"}
-                          </p>
-                          <h3 className="mb-sign text-3xl font-bold leading-tight sm:text-4xl">
-                            {high
-                              ? "You don't have to carry this alone."
-                              : medium
-                                ? "Thank you for checking in. Take some time to breathe."
-                                : "Check-in complete. You're doing well."}
-                          </h3>
-                          <p className="mt-2 max-w-[60ch] text-[color:var(--mb-panel-soft)]">
-                            {high
-                              ? "Your answers suggest you may be going through heavy stress or distress. Your check-in is marked for priority review by guidance staff, in confidence."
-                              : medium
-                                ? "Your answers suggest elevated stress. Self-care routines, or talking with a campus counselor, can help with academic pressure."
-                                : "Your answers show a steady baseline. Keep up your routines, and remember support is here if things change."}
-                          </p>
+            <AnimatePresence mode="wait" initial={false}>
+              {surveyCompleted ? (
+                (() => {
+                  const high = lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview;
+                  const medium = !high && lastSubmission?.riskLevel === "medium";
+                  const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
+                  return (
+                    <m.div key="results" {...listMotion} exit={fade.exit} className="space-y-4" aria-live="polite">
+                      <m.div {...itemMotion} className="mb-plate p-6 sm:p-6">
+                        <div className="flex items-start gap-4">
+                          <span className="grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]">
+                            <Icon className="h-6 w-6" aria-hidden="true" />
+                          </span>
+                          <div>
+                            <p className="mb-sign text-lg font-bold opacity-90">
+                              {high
+                                ? "Priority support suggested"
+                                : medium
+                                  ? "Some stress is showing"
+                                  : "Steady right now"}
+                            </p>
+                            <h3 className="mb-sign text-3xl font-bold leading-tight sm:text-4xl">
+                              {high
+                                ? "You don't have to carry this alone."
+                                : medium
+                                  ? "Thank you for checking in. Take some time to breathe."
+                                  : "Check-in complete. You're doing well."}
+                            </h3>
+                            <p className="mt-2 max-w-[60ch] text-[color:var(--mb-panel-soft)]">
+                              {high
+                                ? "Your answers suggest you may be going through heavy stress or distress. Your check-in is marked for priority review by guidance staff, in confidence."
+                                : medium
+                                  ? "Your answers suggest elevated stress. Self-care routines, or talking with a campus counselor, can help with academic pressure."
+                                  : "Your answers show a steady baseline. Keep up your routines, and remember support is here if things change."}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      </m.div>
 
-                    {high && (
-                      <div className="mb-plate-amber p-6">
-                        <p className="mb-sign text-2xl font-bold">If you need to talk to someone right now</p>
-                        <ul className="mt-2 space-y-1">
-                          <li>
-                            <strong>NCMH National Crisis Hotline:</strong> call{" "}
+                      {high && (
+                        <m.div {...itemMotion} className="mb-plate-amber p-6">
+                          <p className="mb-sign text-2xl font-bold">If you need to talk to someone right now</p>
+                          <ul className="mt-2 space-y-1">
+                            <li>
+                              <strong>NCMH National Crisis Hotline:</strong> call{" "}
+                              <a href="tel:1553" className="font-bold underline">
+                                1553
+                              </a>{" "}
+                              (toll-free) or{" "}
+                              <a href="tel:+639178998727" className="font-bold underline">
+                                0917-899-8727
+                              </a>
+                            </li>
+                            <li>
+                              <strong>Hopeline Philippines:</strong>{" "}
+                              <a href="tel:+639175584673" className="font-bold underline">
+                                0917-558-4673
+                              </a>{" "}
+                              or{" "}
+                              <a href="tel:+63288044673" className="font-bold underline">
+                                (02) 8804-4673
+                              </a>
+                            </li>
+                            <li>
+                              <strong>USA Guidance Center:</strong> message through Mind Bridge or visit the Guidance
+                              Office.
+                            </li>
+                          </ul>
+                        </m.div>
+                      )}
+
+                      <m.div {...itemMotion} className="flex flex-wrap gap-3">
+                        <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
+                          <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
+                        </button>
+                        <button type="button" onClick={resetCheckIn} className="mb-btn mb-btn-line">
+                          Take the check-in again
+                        </button>
+                      </m.div>
+                    </m.div>
+                  );
+                })()
+              ) : (
+                <m.div key="form" {...fade}>
+                  {(() => {
+                    const firstOpen = answers.findIndex((a) => a === null);
+                    const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
+                    return (
+                      <ol className="mb-6 flex gap-2" aria-label="Check-in progress">
+                        {SCREENING_QUESTIONS.map((q, i) => {
+                          const done = answers[i] !== null;
+                          const here = i === qIndex;
+                          return (
+                            <li key={q.id} className="flex-1">
+                              <button
+                                type="button"
+                                onClick={() => goToQuestion(i)}
+                                disabled={i > reach}
+                                aria-current={here ? "step" : undefined}
+                                aria-label={`Question ${i + 1}${done ? ", answered" : ""}`}
+                                className={`mb-sign grid h-11 w-full place-items-center rounded border text-xl font-bold disabled:cursor-not-allowed disabled:opacity-50 ${
+                                  here
+                                    ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                    : done
+                                      ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
+                                      : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
+                                }`}
+                              >
+                                {done && !here ? <Check className="h-5 w-5" aria-hidden="true" /> : i + 1}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    );
+                  })()}
+
+                  <div
+                    className="mb-6 h-2 overflow-hidden rounded-full bg-[color:var(--mb-line)]"
+                    role="progressbar"
+                    aria-label="Questions answered"
+                    aria-valuemin={0}
+                    aria-valuemax={SCREENING_QUESTIONS.length}
+                    aria-valuenow={answeredCount}
+                  >
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[color:var(--mb-accent)] to-[color:var(--mb-brand)] transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+
+                  <AnimatePresence mode="wait" initial={false} custom={dir}>
+                    <m.div key={qIndex} {...stepMotion}>
+                      <div className="mb-plate p-6 sm:p-8">
+                        <p className="mb-sign text-lg font-bold opacity-90">
+                          You are on question {qIndex + 1} of {SCREENING_QUESTIONS.length}
+                        </p>
+                        <p className="mb-sign mt-1 text-3xl font-bold leading-tight sm:text-4xl">{currentQ.text}</p>
+                        <p className="mt-2 text-[color:var(--mb-panel-soft)]">{currentQ.subtext}</p>
+                        {currentQ.isCrisisItem && (
+                          <p className="mt-4 rounded bg-[color:var(--mb-panel-ink)] p-3 text-[color:var(--mb-panel)]">
+                            This question is about your safety. If you answer anything above 0, your check-in is marked
+                            for priority review by guidance staff. If you need to talk to someone right now, call{" "}
                             <a href="tel:1553" className="font-bold underline">
                               1553
                             </a>{" "}
-                            (toll-free) or{" "}
-                            <a href="tel:+639178998727" className="font-bold underline">
-                              0917-899-8727
-                            </a>
-                          </li>
-                          <li>
-                            <strong>Hopeline Philippines:</strong>{" "}
-                            <a href="tel:+639175584673" className="font-bold underline">
-                              0917-558-4673
-                            </a>{" "}
-                            or{" "}
-                            <a href="tel:+63288044673" className="font-bold underline">
-                              (02) 8804-4673
-                            </a>
-                          </li>
-                          <li>
-                            <strong>USA Guidance Center:</strong> message through Mind Bridge or visit the Guidance
-                            Office.
-                          </li>
-                        </ul>
+                            (free, 24/7).
+                          </p>
+                        )}
                       </div>
-                    )}
 
-                    <div className="flex flex-wrap gap-3">
-                      <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
-                        <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
-                      </button>
-                      <button type="button" onClick={resetCheckIn} className="mb-btn mb-btn-line">
-                        Take the check-in again
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <>
-                {(() => {
-                  const firstOpen = answers.findIndex((a) => a === null);
-                  const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
-                  return (
-                    <ol className="mb-6 flex gap-2" aria-label="Check-in progress">
-                      {SCREENING_QUESTIONS.map((q, i) => {
-                        const done = answers[i] !== null;
-                        const here = i === qIndex;
-                        return (
-                          <li key={q.id} className="flex-1">
-                            <button
-                              type="button"
-                              onClick={() => setQIndex(i)}
-                              disabled={i > reach}
-                              aria-current={here ? "step" : undefined}
-                              aria-label={`Question ${i + 1}${done ? ", answered" : ""}`}
-                              className={`mb-sign grid h-11 w-full place-items-center rounded border text-xl font-bold disabled:cursor-not-allowed disabled:opacity-50 ${
-                                here
-                                  ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                                  : done
-                                    ? "border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]"
-                                    : "border-[color:var(--mb-line)] text-[color:var(--mb-muted)]"
-                              }`}
-                            >
-                              {done && !here ? <Check className="h-5 w-5" aria-hidden="true" /> : i + 1}
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  );
-                })()}
+                      <fieldset className="mt-6">
+                        <legend className="sr-only">{currentQ.text}</legend>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {SCALE_OPTIONS.map((opt) => {
+                            const selected = answers[qIndex] === opt.value;
+                            return (
+                              <label key={opt.value} className="block cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`q-${qIndex}`}
+                                  value={opt.value}
+                                  checked={selected}
+                                  onChange={() => selectOption(opt.value)}
+                                  className="peer sr-only"
+                                />
+                                <span
+                                  className={`flex items-center gap-4 rounded-md border p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
+                                    selected
+                                      ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                      : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] hover:border-[color:var(--mb-brand)] hover:shadow-mb-sm"
+                                  }`}
+                                >
+                                  <span
+                                    className={`mb-sign grid h-12 w-12 shrink-0 place-items-center rounded text-3xl font-bold ${
+                                      selected
+                                        ? "bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
+                                        : "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                    }`}
+                                    aria-hidden="true"
+                                  >
+                                    {opt.value}
+                                  </span>
+                                  <span>
+                                    <span className="mb-sign block text-xl font-bold">
+                                      {opt.label.replace(/^\d - /, "")}
+                                    </span>
+                                    <span
+                                      className={`block ${selected ? "text-[color:var(--mb-panel-soft)]" : "text-[color:var(--mb-muted)]"}`}
+                                    >
+                                      {opt.desc}
+                                    </span>
+                                  </span>
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+                    </m.div>
+                  </AnimatePresence>
 
-                <div
-                  className="mb-6 h-2 overflow-hidden rounded-full bg-[color:var(--mb-line)]"
-                  role="progressbar"
-                  aria-label="Questions answered"
-                  aria-valuemin={0}
-                  aria-valuemax={SCREENING_QUESTIONS.length}
-                  aria-valuenow={answeredCount}
-                >
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[color:var(--mb-accent)] to-[color:var(--mb-brand)] transition-[width] duration-300 ease-out motion-reduce:transition-none"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-
-                <div key={qIndex} className="mb-plate mb-step p-6 sm:p-8">
-                  <p className="mb-sign text-lg font-bold opacity-90">
-                    You are on question {qIndex + 1} of {SCREENING_QUESTIONS.length}
-                  </p>
-                  <p className="mb-sign mt-1 text-3xl font-bold leading-tight sm:text-4xl">{currentQ.text}</p>
-                  <p className="mt-2 text-[color:var(--mb-panel-soft)]">{currentQ.subtext}</p>
-                  {currentQ.isCrisisItem && (
-                    <p className="mt-4 rounded bg-[color:var(--mb-panel-ink)] p-3 text-[color:var(--mb-panel)]">
-                      This question is about your safety. If you answer anything above 0, your check-in is marked for
-                      priority review by guidance staff. If you need to talk to someone right now, call{" "}
-                      <a href="tel:1553" className="font-bold underline">
-                        1553
-                      </a>{" "}
-                      (free, 24/7).
+                  {submitError && (
+                    <p role="alert" className="mb-alert mt-6 font-medium">
+                      {submitError}
                     </p>
                   )}
-                </div>
 
-                <fieldset key={`opts-${qIndex}`} className="mb-step mt-6">
-                  <legend className="sr-only">{currentQ.text}</legend>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {SCALE_OPTIONS.map((opt) => {
-                      const selected = answers[qIndex] === opt.value;
-                      return (
-                        <label key={opt.value} className="block cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`q-${qIndex}`}
-                            value={opt.value}
-                            checked={selected}
-                            onChange={() => selectOption(opt.value)}
-                            className="peer sr-only"
-                          />
-                          <span
-                            className={`flex items-center gap-4 rounded-md border p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
-                              selected
-                                ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                                : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] hover:border-[color:var(--mb-brand)] hover:shadow-mb-sm"
-                            }`}
-                          >
-                            <span
-                              className={`mb-sign grid h-12 w-12 shrink-0 place-items-center rounded text-3xl font-bold ${
-                                selected
-                                  ? "bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
-                                  : "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                              }`}
-                              aria-hidden="true"
-                            >
-                              {opt.value}
-                            </span>
-                            <span>
-                              <span className="mb-sign block text-xl font-bold">{opt.label.replace(/^\d - /, "")}</span>
-                              <span
-                                className={`block ${selected ? "text-[color:var(--mb-panel-soft)]" : "text-[color:var(--mb-muted)]"}`}
-                              >
-                                {opt.desc}
-                              </span>
-                            </span>
-                          </span>
-                        </label>
-                      );
-                    })}
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-[color:var(--mb-line)] pt-6">
+                    <button
+                      type="button"
+                      onClick={() => goToQuestion(Math.max(0, qIndex - 1))}
+                      disabled={qIndex === 0}
+                      className="mb-btn mb-btn-line"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={answers[qIndex] === null || submittingSurvey}
+                      className="mb-btn mb-btn-solid"
+                    >
+                      {submittingSurvey ? (
+                        <>
+                          <Spinner size={16} className="text-[color:var(--mb-panel-ink)]" />
+                          <span>Evaluating…</span>
+                        </>
+                      ) : qIndex === SCREENING_QUESTIONS.length - 1 ? (
+                        "Submit check-in"
+                      ) : (
+                        <>
+                          Next <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                        </>
+                      )}
+                    </button>
                   </div>
-                </fieldset>
-
-                {submitError && (
-                  <p role="alert" className="mb-alert mt-6 font-medium">
-                    {submitError}
-                  </p>
-                )}
-
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-[color:var(--mb-line)] pt-6">
-                  <button
-                    type="button"
-                    onClick={() => setQIndex(Math.max(0, qIndex - 1))}
-                    disabled={qIndex === 0}
-                    className="mb-btn mb-btn-line"
-                  >
-                    Back
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={answers[qIndex] === null || submittingSurvey}
-                    className="mb-btn mb-btn-solid"
-                  >
-                    {submittingSurvey ? (
-                      <>
-                        <Spinner size={16} className="text-[color:var(--mb-panel-ink)]" />
-                        <span>Evaluating…</span>
-                      </>
-                    ) : qIndex === SCREENING_QUESTIONS.length - 1 ? (
-                      "Submit check-in"
-                    ) : (
-                      <>
-                        Next <ArrowRight className="h-5 w-5" aria-hidden="true" />
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
+                </m.div>
+              )}
+            </AnimatePresence>
           </section>
 
           {/* WELLNESS TREND LINE CHART & HISTORY SECTION */}
@@ -761,140 +798,147 @@ export default function StudentDashboard() {
               )}
             </div>
 
-            {loadingHistory ? (
-              <div role="status" aria-label="Loading your trend" className="space-y-3">
-                <span className="mb-skeleton h-6 w-1/3" />
-                <span className="mb-skeleton h-48 w-full" />
-              </div>
-            ) : chartData.length === 0 ? (
-              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]">
-                <BarChart2 className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
-                <p className="text-lg font-bold text-[color:var(--mb-ink)]">No check-ins yet</p>
-                <p className="mx-auto mt-1 max-w-sm">
-                  Complete your first one-minute check-in above and your scores will show up here over time.
-                </p>
-              </div>
-            ) : trendView === "chart" ? (
-              <div>
-                {/* Score Benchmark Legend */}
-                <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)]" />
-                    <span>0 to 6: balanced</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-amber)]" />
-                    <span>7 to 12: moderate</span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-urgent-solid)]" />
-                    <span>13 to 21: priority</span>
-                  </span>
-                </div>
-
-                {/* Area Line Chart */}
-                <div
-                  className="h-60 sm:h-64 w-full"
-                  role="img"
-                  aria-label={`Line chart of ${chartData.length} check-in scores, latest ${chartData[chartData.length - 1].score} out of ${chartData[chartData.length - 1].max}. Switch to History for a text list.`}
+            {/* Skeleton, empty state, chart and history crossfade; the chart/history toggle uses the same swap */}
+            <AnimatePresence mode="wait" initial={false}>
+              {loadingHistory ? (
+                <m.div key="loading" {...fade} role="status" aria-label="Loading your trend" className="space-y-3">
+                  <span className="mb-skeleton h-6 w-1/3" />
+                  <span className="mb-skeleton h-48 w-full" />
+                </m.div>
+              ) : chartData.length === 0 ? (
+                <m.div
+                  key="empty"
+                  {...fade}
+                  className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]"
                 >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="var(--mb-brand)" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="var(--mb-brand)" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
-                      <XAxis
-                        dataKey="formattedDate"
-                        stroke="var(--mb-muted)"
-                        tick={{ fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        domain={[0, 21]}
-                        stroke="var(--mb-muted)"
-                        tick={{ fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={false}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        content={({ active, payload }) => {
-                          if (active && payload && payload.length) {
-                            const data = payload[0].payload;
-                            return (
-                              <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
-                                <div className="font-bold text-[color:var(--mb-ink)]">
-                                  {data.fullDate || data.formattedDate}
-                                </div>
-                                <div className="mt-1 flex items-center gap-2">
-                                  <span className="text-[color:var(--mb-brand)] font-bold">
-                                    Score: {data.score} / {data.max}
-                                  </span>
-                                  <span
-                                    className={`mb-badge capitalize ${
-                                      data.riskLevel === "high"
-                                        ? "mb-badge-urgent"
-                                        : data.riskLevel === "medium"
-                                          ? "mb-badge-warn"
-                                          : "mb-badge-safe"
-                                    }`}
-                                  >
-                                    {data.riskLevel}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <ReferenceLine y={6} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
-                      <ReferenceLine y={12} stroke="var(--mb-warn)" strokeDasharray="3 3" opacity={0.6} />
-                      <Area
-                        type="monotone"
-                        dataKey="score"
-                        stroke="var(--mb-brand)"
-                        strokeWidth={2.5}
-                        fillOpacity={1}
-                        fill="url(#scoreGradient)"
-                        activeDot={{ r: 6, fill: "var(--mb-brand)", stroke: "var(--mb-surface)", strokeWidth: 2 }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            ) : (
-              /* Table History View */
-              <div className="space-y-2">
-                {pastAssessments.slice(0, 6).map((item) => (
-                  <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 mb-tile mb-tile-sm">
-                    <div>
-                      <span className="font-bold text-[color:var(--mb-ink)]">{formatDateTime(item.createdAt)}</span>
-                      <span className="ml-2 text-[color:var(--mb-muted)]">
-                        Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> /{" "}
-                        {item.maxScore || 21}
-                      </span>
-                    </div>
-                    <span
-                      className={`mb-badge capitalize ${
-                        item.riskLevel === "high"
-                          ? "mb-badge-urgent"
-                          : item.riskLevel === "medium"
-                            ? "mb-badge-warn"
-                            : "mb-badge-safe"
-                      }`}
-                    >
-                      {item.riskLevel} risk
+                  <BarChart2 className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
+                  <p className="text-lg font-bold text-[color:var(--mb-ink)]">No check-ins yet</p>
+                  <p className="mx-auto mt-1 max-w-sm">
+                    Complete your first one-minute check-in above and your scores will show up here over time.
+                  </p>
+                </m.div>
+              ) : trendView === "chart" ? (
+                <m.div key="chart" {...fade}>
+                  {/* Score Benchmark Legend */}
+                  <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)]" />
+                      <span>0 to 6: balanced</span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-amber)]" />
+                      <span>7 to 12: moderate</span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-urgent-solid)]" />
+                      <span>13 to 21: priority</span>
                     </span>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Area Line Chart */}
+                  <div
+                    className="h-60 sm:h-64 w-full"
+                    role="img"
+                    aria-label={`Line chart of ${chartData.length} check-in scores, latest ${chartData[chartData.length - 1].score} out of ${chartData[chartData.length - 1].max}. Switch to History for a text list.`}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="var(--mb-brand)" stopOpacity={0.35} />
+                            <stop offset="95%" stopColor="var(--mb-brand)" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
+                        <XAxis
+                          dataKey="formattedDate"
+                          stroke="var(--mb-muted)"
+                          tick={{ fontSize: 12 }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          domain={[0, 21]}
+                          stroke="var(--mb-muted)"
+                          tick={{ fontSize: 12 }}
+                          tickLine={false}
+                          axisLine={false}
+                          allowDecimals={false}
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              const data = payload[0].payload;
+                              return (
+                                <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
+                                  <div className="font-bold text-[color:var(--mb-ink)]">
+                                    {data.fullDate || data.formattedDate}
+                                  </div>
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <span className="text-[color:var(--mb-brand)] font-bold">
+                                      Score: {data.score} / {data.max}
+                                    </span>
+                                    <span
+                                      className={`mb-badge capitalize ${
+                                        data.riskLevel === "high"
+                                          ? "mb-badge-urgent"
+                                          : data.riskLevel === "medium"
+                                            ? "mb-badge-warn"
+                                            : "mb-badge-safe"
+                                      }`}
+                                    >
+                                      {data.riskLevel}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <ReferenceLine y={6} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
+                        <ReferenceLine y={12} stroke="var(--mb-warn)" strokeDasharray="3 3" opacity={0.6} />
+                        <Area
+                          type="monotone"
+                          dataKey="score"
+                          stroke="var(--mb-brand)"
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill="url(#scoreGradient)"
+                          activeDot={{ r: 6, fill: "var(--mb-brand)", stroke: "var(--mb-surface)", strokeWidth: 2 }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </m.div>
+              ) : (
+                /* Table History View */
+                <m.div key="table" {...fade} className="space-y-2">
+                  {pastAssessments.slice(0, 6).map((item) => (
+                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 mb-tile mb-tile-sm">
+                      <div>
+                        <span className="font-bold text-[color:var(--mb-ink)]">{formatDateTime(item.createdAt)}</span>
+                        <span className="ml-2 text-[color:var(--mb-muted)]">
+                          Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> /{" "}
+                          {item.maxScore || 21}
+                        </span>
+                      </div>
+                      <span
+                        className={`mb-badge capitalize ${
+                          item.riskLevel === "high"
+                            ? "mb-badge-urgent"
+                            : item.riskLevel === "medium"
+                              ? "mb-badge-warn"
+                              : "mb-badge-safe"
+                        }`}
+                      >
+                        {item.riskLevel} risk
+                      </span>
+                    </div>
+                  ))}
+                </m.div>
+              )}
+            </AnimatePresence>
           </div>
         </section>
 
@@ -932,43 +976,49 @@ export default function StudentDashboard() {
               </Link>
             </div>
 
-            <div className="space-y-3">
+            <AnimatePresence mode="wait" initial={false}>
               {loadingAppointments ? (
-                <div role="status" aria-label="Loading sessions" className="space-y-3">
+                <m.div key="loading" {...fade} role="status" aria-label="Loading sessions" className="space-y-3">
                   <span className="mb-skeleton h-16 w-full" />
                   <span className="mb-skeleton h-16 w-full" />
-                </div>
+                </m.div>
               ) : appointments.length === 0 ? (
-                <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
+                <m.div
+                  key="empty"
+                  {...fade}
+                  className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]"
+                >
                   No sessions yet. Book one whenever you feel ready.
-                </div>
+                </m.div>
               ) : (
-                appointments.slice(0, 3).map((apt) => (
-                  <div key={apt.id} className="mb-tile mb-tile-sm">
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Counseling Session"}</div>
-                      <span
-                        className={`mb-badge shrink-0 capitalize ${
-                          (apt.status || "").toLowerCase().includes("confirm")
-                            ? "mb-badge-safe"
-                            : (apt.status || "").toLowerCase().includes("pending")
-                              ? "mb-badge-warn"
-                              : ""
-                        }`}
-                      >
-                        {apt.status || "Pending"}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-[color:var(--mb-muted)]">
-                      {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
-                    </div>
-                    {apt.counselorName && (
-                      <div className="mt-1 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
-                    )}
-                  </div>
-                ))
+                <m.div key="list" {...listMotion} exit={fade.exit} className="space-y-3">
+                  {appointments.slice(0, 3).map((apt) => (
+                    <m.div key={apt.id} {...itemMotion} className="mb-tile mb-tile-sm">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Counseling Session"}</div>
+                        <span
+                          className={`mb-badge shrink-0 capitalize ${
+                            (apt.status || "").toLowerCase().includes("confirm")
+                              ? "mb-badge-safe"
+                              : (apt.status || "").toLowerCase().includes("pending")
+                                ? "mb-badge-warn"
+                                : ""
+                          }`}
+                        >
+                          {apt.status || "Pending"}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-[color:var(--mb-muted)]">
+                        {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
+                      </div>
+                      {apt.counselorName && (
+                        <div className="mt-1 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
+                      )}
+                    </m.div>
+                  ))}
+                </m.div>
               )}
-            </div>
+            </AnimatePresence>
 
             <button
               type="button"
@@ -1051,6 +1101,6 @@ export default function StudentDashboard() {
           />
         </Suspense>
       )}
-    </div>
+    </m.div>
   );
 }

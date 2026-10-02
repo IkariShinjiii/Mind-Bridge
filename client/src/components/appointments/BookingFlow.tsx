@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Spinner from "../ui/Spinner";
+import { fadePreset, staggerChild, staggerParent, stepVariants, useMotionPreset, useNoMotion } from "../../lib/motion";
 import { parseDate } from "../../utils/dates";
 import type { AvailabilitySlot } from "../../types";
 
@@ -45,6 +47,15 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
 
   const [counselorKey, setCounselorKey] = useState<string | null>(null);
   const [chosen, setChosen] = useState<AvailabilitySlot | null>(null);
+  // 1 slides the next step in from the right, -1 brings the previous one back from the left
+  const [dir, setDir] = useState<1 | -1>(1);
+  const fade = useMotionPreset(fadePreset);
+  const noMotion = useNoMotion();
+  const stepMotion = noMotion
+    ? {}
+    : ({ variants: stepVariants, initial: "enter", animate: "center", exit: "exit", custom: dir } as const);
+  const listMotion = noMotion ? {} : ({ variants: staggerParent, initial: "hidden", animate: "show" } as const);
+  const itemMotion = noMotion ? {} : { variants: staggerChild };
 
   const single = counselors.length === 1;
   const counselor = counselors.find((c) => c.key === counselorKey) || (single ? counselors[0] : null);
@@ -62,23 +73,35 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
     return groups;
   }, [counselor]);
 
+  // Loading, empty and the flow itself crossfade through one AnimatePresence
+  const view = (key: string, node: ReactNode) => (
+    <AnimatePresence mode="wait" initial={false}>
+      <m.div key={key} {...fade}>
+        {node}
+      </m.div>
+    </AnimatePresence>
+  );
+
   if (loading) {
-    return (
+    return view(
+      "loading",
       <div className="flex items-center justify-center gap-2 py-8 text-[color:var(--mb-muted)]">
         <Spinner size={18} /> Finding open times…
-      </div>
+      </div>,
     );
   }
 
   if (slots.length === 0) {
-    return (
+    return view(
+      "empty",
       <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-6 text-[color:var(--mb-muted)]">
         No counselor times are open right now. Please check back soon, or visit the Guidance Office in person.
-      </div>
+      </div>,
     );
   }
 
   const goTo = (n: number) => {
+    setDir(-1);
     if (n === 1) {
       setChosen(null);
       setCounselorKey(null);
@@ -90,7 +113,13 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
   const start = chosen && slotStart(chosen);
   const end = chosen && slotEnd(chosen);
 
-  return (
+  const forward = (next: () => void) => {
+    setDir(1);
+    next();
+  };
+
+  return view(
+    "flow",
     <div>
       <ol className="mb-6 flex gap-2" aria-label="Booking steps">
         {STEPS.map((label, i) => {
@@ -121,96 +150,102 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
         })}
       </ol>
 
-      {step === 1 && (
-        <div className="space-y-3">
-          <p className="mb-sign text-2xl font-bold">Who would you like to see?</p>
-          {counselors.map((c) => {
-            const first = slotStart(c.slots[0]);
-            return (
-              <button
-                key={c.key}
-                type="button"
-                onClick={() => setCounselorKey(c.key)}
-                className="flex w-full items-center justify-between gap-4 rounded-md border border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4 text-left hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
-              >
-                <span>
-                  <span className="mb-sign block text-2xl font-bold">{c.name}</span>
-                  <span className="block opacity-80">
-                    {c.slots.length} open {c.slots.length === 1 ? "time" : "times"}. Next: {dayLabel(first)}
-                  </span>
-                </span>
-                <ArrowRight className="h-6 w-6 shrink-0" aria-hidden="true" />
+      <AnimatePresence mode="wait" initial={false} custom={dir}>
+        {step === 1 && (
+          <m.div key="counselor" {...stepMotion}>
+            <m.div {...listMotion} className="space-y-3">
+              <p className="mb-sign text-2xl font-bold">Who would you like to see?</p>
+              {counselors.map((c) => {
+                const first = slotStart(c.slots[0]);
+                return (
+                  <m.button
+                    key={c.key}
+                    type="button"
+                    {...itemMotion}
+                    onClick={() => forward(() => setCounselorKey(c.key))}
+                    className="flex w-full items-center justify-between gap-4 rounded-md border border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4 text-left hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
+                  >
+                    <span>
+                      <span className="mb-sign block text-2xl font-bold">{c.name}</span>
+                      <span className="block opacity-80">
+                        {c.slots.length} open {c.slots.length === 1 ? "time" : "times"}. Next: {dayLabel(first)}
+                      </span>
+                    </span>
+                    <ArrowRight className="h-6 w-6 shrink-0" aria-hidden="true" />
+                  </m.button>
+                );
+              })}
+            </m.div>
+          </m.div>
+        )}
+
+        {step === 2 && counselor && (
+          <m.div key="time" {...stepMotion} className="space-y-4">
+            <p className="mb-sign text-2xl font-bold">Pick a time with {counselor.name}</p>
+            {/* Stagger by day, not by slot, so a long list still settles quickly */}
+            <m.div {...listMotion} className="max-h-72 space-y-4 overflow-y-auto pr-1">
+              {days.map((day) => (
+                <m.div key={day.label} {...itemMotion}>
+                  <p className="mb-2 font-bold">{day.label}</p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {day.slots.map((slot) => {
+                      const s = slotStart(slot);
+                      const e = slotEnd(slot);
+                      return (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => forward(() => setChosen(slot))}
+                          className="mb-sign min-h-[48px] rounded-md border border-[color:var(--mb-line)] px-3 text-xl font-bold hover:border-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)]"
+                        >
+                          {timeLabel(s) || "Time to be confirmed"}
+                          {e ? ` to ${timeLabel(e)}` : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </m.div>
+              ))}
+            </m.div>
+            {!single && (
+              <button type="button" onClick={() => goTo(1)} className="mb-btn mb-btn-line">
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" /> Choose a different counselor
               </button>
-            );
-          })}
-        </div>
-      )}
+            )}
+          </m.div>
+        )}
 
-      {step === 2 && counselor && (
-        <div className="space-y-4">
-          <p className="mb-sign text-2xl font-bold">Pick a time with {counselor.name}</p>
-          <div className="max-h-72 space-y-4 overflow-y-auto pr-1">
-            {days.map((day) => (
-              <div key={day.label}>
-                <p className="mb-2 font-bold">{day.label}</p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {day.slots.map((slot) => {
-                    const s = slotStart(slot);
-                    const e = slotEnd(slot);
-                    return (
-                      <button
-                        key={slot.id}
-                        type="button"
-                        onClick={() => setChosen(slot)}
-                        className="mb-sign min-h-[48px] rounded-md border border-[color:var(--mb-line)] px-3 text-xl font-bold hover:border-[color:var(--mb-ink)] hover:bg-[color:var(--mb-surface-2)]"
-                      >
-                        {timeLabel(s) || "Time to be confirmed"}
-                        {e ? ` to ${timeLabel(e)}` : ""}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-          {!single && (
-            <button type="button" onClick={() => goTo(1)} className="mb-btn mb-btn-line">
-              <ArrowLeft className="h-5 w-5" aria-hidden="true" /> Choose a different counselor
-            </button>
-          )}
-        </div>
-      )}
-
-      {step === 3 && chosen && counselor && (
-        <div className="space-y-4">
-          <div className="mb-plate p-6">
-            <p className="mb-sign text-lg font-bold opacity-90">Please check your booking</p>
-            <p className="mb-sign mt-1 text-3xl font-bold leading-tight">{counselor.name}</p>
-            <p className="mb-sign text-2xl font-bold">
-              {dayLabel(start)}, {timeLabel(start)}
-              {end ? ` to ${timeLabel(end)}` : ""}
-            </p>
-            <p className="mt-3 text-[color:var(--mb-panel-soft)]">
-              Your counselor will confirm the request. By booking, you consent to your appointment details being used
-              for counseling purposes.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => onBook(chosen)}
-              disabled={bookingId === chosen.id}
-              className="mb-btn mb-btn-solid"
-            >
-              {bookingId === chosen.id ? <Spinner size={16} className="text-[color:var(--mb-panel-ink)]" /> : null}
-              Confirm booking
-            </button>
-            <button type="button" onClick={() => goTo(2)} className="mb-btn mb-btn-line">
-              Pick another time
-            </button>
-          </div>
-        </div>
-      )}
+        {step === 3 && chosen && counselor && (
+          <m.div key="confirm" {...stepMotion} className="space-y-4">
+            <div className="mb-plate p-6">
+              <p className="mb-sign text-lg font-bold opacity-90">Please check your booking</p>
+              <p className="mb-sign mt-1 text-3xl font-bold leading-tight">{counselor.name}</p>
+              <p className="mb-sign text-2xl font-bold">
+                {dayLabel(start)}, {timeLabel(start)}
+                {end ? ` to ${timeLabel(end)}` : ""}
+              </p>
+              <p className="mt-3 text-[color:var(--mb-panel-soft)]">
+                Your counselor will confirm the request. By booking, you consent to your appointment details being used
+                for counseling purposes.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => onBook(chosen)}
+                disabled={bookingId === chosen.id}
+                className="mb-btn mb-btn-solid"
+              >
+                {bookingId === chosen.id ? <Spinner size={16} className="text-[color:var(--mb-panel-ink)]" /> : null}
+                Confirm booking
+              </button>
+              <button type="button" onClick={() => goTo(2)} className="mb-btn mb-btn-line">
+                Pick another time
+              </button>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {onCancel && (
         <div className="mt-6 border-t border-[color:var(--mb-line)] pt-4">
@@ -219,6 +254,6 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
           </button>
         </div>
       )}
-    </div>
+    </div>,
   );
 }
