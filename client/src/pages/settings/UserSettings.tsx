@@ -22,9 +22,13 @@ import {
   Check,
   KeyRound,
   Plus,
+  Moon,
+  Palette,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
 import { AVATAR_COLORS, avatarColor } from "../../utils/avatar";
@@ -51,7 +55,7 @@ const PRESET_GOALS = [
   "Improve how I communicate with others",
 ];
 
-type TabId = "profile" | "password" | "privacy" | "emergency" | "goals" | "sessions";
+type TabId = "profile" | "appearance" | "password" | "privacy" | "emergency" | "goals" | "sessions";
 
 /**
  * Badge classes for an appointment status in the session history.
@@ -123,6 +127,7 @@ export default function UserSettings() {
   const { currentUser, userRole, refreshUserData } = useAuth();
   const navigate = useNavigate();
   const panelMotion = useMotionPreset(pagePreset);
+  const [theme, , setTheme] = useTheme();
 
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [loading, setLoading] = useState(true);
@@ -375,6 +380,7 @@ export default function UserSettings() {
 
   const allTabs: Array<{ id: TabId; label: string; icon: LucideIcon; show: boolean }> = [
     { id: "profile", label: "Profile", icon: User, show: true },
+    { id: "appearance", label: "Appearance", icon: Palette, show: true },
     { id: "password", label: "Password", icon: Lock, show: true },
     { id: "privacy", label: "Privacy", icon: Shield, show: true },
     { id: "emergency", label: "Emergency contact", icon: HeartPulse, show: isStudent },
@@ -631,6 +637,69 @@ export default function UserSettings() {
                       </SaveButton>
                     </form>
                   )}
+                </m.div>
+              )}
+
+              {/* APPEARANCE */}
+              {activeTab === "appearance" && (
+                <m.div key="appearance" {...panelMotion} className="space-y-6">
+                  <PanelHead title="Appearance">
+                    Light is easier in daylight. Dark is gentler for late-night check-ins. Your choice is remembered on
+                    this device.
+                  </PanelHead>
+
+                  <fieldset>
+                    <legend className="sr-only">Colour theme</legend>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {(
+                        [
+                          { value: "light", label: "Light", hint: "Bright and clear, best in daytime.", icon: Sun },
+                          { value: "dark", label: "Dark", hint: "Softer on the eyes at night.", icon: Moon },
+                        ] as const
+                      ).map(({ value, label, hint, icon: Icon }) => {
+                        const selected = theme === value;
+                        return (
+                          <label key={value} className="block cursor-pointer">
+                            <input
+                              type="radio"
+                              name="theme"
+                              value={value}
+                              checked={selected}
+                              onChange={() => setTheme(value)}
+                              className="peer sr-only"
+                            />
+                            <span
+                              className={`flex items-center gap-4 rounded-md border p-4 transition-colors peer-focus-visible:outline peer-focus-visible:outline-[3px] peer-focus-visible:outline-offset-[3px] peer-focus-visible:outline-[color:var(--mb-focus)] ${
+                                selected
+                                  ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                  : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] hover:border-[color:var(--mb-brand)] hover:shadow-mb-sm"
+                              }`}
+                            >
+                              <span
+                                className={`grid h-12 w-12 shrink-0 place-items-center rounded ${
+                                  selected
+                                    ? "bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
+                                    : "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                }`}
+                                aria-hidden="true"
+                              >
+                                <Icon className="h-6 w-6" />
+                              </span>
+                              <span>
+                                <span className="mb-sign block text-xl font-bold">{label}</span>
+                                <span
+                                  className={`block ${selected ? "text-[color:var(--mb-panel-soft)]" : "text-[color:var(--mb-muted)]"}`}
+                                >
+                                  {hint}
+                                </span>
+                              </span>
+                              {selected && <Check className="ml-auto h-6 w-6 shrink-0" aria-hidden="true" />}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                 </m.div>
               )}
 

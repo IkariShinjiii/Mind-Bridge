@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence, m } from "framer-motion";
-import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Moon, Sun, Phone } from "lucide-react";
+import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Phone } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { transition, useMotionPreset, type MotionPreset } from "../../lib/motion";
@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
   const { currentUser, userRole, userData, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [theme, toggleTheme] = useTheme();
+  const [theme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const menu = useMotionPreset(menuPreset);
@@ -35,7 +35,6 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
   const initials = (safeName || "U").slice(0, 2).toUpperCase();
   const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
   const avatarBg = avatarColor(userData?.avatarGradient);
-  const next = theme === "dark" ? "light" : "dark";
 
   const isAccountsTab = location.pathname === "/admin/dashboard" && location.search.includes("tab=accounts");
   const isHere = (path: string) => location.pathname === path;
@@ -187,19 +186,6 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                 Crisis 1553
               </a>
             )}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={`Switch to ${next} mode`}
-              className="mb-btn mb-btn-line !min-h-[44px] !px-3"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" aria-hidden="true" />
-              ) : (
-                <Moon className="h-5 w-5" aria-hidden="true" />
-              )}
-            </button>
-
             <button
               type="button"
               ref={menuButtonRef}

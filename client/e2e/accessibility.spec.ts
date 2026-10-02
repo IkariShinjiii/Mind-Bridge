@@ -77,6 +77,10 @@ for (const theme of ["light", "dark"]) {
         await page.waitForLoadState("networkidle");
         await expectNoViolations(page, path);
       }
+
+      await page.getByRole("button", { name: "Appearance" }).click();
+      await expect(page.getByRole("radio", { name: /Dark/ })).toBeAttached();
+      await expectNoViolations(page, "settings appearance");
     });
 
     test("staff pages: dashboard and the case inspector dialog", async ({ page }) => {
