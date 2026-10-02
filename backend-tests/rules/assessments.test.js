@@ -41,6 +41,26 @@ describe("assessments - UPDATE (updateAssessmentStatus)", () => {
   it("admin reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "admin"), "assessments/a1"), patch)));
   it("student cannot edit even their own assessment", () => assertFails(updateDoc(doc(as(env, "student"), "assessments/a1"), { riskLevel: "low", counselorNotes: "x" })));
   it("unapproved counselor cannot review", () => assertFails(updateDoc(doc(as(env, "pendingCounselor"), "assessments/a1"), patch)));
+
+  it("staff can move a case through every status", async () => {
+    for (const status of ["reviewed", "escalated", "open"]) {
+      await assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { status, reviewedAt: "2026-10-02T00:00:00.000Z" }));
+    }
+  });
+  it("staff can save notes on their own", () =>
+    assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { counselorNotes: "called the student" })));
+  it("staff cannot change what the student submitted: score, risk, answers, flag or owner", async () => {
+    const ref = () => doc(as(env, "admin"), "assessments/a1");
+    await assertFails(updateDoc(ref(), { riskLevel: "high" }));
+    await assertFails(updateDoc(ref(), { total: 9 }));
+    await assertFails(updateDoc(ref(), { answers: [3, 3, 3] }));
+    await assertFails(updateDoc(ref(), { flaggedForImmediateReview: true }));
+    await assertFails(updateDoc(ref(), { studentId: "stu2" }));
+  });
+  it("a valid review cannot smuggle in a changed field", () =>
+    assertFails(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { ...patch, riskLevel: "high" })));
+  it("staff cannot set a status the app does not use", () =>
+    assertFails(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { status: "deleted" })));
 });
 
 describe("assessments - DELETE", () => {

@@ -51,6 +51,15 @@ describe("appointments - CREATE (bookAppointment)", () => {
   it("student cannot book on behalf of another student", () => assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ studentId: "stu2" }))));
   it("deactivated student cannot book", () => assertFails(addDoc(collection(as(env, "deactivated"), "appointments"), appointment({ studentId: "stu3" }))));
   it("unauthenticated cannot book", () => assertFails(addDoc(collection(anon(env), "appointments"), appointment())));
+  it("a booking can only start as a pending request, never already confirmed or completed", async () => {
+    for (const status of ["Confirmed", "Completed", "Rescheduled", "Declined"]) {
+      await assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ status })));
+    }
+  });
+  it("a booking with no status at all is refused too", () => {
+    const { status, ...withoutStatus } = appointment();
+    return assertFails(addDoc(collection(as(env, "student"), "appointments"), withoutStatus));
+  });
 });
 
 describe("appointments - READ (getAppointments, getAllAppointments)", () => {
@@ -86,6 +95,17 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   it("unapproved counselor cannot read threads", () => assertFails(getDoc(doc(as(env, "pendingCounselor"), "messages/m1"))));
 
   it("student posts to own thread", () => assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message())));
+  it("student cannot post as a counselor or admin", async () => {
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "counselor" })));
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "admin" })));
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "anything" })));
+  });
+  it("staff cannot post as a student", () =>
+    assertFails(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "student" }))));
+  it("staff post with the role the app sends ('admin') as well as 'counselor'", async () => {
+    await assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "admin" })));
+    await assertSucceeds(addDoc(collection(as(env, "admin"), "messages"), message({ senderId: "adm1", senderRole: "admin" })));
+  });
   it("student cannot post into another student's thread", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ studentId: "stu2" }))));
   it("student cannot forge senderId", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderId: "cou1" }))));
   it("counselor replies in a student's thread", () =>

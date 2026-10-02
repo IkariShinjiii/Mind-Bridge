@@ -41,12 +41,18 @@ service cloud.firestore {
       allow create: if isActive() && request.resource.data.studentId == request.auth.uid
         && request.resource.data.status == 'open';
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
-      allow update: if isStaff();
+      // Staff review a check-in: they can set the case status, the review time and their notes, nothing else.
+      // The answers, score, risk level and owner stay exactly as the student submitted them.
+      allow update: if isStaff()
+        && touchesOnly(['status', 'reviewedAt', 'counselorNotes'])
+        && request.resource.data.status in ['open', 'reviewed', 'escalated'];
       allow delete: if false;
     }
 
     match /appointments/{id} {
-      allow create: if isActive() && request.resource.data.studentId == request.auth.uid;
+      // A booking always starts as a request; only staff can confirm it.
+      allow create: if isActive() && request.resource.data.studentId == request.auth.uid
+        && request.resource.data.status == 'Pending Review';
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       allow update: if isStaff()
         || (isActive() && resource.data.studentId == request.auth.uid
@@ -66,7 +72,11 @@ service cloud.firestore {
     match /messages/{id} {
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       allow create: if isActive() && request.resource.data.senderId == request.auth.uid
-        && (request.resource.data.studentId == request.auth.uid || isStaff());
+        && (request.resource.data.studentId == request.auth.uid || isStaff())
+        // A student can only speak as a student; staff speak as staff (the app sends 'admin' for both roles).
+        && (isStaff()
+            ? request.resource.data.senderRole in ['admin', 'counselor']
+            : request.resource.data.senderRole == 'student');
       allow update, delete: if false;
     }
 

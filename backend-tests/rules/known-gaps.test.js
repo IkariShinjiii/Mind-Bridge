@@ -12,8 +12,8 @@ afterAll(async () => { await env.cleanup(); });
 beforeEach(async () => { await env.clearFirestore(); await seedUsers(env); });
 
 describe("GAP: students can write fields that should be server-controlled", () => {
-  it("GAP: a student can create an appointment that is already 'Confirmed'", () =>
-    assertSucceeds(addDoc(collection(as(env, "student"), "appointments"), appointment({ status: "Confirmed" }))));
+  // Fixed and moved to scheduling.test.js: a student can no longer create an already-'Confirmed' appointment,
+  // or post a message labelled with a staff role.
 
   it("GAP: a student can book against any counselorId / slot, with no conflict check", async () => {
     await seed(env, "availability/slot1", slot({ isBooked: true }));
@@ -29,7 +29,6 @@ describe("GAP: students can write fields that should be server-controlled", () =
     assertSucceeds(addDoc(collection(as(env, "student"), "assessments"),
       assessment({ total: 21, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false }))));
 
-  it("GAP: a student can post a message labelled senderRole 'counselor' under any name", () =>
-    assertSucceeds(addDoc(collection(as(env, "student"), "messages"),
-      message({ senderRole: "counselor", senderName: "Dr. Cruz" }))));
+  it("GAP: a student can still post a message under any display name (the role is checked, the name is not)", () =>
+    assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Dr. Cruz" }))));
 });

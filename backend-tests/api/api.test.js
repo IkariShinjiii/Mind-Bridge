@@ -118,14 +118,14 @@ describe("assessments", () => {
   it("updateAssessmentStatus leaves notes alone when omitted", async () => {
     await seed(env, "assessments/a1", assessment({ counselorNotes: "keep" }));
     login("admin");
-    await api.updateAssessmentStatus("a1", "closed");
+    await api.updateAssessmentStatus("a1", "escalated");
     expect((await raw("assessments/a1")).counselorNotes).toBe("keep");
   });
 
   it("updateAssessmentStatus as a student -> permission-denied", async () => {
     await seed(env, "assessments/a1", assessment());
     login("student");
-    await denied(api.updateAssessmentStatus("a1", "closed"));
+    await denied(api.updateAssessmentStatus("a1", "reviewed"));
   });
 });
 
