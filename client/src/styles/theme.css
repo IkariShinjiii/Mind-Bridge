@@ -562,55 +562,12 @@ textarea.mb-field {
   background: var(--mb-line);
   border-radius: 2px;
 }
-.mb-route::after {
-  content: "";
-  position: absolute;
-  left: 1.9rem;
-  top: 2rem;
-  bottom: 2rem;
-  width: 4px;
-  background: var(--mb-amber);
-  border-radius: 2px;
-  transform-origin: top;
-  animation: mb-draw 1.4s var(--mb-ease) 0.3s both;
-}
 .mb-stop {
   position: relative;
   z-index: 1;
-  animation: mb-lift 0.6s var(--mb-ease) both;
-}
-.mb-stop:nth-child(1) {
-  animation-delay: 0.15s;
-}
-.mb-stop:nth-child(2) {
-  animation-delay: 0.45s;
-}
-.mb-stop:nth-child(3) {
-  animation-delay: 0.75s;
-}
-.mb-stop:nth-child(4) {
-  animation-delay: 1.05s;
 }
 
 /* ── Motion: nothing longer than 300ms except the landing route and the shimmer ── */
-@keyframes mb-draw {
-  from {
-    transform: scaleY(0);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-@keyframes mb-lift {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 @keyframes mb-shimmer {
   from {
     background-position: 100% 0;
@@ -618,35 +575,6 @@ textarea.mb-field {
   to {
     background-position: -100% 0;
   }
-}
-@keyframes mb-page {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes mb-step {
-  from {
-    opacity: 0;
-    transform: translateX(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* Page transition. `backwards` fill: once it ends no transform lingers to trap position:fixed dialogs. */
-.mb .animate-fade-up {
-  animation: mb-page 0.26s var(--mb-ease) backwards;
-}
-/* A new question or booking step eases in from the right */
-.mb-step {
-  animation: mb-step 0.24s var(--mb-ease) backwards;
 }
 
 /* Pages migrated from the old dark theme keep a few legacy font utilities. */
@@ -658,12 +586,6 @@ textarea.mb-field {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mb-route::after,
-  .mb-stop,
-  .mb-step,
-  .mb .animate-fade-up {
-    animation: none;
-  }
   .mb-skeleton {
     animation: none;
   }

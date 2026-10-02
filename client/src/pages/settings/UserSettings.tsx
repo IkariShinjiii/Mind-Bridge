@@ -9,6 +9,7 @@ import {
   type ButtonHTMLAttributes,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { m, AnimatePresence } from "framer-motion";
 import {
   User,
   Lock,
@@ -37,6 +38,7 @@ import { friendlyError, codeOf } from "../../utils/errors";
 import { focusById } from "../../utils/dom";
 import type { Appointment, EmergencyContact, FieldErrors } from "../../types";
 import { formatDateTime } from "../../utils/dates";
+import { pagePreset, useMotionPreset } from "../../lib/motion";
 
 const PRESET_GOALS = [
   "Manage academic stress and burnout",
@@ -120,6 +122,7 @@ function SaveButton({ saving, children, savingLabel = "Saving…", ...rest }: Sa
 export default function UserSettings() {
   const { currentUser, userRole, refreshUserData } = useAuth();
   const navigate = useNavigate();
+  const panelMotion = useMotionPreset(pagePreset);
 
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [loading, setLoading] = useState(true);
@@ -381,7 +384,7 @@ export default function UserSettings() {
   const navTabs = allTabs.filter((t) => t.show);
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up">
+    <div className="mx-auto max-w-6xl">
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
@@ -425,465 +428,473 @@ export default function UserSettings() {
 
           <div className="min-w-0 mb-card">
             {/* PROFILE */}
-            {activeTab === "profile" && (
-              <form onSubmit={handleSaveProfile} noValidate className="space-y-6">
-                <PanelHead title="Profile">How your name and picture appear in Mind Bridge.</PanelHead>
+            <AnimatePresence mode="wait" initial={false}>
+              {activeTab === "profile" && (
+                <m.form key="profile" {...panelMotion} onSubmit={handleSaveProfile} noValidate className="space-y-6">
+                  <PanelHead title="Profile">How your name and picture appear in Mind Bridge.</PanelHead>
 
-                <fieldset className="mb-tile">
-                  <legend className="px-1 font-bold text-[color:var(--mb-ink)]">Picture</legend>
-                  <div className="flex flex-wrap items-center gap-6">
-                    <div
-                      style={
-                        useGoogleAvatar && currentUser?.photoURL
-                          ? undefined
-                          : { backgroundColor: avatarColor(avatarId) }
-                      }
-                      className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-ink)]"
-                    >
-                      {useGoogleAvatar && currentUser?.photoURL ? (
-                        <img
-                          src={currentUser.photoURL}
-                          alt="Your profile picture"
-                          className="h-full w-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <span className="font-display text-2xl font-bold text-white">{userInitials}</span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Choose a picture">
-                      {currentUser?.photoURL && (
-                        <button
-                          type="button"
-                          onClick={() => setUseGoogleAvatar(true)}
-                          aria-pressed={useGoogleAvatar}
-                          aria-label="Use my Google profile picture"
-                          className={`relative h-11 w-11 overflow-hidden rounded-full border-2 ${
-                            useGoogleAvatar ? "border-[color:var(--mb-ink)]" : "border-[color:var(--mb-line)]"
-                          }`}
-                        >
+                  <fieldset className="mb-tile">
+                    <legend className="px-1 font-bold text-[color:var(--mb-ink)]">Picture</legend>
+                    <div className="flex flex-wrap items-center gap-6">
+                      <div
+                        style={
+                          useGoogleAvatar && currentUser?.photoURL
+                            ? undefined
+                            : { backgroundColor: avatarColor(avatarId) }
+                        }
+                        className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-ink)]"
+                      >
+                        {useGoogleAvatar && currentUser?.photoURL ? (
                           <img
                             src={currentUser.photoURL}
-                            alt=""
+                            alt="Your profile picture"
                             className="h-full w-full object-cover"
                             referrerPolicy="no-referrer"
                           />
-                          {useGoogleAvatar && (
-                            <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-white">
-                              <Check className="h-5 w-5" aria-hidden="true" />
-                            </span>
-                          )}
-                        </button>
-                      )}
-                      {AVATAR_COLORS.map((c) => {
-                        const selected = !useGoogleAvatar && avatarId === c.id;
-                        return (
+                        ) : (
+                          <span className="font-display text-2xl font-bold text-white">{userInitials}</span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Choose a picture">
+                        {currentUser?.photoURL && (
                           <button
-                            key={c.id}
                             type="button"
-                            onClick={() => {
-                              setAvatarId(c.id);
-                              setUseGoogleAvatar(false);
-                            }}
-                            aria-pressed={selected}
-                            aria-label={`${c.name} background`}
-                            style={{ backgroundColor: c.color }}
-                            className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-white ${
-                              selected ? "border-[color:var(--mb-ink)]" : "border-[color:var(--mb-line)]"
+                            onClick={() => setUseGoogleAvatar(true)}
+                            aria-pressed={useGoogleAvatar}
+                            aria-label="Use my Google profile picture"
+                            className={`relative h-11 w-11 overflow-hidden rounded-full border-2 ${
+                              useGoogleAvatar ? "border-[color:var(--mb-ink)]" : "border-[color:var(--mb-line)]"
                             }`}
                           >
-                            {selected && <Check className="h-5 w-5" aria-hidden="true" />}
+                            <img
+                              src={currentUser.photoURL}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                            {useGoogleAvatar && (
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-white">
+                                <Check className="h-5 w-5" aria-hidden="true" />
+                              </span>
+                            )}
                           </button>
-                        );
-                      })}
+                        )}
+                        {AVATAR_COLORS.map((c) => {
+                          const selected = !useGoogleAvatar && avatarId === c.id;
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setAvatarId(c.id);
+                                setUseGoogleAvatar(false);
+                              }}
+                              aria-pressed={selected}
+                              aria-label={`${c.name} background`}
+                              style={{ backgroundColor: c.color }}
+                              className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-white ${
+                                selected ? "border-[color:var(--mb-ink)]" : "border-[color:var(--mb-line)]"
+                              }`}
+                            >
+                              {selected && <Check className="h-5 w-5" aria-hidden="true" />}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                </fieldset>
+                  </fieldset>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field id="set-name" label="Full name" required error={fieldErrors.name}>
-                    <input
-                      id="set-name"
-                      type="text"
-                      value={name}
-                      maxLength={80}
-                      onChange={(e) => setName(e.target.value)}
-                      autoComplete="name"
-                      required
-                      className="mb-field"
-                    />
-                  </Field>
-                  <Field id="set-email" label="Email" hint="school account, cannot be changed">
-                    <input
-                      id="set-email"
-                      type="email"
-                      value={currentUser?.email || ""}
-                      readOnly
-                      className="mb-field !bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
-                    />
-                  </Field>
-                  <Field id="set-phone" label="Phone number" hint="optional" error={fieldErrors.phone}>
-                    <input
-                      id="set-phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+63 912 345 6789"
-                      autoComplete="tel"
-                      className="mb-field"
-                    />
-                  </Field>
-                  <div>
-                    <p className="mb-1 font-bold text-[color:var(--mb-ink)]">Account type</p>
-                    <p className="flex min-h-[48px] items-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 font-bold capitalize text-[color:var(--mb-ink)]">
-                      {userRole || "student"}
-                    </p>
-                  </div>
-                </div>
-
-                <Field id="set-bio" label="About you" hint="optional, shown to your counselors">
-                  <textarea
-                    id="set-bio"
-                    rows={3}
-                    value={bio}
-                    maxLength={500}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Your program, year level, or anything you'd like counselors to know"
-                    className="mb-field"
-                  />
-                </Field>
-
-                <SaveButton saving={saving} type="submit">
-                  Save profile
-                </SaveButton>
-              </form>
-            )}
-
-            {/* PASSWORD */}
-            {activeTab === "password" && (
-              <div className="space-y-6">
-                <PanelHead title="Password">Use a password you don't use anywhere else.</PanelHead>
-
-                {isGoogleUser ? (
-                  <div className="flex gap-4 rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6">
-                    <KeyRound className="mt-1 h-6 w-6 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field id="set-name" label="Full name" required error={fieldErrors.name}>
+                      <input
+                        id="set-name"
+                        type="text"
+                        value={name}
+                        maxLength={80}
+                        onChange={(e) => setName(e.target.value)}
+                        autoComplete="name"
+                        required
+                        className="mb-field"
+                      />
+                    </Field>
+                    <Field id="set-email" label="Email" hint="school account, cannot be changed">
+                      <input
+                        id="set-email"
+                        type="email"
+                        value={currentUser?.email || ""}
+                        readOnly
+                        className="mb-field !bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
+                      />
+                    </Field>
+                    <Field id="set-phone" label="Phone number" hint="optional" error={fieldErrors.phone}>
+                      <input
+                        id="set-phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+63 912 345 6789"
+                        autoComplete="tel"
+                        className="mb-field"
+                      />
+                    </Field>
                     <div>
-                      <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">You sign in with Google</h3>
-                      <p className="mt-1 max-w-[60ch] text-[color:var(--mb-ink)]">
-                        This account is linked to <strong className="break-all">{currentUser?.email}</strong>. Change
-                        your password and set up two-step verification in your Google account settings.
+                      <p className="mb-1 font-bold text-[color:var(--mb-ink)]">Account type</p>
+                      <p className="flex min-h-[48px] items-center rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] px-4 font-bold capitalize text-[color:var(--mb-ink)]">
+                        {userRole || "student"}
                       </p>
                     </div>
                   </div>
-                ) : (
-                  <form onSubmit={handleChangePassword} noValidate className="max-w-md space-y-4">
-                    <Field id="set-current-pw" label="Current password" required error={fieldErrors.currentPassword}>
-                      <input
-                        id="set-current-pw"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        autoComplete="current-password"
-                        required
-                        className="mb-field"
-                      />
-                    </Field>
-                    <Field
-                      id="set-new-pw"
-                      label="New password"
-                      hint="at least 6 characters"
-                      required
-                      error={fieldErrors.newPassword}
-                    >
-                      <input
+
+                  <Field id="set-bio" label="About you" hint="optional, shown to your counselors">
+                    <textarea
+                      id="set-bio"
+                      rows={3}
+                      value={bio}
+                      maxLength={500}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Your program, year level, or anything you'd like counselors to know"
+                      className="mb-field"
+                    />
+                  </Field>
+
+                  <SaveButton saving={saving} type="submit">
+                    Save profile
+                  </SaveButton>
+                </m.form>
+              )}
+
+              {/* PASSWORD */}
+              {activeTab === "password" && (
+                <m.div key="password" {...panelMotion} className="space-y-6">
+                  <PanelHead title="Password">Use a password you don't use anywhere else.</PanelHead>
+
+                  {isGoogleUser ? (
+                    <div className="flex gap-4 rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)] p-6">
+                      <KeyRound className="mt-1 h-6 w-6 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                      <div>
+                        <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">You sign in with Google</h3>
+                        <p className="mt-1 max-w-[60ch] text-[color:var(--mb-ink)]">
+                          This account is linked to <strong className="break-all">{currentUser?.email}</strong>. Change
+                          your password and set up two-step verification in your Google account settings.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleChangePassword} noValidate className="max-w-md space-y-4">
+                      <Field id="set-current-pw" label="Current password" required error={fieldErrors.currentPassword}>
+                        <input
+                          id="set-current-pw"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          autoComplete="current-password"
+                          required
+                          className="mb-field"
+                        />
+                      </Field>
+                      <Field
                         id="set-new-pw"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        autoComplete="new-password"
+                        label="New password"
+                        hint="at least 6 characters"
                         required
-                        className="mb-field"
-                      />
-                    </Field>
-                    <Field
-                      id="set-confirm-pw"
-                      label="Confirm new password"
-                      required
-                      error={fieldErrors.confirmPassword}
-                    >
-                      <input
+                        error={fieldErrors.newPassword}
+                      >
+                        <input
+                          id="set-new-pw"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          autoComplete="new-password"
+                          required
+                          className="mb-field"
+                        />
+                      </Field>
+                      <Field
                         id="set-confirm-pw"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        autoComplete="new-password"
+                        label="Confirm new password"
+                        required
+                        error={fieldErrors.confirmPassword}
+                      >
+                        <input
+                          id="set-confirm-pw"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          autoComplete="new-password"
+                          required
+                          className="mb-field"
+                        />
+                      </Field>
+                      <SaveButton saving={passwordLoading} savingLabel="Updating…" type="submit">
+                        Update password
+                      </SaveButton>
+                    </form>
+                  )}
+                </m.div>
+              )}
+
+              {/* PRIVACY: a statement of what is true, not switches */}
+              {activeTab === "privacy" && (
+                <m.div key="privacy" {...panelMotion} className="space-y-6">
+                  <PanelHead title="Who can see your information">
+                    What Mind Bridge shares, and with whom. There are no hidden settings behind this page.
+                  </PanelHead>
+
+                  {isStudent ? (
+                    <ul className="space-y-3">
+                      {[
+                        [
+                          "Check-in answers and scores",
+                          "You and approved guidance staff (counselors and admins). Other students never see them.",
+                        ],
+                        ["Appointments and chat messages", "You and approved guidance staff."],
+                        ["Your emergency contact", "Approved guidance staff, when they open one of your cases."],
+                        [
+                          "Reports",
+                          "Staff can export a report with names and emails removed. It lists risk level and score only.",
+                        ],
+                      ].map(([title, body]) => (
+                        <li key={title} className="mb-tile">
+                          <p className="font-bold text-[color:var(--mb-ink)]">{title}</p>
+                          <p className="text-[color:var(--mb-muted)]">{body}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="space-y-3">
+                      <li className="mb-tile">
+                        <p className="font-bold text-[color:var(--mb-ink)]">Your profile</p>
+                        <p className="text-[color:var(--mb-muted)]">
+                          Your name, email and role are visible to other approved staff and to students you are assigned
+                          to.
+                        </p>
+                      </li>
+                    </ul>
+                  )}
+
+                  <div className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 text-[color:var(--mb-warn)]">
+                    <p className="flex items-center gap-2 font-bold">
+                      <Shield className="h-5 w-5" aria-hidden="true" /> Confidentiality notice
+                    </p>
+                    <p className="mt-1">
+                      In line with the Philippine Mental Health Act (RA 11036) and university ethics policy, what you
+                      share stays between you and the Guidance Office, except where there is a clear, imminent threat to
+                      life or safety.
+                    </p>
+                  </div>
+
+                  <p className="text-[color:var(--mb-muted)]">
+                    Read the full{" "}
+                    <Link to="/privacy-policy" className="font-bold text-[color:var(--mb-ink)] underline">
+                      Privacy Policy
+                    </Link>
+                    .
+                  </p>
+                </m.div>
+              )}
+
+              {/* EMERGENCY CONTACT (students) */}
+              {activeTab === "emergency" && (
+                <m.form
+                  key="emergency"
+                  {...panelMotion}
+                  onSubmit={handleSaveEmergencyContact}
+                  noValidate
+                  className="space-y-6"
+                >
+                  <PanelHead title="Emergency contact">
+                    Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in
+                    an emergency.
+                  </PanelHead>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field id="ec-name" label="Contact's full name" required error={fieldErrors.name}>
+                      <input
+                        id="ec-name"
+                        type="text"
+                        value={emergencyContact.name}
+                        onChange={(e) => setEmergencyContact({ ...emergencyContact, name: e.target.value })}
+                        placeholder="e.g. Maria Santos"
                         required
                         className="mb-field"
                       />
                     </Field>
-                    <SaveButton saving={passwordLoading} savingLabel="Updating…" type="submit">
-                      Update password
-                    </SaveButton>
-                  </form>
-                )}
-              </div>
-            )}
-
-            {/* PRIVACY: a statement of what is true, not switches */}
-            {activeTab === "privacy" && (
-              <div className="space-y-6">
-                <PanelHead title="Who can see your information">
-                  What Mind Bridge shares, and with whom. There are no hidden settings behind this page.
-                </PanelHead>
-
-                {isStudent ? (
-                  <ul className="space-y-3">
-                    {[
-                      [
-                        "Check-in answers and scores",
-                        "You and approved guidance staff (counselors and admins). Other students never see them.",
-                      ],
-                      ["Appointments and chat messages", "You and approved guidance staff."],
-                      ["Your emergency contact", "Approved guidance staff, when they open one of your cases."],
-                      [
-                        "Reports",
-                        "Staff can export a report with names and emails removed. It lists risk level and score only.",
-                      ],
-                    ].map(([title, body]) => (
-                      <li key={title} className="mb-tile">
-                        <p className="font-bold text-[color:var(--mb-ink)]">{title}</p>
-                        <p className="text-[color:var(--mb-muted)]">{body}</p>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <ul className="space-y-3">
-                    <li className="mb-tile">
-                      <p className="font-bold text-[color:var(--mb-ink)]">Your profile</p>
-                      <p className="text-[color:var(--mb-muted)]">
-                        Your name, email and role are visible to other approved staff and to students you are assigned
-                        to.
-                      </p>
-                    </li>
-                  </ul>
-                )}
-
-                <div className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 text-[color:var(--mb-warn)]">
-                  <p className="flex items-center gap-2 font-bold">
-                    <Shield className="h-5 w-5" aria-hidden="true" /> Confidentiality notice
-                  </p>
-                  <p className="mt-1">
-                    In line with the Philippine Mental Health Act (RA 11036) and university ethics policy, what you
-                    share stays between you and the Guidance Office, except where there is a clear, imminent threat to
-                    life or safety.
-                  </p>
-                </div>
-
-                <p className="text-[color:var(--mb-muted)]">
-                  Read the full{" "}
-                  <Link to="/privacy-policy" className="font-bold text-[color:var(--mb-ink)] underline">
-                    Privacy Policy
-                  </Link>
-                  .
-                </p>
-              </div>
-            )}
-
-            {/* EMERGENCY CONTACT (students) */}
-            {activeTab === "emergency" && (
-              <form onSubmit={handleSaveEmergencyContact} noValidate className="space-y-6">
-                <PanelHead title="Emergency contact">
-                  Someone you trust, such as a parent, guardian or close friend. Approved staff can reach them only in
-                  an emergency.
-                </PanelHead>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field id="ec-name" label="Contact's full name" required error={fieldErrors.name}>
-                    <input
-                      id="ec-name"
-                      type="text"
-                      value={emergencyContact.name}
-                      onChange={(e) => setEmergencyContact({ ...emergencyContact, name: e.target.value })}
-                      placeholder="e.g. Maria Santos"
-                      required
-                      className="mb-field"
-                    />
-                  </Field>
-                  <Field id="ec-rel" label="Relationship">
-                    <select
-                      id="ec-rel"
-                      value={emergencyContact.relationship}
-                      onChange={(e) => setEmergencyContact({ ...emergencyContact, relationship: e.target.value })}
-                      className="mb-field"
-                    >
-                      <option value="Parent">Parent</option>
-                      <option value="Guardian">Legal guardian</option>
-                      <option value="Sibling">Sibling</option>
-                      <option value="Partner">Spouse or partner</option>
-                      <option value="Close Friend">Close friend or peer</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </Field>
-                  <Field id="ec-phone" label="Mobile number" required error={fieldErrors.phone}>
-                    <input
-                      id="ec-phone"
-                      type="tel"
-                      value={emergencyContact.phone}
-                      onChange={(e) => setEmergencyContact({ ...emergencyContact, phone: e.target.value })}
-                      placeholder="+63 912 345 6789"
-                      required
-                      className="mb-field"
-                    />
-                  </Field>
-                  <Field id="ec-alt" label="Another number" hint="optional" error={fieldErrors.alternatePhone}>
-                    <input
-                      id="ec-alt"
-                      type="tel"
-                      value={emergencyContact.alternatePhone}
-                      onChange={(e) => setEmergencyContact({ ...emergencyContact, alternatePhone: e.target.value })}
-                      className="mb-field"
-                    />
-                  </Field>
-                </div>
-
-                <Field id="ec-notes" label="Anything responders should know" hint="optional">
-                  <textarea
-                    id="ec-notes"
-                    rows={2}
-                    value={emergencyContact.notes}
-                    onChange={(e) => setEmergencyContact({ ...emergencyContact, notes: e.target.value })}
-                    placeholder="e.g. Speaks Hiligaynon, lives nearby, has asthma"
-                    className="mb-field"
-                  />
-                </Field>
-
-                <SaveButton saving={saving} type="submit">
-                  Save emergency contact
-                </SaveButton>
-              </form>
-            )}
-
-            {/* GOALS (students) */}
-            {activeTab === "goals" && (
-              <div className="space-y-6">
-                <PanelHead title="Wellness goals">
-                  Pick up to {MAX_GOALS} things you want to work on. Only you see this list.
-                </PanelHead>
-
-                <p className="font-bold text-[color:var(--mb-ink)]" aria-live="polite">
-                  <span className="font-display text-2xl tabular-nums">{selectedGoals.length}</span> of {MAX_GOALS}{" "}
-                  chosen
-                </p>
-
-                <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Wellness goals">
-                  {goalOptions.map((goal) => {
-                    const selected = selectedGoals.includes(goal);
-                    return (
-                      <button
-                        key={goal}
-                        type="button"
-                        onClick={() => handleToggleGoal(goal)}
-                        aria-pressed={selected}
-                        className={`flex min-h-[56px] items-center justify-between gap-3 rounded-md border p-3 text-left font-medium transition-colors ${
-                          selected
-                            ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-ink)]"
-                            : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
-                        }`}
+                    <Field id="ec-rel" label="Relationship">
+                      <select
+                        id="ec-rel"
+                        value={emergencyContact.relationship}
+                        onChange={(e) => setEmergencyContact({ ...emergencyContact, relationship: e.target.value })}
+                        className="mb-field"
                       >
-                        <span>{goal}</span>
-                        <span
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border ${
+                        <option value="Parent">Parent</option>
+                        <option value="Guardian">Legal guardian</option>
+                        <option value="Sibling">Sibling</option>
+                        <option value="Partner">Spouse or partner</option>
+                        <option value="Close Friend">Close friend or peer</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </Field>
+                    <Field id="ec-phone" label="Mobile number" required error={fieldErrors.phone}>
+                      <input
+                        id="ec-phone"
+                        type="tel"
+                        value={emergencyContact.phone}
+                        onChange={(e) => setEmergencyContact({ ...emergencyContact, phone: e.target.value })}
+                        placeholder="+63 912 345 6789"
+                        required
+                        className="mb-field"
+                      />
+                    </Field>
+                    <Field id="ec-alt" label="Another number" hint="optional" error={fieldErrors.alternatePhone}>
+                      <input
+                        id="ec-alt"
+                        type="tel"
+                        value={emergencyContact.alternatePhone}
+                        onChange={(e) => setEmergencyContact({ ...emergencyContact, alternatePhone: e.target.value })}
+                        className="mb-field"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field id="ec-notes" label="Anything responders should know" hint="optional">
+                    <textarea
+                      id="ec-notes"
+                      rows={2}
+                      value={emergencyContact.notes}
+                      onChange={(e) => setEmergencyContact({ ...emergencyContact, notes: e.target.value })}
+                      placeholder="e.g. Speaks Hiligaynon, lives nearby, has asthma"
+                      className="mb-field"
+                    />
+                  </Field>
+
+                  <SaveButton saving={saving} type="submit">
+                    Save emergency contact
+                  </SaveButton>
+                </m.form>
+              )}
+
+              {/* GOALS (students) */}
+              {activeTab === "goals" && (
+                <m.div key="goals" {...panelMotion} className="space-y-6">
+                  <PanelHead title="Wellness goals">
+                    Pick up to {MAX_GOALS} things you want to work on. Only you see this list.
+                  </PanelHead>
+
+                  <p className="font-bold text-[color:var(--mb-ink)]" aria-live="polite">
+                    <span className="font-display text-2xl tabular-nums">{selectedGoals.length}</span> of {MAX_GOALS}{" "}
+                    chosen
+                  </p>
+
+                  <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Wellness goals">
+                    {goalOptions.map((goal) => {
+                      const selected = selectedGoals.includes(goal);
+                      return (
+                        <button
+                          key={goal}
+                          type="button"
+                          onClick={() => handleToggleGoal(goal)}
+                          aria-pressed={selected}
+                          className={`flex min-h-[56px] items-center justify-between gap-3 rounded-md border p-3 text-left font-medium transition-colors ${
                             selected
-                              ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                              : "border-[color:var(--mb-line)]"
+                              ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-ink)]"
+                              : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)] hover:border-[color:var(--mb-muted)]"
                           }`}
-                          aria-hidden="true"
                         >
-                          {selected && <Check className="h-4 w-4" />}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <form onSubmit={handleAddCustomGoal} className="flex gap-2">
-                  <label htmlFor="custom-goal" className="sr-only">
-                    Add your own goal
-                  </label>
-                  <input
-                    id="custom-goal"
-                    type="text"
-                    value={customGoal}
-                    onChange={(e) => setCustomGoal(e.target.value)}
-                    placeholder="Add your own goal"
-                    className="mb-field flex-1"
-                  />
-                  <button type="submit" className="mb-btn mb-btn-line !px-4">
-                    <Plus className="h-5 w-5" aria-hidden="true" />
-                    Add
-                  </button>
-                </form>
-
-                <SaveButton saving={saving} savingLabel="Saving…" type="button" onClick={handleSaveGoals}>
-                  Save goals
-                </SaveButton>
-              </div>
-            )}
-
-            {/* SESSION HISTORY (students) */}
-            {activeTab === "sessions" && (
-              <div className="space-y-6">
-                <PanelHead title="Session history">Your appointments with guidance counselors.</PanelHead>
-
-                {loadingApts ? (
-                  <div className="flex items-center justify-center gap-2 py-12 text-[color:var(--mb-muted)]">
-                    <Spinner size={18} className="text-[color:var(--mb-brand)]" />
-                    <span>Loading your sessions…</span>
+                          <span>{goal}</span>
+                          <span
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border ${
+                              selected
+                                ? "border-[color:var(--mb-panel)] bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                                : "border-[color:var(--mb-line)]"
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {selected && <Check className="h-4 w-4" />}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
-                ) : appointmentsList.length === 0 ? (
-                  <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center">
-                    <div className="mb-plate mx-auto mb-3 flex h-12 w-12 items-center justify-center">
-                      <Calendar className="h-6 w-6" aria-hidden="true" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">No sessions yet</h3>
-                    <p className="mx-auto mt-1 max-w-[45ch] text-[color:var(--mb-muted)]">
-                      You haven't booked a session. You can book a confidential time whenever you're ready.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/appointments")}
-                      className="mb-btn mb-btn-solid mt-4"
-                    >
-                      Book a counselor
+
+                  <form onSubmit={handleAddCustomGoal} className="flex gap-2">
+                    <label htmlFor="custom-goal" className="sr-only">
+                      Add your own goal
+                    </label>
+                    <input
+                      id="custom-goal"
+                      type="text"
+                      value={customGoal}
+                      onChange={(e) => setCustomGoal(e.target.value)}
+                      placeholder="Add your own goal"
+                      className="mb-field flex-1"
+                    />
+                    <button type="submit" className="mb-btn mb-btn-line !px-4">
+                      <Plus className="h-5 w-5" aria-hidden="true" />
+                      Add
                     </button>
-                  </div>
-                ) : (
-                  <ul className="space-y-3">
-                    {appointmentsList.map((apt) => (
-                      <li
-                        key={apt.id}
-                        className="flex flex-col gap-2 mb-tile sm:flex-row sm:items-center sm:justify-between"
+                  </form>
+
+                  <SaveButton saving={saving} savingLabel="Saving…" type="button" onClick={handleSaveGoals}>
+                    Save goals
+                  </SaveButton>
+                </m.div>
+              )}
+
+              {/* SESSION HISTORY (students) */}
+              {activeTab === "sessions" && (
+                <m.div key="sessions" {...panelMotion} className="space-y-6">
+                  <PanelHead title="Session history">Your appointments with guidance counselors.</PanelHead>
+
+                  {loadingApts ? (
+                    <div className="flex items-center justify-center gap-2 py-12 text-[color:var(--mb-muted)]">
+                      <Spinner size={18} className="text-[color:var(--mb-brand)]" />
+                      <span>Loading your sessions…</span>
+                    </div>
+                  ) : appointmentsList.length === 0 ? (
+                    <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center">
+                      <div className="mb-plate mx-auto mb-3 flex h-12 w-12 items-center justify-center">
+                        <Calendar className="h-6 w-6" aria-hidden="true" />
+                      </div>
+                      <h3 className="text-xl font-bold text-[color:var(--mb-ink)]">No sessions yet</h3>
+                      <p className="mx-auto mt-1 max-w-[45ch] text-[color:var(--mb-muted)]">
+                        You haven't booked a session. You can book a confidential time whenever you're ready.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/appointments")}
+                        className="mb-btn mb-btn-solid mt-4"
                       >
-                        <div>
-                          <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                            {apt.title || "Counseling session"}
-                          </p>
-                          <p className="text-[color:var(--mb-muted)]">
-                            {apt.counselorName || "Assigned counselor"} · {formatDateTime(apt.start || apt.date)}
-                          </p>
-                        </div>
-                        <span
-                          className={`self-start rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}
+                        Book a counselor
+                      </button>
+                    </div>
+                  ) : (
+                    <ul className="space-y-3">
+                      {appointmentsList.map((apt) => (
+                        <li
+                          key={apt.id}
+                          className="flex flex-col gap-2 mb-tile sm:flex-row sm:items-center sm:justify-between"
                         >
-                          {apt.status || "Pending Review"}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
+                          <div>
+                            <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
+                              {apt.title || "Counseling session"}
+                            </p>
+                            <p className="text-[color:var(--mb-muted)]">
+                              {apt.counselorName || "Assigned counselor"} · {formatDateTime(apt.start || apt.date)}
+                            </p>
+                          </div>
+                          <span
+                            className={`self-start rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${statusTone(apt.status)}`}
+                          >
+                            {apt.status || "Pending Review"}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </m.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}
