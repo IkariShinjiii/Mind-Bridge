@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { PhoneCall, Phone, HeartHandshake, Building2, Calendar, ArrowLeft, type LucideIcon } from "lucide-react";
+import { m } from "framer-motion";
 import PanelHead from "../../components/ui/PanelHead";
+import { pagePreset, useMotionPreset } from "../../lib/motion";
 
 interface HotlineNumber {
   label: string;
@@ -124,6 +126,7 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
 export default function CrisisResources() {
   const navigate = useNavigate();
   const [phase, setPhase] = useState<BreathingPhase>("idle");
+  const page = useMotionPreset(pagePreset);
 
   // Advance to the next phase every PHASE_MS; idle never advances
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function CrisisResources() {
   }, [phase]);
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
+    <m.div {...page} className="mx-auto max-w-6xl space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
@@ -219,6 +222,6 @@ export default function CrisisResources() {
           )}
         </div>
       </section>
-    </div>
+    </m.div>
   );
 }
