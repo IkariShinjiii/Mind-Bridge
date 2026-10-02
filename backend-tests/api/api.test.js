@@ -308,6 +308,26 @@ describe("user profiles, admin and assignment", () => {
   });
 });
 
+describe("getMyMessages (data download)", () => {
+  it("returns the caller's own thread, oldest first, and never another student's", async () => {
+    await seed(env, "messages/m2", message({ text: "second", timestamp: "2026-10-01T00:00:02.000Z" }));
+    await seed(env, "messages/m1", message({ text: "first", timestamp: "2026-10-01T00:00:01.000Z" }));
+    await seed(env, "messages/mx", message({ studentId: "stu2", senderId: "stu2", text: "someone else" }));
+    login("student");
+    const mine = await api.getMyMessages();
+    expect(mine.map((m) => m.text)).toEqual(["first", "second"]);
+  });
+  it("signed out -> []", async () => {
+    logout();
+    expect(await api.getMyMessages()).toEqual([]);
+  });
+  it("a counselor with no thread of their own gets an empty list, not an error", async () => {
+    await seed(env, "messages/m1", message());
+    login("counselor");
+    expect(await api.getMyMessages()).toEqual([]);
+  });
+});
+
 describe("confidential messages", () => {
   it("sendStudentMessage returns id + trimmed payload and persists it", async () => {
     login("student");

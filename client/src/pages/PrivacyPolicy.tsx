@@ -102,7 +102,10 @@ export default function PrivacyPolicy() {
                 <li>Suspend, withdraw, or order the blocking, removal, or destruction of your personal data.</li>
                 <li>Rectify errors in your personal data.</li>
               </ul>
-              <p className="mt-2">To make a request, contact us using the details in section 7.</p>
+              <p className="mt-2">
+                You can download a copy of your own data in Settings, under Privacy. For any other request, contact us
+                using the details in section 7.
+              </p>
             </section>
 
             <section>

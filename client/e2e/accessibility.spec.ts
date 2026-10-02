@@ -81,6 +81,10 @@ for (const theme of ["light", "dark"]) {
       await page.getByRole("button", { name: "Appearance" }).click();
       await expect(page.getByRole("radio", { name: /Dark/ })).toBeAttached();
       await expectNoViolations(page, "settings appearance");
+
+      await page.getByRole("button", { name: "Privacy", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Download my data" })).toBeVisible();
+      await expectNoViolations(page, "settings privacy");
     });
 
     test("staff pages: dashboard and the case inspector dialog", async ({ page }) => {

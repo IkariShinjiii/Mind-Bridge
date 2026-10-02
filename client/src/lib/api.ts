@@ -443,6 +443,17 @@ export const assignCounselorToStudent = (
 
 // --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---
 
+/** One-shot read of the signed-in user's own chat messages, oldest first. (The chat itself uses a live listener.) */
+export const getMyMessages = (): Promise<ChatMessage[]> =>
+  guard(async () => {
+    const uid = getCurrentUserId();
+    if (!uid) return [];
+    const messages = mapDocs<ChatMessage>(
+      await getDocs(query(collection(db, "messages"), where("studentId", "==", uid))),
+    );
+    return messages.sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
+  });
+
 /**
  * Subscribes to a student's chat thread, oldest message first.
  * @param studentId - the thread owner

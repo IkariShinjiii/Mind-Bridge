@@ -22,6 +22,7 @@ import {
   Check,
   KeyRound,
   Plus,
+  Download,
   Moon,
   Palette,
   Sun,
@@ -30,7 +31,8 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
-import { getUserSettings, saveUserSettings, getAppointments } from "../../lib/api";
+import { getUserSettings, saveUserSettings, getAppointments, getMyAssessments, getMyMessages } from "../../lib/api";
+import { buildDataExport, dataExportFileName, downloadJson } from "../../utils/dataExport";
 import { AVATAR_COLORS, avatarColor } from "../../utils/avatar";
 import Spinner from "../../components/ui/Spinner";
 import { useToast } from "../../components/ui/Toast";
@@ -223,9 +225,29 @@ export default function UserSettings() {
     }
   }, [activeTab, currentUser]);
 
+  const [downloading, setDownloading] = useState(false);
   const toast = useToast();
   const showFeedback = (type: "success" | "error", message: string) =>
     type === "success" ? toast.success(message) : toast.error(message);
+
+  const handleDownloadMyData = async () => {
+    setDownloading(true);
+    try {
+      const [profile, assessments, appointments, messages] = await Promise.all([
+        getUserSettings(),
+        getMyAssessments(),
+        getAppointments(),
+        getMyMessages(),
+      ]);
+      const now = new Date();
+      downloadJson(dataExportFileName(now), buildDataExport({ profile, assessments, appointments, messages }, now));
+      showFeedback("success", "Your data was downloaded.");
+    } catch (err) {
+      showFeedback("error", friendlyError(err, "Could not prepare your data. Try again."));
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const handleSaveProfile = async (e: FormEvent) => {
     e.preventDefault();
@@ -754,6 +776,27 @@ export default function UserSettings() {
                       life or safety.
                     </p>
                   </div>
+
+                  <section aria-labelledby="my-data-heading" className="mb-tile space-y-3">
+                    <h3 id="my-data-heading" className="text-lg font-bold text-[color:var(--mb-ink)]">
+                      Your data
+                    </h3>
+                    <p className="max-w-[65ch] text-[color:var(--mb-muted)]">
+                      Download a copy of what Mind Bridge holds about you: your profile, check-ins, appointments and
+                      chat messages. Notes written by guidance staff are not included; contact the Guidance Office to
+                      ask about them.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => void handleDownloadMyData()}
+                      disabled={downloading}
+                      aria-busy={downloading}
+                      className="mb-btn mb-btn-line"
+                    >
+                      <Download className="h-5 w-5" aria-hidden="true" />
+                      {downloading ? "Preparing your file…" : "Download my data"}
+                    </button>
+                  </section>
 
                   <p className="text-[color:var(--mb-muted)]">
                     Read the full{" "}

@@ -562,6 +562,35 @@ describe("user settings and assignment", () => {
 });
 
 describe("messages", () => {
+  describe("getMyMessages", () => {
+    it("reads only the signed-in user's thread, oldest first", async () => {
+      fs.getDocs.mockResolvedValue(
+        snap([
+          ["m2", { studentId: "stu1", text: "second", timestamp: "2026-10-01T00:00:02.000Z" }],
+          ["m1", { studentId: "stu1", text: "first", timestamp: "2026-10-01T00:00:01.000Z" }],
+        ]),
+      );
+      const messages = await api.getMyMessages();
+      expect(messages.map((m) => m.text)).toEqual(["first", "second"]);
+      expect(messages[0]).toMatchObject({ id: "m1" });
+      expect(fs.getDocs.mock.calls[0]![0]).toMatchObject({
+        name: "messages",
+        clauses: [{ field: "studentId", op: "==", value: "stu1" }],
+      });
+    });
+
+    it("returns nothing, and reads nothing, when signed out", async () => {
+      signIn(null);
+      expect(await api.getMyMessages()).toEqual([]);
+      expect(fs.getDocs).not.toHaveBeenCalled();
+    });
+
+    it("turns a failed read into an AppError", async () => {
+      fs.getDocs.mockRejectedValue({ code: "permission-denied" });
+      await expect(api.getMyMessages()).rejects.toMatchObject({ code: "permission-denied" });
+    });
+  });
+
   describe("sendStudentMessage", () => {
     it("stores a trimmed message with sender defaults and returns it with its id", async () => {
       const m = await api.sendStudentMessage({ studentId: "stu1", text: "  hello  " });
