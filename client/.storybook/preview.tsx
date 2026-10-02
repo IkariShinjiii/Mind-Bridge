@@ -1,5 +1,6 @@
 import React from "react";
 import { LazyMotion, MotionConfig, domAnimation } from "framer-motion";
+import "../src/lib/fonts";
 import "../src/styles/index.css";
 import "../src/styles/theme.css";
 import "./preview.css";

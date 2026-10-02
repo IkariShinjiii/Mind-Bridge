@@ -25,6 +25,21 @@ test.describe("Page titles and head tags", () => {
     await expect(page).toHaveTitle("Crisis resources | Mind Bridge");
   });
 
+  test("fonts are served from our own origin, not Google Fonts", async ({ page }) => {
+    const thirdParty: string[] = [];
+    page.on("request", (request) => {
+      if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) thirdParty.push(request.url());
+    });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const families = await page.evaluate(() =>
+      [...document.fonts].filter((face) => face.status === "loaded").map((face) => face.family.replace(/"/g, "")),
+    );
+    expect(thirdParty).toEqual([]);
+    expect(families).toContain("Barlow Semi Condensed");
+    expect(families).toContain("Atkinson Hyperlegible Next");
+  });
+
   test("the page declares a description, a favicon and a sharing preview", async ({ page, request }) => {
     await page.goto("/");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /private wellness check-in/);

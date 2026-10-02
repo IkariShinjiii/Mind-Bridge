@@ -1,5 +1,6 @@
 import React from "react";
 import "./lib/zodConfig";
+import "./lib/fonts";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { LazyMotion, MotionConfig, domAnimation } from "framer-motion";
