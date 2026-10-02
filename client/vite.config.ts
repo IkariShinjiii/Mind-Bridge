@@ -33,6 +33,14 @@ export default defineConfig(({ mode }) => ({
           )
             return "charts";
           if (/\/node_modules\/(@firebase|firebase|re2js)\//.test(path)) return "firebase";
+          // React is shared by the entry and by Recharts. Without its own chunk Rollup folds it into "charts",
+          // and every page, including the landing page, then downloads the charting library up front.
+          if (
+            /\/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom|react-is|use-sync-external-store)\//.test(
+              path,
+            )
+          )
+            return "react";
           return undefined;
         },
       },
