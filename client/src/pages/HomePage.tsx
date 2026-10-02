@@ -73,7 +73,7 @@ export default function HomePage() {
           STORY: you are here, four stops to a counselor, and the crisis line is always one tap away.
           FIRST VIEWPORT: amber crisis strip, headline and two actions left, four-stop route board right.
           FORM: calm wayfinding (assigned roll, seed ea2f1600). */}
-      <section className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-16">
+      <section className="grid w-full gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-16">
         <div>
           <h1 className="mb-sign text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl [text-wrap:balance]">
             Ask for help quietly. Reach a counselor sooner.
@@ -138,7 +138,7 @@ export default function HomePage() {
         </ol>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 sm:px-6" aria-labelledby="doors-h">
+      <section className="w-full px-4 sm:px-6" aria-labelledby="doors-h">
         <h2 id="doors-h" className="mb-sign text-3xl font-bold sm:text-4xl">
           Pick your door
         </h2>
@@ -165,7 +165,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto mt-16 max-w-6xl px-4 sm:px-6" aria-labelledby="private-h">
+      <section className="mt-16 w-full px-4 sm:px-6" aria-labelledby="private-h">
         <div className="mb-card grid gap-6 md:grid-cols-[auto_1fr] md:gap-12 md:!p-8">
           <h2 id="private-h" className="mb-sign text-3xl font-bold">
             Who can see your answers

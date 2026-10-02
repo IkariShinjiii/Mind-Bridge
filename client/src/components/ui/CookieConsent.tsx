@@ -26,7 +26,7 @@ export default function CookieConsent() {
       role="region"
       aria-label="Cookie notice"
     >
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="flex w-full flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <p className="flex-1 text-[color:var(--mb-ink)]">
           Mind Bridge uses only essential cookies, which keep you signed in and the site secure.{" "}
           <Link to="/cookie-policy" className="font-bold text-[color:var(--mb-ink)]">

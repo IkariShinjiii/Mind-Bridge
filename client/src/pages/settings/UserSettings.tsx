@@ -390,7 +390,7 @@ export default function UserSettings() {
   const navTabs = allTabs.filter((t) => t.show);
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">

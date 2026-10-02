@@ -24,7 +24,7 @@ export function Brand({ small = false }) {
 export function CrisisStrip() {
   return (
     <div className="mb-plate-amber !rounded-none">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
+      <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
         <p className="font-semibold">In crisis right now? The NCMH hotline is free and open 24/7.</p>
         <a
           href="tel:1553"
@@ -59,7 +59,7 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
       </a>
       <CrisisStrip />
       <header className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <div className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Brand />
           <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
             <button
@@ -105,7 +105,7 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
       </main>
 
       <footer className="mt-16 border-t border-[color:var(--mb-line)]">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto]">
+        <div className="grid w-full gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1fr_auto]">
           <address className="not-italic text-[color:var(--mb-muted)]">
             <p className="font-bold text-[color:var(--mb-ink)]">University of San Agustin, Guidance Services</p>
             <p>General Luna Street, City Proper, Iloilo City 5000</p>
@@ -135,7 +135,7 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
             </Link>
           </nav>
         </div>
-        <p className="mx-auto max-w-6xl px-4 pb-8 text-sm text-[color:var(--mb-muted)] sm:px-6">
+        <p className="w-full px-4 pb-8 text-sm text-[color:var(--mb-muted)] sm:px-6">
           © {new Date().getFullYear()} Mind Bridge. Screening results are a guide for counselors and students, not a
           medical diagnosis.
         </p>

@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         Skip to main content
       </a>
       <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
           <Link
             to="/"
             className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
@@ -260,7 +260,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         tabIndex={-1}
         className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8"
       >
-        <div key={location.pathname} className="mx-auto w-full max-w-6xl">
+        <div key={location.pathname} className="w-full">
           {children}
         </div>
       </main>

@@ -136,7 +136,7 @@ export default function CrisisResources() {
   }, [phase]);
 
   return (
-    <m.div {...page} className="mx-auto max-w-6xl space-y-6">
+    <m.div {...page} className="w-full space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
         <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">

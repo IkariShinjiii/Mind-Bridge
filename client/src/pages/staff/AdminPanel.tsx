@@ -418,7 +418,7 @@ export default function AdminPanel() {
   }, [users, accountSubTab]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 pb-12">
+    <div className="w-full space-y-8 pb-12">
       {/* Header */}
       <div className="border-b border-[color:var(--mb-line)] pb-6">
         <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Staff dashboard</h1>
