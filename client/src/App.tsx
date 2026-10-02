@@ -17,14 +17,16 @@ const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 import NotFoundPage from "./pages/NotFoundPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
+import AccountNotice from "./components/ui/AccountNotice";
 import CookieConsent from "./components/ui/CookieConsent";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import PageLoader from "./components/ui/PageLoader";
+import PublicShell from "./components/ui/PublicShell";
 import type { UserRole } from "./types";
 import { pageTitle } from "./utils/pageTitle";
 
 function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: UserRole[] }) {
-  const { currentUser, userRole, loading } = useAuth();
+  const { currentUser, userRole, accountStatus, loading, logout, refreshUserData } = useAuth();
 
   if (loading) {
     return <PageLoader label="Loading session…" />;
@@ -32,6 +34,15 @@ function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allow
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Waiting for approval, or deactivated: say so plainly instead of showing a dashboard full of permission errors.
+  if (accountStatus !== "active") {
+    return (
+      <PublicShell showAuthLinks={false}>
+        <AccountNotice status={accountStatus} onCheckAgain={refreshUserData} onLogout={() => void logout()} />
+      </PublicShell>
+    );
   }
 
   if (allowedRoles && (!userRole || !allowedRoles.includes(userRole))) {

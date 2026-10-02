@@ -76,9 +76,11 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
             </button>
             {currentUser ? (
               <>
-                <Link to={dashboard} className="mb-btn mb-btn-solid whitespace-nowrap">
-                  Dashboard
-                </Link>
+                {showAuthLinks && (
+                  <Link to={dashboard} className="mb-btn mb-btn-solid whitespace-nowrap">
+                    Dashboard
+                  </Link>
+                )}
                 <button type="button" onClick={logout} className="mb-btn mb-btn-line whitespace-nowrap">
                   Log out
                 </button>
