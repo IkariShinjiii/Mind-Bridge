@@ -81,6 +81,8 @@ export interface Assessment {
   student?: string;
   user?: string;
   assignedCounselorId?: string;
+  /** Set by the staff dashboard (never stored) when the saved risk level or safety flag was lower than the answers justify. */
+  riskCorrectedFrom?: RiskLevel;
 }
 
 /** Document in `appointments/{id}`. */

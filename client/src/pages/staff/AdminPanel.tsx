@@ -42,6 +42,7 @@ import {
 } from "../../utils/adminExport";
 import { friendlyError } from "../../utils/errors";
 import { plural } from "../../utils/plural";
+import { withVerifiedRisk } from "../../utils/risk";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
 import { caseReviewSchema } from "../../lib/schemas";
@@ -96,6 +97,15 @@ function Stat({
       <p className="mb-sign mt-1 text-4xl font-bold leading-none tabular-nums">{value}</p>
       <p className={`mt-1 text-sm ${urgent ? "" : "text-[color:var(--mb-muted)]"}`}>{note}</p>
     </div>
+  );
+}
+
+/** Shown when the saved record understated the risk and the dashboard raised it from the answers. */
+function RiskCorrectedNote({ from }: { from: RiskLevel }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] px-2 py-1 text-sm font-bold text-[color:var(--mb-warn)]">
+      <AlertCircle className="h-4 w-4" aria-hidden="true" /> Raised from the answers (saved as {from})
+    </span>
   );
 }
 
@@ -203,7 +213,8 @@ export default function AdminPanel() {
       ]);
       setLoadError(failed.length ? `Could not load ${failed.join(", ")}. What you see below may be incomplete.` : "");
       setUsers(allUsers);
-      setAssessments(assessmentData);
+      // The risk level is written by the student's browser, so re-check it against the score before showing it.
+      setAssessments(assessmentData.map(withVerifiedRisk));
       setAppointments(appointmentData);
     } catch (error) {
       console.error("Failed to load admin data", error);
@@ -575,6 +586,7 @@ export default function AdminPanel() {
                                 <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
                               </span>
                             )}
+                            {item.riskCorrectedFrom && <RiskCorrectedNote from={item.riskCorrectedFrom} />}
                           </div>
                         </div>
 
@@ -931,6 +943,7 @@ export default function AdminPanel() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <RiskTag risk={activeCase.riskLevel || "low"} />
+              {activeCase.riskCorrectedFrom && <RiskCorrectedNote from={activeCase.riskCorrectedFrom} />}
               {activeCase.flaggedForImmediateReview && (
                 <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
                   <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged

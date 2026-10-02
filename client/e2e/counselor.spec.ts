@@ -31,6 +31,9 @@ const lowCase = {
   studentId: "uid-other",
   studentName: "Carlo Other",
   studentEmail: "carlo@usa.edu.ph",
+  // Answers and summary must agree with "low": the dashboard re-checks the saved risk against them.
+  answers: [0, 0, 1, 0, 0, 1, 0],
+  questionSummary: questionSummary.map((q, i) => ({ ...q, score: i === 2 || i === 5 ? 1 : 0 })),
   total: 2,
   riskLevel: "low",
   flaggedForImmediateReview: false,
