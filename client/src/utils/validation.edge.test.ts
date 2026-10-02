@@ -85,7 +85,7 @@ describe("isPhone edge cases", () => {
 });
 
 describe("validateSignup edge cases", () => {
-  const ok = { name: "Ana", email: "ana@usa.edu.ph", password: "secret" };
+  const ok = { name: "Ana", email: "ana@usa.edu.ph", password: "secret12" };
   it("accepts a password of exactly the minimum length and rejects one shorter", () => {
     expect(validateSignup({ ...ok, password: "x".repeat(MIN_PASSWORD_LENGTH) })).toEqual({});
     expect(validateSignup({ ...ok, password: "x".repeat(MIN_PASSWORD_LENGTH - 1) })).toHaveProperty("password");
@@ -96,7 +96,7 @@ describe("validateSignup edge cases", () => {
     expect(e.email).toMatch(/Enter your school email/);
   });
   it("does not trim the password (spaces count as characters)", () => {
-    expect(validateSignup({ ...ok, password: "      " })).toEqual({});
+    expect(validateSignup({ ...ok, password: "        " })).toEqual({});
   });
   it("consent defaults to true when omitted, but an explicit false or null fails", () => {
     expect(validateSignup(ok)).toEqual({});
@@ -163,10 +163,10 @@ describe("validatePasswordChange edge cases", () => {
   });
   it("confirmation is compared exactly (case and trailing space matter)", () => {
     expect(
-      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "secret1" }),
+      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret12", confirmPassword: "secret12" }),
     ).toHaveProperty("confirmPassword");
     expect(
-      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret1", confirmPassword: "Secret1 " }),
+      validatePasswordChange({ currentPassword: "old-one", newPassword: "Secret12", confirmPassword: "Secret12 " }),
     ).toHaveProperty("confirmPassword");
   });
 });

@@ -604,7 +604,7 @@ export default function UserSettings() {
                       <Field
                         id="set-new-pw"
                         label="New password"
-                        hint="at least 6 characters"
+                        hint="at least 8 characters"
                         required
                         error={fieldErrors.newPassword}
                       >

@@ -42,10 +42,10 @@ test.describe("Student signup", () => {
     await expect(page).toHaveURL(/\/signup$/);
   });
 
-  test("signup is refused when the password is shorter than 6 characters", async ({ page }) => {
-    await fillSignup(page, { password: "abc12" });
+  test("signup is refused when the password is shorter than 8 characters", async ({ page }) => {
+    await fillSignup(page, { password: "abc1234" });
 
-    await expect(page.getByRole("alert")).toHaveText("Password must be at least 6 characters.");
+    await expect(page.getByRole("alert")).toHaveText("Password must be at least 8 characters.");
     await expect(page).toHaveURL(/\/signup$/);
   });
 

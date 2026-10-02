@@ -171,7 +171,7 @@ export default function Signup() {
           label="Password"
           type="password"
           autoComplete="new-password"
-          hint="At least 6 characters. A longer phrase with numbers and capitals is stronger."
+          hint="At least 8 characters. A longer phrase with numbers and capitals is stronger."
           required
           error={fieldErrors.password}
           onChange={(e) => setPassword(e.target.value)}

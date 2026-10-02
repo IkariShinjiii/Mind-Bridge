@@ -40,12 +40,12 @@ describe("form validators", () => {
     expect(Object.keys(e).sort()).toEqual(["consent", "email", "name", "password"]);
   });
   it("passes a valid sign-up", () => {
-    expect(validateSignup({ name: "Ana", email: "ana@usa.edu.ph", password: "secret1", consent: true })).toEqual({});
+    expect(validateSignup({ name: "Ana", email: "ana@usa.edu.ph", password: "secret12", consent: true })).toEqual({});
   });
   it("rejects a non-school email and a short password at sign-up", () => {
     const e = validateSignup({ name: "Ana", email: "ana@gmail.com", password: "123" });
     expect(e.email).toMatch(/usa\.edu\.ph/);
-    expect(e.password).toMatch(/at least 6/);
+    expect(e.password).toMatch(/at least 8/);
   });
   it("login requires both fields", () => {
     expect(validateLogin({ email: "", password: "" })).toHaveProperty("email");
@@ -61,13 +61,13 @@ describe("form validators", () => {
   });
   it("password change checks length, difference and match", () => {
     expect(
-      validatePasswordChange({ currentPassword: "old123", newPassword: "old123", confirmPassword: "old123" }),
+      validatePasswordChange({ currentPassword: "old12345", newPassword: "old12345", confirmPassword: "old12345" }),
     ).toHaveProperty("newPassword");
     expect(
-      validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new12345" }),
+      validatePasswordChange({ currentPassword: "old12345", newPassword: "new12345", confirmPassword: "new123456" }),
     ).toHaveProperty("confirmPassword");
     expect(
-      validatePasswordChange({ currentPassword: "old123", newPassword: "new1234", confirmPassword: "new1234" }),
+      validatePasswordChange({ currentPassword: "old12345", newPassword: "new12345", confirmPassword: "new12345" }),
     ).toEqual({});
   });
   it("availability window must be in the future and ordered", () => {

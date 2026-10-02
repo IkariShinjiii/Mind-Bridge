@@ -1,7 +1,10 @@
 /** School email domain required for student accounts. */
 export const SCHOOL_EMAIL_DOMAIN = "@usa.edu.ph";
-/** Minimum password length enforced by Firebase Auth. */
-export const MIN_PASSWORD_LENGTH = 6;
+/**
+ * Minimum length for a NEW password (sign-up and change). Firebase itself only requires 6; the app asks for 8
+ * (security audit F-09). Log-in is not length-checked, so existing shorter passwords keep working.
+ */
+export const MIN_PASSWORD_LENGTH = 8;
 
 export type PasswordLevel = 0 | 1 | 2 | 3 | 4;
 

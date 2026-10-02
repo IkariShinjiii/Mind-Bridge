@@ -64,7 +64,7 @@ export const Password: Story = {
     type: "password",
     autoComplete: "new-password",
     required: true,
-    hint: "At least 6 characters.",
+    hint: "At least 8 characters.",
   },
 };
 

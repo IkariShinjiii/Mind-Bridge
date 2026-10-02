@@ -94,8 +94,8 @@ export const SignupWithFieldErrors: Story = {
           label="Password"
           type="password"
           defaultValue="abc"
-          hint="At least 6 characters."
-          error="Password must be at least 6 characters."
+          hint="At least 8 characters."
+          error="Password must be at least 8 characters."
         />
         <button type="submit" className="mb-btn mb-btn-solid w-full">
           Create account
