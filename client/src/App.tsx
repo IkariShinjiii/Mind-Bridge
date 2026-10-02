@@ -1,5 +1,7 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, m } from "framer-motion";
+import { pagePreset, useMotionPreset } from "./lib/motion";
 import { useAuth } from "./hooks/useAuth";
 
 import HomePage from "./pages/HomePage";
@@ -56,76 +58,83 @@ function PublicOnlyRoute({ children }: { children: ReactNode }) {
 
 export default function App() {
   const location = useLocation();
+  const page = useMotionPreset(pagePreset);
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <CookieConsent />
       <ErrorBoundary resetKey={location.pathname}>
         <Suspense fallback={<PageLoader />}>
-          <Routes location={location} key={location.pathname}>
-            <Route path="/" element={<HomePage />} />
-            <Route
-              path="/login"
-              element={
-                <PublicOnlyRoute>
-                  <Login />
-                </PublicOnlyRoute>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <PublicOnlyRoute>
-                  <Signup />
-                </PublicOnlyRoute>
-              }
-            />
-            <Route
-              path="/student/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["student"]}>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/counselor/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["admin"]}>
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/appointments"
-              element={
-                <ProtectedRoute allowedRoles={["student", "admin"]}>
-                  <Appointments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/resources"
-              element={
-                <ProtectedRoute allowedRoles={["student", "admin"]}>
-                  <CrisisResources />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute allowedRoles={["student", "admin"]}>
-                  <UserSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsAndConditions />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          {/* mode="wait": the old page fades out (120ms) before the new one rises in, so two pages are never mounted at once.
+              `location` is passed to Routes so the leaving page keeps rendering its own route while the URL has moved on. */}
+          <AnimatePresence mode="wait">
+            <m.div key={location.pathname} className="flex min-h-0 flex-1 flex-col" {...page}>
+              <Routes location={location}>
+                <Route path="/" element={<HomePage />} />
+                <Route
+                  path="/login"
+                  element={
+                    <PublicOnlyRoute>
+                      <Login />
+                    </PublicOnlyRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicOnlyRoute>
+                      <Signup />
+                    </PublicOnlyRoute>
+                  }
+                />
+                <Route
+                  path="/student/dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={["student"]}>
+                      <StudentDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/counselor/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <AdminPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/appointments"
+                  element={
+                    <ProtectedRoute allowedRoles={["student", "admin"]}>
+                      <Appointments />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/resources"
+                  element={
+                    <ProtectedRoute allowedRoles={["student", "admin"]}>
+                      <CrisisResources />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute allowedRoles={["student", "admin"]}>
+                      <UserSettings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route path="/cookie-policy" element={<CookiePolicy />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </m.div>
+          </AnimatePresence>
         </Suspense>
       </ErrorBoundary>
     </div>

@@ -1,12 +1,21 @@
 import { useState, useRef, useEffect, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { AnimatePresence, m } from "framer-motion";
 import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Moon, Sun, Phone } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
+import { transition, useMotionPreset, type MotionPreset } from "../../lib/motion";
 import Spinner from "../ui/Spinner";
 import { ToastViewport } from "../ui/Toast";
 import { avatarColor } from "../../utils/avatar";
 import icon from "../../assets/mindbridge-icon.png";
+
+/** Account dropdown: drops 4px and fades in (150ms), fades out in 120ms. */
+const menuPreset: MotionPreset = {
+  initial: { opacity: 0, y: -4 },
+  animate: { opacity: 1, y: 0, transition: transition.fast },
+  exit: { opacity: 0, transition: transition.exit },
+};
 
 export default function DashboardLayout({ children }: { children?: ReactNode }) {
   const { currentUser, userRole, userData, logout } = useAuth();
@@ -15,6 +24,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
   const [theme, toggleTheme] = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const menu = useMotionPreset(menuPreset);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -113,16 +123,14 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     items[(i + step + items.length) % items.length]?.focus();
   }
 
-  // After navigating, move focus to the page so keyboard and screen reader users start at the top of it
-  const firstRender = useRef(true);
+  // After navigating, move focus to the page so keyboard and screen reader users start at the top of it.
+  // App remounts this layout on every route change, so "first render" can't tell a navigation from the initial
+  // load; the router gives the first entry the key "default" and every later one a unique key.
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
+    if (location.key === "default") return;
     mainRef.current?.focus({ preventScroll: true });
     mainRef.current?.scrollTo({ top: 0 });
-  }, [location.pathname]);
+  }, [location.key]);
 
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -218,41 +226,44 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               )}
             </button>
 
-            {menuOpen && (
-              <div
-                role="menu"
-                aria-label="Account"
-                onKeyDown={onMenuKeyDown}
-                className="animate-fade-up absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
-              >
-                <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
-                  <p className="truncate font-bold">{safeName}</p>
-                  <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
-                  <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
-                </div>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    navigate("/settings");
-                  }}
-                  className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
+            <AnimatePresence>
+              {menuOpen && (
+                <m.div
+                  role="menu"
+                  aria-label="Account"
+                  onKeyDown={onMenuKeyDown}
+                  {...menu}
+                  className="absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
                 >
-                  <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
-                </button>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={handleLogout}
-                  disabled={loggingOut}
-                  className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
-                >
-                  {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
-                  {loggingOut ? "Signing out…" : "Sign out"}
-                </button>
-              </div>
-            )}
+                  <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
+                    <p className="truncate font-bold">{safeName}</p>
+                    <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
+                    <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/settings");
+                    }}
+                    className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
+                  >
+                    <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
+                  >
+                    {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
+                    {loggingOut ? "Signing out…" : "Sign out"}
+                  </button>
+                </m.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </header>

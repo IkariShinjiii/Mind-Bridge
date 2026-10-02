@@ -1,4 +1,7 @@
-import type { ElementType, HTMLAttributes, ReactNode } from "react";
+import { m } from "framer-motion";
+import { useMemo, type ElementType, type HTMLAttributes, type ReactNode } from "react";
+import { cardHover, useNoMotion } from "../../lib/motion";
+import { Alert } from "./Alert";
 import PanelHead from "./PanelHead";
 import Spinner from "./Spinner";
 
@@ -78,6 +81,9 @@ export default function Card({
   children,
   ...rest
 }: CardProps) {
+  const noMotion = useNoMotion();
+  // Interactive cards are Framer elements so the hover lift is one animation, not a CSS transform racing it.
+  const MotionTag = useMemo(() => (interactive ? m.create(Tag) : null), [interactive, Tag]);
   let body = children;
   if (loading) {
     body = (
@@ -89,9 +95,9 @@ export default function Card({
   } else if (error) {
     body = (
       <div className="space-y-3">
-        <p role="alert" className="mb-alert font-medium">
+        <Alert role="alert" className="font-medium">
           {error}
-        </p>
+        </Alert>
         {onRetry && (
           <button type="button" onClick={onRetry} className="mb-btn mb-btn-line">
             Try again
@@ -101,8 +107,12 @@ export default function Card({
     );
   }
 
+  const Root = MotionTag ?? Tag;
+  const motionProps = MotionTag ? { "data-motion": "", whileHover: noMotion || disabled ? undefined : cardHover } : {};
+
   return (
-    <Tag
+    <Root
+      {...motionProps}
       aria-busy={loading || undefined}
       aria-disabled={disabled || undefined}
       className={`mb-card${dashed ? " !border-dashed !shadow-none" : ""}${interactive ? " mb-card-interactive" : ""} ${
@@ -121,6 +131,6 @@ export default function Card({
           {footer}
         </div>
       )}
-    </Tag>
+    </Root>
   );
 }

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Alert, FieldError, Notice } from "./Alert";
 
 /** `mb-alert` is the error banner. Use `role="alert"` for errors that appear after an action, `role="note"` for static notices. */
 const meta = {
@@ -19,16 +20,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Error: Story = {
   render: () => (
-    <p role="alert" className="mb-alert font-medium">
+    <Alert role="alert" className="font-medium">
       That time was just taken. Pick another open time.
-    </p>
+    </Alert>
   ),
 };
 
 export const Note: Story = {
   render: () => (
-    <p role="note" className="mb-alert font-medium">
+    <Alert role="note" className="font-medium">
       Sessions cancelled within 24 hours cannot be rebooked online.
-    </p>
+    </Alert>
   ),
+};
+
+export const Success: Story = {
+  render: () => (
+    <Notice role="status" className="font-medium">
+      Password reset email sent. Check your inbox.
+    </Notice>
+  ),
+};
+
+export const Field: Story = {
+  render: () => <FieldError>Enter your school email address.</FieldError>,
 };

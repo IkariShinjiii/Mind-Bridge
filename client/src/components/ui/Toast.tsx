@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, m } from "framer-motion";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
+import { toastPreset, useMotionPreset } from "../../lib/motion";
 
 type ToastType = "success" | "error";
 
@@ -71,14 +73,11 @@ export function useToast(): ToastApi {
 
 function ToastItem({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number) => void }) {
   const [paused, setPaused] = useState(false);
-  const [leaving, setLeaving] = useState(false);
+  const motion = useMotionPreset(toastPreset);
   const isError = toast.type === "error";
 
-  // Slide out first, then remove; the short delay matches the exit animation in theme.css.
-  const leave = useCallback(() => {
-    setLeaving(true);
-    setTimeout(() => onDismiss(toast.id), 180);
-  }, [onDismiss, toast.id]);
+  // Removing the toast from the queue is enough: the AnimatePresence in ToastViewport plays the exit first.
+  const leave = useCallback(() => onDismiss(toast.id), [onDismiss, toast.id]);
 
   // Hovering or focusing a toast holds it open so it can be read, and it never vanishes under the pointer.
   useEffect(() => {
@@ -89,13 +88,13 @@ function ToastItem({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: num
 
   const Icon = isError ? AlertCircle : CheckCircle2;
   return (
-    <div
-      data-leaving={leaving || undefined}
+    <m.div
+      {...motion}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className={`mb-toast pointer-events-auto flex items-start gap-3 rounded-lg border border-l-4 bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-mb-lg ${
+      className={`pointer-events-auto flex items-start gap-3 rounded-lg border border-l-4 bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-mb-lg ${
         isError ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-safe)]"
       }`}
     >
@@ -112,7 +111,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: num
       >
         <X className="h-5 w-5" aria-hidden="true" />
       </button>
-    </div>
+    </m.div>
   );
 }
 
@@ -127,14 +126,15 @@ export function ToastViewport() {
   const { api, toasts } = ctx;
   const render = (type: ToastType) =>
     toasts.filter((t) => t.type === type).map((t) => <ToastItem key={t.id} toast={t} onDismiss={api.dismiss} />);
+  // One AnimatePresence per live region, so a leaving toast stays inside the region it was announced in.
 
   return (
     <div className="pointer-events-none fixed inset-x-4 bottom-24 z-[60] flex flex-col items-end gap-3 lg:bottom-6 lg:left-auto lg:right-6 lg:w-[26rem]">
       <div role="status" aria-live="polite" className="flex w-full flex-col gap-3">
-        {render("success")}
+        <AnimatePresence>{render("success")}</AnimatePresence>
       </div>
       <div role="alert" aria-live="assertive" className="flex w-full flex-col gap-3">
-        {render("error")}
+        <AnimatePresence>{render("error")}</AnimatePresence>
       </div>
     </div>
   );

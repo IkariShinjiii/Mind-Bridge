@@ -319,6 +319,16 @@
   transform: translateY(1px);
   box-shadow: none;
 }
+/* <Button> and interactive <Card> move with Framer (data-motion); drop the CSS transform so the two never fight. */
+.mb-btn[data-motion],
+.mb-card-interactive[data-motion] {
+  transition-property: box-shadow, background-color, border-color, color;
+}
+.mb-btn[data-motion]:hover,
+.mb-btn[data-motion]:active,
+.mb-card-interactive[data-motion]:hover {
+  transform: none;
+}
 
 /* Primary: filled teal */
 .mb-btn-solid {
@@ -456,7 +466,7 @@ textarea.mb-field {
   line-height: 1.6;
 }
 
-/* Validation message: fades in under the field */
+/* Validation message under the field. Motion lives in <FieldError>, <Alert> and <Notice>. */
 .mb-field-error {
   display: flex;
   align-items: flex-start;
@@ -464,7 +474,6 @@ textarea.mb-field {
   margin-top: 0.5rem;
   font-weight: 700;
   color: var(--mb-urgent);
-  animation: mb-fade-in var(--mb-base) var(--mb-ease) backwards;
 }
 
 .mb-alert {
@@ -474,7 +483,6 @@ textarea.mb-field {
   border-left-width: 4px;
   border-radius: var(--mb-r-md);
   padding: 0.75rem 1rem;
-  animation: mb-fade-in var(--mb-base) var(--mb-ease) backwards;
 }
 .mb-notice {
   background: var(--mb-safe-bg);
@@ -483,7 +491,6 @@ textarea.mb-field {
   border-left-width: 4px;
   border-radius: var(--mb-r-md);
   padding: 0.75rem 1rem;
-  animation: mb-fade-in var(--mb-base) var(--mb-ease) backwards;
 }
 
 /* Password strength: four segments, filled left to right; the label says it in words */
@@ -604,16 +611,6 @@ textarea.mb-field {
     transform: none;
   }
 }
-@keyframes mb-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 @keyframes mb-shimmer {
   from {
     background-position: 100% 0;
@@ -630,26 +627,6 @@ textarea.mb-field {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@keyframes mb-toast-in {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes mb-toast-out {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 0;
-    transform: translateX(24px);
   }
 }
 @keyframes mb-step {
@@ -672,13 +649,6 @@ textarea.mb-field {
   animation: mb-step 0.24s var(--mb-ease) backwards;
 }
 
-.mb-toast {
-  animation: mb-toast-in 0.24s var(--mb-ease) backwards;
-}
-.mb-toast[data-leaving="true"] {
-  animation: mb-toast-out 0.18s ease-in forwards;
-}
-
 /* Pages migrated from the old dark theme keep a few legacy font utilities. */
 .mb .font-display {
   font-family: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
@@ -691,10 +661,6 @@ textarea.mb-field {
   .mb-route::after,
   .mb-stop,
   .mb-step,
-  .mb-toast,
-  .mb-field-error,
-  .mb-alert,
-  .mb-notice,
   .mb .animate-fade-up {
     animation: none;
   }
@@ -709,9 +675,5 @@ textarea.mb-field {
   .mb-btn:hover,
   .mb-card-interactive:hover {
     transform: none;
-  }
-  .mb-toast[data-leaving="true"] {
-    animation: none;
-    opacity: 0;
   }
 }

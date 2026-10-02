@@ -1,5 +1,10 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { m } from "framer-motion";
+import { buttonTap, transition, useNoMotion } from "../../lib/motion";
 import Spinner from "./Spinner";
+
+/** Hover lift for solid and danger buttons (matches the 1px CSS lift it replaces). */
+const buttonHover = { y: -1, transition: transition.fast };
 
 export type ButtonVariant = "solid" | "line" | "danger";
 
@@ -50,18 +55,23 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   },
   ref,
 ) {
+  const noMotion = useNoMotion();
+  const inert = noMotion || disabled || loading;
   return (
-    <button
+    <m.button
       ref={ref}
+      data-motion=""
+      whileHover={inert || variant === "line" ? undefined : buttonHover}
+      whileTap={inert ? undefined : buttonTap}
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={`mb-btn ${VARIANTS[variant] ?? VARIANTS.solid}${fullWidth ? " w-full" : ""}${className ? ` ${className}` : ""}`}
-      {...rest}
+      {...(rest as object)}
     >
       {loading ? <Spinner size={16} /> : icon}
       {children}
-    </button>
+    </m.button>
   );
 });
 
