@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { m, AnimatePresence } from "framer-motion";
 import {
   ClipboardList,
   Calendar,
@@ -40,6 +41,7 @@ import {
   downloadAssessmentsCsv,
 } from "../../utils/adminExport";
 import { friendlyError } from "../../utils/errors";
+import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
 import { caseReviewSchema } from "../../lib/schemas";
 import type { Appointment, Assessment, CaseStatus, RiskLevel, StoredRole, UserProfile } from "../../types";
@@ -54,6 +56,15 @@ const isMainTab = (value: string | null): value is MainTab =>
 // Destructive outline button: overrides the hover fill of .mb-btn-line
 const DANGER_LINE =
   "!border-[color:var(--mb-urgent)] !text-[color:var(--mb-urgent)] hover:!bg-[color:var(--mb-urgent-bg)] hover:!text-[color:var(--mb-urgent)]";
+
+/** Cards rise in one after another; the stagger stops at 8 so long lists do not drag. */
+const cardEntrance = (i: number, enabled: boolean) =>
+  enabled
+    ? {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0, transition: { ...transition.base, delay: Math.min(i, 8) * 0.04 } },
+      }
+    : { initial: false as const };
 
 const roleLabel = (role?: StoredRole | string) =>
   role === "admin" ? "Admin" : role === "counselor" ? "Counselor" : "Student";
@@ -123,6 +134,8 @@ const RISK_CARDS: ReadonlyArray<readonly [RiskLevel, string, LucideIcon]> = [
 
 export default function AdminPanel() {
   const { currentUser } = useAuth();
+  const panelMotion = useMotionPreset(pagePreset);
+  const cardsMove = panelMotion.initial !== false;
   const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
 
@@ -467,406 +480,412 @@ export default function AdminPanel() {
       {/* ======================================================== */}
       {/* TAB 1: STUDENT CASES & CLINICAL TRIAGE                    */}
       {/* ======================================================== */}
-      {mainTab === "cases" && (
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
-              {CASE_FILTERS.map(([value, label]) => (
+      <AnimatePresence mode="wait" initial={false}>
+        {mainTab === "cases" && (
+          <m.div key="cases" {...panelMotion} className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
+                {CASE_FILTERS.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFilter(value)}
+                    aria-pressed={filter === value}
+                    className="mb-chip"
+                  >
+                    {label}
+                  </button>
+                ))}
                 <button
-                  key={value}
                   type="button"
-                  onClick={() => setFilter(value)}
-                  aria-pressed={filter === value}
+                  onClick={() => setAssignedOnly(!assignedOnly)}
+                  aria-pressed={assignedOnly}
+                  className="mb-chip"
+                >
+                  {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
+                </button>
+              </div>
+              <p className="text-[color:var(--mb-muted)]" aria-live="polite">
+                {triageCases.length} case{triageCases.length !== 1 ? "s" : ""}, highest priority first
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+                <Spinner size={20} className="text-[color:var(--mb-brand)]" />
+                <span>Loading student check-ins...</span>
+              </div>
+            ) : triageCases.length === 0 ? (
+              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center text-[color:var(--mb-muted)]">
+                No cases match this filter.
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {triageCases.map((item, i) => {
+                  const risk = item.riskLevel || "low";
+                  const status = item.status || "open";
+                  const immediate = Boolean(item.flaggedForImmediateReview);
+                  const when = item.submittedAt || item.createdAt;
+                  const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
+                  const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
+                  const riskTone =
+                    risk === "high"
+                      ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
+                      : risk === "medium"
+                        ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                        : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
+
+                  return (
+                    <m.li key={item.id} {...cardEntrance(i, cardsMove)}>
+                      {/* Entrance lives on the li: an inline transform here would block the card's CSS hover lift. */}
+                      <div
+                        className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
+                          immediate ? "border-[color:var(--mb-urgent)] border-l-4" : "border-[color:var(--mb-line)]"
+                        }`}
+                      >
+                        <div
+                          className={`flex flex-row items-center gap-3 rounded-md p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
+                        >
+                          <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
+                          <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="mb-sign text-2xl font-bold leading-tight">{item.studentName || "Student"}</p>
+                          <p className="truncate font-mono text-sm text-[color:var(--mb-muted)]">
+                            {item.studentEmail || "Institutional email"}
+                          </p>
+                          <p className="mt-1 text-[color:var(--mb-muted)]">
+                            Score {item.total ?? 0} of {item.maxScore ?? 21} · {submittedAt}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span
+                              className={`inline-flex rounded border px-2 py-1 text-sm font-bold capitalize ${
+                                STATUS_STYLES[status] ||
+                                "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
+                              }`}
+                            >
+                              {status}
+                            </span>
+                            {immediate && (
+                              <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                                <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 sm:flex-col">
+                          <button
+                            type="button"
+                            onClick={() => openCaseInspector(item)}
+                            className="mb-btn mb-btn-solid !min-h-[44px]"
+                          >
+                            Inspect case
+                          </button>
+                          {status !== "reviewed" ? (
+                            <button
+                              type="button"
+                              onClick={() => markAssessmentStatus(item.id, "reviewed")}
+                              disabled={updatingAssessmentId === item.id}
+                              className="mb-btn mb-btn-line !min-h-[44px]"
+                            >
+                              {updatingAssessmentId === item.id ? "Updating…" : "Mark reviewed"}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => markAssessmentStatus(item.id, "open")}
+                              disabled={updatingAssessmentId === item.id}
+                              className="mb-btn mb-btn-line !min-h-[44px]"
+                            >
+                              {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </m.li>
+                  );
+                })}
+              </ul>
+            )}
+          </m.div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 2: SYSTEM ANALYTICS & TRENDS                         */}
+        {/* ======================================================== */}
+        {mainTab === "analytics" && (
+          <m.div key="analytics" {...panelMotion} className="space-y-8">
+            <section aria-labelledby="risk-heading" className="mb-card">
+              <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <h2 id="risk-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
+                  Risk across all check-ins
+                </h2>
+                <p className="text-[color:var(--mb-muted)]">
+                  {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a
+                  diagnosis.
+                </p>
+              </div>
+
+              <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                {RISK_CARDS.map(([risk, label, Icon]) => {
+                  const n = analytics.riskCounts[risk];
+                  const pct = analytics.totalAssessments ? Math.round((n / analytics.totalAssessments) * 100) : 0;
+                  return (
+                    <div key={risk} className={`rounded-md border p-4 ${RISK_STYLES[risk]}`}>
+                      <p className="flex items-center gap-2 font-bold">
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                        {label}
+                      </p>
+                      <p className="mb-sign mt-1 text-4xl font-bold leading-none tabular-nums">{n}</p>
+                      <p className="mt-1 text-sm">{pct}% of check-ins</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div
+                className="h-72 w-full"
+                role="img"
+                aria-label={`Bar chart of check-ins by risk level: ${analytics.riskCounts.low} low, ${analytics.riskCounts.medium} medium, ${analytics.riskCounts.high} high.`}
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analytics.chartData} margin={{ top: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      stroke="var(--mb-muted)"
+                      tick={{ fontSize: 14 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      stroke="var(--mb-muted)"
+                      tick={{ fontSize: 14 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "var(--mb-surface-2)" }}
+                      contentStyle={{
+                        backgroundColor: "var(--mb-surface)",
+                        border: "2px solid var(--mb-line)",
+                        borderRadius: 6,
+                        color: "var(--mb-ink)",
+                      }}
+                    />
+                    <Bar dataKey="value" name="Check-ins" radius={[4, 4, 0, 0]} maxBarSize={96}>
+                      {analytics.chartData.map((entry, index) => (
+                        <Cell key={entry.name} fill={CHART_COLORS[index]} />
+                      ))}
+                      <LabelList dataKey="value" position="top" fill="var(--mb-ink)" fontSize={14} fontWeight={700} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </section>
+
+            {/* Export */}
+            <section aria-labelledby="export-heading" className="mb-card">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 id="export-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
+                    Export report
+                  </h2>
+                  <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+                    Download an anonymized compliance report of all check-ins as a CSV file.
+                  </p>
+                </div>
+                <button type="button" onClick={exportCsv} disabled={exportingCsv} className="mb-btn mb-btn-solid">
+                  {exportingCsv && <Spinner size={16} />}
+                  {exportingCsv ? "Exporting…" : "Export CSV"}
+                </button>
+              </div>
+            </section>
+          </m.div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 3: MANAGE MY AVAILABILITY                            */}
+        {/* ======================================================== */}
+        {mainTab === "availability" && (
+          <m.div key="availability" {...panelMotion} className="max-w-4xl">
+            <ManageAvailability />
+          </m.div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB 4: MANAGE ACCOUNTS & ASSIGNMENTS                     */}
+        {/* ======================================================== */}
+        {mainTab === "accounts" && (
+          <m.div key="accounts" {...panelMotion} className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">Accounts</h2>
+              <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
+                Approve staff, deactivate accounts, and assign each student a counselor.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Account type">
+              {(
+                [
+                  ["staff", `Staff (${approvedStaff.length + pendingStaff.length})`],
+                  ["students", "Students and counselor assignments"],
+                ] as const
+              ).map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setAccountSubTab(val)}
+                  aria-pressed={accountSubTab === val}
                   className="mb-chip"
                 >
                   {label}
                 </button>
               ))}
-              <button
-                type="button"
-                onClick={() => setAssignedOnly(!assignedOnly)}
-                aria-pressed={assignedOnly}
-                className="mb-chip"
+            </div>
+
+            {/* Pending staff approvals */}
+            {accountSubTab === "staff" && pendingStaff.length > 0 && (
+              <section
+                aria-labelledby="pending-heading"
+                className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 sm:p-6"
               >
-                {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
-              </button>
-            </div>
-            <p className="text-[color:var(--mb-muted)]" aria-live="polite">
-              {triageCases.length} case{triageCases.length !== 1 ? "s" : ""}, highest priority first
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
-              <Spinner size={20} className="text-[color:var(--mb-brand)]" />
-              <span>Loading student check-ins...</span>
-            </div>
-          ) : triageCases.length === 0 ? (
-            <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center text-[color:var(--mb-muted)]">
-              No cases match this filter.
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {triageCases.map((item) => {
-                const risk = item.riskLevel || "low";
-                const status = item.status || "open";
-                const immediate = Boolean(item.flaggedForImmediateReview);
-                const when = item.submittedAt || item.createdAt;
-                const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
-                const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
-                const riskTone =
-                  risk === "high"
-                    ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
-                    : risk === "medium"
-                      ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
-                      : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
-
-                return (
-                  <li
-                    key={item.id}
-                    className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
-                      immediate ? "border-[color:var(--mb-urgent)] border-l-4" : "border-[color:var(--mb-line)]"
-                    }`}
-                  >
-                    <div
-                      className={`flex flex-row items-center gap-3 rounded-md p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
-                    >
-                      <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
-                      <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="mb-sign text-2xl font-bold leading-tight">{item.studentName || "Student"}</p>
-                      <p className="truncate font-mono text-sm text-[color:var(--mb-muted)]">
-                        {item.studentEmail || "Institutional email"}
-                      </p>
-                      <p className="mt-1 text-[color:var(--mb-muted)]">
-                        Score {item.total ?? 0} of {item.maxScore ?? 21} · {submittedAt}
-                      </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`inline-flex rounded border px-2 py-1 text-sm font-bold capitalize ${
-                            STATUS_STYLES[status] ||
-                            "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
-                          }`}
-                        >
-                          {status}
-                        </span>
-                        {immediate && (
-                          <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
-                            <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 sm:flex-col">
-                      <button
-                        type="button"
-                        onClick={() => openCaseInspector(item)}
-                        className="mb-btn mb-btn-solid !min-h-[44px]"
-                      >
-                        Inspect case
-                      </button>
-                      {status !== "reviewed" ? (
-                        <button
-                          type="button"
-                          onClick={() => markAssessmentStatus(item.id, "reviewed")}
-                          disabled={updatingAssessmentId === item.id}
-                          className="mb-btn mb-btn-line !min-h-[44px]"
-                        >
-                          {updatingAssessmentId === item.id ? "Updating…" : "Mark reviewed"}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => markAssessmentStatus(item.id, "open")}
-                          disabled={updatingAssessmentId === item.id}
-                          className="mb-btn mb-btn-line !min-h-[44px]"
-                        >
-                          {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* TAB 2: SYSTEM ANALYTICS & TRENDS                         */}
-      {/* ======================================================== */}
-      {mainTab === "analytics" && (
-        <div className="space-y-8">
-          <section aria-labelledby="risk-heading" className="mb-card">
-            <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <h2 id="risk-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
-                Risk across all check-ins
-              </h2>
-              <p className="text-[color:var(--mb-muted)]">
-                {analytics.totalAssessments} check-ins from {analytics.totalStudents} students. Screening aid, not a
-                diagnosis.
-              </p>
-            </div>
-
-            <div className="mb-6 grid gap-3 sm:grid-cols-3">
-              {RISK_CARDS.map(([risk, label, Icon]) => {
-                const n = analytics.riskCounts[risk];
-                const pct = analytics.totalAssessments ? Math.round((n / analytics.totalAssessments) * 100) : 0;
-                return (
-                  <div key={risk} className={`rounded-md border p-4 ${RISK_STYLES[risk]}`}>
-                    <p className="flex items-center gap-2 font-bold">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                      {label}
-                    </p>
-                    <p className="mb-sign mt-1 text-4xl font-bold leading-none tabular-nums">{n}</p>
-                    <p className="mt-1 text-sm">{pct}% of check-ins</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div
-              className="h-72 w-full"
-              role="img"
-              aria-label={`Bar chart of check-ins by risk level: ${analytics.riskCounts.low} low, ${analytics.riskCounts.medium} medium, ${analytics.riskCounts.high} high.`}
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.chartData} margin={{ top: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    stroke="var(--mb-muted)"
-                    tick={{ fontSize: 14 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    stroke="var(--mb-muted)"
-                    tick={{ fontSize: 14 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "var(--mb-surface-2)" }}
-                    contentStyle={{
-                      backgroundColor: "var(--mb-surface)",
-                      border: "2px solid var(--mb-line)",
-                      borderRadius: 6,
-                      color: "var(--mb-ink)",
-                    }}
-                  />
-                  <Bar dataKey="value" name="Check-ins" radius={[4, 4, 0, 0]} maxBarSize={96}>
-                    {analytics.chartData.map((entry, index) => (
-                      <Cell key={entry.name} fill={CHART_COLORS[index]} />
-                    ))}
-                    <LabelList dataKey="value" position="top" fill="var(--mb-ink)" fontSize={14} fontWeight={700} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-
-          {/* Export */}
-          <section aria-labelledby="export-heading" className="mb-card">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 id="export-heading" className="text-2xl font-bold text-[color:var(--mb-ink)]">
-                  Export report
-                </h2>
-                <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-                  Download an anonymized compliance report of all check-ins as a CSV file.
-                </p>
-              </div>
-              <button type="button" onClick={exportCsv} disabled={exportingCsv} className="mb-btn mb-btn-solid">
-                {exportingCsv && <Spinner size={16} />}
-                {exportingCsv ? "Exporting…" : "Export CSV"}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* TAB 3: MANAGE MY AVAILABILITY                            */}
-      {/* ======================================================== */}
-      {mainTab === "availability" && (
-        <div className="max-w-4xl">
-          <ManageAvailability />
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* TAB 4: MANAGE ACCOUNTS & ASSIGNMENTS                     */}
-      {/* ======================================================== */}
-      {mainTab === "accounts" && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">Accounts</h2>
-            <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-              Approve staff, deactivate accounts, and assign each student a counselor.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Account type">
-            {(
-              [
-                ["staff", `Staff (${approvedStaff.length + pendingStaff.length})`],
-                ["students", "Students and counselor assignments"],
-              ] as const
-            ).map(([val, label]) => (
-              <button
-                key={val}
-                type="button"
-                onClick={() => setAccountSubTab(val)}
-                aria-pressed={accountSubTab === val}
-                className="mb-chip"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Pending staff approvals */}
-          {accountSubTab === "staff" && pendingStaff.length > 0 && (
-            <section
-              aria-labelledby="pending-heading"
-              className="rounded-md border border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] p-4 sm:p-6"
-            >
-              <h3 id="pending-heading" className="mb-3 text-xl font-bold text-[color:var(--mb-warn)]">
-                Waiting for approval ({pendingStaff.length})
-              </h3>
-              <ul className="space-y-3">
-                {pendingStaff.map((u) => (
-                  <li
-                    key={u.id}
-                    className="flex flex-col gap-3 mb-card mb-card-sm sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed staff"}</p>
-                      <p className="break-all font-mono text-sm text-[color:var(--mb-muted)]">{u.email}</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleAccountAction(approveCounselor, u.id, "Staff account approved.")}
-                        disabled={actionLoadingId === u.id}
-                        className="mb-btn mb-btn-solid !px-4 text-sm"
-                      >
-                        {actionLoadingId === u.id && <Spinner size={14} />}
-                        Approve
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleAccountAction(rejectCounselor, u.id, "Staff request rejected.")}
-                        disabled={actionLoadingId === u.id}
-                        className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <section aria-labelledby="accounts-heading">
-            <h3
-              id="accounts-heading"
-              className="mb-3 border-b border-[color:var(--mb-line)] pb-2 text-xl font-bold text-[color:var(--mb-ink)]"
-            >
-              {accountSubTab === "staff" ? "Staff and administrators" : "Students"}
-            </h3>
-
-            {filteredUsers.length === 0 ? (
-              <p className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
-                No accounts in this category.
-              </p>
-            ) : (
-              <ul className="space-y-3">
-                {filteredUsers.map((u) => {
-                  const isSelf = u.id === currentUser?.uid;
-                  const deactivated = u.active === false;
-                  const busy = actionLoadingId === u.id;
-                  return (
-                    <li
+                <h3 id="pending-heading" className="mb-3 text-xl font-bold text-[color:var(--mb-warn)]">
+                  Waiting for approval ({pendingStaff.length})
+                </h3>
+                <ul className="space-y-3">
+                  {pendingStaff.map((u, i) => (
+                    <m.li
                       key={u.id}
-                      className="flex flex-col gap-4 mb-card mb-card-sm lg:flex-row lg:items-center lg:justify-between"
+                      {...cardEntrance(i, cardsMove)}
+                      className="flex flex-col gap-3 mb-card mb-card-sm sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-lg font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed user"}</p>
-                          <span
-                            className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${
-                              ROLE_BADGE[u.role || "student"] || ROLE_BADGE.student
-                            }`}
-                          >
-                            {roleLabel(u.role)}
-                          </span>
-                          {deactivated && (
-                            <span className="rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--mb-urgent)]">
-                              Deactivated
-                            </span>
-                          )}
-                          {isSelf && <span className="text-sm text-[color:var(--mb-muted)]">(you)</span>}
-                        </div>
+                        <p className="font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed staff"}</p>
                         <p className="break-all font-mono text-sm text-[color:var(--mb-muted)]">{u.email}</p>
                       </div>
-
-                      <div className="flex flex-wrap items-center gap-3">
-                        {accountSubTab === "students" && (
-                          <label className="flex items-center gap-2 text-sm">
-                            <span className="font-bold text-[color:var(--mb-ink)]">Counselor</span>
-                            <select
-                              value={u.assignedCounselorId || ""}
-                              onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
-                              disabled={busy}
-                              className="mb-field !w-auto min-w-[10rem]"
-                            >
-                              <option value="">Unassigned</option>
-                              {approvedStaff.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.name || c.email}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        )}
-
+                      <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() =>
-                            handleAccountAction(
-                              deactivated ? reactivateUser : deactivateUser,
-                              u.id,
-                              deactivated ? "Account reactivated." : "Account deactivated.",
-                            )
-                          }
-                          disabled={busy || isSelf}
-                          title={isSelf ? "You cannot deactivate your own account" : undefined}
-                          className={`mb-btn mb-btn-line !px-4 text-sm ${
-                            deactivated
-                              ? "!border-[color:var(--mb-safe)] !text-[color:var(--mb-safe)] hover:!bg-[color:var(--mb-safe-bg)] hover:!text-[color:var(--mb-safe)]"
-                              : DANGER_LINE
-                          }`}
+                          onClick={() => handleAccountAction(approveCounselor, u.id, "Staff account approved.")}
+                          disabled={actionLoadingId === u.id}
+                          className="mb-btn mb-btn-solid !px-4 text-sm"
                         >
-                          {busy && <Spinner size={14} />}
-                          {deactivated ? "Reactivate" : "Deactivate"}
+                          {actionLoadingId === u.id && <Spinner size={14} />}
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAccountAction(rejectCounselor, u.id, "Staff request rejected.")}
+                          disabled={actionLoadingId === u.id}
+                          className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
+                        >
+                          Reject
                         </button>
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                    </m.li>
+                  ))}
+                </ul>
+              </section>
             )}
-          </section>
-        </div>
-      )}
+
+            <section key={accountSubTab} aria-labelledby="accounts-heading">
+              <h3
+                id="accounts-heading"
+                className="mb-3 border-b border-[color:var(--mb-line)] pb-2 text-xl font-bold text-[color:var(--mb-ink)]"
+              >
+                {accountSubTab === "staff" ? "Staff and administrators" : "Students"}
+              </h3>
+
+              {filteredUsers.length === 0 ? (
+                <p className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
+                  No accounts in this category.
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {filteredUsers.map((u, i) => {
+                    const isSelf = u.id === currentUser?.uid;
+                    const deactivated = u.active === false;
+                    const busy = actionLoadingId === u.id;
+                    return (
+                      <m.li
+                        key={u.id}
+                        {...cardEntrance(i, cardsMove)}
+                        className="flex flex-col gap-4 mb-card mb-card-sm lg:flex-row lg:items-center lg:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-lg font-bold text-[color:var(--mb-ink)]">{u.name || "Unnamed user"}</p>
+                            <span
+                              className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${
+                                ROLE_BADGE[u.role || "student"] || ROLE_BADGE.student
+                              }`}
+                            >
+                              {roleLabel(u.role)}
+                            </span>
+                            {deactivated && (
+                              <span className="rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] px-2 py-1 text-xs font-bold uppercase tracking-wider text-[color:var(--mb-urgent)]">
+                                Deactivated
+                              </span>
+                            )}
+                            {isSelf && <span className="text-sm text-[color:var(--mb-muted)]">(you)</span>}
+                          </div>
+                          <p className="break-all font-mono text-sm text-[color:var(--mb-muted)]">{u.email}</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          {accountSubTab === "students" && (
+                            <label className="flex items-center gap-2 text-sm">
+                              <span className="font-bold text-[color:var(--mb-ink)]">Counselor</span>
+                              <select
+                                value={u.assignedCounselorId || ""}
+                                onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
+                                disabled={busy}
+                                className="mb-field !w-auto min-w-[10rem]"
+                              >
+                                <option value="">Unassigned</option>
+                                {approvedStaff.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name || c.email}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleAccountAction(
+                                deactivated ? reactivateUser : deactivateUser,
+                                u.id,
+                                deactivated ? "Account reactivated." : "Account deactivated.",
+                              )
+                            }
+                            disabled={busy || isSelf}
+                            title={isSelf ? "You cannot deactivate your own account" : undefined}
+                            className={`mb-btn mb-btn-line !px-4 text-sm ${
+                              deactivated
+                                ? "!border-[color:var(--mb-safe)] !text-[color:var(--mb-safe)] hover:!bg-[color:var(--mb-safe-bg)] hover:!text-[color:var(--mb-safe)]"
+                                : DANGER_LINE
+                            }`}
+                          >
+                            {busy && <Spinner size={14} />}
+                            {deactivated ? "Reactivate" : "Deactivate"}
+                          </button>
+                        </div>
+                      </m.li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* ======================================================== */}
       {/* CASE INSPECTOR                                           */}

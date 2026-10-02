@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { m } from "framer-motion";
 import {
   ArrowRight,
   ClipboardList,
@@ -10,6 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import PublicShell from "../components/ui/PublicShell";
+import { duration, ease, useNoMotion } from "../lib/motion";
 
 const STOPS = [
   {
@@ -63,6 +65,7 @@ const DOORS = [
 ];
 
 export default function HomePage() {
+  const noMotion = useNoMotion();
   return (
     <PublicShell>
       {/* THESIS: a first-time visitor sees the route to help as a signposted path, not a pitch.
@@ -91,8 +94,33 @@ export default function HomePage() {
         </div>
 
         <ol className="mb-route m-0 list-none space-y-4 p-0" aria-label="How Mind Bridge works, in four steps">
-          {STOPS.map(({ n, icon: Icon, title, body }) => (
-            <li key={n} className="mb-stop mb-plate relative flex items-start gap-4 p-4">
+          <svg
+            className="pointer-events-none absolute bottom-8 left-[1.9rem] top-8 h-[calc(100%-4rem)] w-1 overflow-visible"
+            viewBox="0 0 4 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <m.line
+              x1="2"
+              y1="0"
+              x2="2"
+              y2="100"
+              stroke="var(--mb-amber)"
+              strokeWidth="4"
+              vectorEffect="non-scaling-stroke"
+              initial={noMotion ? false : { pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: duration.route, ease, delay: 0.3 }}
+            />
+          </svg>
+          {STOPS.map(({ n, icon: Icon, title, body }, i) => (
+            <m.li
+              key={n}
+              className="mb-stop mb-plate relative flex items-start gap-4 p-4"
+              initial={noMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease, delay: 0.15 + i * 0.3 }}
+            >
               <span
                 className="mb-sign grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-3xl font-bold text-[color:var(--mb-panel)]"
                 aria-hidden="true"
@@ -105,7 +133,7 @@ export default function HomePage() {
                 </h2>
                 <p className="text-[color:var(--mb-panel-soft)]">{body}</p>
               </div>
-            </li>
+            </m.li>
           ))}
         </ol>
       </section>

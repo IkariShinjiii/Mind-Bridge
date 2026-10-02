@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { m } from "framer-motion";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
@@ -7,7 +8,36 @@ import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthF
 import { validateSignup, passwordStrength, SCHOOL_EMAIL_DOMAIN } from "../../utils/validation";
 import { friendlyError, isPopupDismissed } from "../../utils/errors";
 import { focusById } from "../../utils/dom";
+import { duration, ease, useNoMotion } from "../../lib/motion";
 import type { FieldErrors } from "../../types";
+
+const LEVEL_FILL = [
+  "",
+  "var(--mb-urgent-solid)",
+  "var(--mb-amber)",
+  "var(--mb-accent)",
+  "var(--mb-safe-solid)",
+] as const;
+
+/** Four segments that fill left to right as the password gets stronger. */
+function StrengthMeter({ level }: { level: number }) {
+  const noMotion = useNoMotion();
+  return (
+    <div className="mb-meter" aria-hidden="true">
+      {[1, 2, 3, 4].map((seg) => (
+        <span key={seg} className="relative overflow-hidden">
+          <m.span
+            className="absolute inset-0 origin-left rounded-full"
+            style={{ backgroundColor: LEVEL_FILL[level] || LEVEL_FILL[1] }}
+            initial={false}
+            animate={{ scaleX: seg <= level ? 1 : 0 }}
+            transition={noMotion ? { duration: 0 } : { duration: duration.base, ease, delay: (seg - 1) * 0.04 }}
+          />
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -147,12 +177,7 @@ export default function Signup() {
           onChange={(e) => setPassword(e.target.value)}
         >
           <div className="mt-3">
-            <div className="mb-meter" data-level={strength.level} aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
+            <StrengthMeter level={strength.level} />
             <p aria-live="polite" className="mt-2 min-h-[1.5rem] text-sm font-bold text-[color:var(--mb-muted)]">
               {strength.label ? `Password strength: ${strength.label}` : ""}
             </p>
