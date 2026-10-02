@@ -49,7 +49,8 @@ function formatShortDate(val: StoredDate): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-// Validated Clinical Screening Item Bank (PHQ-9 & GAD-7 Dual-Scale)
+// Seven items adapted (paraphrased) from the PHQ-9 and GAD-7. These are not the validated instruments themselves,
+// so the app calls the result a screening aid, never a diagnosis.
 const SCREENING_QUESTIONS: ScreeningQuestion[] = [
   {
     id: "q1",

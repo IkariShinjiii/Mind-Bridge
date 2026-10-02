@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setUserData(loaded.profile);
               setAccountStatus(loaded.status);
             } else {
-              console.error(`No document found in 'users' collection for UID: ${user.uid}`);
+              console.error("Signed in, but there is no profile document for this account; treating it as a student.");
               setUserRole("student");
             }
           } catch (error) {

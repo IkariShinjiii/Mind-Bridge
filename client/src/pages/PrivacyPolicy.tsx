@@ -34,13 +34,22 @@ export default function PrivacyPolicy() {
               <p>We only collect information that is strictly necessary for providing our services. This includes:</p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>
-                  <strong>Personal Identification Information:</strong> Name, university email address, student ID
-                  number.
+                  <strong>Account information:</strong> Your name and university email address. If you choose to add
+                  them, also a phone number, a short note about yourself, and your wellness goals.
                 </li>
                 <li>
-                  <strong>Sensitive Health Information:</strong> Responses to wellness check-ins (e.g., PHQ-9, GAD-7)
-                  and counselor notes to facilitate support and triage in accordance with the Mental Health Act (RA
-                  11036).
+                  <strong>Emergency contact (optional):</strong> The name, relationship and phone numbers you enter, and
+                  any notes for responders.
+                </li>
+                <li>
+                  <strong>Appointments and messages:</strong> The sessions you book with a counselor and the messages
+                  you exchange with them in the confidential chat.
+                </li>
+                <li>
+                  <strong>Sensitive Health Information:</strong> Your answers to the wellness check-in (a short
+                  screening of seven questions about the last two weeks, adapted from the PHQ-9 and GAD-7
+                  questionnaires, which is a guide and not a diagnosis), and counselor notes, to facilitate support and
+                  triage in accordance with the Mental Health Act (RA 11036).
                 </li>
                 <li>
                   <strong>Usage Data:</strong> Essential cookies and system logs necessary for the secure operation of
@@ -68,6 +77,10 @@ export default function PrivacyPolicy() {
                 the University of San Agustin. We may disclose your information only when required by law or in
                 emergency situations to protect your life and safety.
               </p>
+              <p className="mt-2">
+                Mind Bridge stores your data with Google (Firebase Authentication and Cloud Firestore), which processes
+                it on our behalf to run the service.
+              </p>
             </section>
 
             <section>
@@ -89,6 +102,7 @@ export default function PrivacyPolicy() {
                 <li>Suspend, withdraw, or order the blocking, removal, or destruction of your personal data.</li>
                 <li>Rectify errors in your personal data.</li>
               </ul>
+              <p className="mt-2">To make a request, contact us using the details in section 7.</p>
             </section>
 
             <section>
