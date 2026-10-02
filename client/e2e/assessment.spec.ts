@@ -38,6 +38,8 @@ test.describe("Completing a wellness check-in", () => {
   test("the last question offers Submit check-in instead of Next", async ({ page }) => {
     const checkIn = page.getByRole("region", { name: "Check-in" });
     for (let i = 0; i < 6; i++) {
+      // The previous question stays mounted while it animates out, so wait for this one first.
+      await expect(checkIn.getByText(`You are on question ${i + 1} of 7`)).toBeVisible();
       await checkIn.locator('input[type=radio][value="0"]').check({ force: true });
       await checkIn.getByRole("button", { name: /^Next/ }).click();
     }

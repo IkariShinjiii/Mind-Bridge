@@ -97,6 +97,8 @@ The scale lives in `tailwind.config.js` (`text-xs` to `text-4xl`), and bare `h1`
 
 All transitions are 300ms or less: page change 260ms fade and 8px rise, button and chip colour 150ms, card lift 220ms, check-in question 240ms slide. The only long moment is the route line on the landing page. Everything respects `prefers-reduced-motion` (animations and transitions are removed, not shortened).
 
+Entrances and exits are Framer Motion, not CSS keyframes. Every duration, curve and preset lives in `client/src/lib/motion.ts` (`pagePreset`, `fadePreset`, `dialogPreset`, `toastPreset`, `stepVariants`, `staggerParent`/`staggerChild`); use those rather than inline numbers. One `MotionConfig` and one `LazyMotion` wrap the app in `main.tsx` (and the Storybook preview), so components import `m`, not `motion`. Pass presets through `useMotionPreset` so reduced motion renders the final state with no animation. Route changes use `AnimatePresence mode="wait"` in `App.tsx`, so pages don't add their own entrance. Never leave a transform on an ancestor of a `position: fixed` element. The skeleton shimmer is the only animation still in CSS.
+
 ## Copy
 
 Plain, specific, non-clinical. Errors say what happened and what to do next. Buttons start with a verb and name the outcome ("Create account", "Save notes"). Results are always described as a screening aid, not a diagnosis. No claim goes on the page that the product or its security rules do not back up.
