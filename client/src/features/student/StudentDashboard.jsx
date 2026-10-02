@@ -408,12 +408,19 @@ export default function StudentDashboard() {
                     : "None scheduled"}
                 </div>
               </div>
-              <div className="mt-2 text-sm text-[color:var(--mb-muted)] flex items-center justify-between">
-                <span>Status:</span>
-                <span className="font-bold text-[color:var(--mb-brand)] capitalize">
-                  {appointments[0]?.status || "Open"}
-                </span>
-              </div>
+              {appointments.length > 0 ? (
+                <div className="mt-2 flex items-center justify-between text-sm text-[color:var(--mb-muted)]">
+                  <span>Status</span>
+                  <span className="font-bold text-[color:var(--mb-brand)] capitalize">{appointments[0].status}</span>
+                </div>
+              ) : (
+                <Link
+                  to="/appointments"
+                  className="mt-2 inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                >
+                  Book a session
+                </Link>
+              )}
             </div>
 
             {/* Assigned Counselor Card */}
@@ -447,7 +454,7 @@ export default function StudentDashboard() {
                 Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved
                 guidance staff only.
               </p>
-              <p className="mt-1 max-w-[65ch] text-sm text-[color:var(--mb-muted)]">
+              <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
                 By taking part, you consent to your answers being collected and processed for triage and support.
               </p>
             </div>

@@ -49,7 +49,7 @@ function Stat({ label, value, note, tone, className = "" }) {
   const urgent = tone === "urgent";
   return (
     <div
-      className={`rounded-md border p-4 ${
+      className={`rounded-md border p-4 shadow-mb-sm ${
         urgent
           ? "border-[color:var(--mb-urgent-solid)] bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
           : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)]"
@@ -364,8 +364,14 @@ export default function AdminPanel() {
       )}
 
       {/* At-a-glance counts, most urgent first */}
-      <section aria-label="Summary" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Stat tone="urgent" label="High risk" value={immediateCount} note="Need review first" />
+      <section aria-label="Summary" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <Stat
+          tone="urgent"
+          label="High risk"
+          value={immediateCount}
+          note="Need review first"
+          className="col-span-2 lg:col-span-1"
+        />
         <Stat label="Open cases" value={openCasesCount} note="Waiting in the queue" />
         <Stat label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
         <Stat label="Students" value={analytics.totalStudents} note="With check-ins" />

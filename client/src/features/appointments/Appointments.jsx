@@ -292,7 +292,7 @@ export default function Appointments() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up">
+    <div className="animate-fade-up">
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
