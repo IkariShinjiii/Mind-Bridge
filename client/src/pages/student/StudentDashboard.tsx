@@ -368,7 +368,8 @@ export default function StudentDashboard() {
             How are you feeling today? Take a quick confidential check-in.
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
+        {/* Below lg the bottom bar already carries both, so they would only push the check-in off the first screen. */}
+        <div className="hidden gap-3 lg:flex">
           <Link to="/appointments" className="mb-btn mb-btn-solid">
             <Calendar className="h-5 w-5" aria-hidden="true" />
             My appointments
@@ -384,7 +385,7 @@ export default function StudentDashboard() {
       <div className="flex flex-col gap-6 lg:flex-row items-start">
         <section className="lg:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))]">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))]">
             {/* Gauge / Status Card */}
             <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
@@ -473,8 +474,8 @@ export default function StudentDashboard() {
               )}
             </div>
 
-            {/* Assigned Counselor Card */}
-            <div className="mb-card mb-card-sm flex flex-col justify-between">
+            {/* Assigned Counselor Card: full row on phones, where the other two sit side by side */}
+            <div className="mb-card mb-card-sm col-span-2 flex flex-col justify-between sm:col-span-1">
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold flex items-center justify-between">
                   <span>Guidance Counselor</span>
@@ -596,8 +597,9 @@ export default function StudentDashboard() {
                   {(() => {
                     const firstOpen = answers.findIndex((a) => a === null);
                     const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
+                    // Phones: seven 37px buttons miss the 44px target, and the progress bar plus Back already cover it.
                     return (
-                      <ol className="mb-6 flex gap-2" aria-label="Check-in progress">
+                      <ol className="mb-6 hidden gap-2 sm:flex" aria-label="Check-in progress">
                         {SCREENING_QUESTIONS.map((q, i) => {
                           const done = answers[i] !== null;
                           const here = i === qIndex;
@@ -835,6 +837,12 @@ export default function StudentDashboard() {
                     </span>
                   </div>
 
+                  {chartData.length === 1 && (
+                    <p className="mb-3 text-[color:var(--mb-muted)]">
+                      One check-in so far. Your trend line appears after the next one.
+                    </p>
+                  )}
+
                   {/* Area Line Chart */}
                   <div
                     className="h-60 sm:h-64 w-full"
@@ -1040,7 +1048,7 @@ export default function StudentDashboard() {
               </h2>
               <Link
                 to="/settings"
-                className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-end font-bold text-[color:var(--mb-brand)] underline"
               >
                 Edit
               </Link>

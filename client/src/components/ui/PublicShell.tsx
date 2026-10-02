@@ -23,7 +23,7 @@ export function Brand({ small = false }) {
 
 export function CrisisStrip() {
   return (
-    <div className="mb-plate-amber !rounded-none">
+    <aside aria-label="Crisis support" className="mb-plate-amber !rounded-none">
       <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
         <p className="font-semibold">In crisis right now? The NCMH hotline is free and open 24/7.</p>
         <a
@@ -35,7 +35,7 @@ export function CrisisStrip() {
           Call 1553
         </a>
       </div>
-    </div>
+    </aside>
   );
 }
 

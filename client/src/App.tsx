@@ -62,7 +62,6 @@ export default function App() {
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
-      <CookieConsent />
       <ErrorBoundary resetKey={location.pathname}>
         <Suspense fallback={<PageLoader />}>
           {/* mode="wait": the old page fades out (120ms) before the new one rises in, so two pages are never mounted at once.
@@ -137,6 +136,8 @@ export default function App() {
           </AnimatePresence>
         </Suspense>
       </ErrorBoundary>
+      {/* After the page in the DOM: the skip link must be the first link a keyboard user reaches. It is fixed-position, so it still shows at the bottom. */}
+      <CookieConsent />
     </div>
   );
 }

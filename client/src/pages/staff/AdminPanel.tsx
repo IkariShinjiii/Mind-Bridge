@@ -540,7 +540,9 @@ export default function AdminPanel() {
                       {/* Entrance lives on the li: an inline transform here would block the card's CSS hover lift. */}
                       <div
                         className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
-                          immediate ? "border-[color:var(--mb-urgent)] border-l-4" : "border-[color:var(--mb-line)]"
+                          immediate
+                            ? "border-[color:var(--mb-urgent)] ring-1 ring-[color:var(--mb-urgent)]"
+                            : "border-[color:var(--mb-line)]"
                         }`}
                       >
                         <div
