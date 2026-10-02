@@ -30,7 +30,7 @@ Unlike clinical electronic health record (EHR) systems that feel cold and bureau
 ## Capabilities and Constraints
 
 - **Core Capabilities**:
-  - Secure role-based authentication (Student, Counselor, Admin) with email verification and bcrypt session security.
+  - Secure role-based authentication (Student, Counselor, Admin) through Firebase Authentication (email and password, or Google). Counselor accounts are approved by an administrator before they can see cases.
   - Multi-dimensional wellness check-in survey assessing mood, stress, sleep, focus, and safety indicators.
   - Multi-tier risk assessment and guidance engine flagging low, moderate, and acute support needs.
   - Interactive appointment booking and counselor availability management.
@@ -45,13 +45,13 @@ Unlike clinical electronic health record (EHR) systems that feel cold and bureau
 
 - **Tone & Voice**: Compassionate, reassuring, steady, transparent, and dignified. Never clinical jargon, never dismissive, never cheerful toxic positivity.
 - **Identity & Name**: Mind Bridge — connecting students to care with warmth, security, and clarity.
-- **Visual Personality**: Calming, grounding, intentional, and high-trust. Deep comforting indigo depths, restorative teal/emerald accents, crisp legible typography, and zero jarring neon distractions.
+- **Visual Personality**: Calming, grounding, intentional, and high-trust. Deep teal as the primary colour, a brighter teal for decoration, amber reserved for the crisis line, crisp legible typography, and zero jarring neon distractions.
 
 ## Evidence on Hand
 
-- Role-based access (student, counselor, admin) on Firebase Auth and Firestore, enforced by `firestore.rules`, with rule-based risk scoring in `client/src/lib/scoring.js` and appointment management.
-- Complete frontend client in `client/` (React + Tailwind CSS + Framer Motion) with student check-in, counselor triage view, scheduling calendar, admin panel, and settings.
-- Real campus crisis resource listings and hotline protocols in `client/src/features/student/CrisisResources.jsx`.
+- Role-based access (student, counselor, admin) on Firebase Auth and Firestore, enforced by `firestore.rules`, with rule-based risk scoring in `client/src/utils/scoring.ts` and appointment management.
+- Complete frontend client in `client/` (React, strict TypeScript, Tailwind CSS, Framer Motion; forms validated with Zod) with student check-in, counselor triage view, scheduling calendar, admin panel, and settings.
+- Real campus crisis resource listings and hotline protocols in `client/src/pages/student/CrisisResources.tsx`.
 
 ## Product Principles
 

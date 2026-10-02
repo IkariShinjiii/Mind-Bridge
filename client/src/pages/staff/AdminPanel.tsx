@@ -520,7 +520,7 @@ export default function AdminPanel() {
                 No cases match this filter.
               </div>
             ) : (
-              <ul className="space-y-3">
+              <ul className="grid gap-3 min-[1700px]:grid-cols-2">
                 {triageCases.map((item, i) => {
                   const risk = item.riskLevel || "low";
                   const status = item.status || "open";
