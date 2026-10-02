@@ -20,6 +20,7 @@ export const transition = {
   page: { duration: duration.page, ease } satisfies Transition,
   step: { duration: duration.step, ease } satisfies Transition,
   exit: { duration: duration.exit, ease: "easeIn" } satisfies Transition,
+  toastOut: { duration: 0.18, ease: "easeIn" } satisfies Transition,
   dialog: { type: "spring", duration: 0.3, bounce: 0 } satisfies Transition,
 } as const;
 
@@ -52,18 +53,18 @@ export const dialogPreset: MotionPreset = {
   exit: { opacity: 0, scale: 0.97, y: 8, transition: transition.exit },
 };
 
-/** Toast sliding in from below. */
+/** Toast: slides in from the right in 240ms, out in 180ms (DESIGN.md). */
 export const toastPreset: MotionPreset = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: transition.step },
-  exit: { opacity: 0, y: 6, transition: transition.exit },
+  initial: { opacity: 0, x: 24 },
+  animate: { opacity: 1, x: 0, transition: transition.step },
+  exit: { opacity: 0, x: 24, transition: transition.toastOut },
 };
 
 /** Check-in / booking step. Pass 1 to move forward, -1 to move back. */
 export const stepVariants: Variants = {
-  enter: (dir: 1 | -1) => ({ opacity: 0, x: 24 * dir }),
+  enter: (dir: 1 | -1) => ({ opacity: 0, x: 10 * dir }),
   center: { opacity: 1, x: 0, transition: transition.step },
-  exit: (dir: 1 | -1) => ({ opacity: 0, x: -24 * dir, transition: transition.exit }),
+  exit: (dir: 1 | -1) => ({ opacity: 0, x: -10 * dir, transition: transition.exit }),
 };
 
 /** Parent/child pair for lists. Parent only staggers; the child does the lift. */
