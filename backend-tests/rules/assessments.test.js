@@ -21,6 +21,53 @@ describe("assessments - CREATE (submitResponse)", () => {
   it("unauthenticated submit is rejected", () => assertFails(addDoc(collection(anon(env), "assessments"), assessment())));
   it("signed-in user without a profile is rejected", () => assertFails(addDoc(collection(noProfile(env), "assessments"), assessment({ studentId: "ghost" }))));
   it("deactivated student is rejected", () => assertFails(addDoc(collection(as(env, "deactivated"), "assessments"), assessment({ studentId: "stu3" }))));
+
+  describe("shape and risk consistency", () => {
+    const submit = (over) => addDoc(collection(as(env, "student"), "assessments"), assessment(over));
+
+    it("a score at 60% of the maximum cannot be filed below high", async () => {
+      await assertFails(submit({ total: 6, maxScore: 10, riskLevel: "low" }));
+      await assertFails(submit({ total: 6, maxScore: 10, riskLevel: "medium" }));
+      await assertSucceeds(submit({ total: 6, maxScore: 10, riskLevel: "high" }));
+    });
+    it("a maximum score cannot be filed as low", () => assertFails(submit({ total: 21, maxScore: 21, riskLevel: "low" })));
+    it("a score just under 60% may be medium, and just under 30% may be low", async () => {
+      await assertSucceeds(submit({ total: 5, maxScore: 10, riskLevel: "medium" }));
+      await assertSucceeds(submit({ total: 2, maxScore: 10, riskLevel: "low" }));
+    });
+    it("a score at 30% of the maximum cannot be filed as low", async () => {
+      await assertFails(submit({ total: 3, maxScore: 10, riskLevel: "low" }));
+      await assertSucceeds(submit({ total: 3, maxScore: 10, riskLevel: "medium" }));
+    });
+    it("filing a risk HIGHER than the score needs is allowed: the check only stops under-reporting", () =>
+      assertSucceeds(submit({ total: 1, maxScore: 21, riskLevel: "high", flaggedForImmediateReview: true })));
+    it("an unknown risk level is refused", () => assertFails(submit({ riskLevel: "extreme" })));
+    it("the score cannot exceed the maximum, be negative, or be a fraction", async () => {
+      await assertFails(submit({ total: 22, maxScore: 21, riskLevel: "high" }));
+      await assertFails(submit({ total: -1 }));
+      await assertFails(submit({ total: 1.5 }));
+    });
+    it("the maximum must be a sensible positive number", async () => {
+      await assertFails(submit({ total: 0, maxScore: 0 }));
+      await assertFails(submit({ total: 0, maxScore: 61 }));
+    });
+    it("extra fields are refused, including a pre-set review time or notes", async () => {
+      await assertFails(submit({ isAdmin: true }));
+      await assertFails(submit({ reviewedAt: "2026-10-01T00:00:00.000Z" }));
+      await assertFails(submit({ counselorNotes: "already reviewed" }));
+    });
+    it("types and sizes are enforced", async () => {
+      await assertFails(submit({ flaggedForImmediateReview: "no" }));
+      await assertFails(submit({ answers: Array(21).fill(0) }));
+      await assertFails(submit({ studentName: "x".repeat(201) }));
+      await assertFails(submit({ questionSummary: "not a list" }));
+    });
+    it("a normal 7-question check-in still goes through, at every risk level", async () => {
+      await assertSucceeds(submit({ total: 0, maxScore: 21, riskLevel: "low", answers: [0, 0, 0, 0, 0, 0, 0] }));
+      await assertSucceeds(submit({ total: 9, maxScore: 21, riskLevel: "medium", answers: [1, 1, 1, 1, 1, 2, 2] }));
+      await assertSucceeds(submit({ total: 13, maxScore: 21, riskLevel: "high", answers: [2, 2, 2, 2, 2, 2, 1] }));
+    });
+  });
 });
 
 describe("assessments - READ (getMyAssessments, getAssessments)", () => {

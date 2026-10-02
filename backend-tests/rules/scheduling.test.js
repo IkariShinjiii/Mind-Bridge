@@ -95,6 +95,14 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   it("unapproved counselor cannot read threads", () => assertFails(getDoc(doc(as(env, "pendingCounselor"), "messages/m1"))));
 
   it("student posts to own thread", () => assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message())));
+  it("a message must have text, and at most 2000 characters (the chat form's own limit)", async () => {
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ text: "" })));
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ text: "x".repeat(2001) })));
+    await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ text: 42 })));
+    await assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ text: "x".repeat(2000) })));
+  });
+  it("a message cannot carry extra fields", () =>
+    assertFails(addDoc(collection(as(env, "student"), "messages"), message({ pinned: true }))));
   it("student cannot post as a counselor or admin", async () => {
     await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "counselor" })));
     await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "admin" })));

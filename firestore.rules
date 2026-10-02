@@ -16,6 +16,27 @@ service cloud.firestore {
     }
     function touchesOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
 
+    // A check-in as the app writes it: only these fields, sane types and sizes, nothing pre-filled by the student,
+    // and a risk level that is not lower than the score allows (high from 60% of the maximum, medium from 30%).
+    // The rules cannot add up the answers or read the crisis item, so the safety flag is still taken on trust here;
+    // the staff dashboard and the alert both re-check it.
+    function validNewAssessment(d) {
+      return d.keys().hasOnly(['studentId', 'studentName', 'studentEmail', 'answers', 'questionSummary', 'total',
+                               'maxScore', 'riskLevel', 'flaggedForImmediateReview', 'status', 'counselorNotes', 'createdAt'])
+        && d.studentName is string && d.studentName.size() <= 200
+        && d.studentEmail is string && d.studentEmail.size() <= 200
+        && d.createdAt is string
+        && d.answers is list && d.answers.size() <= 20
+        && d.questionSummary is list && d.questionSummary.size() <= 20
+        && d.total is int && d.maxScore is int
+        && d.maxScore > 0 && d.maxScore <= 60 && d.total >= 0 && d.total <= d.maxScore
+        && d.riskLevel in ['low', 'medium', 'high']
+        && d.flaggedForImmediateReview is bool
+        && d.counselorNotes == ''
+        && (d.total * 10 < d.maxScore * 6 || d.riskLevel == 'high')
+        && (d.total * 10 < d.maxScore * 3 || d.riskLevel != 'low');
+    }
+
     match /users/{uid} {
       // Staff need to read student profiles (names, emails, assignments).
       allow read: if signedIn() && (request.auth.uid == uid || isStaff());
@@ -39,7 +60,8 @@ service cloud.firestore {
 
     match /assessments/{id} {
       allow create: if isActive() && request.resource.data.studentId == request.auth.uid
-        && request.resource.data.status == 'open';
+        && request.resource.data.status == 'open'
+        && validNewAssessment(request.resource.data);
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       // Staff review a check-in: they can set the case status, the review time and their notes, nothing else.
       // The answers, score, risk level and owner stay exactly as the student submitted them.
@@ -76,7 +98,12 @@ service cloud.firestore {
         // A student can only speak as a student; staff speak as staff (the app sends 'admin' for both roles).
         && (isStaff()
             ? request.resource.data.senderRole in ['admin', 'counselor']
-            : request.resource.data.senderRole == 'student');
+            : request.resource.data.senderRole == 'student')
+        // Same limits as the chat form: 1 to 2000 characters, and only the fields the app sends.
+        && request.resource.data.keys().hasOnly(['studentId', 'senderId', 'senderName', 'senderRole', 'text', 'timestamp'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 2000
+        && request.resource.data.senderName is string && request.resource.data.senderName.size() <= 200;
       allow update, delete: if false;
     }
 

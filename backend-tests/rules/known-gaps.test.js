@@ -25,9 +25,14 @@ describe("GAP: students can write fields that should be server-controlled", () =
     await assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: false }));
   });
 
-  it("GAP: riskLevel / flaggedForImmediateReview are client-supplied (a max score can be filed as 'low')", () =>
+  // A score can no longer be filed under-reported (see assessments.test.js), but the rules cannot read the crisis
+  // answer, so the safety flag is still taken on trust. The staff dashboard and the alert re-check it.
+  it("GAP: a crisis answer can still be filed with flaggedForImmediateReview false", () =>
     assertSucceeds(addDoc(collection(as(env, "student"), "assessments"),
-      assessment({ total: 21, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false }))));
+      assessment({
+        answers: [0, 0, 3], total: 3, maxScore: 9, riskLevel: "medium", flaggedForImmediateReview: false,
+        questionSummary: [{ id: "q3", text: "Safety", score: 3, isCrisisItem: true }],
+      }))));
 
   it("GAP: a student can still post a message under any display name (the role is checked, the name is not)", () =>
     assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Dr. Cruz" }))));
