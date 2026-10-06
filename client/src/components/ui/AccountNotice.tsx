@@ -4,7 +4,7 @@ import type { AccountStatus } from "../../utils/accountStatus";
 export interface AccountNoticeProps {
   /** Which notice to show. An "active" account never needs one. */
   status: Exclude<AccountStatus, "active">;
-  /** Re-reads the profile. Offered only while an account is waiting for approval. */
+  /** Re-reads the profile. Offered while an account is waiting for approval or could not be loaded. */
   onCheckAgain?: () => Promise<void>;
   onLogout: () => void;
 }
@@ -14,6 +14,11 @@ const COPY = {
     label: "Waiting for approval",
     title: "Your staff account is waiting for approval",
     body: "An administrator needs to approve it before you can see student check-ins. That keeps student information private. You will get in as soon as they do.",
+  },
+  unavailable: {
+    label: "Could not load your account",
+    title: "We could not load your account",
+    body: "Something went wrong while reading your profile, so Mind Bridge cannot tell what you have access to. Check your connection and try again.",
   },
   deactivated: {
     label: "Account deactivated",
@@ -51,7 +56,7 @@ export default function AccountNotice({ status, onCheckAgain, onLogout }: Accoun
         <p className="mt-3 max-w-[55ch] text-[color:var(--mb-panel-soft)]">{copy.body}</p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          {status === "pending-approval" && onCheckAgain && (
+          {(status === "pending-approval" || status === "unavailable") && onCheckAgain && (
             <button
               type="button"
               onClick={() => void checkAgain()}
@@ -71,7 +76,7 @@ export default function AccountNotice({ status, onCheckAgain, onLogout }: Accoun
         </div>
 
         <p role="status" className="mt-4 min-h-[1.5rem] text-[color:var(--mb-panel-soft)]">
-          {stillWaiting ? "Still waiting. Nothing has changed yet." : ""}
+          {stillWaiting ? status === "unavailable" ? "Still could not load it." : "Still waiting. Nothing has changed yet." : ""}
         </p>
       </section>
     </div>

@@ -1,4 +1,5 @@
-export type AccountStatus = "active" | "pending-approval" | "deactivated";
+export type AccountStatus = "active" | "pending-approval" | "deactivated" | "unavailable";
+// "unavailable" is set by AuthProvider when the profile read fails, so the role is unknown rather than guessed.
 
 interface ProfileLike {
   role?: string | null | undefined;

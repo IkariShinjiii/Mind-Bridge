@@ -21,3 +21,6 @@ export const PendingApproval: Story = {};
 
 /** An account an administrator has switched off. There is nothing to retry, only Log out. */
 export const Deactivated: Story = { args: { status: "deactivated" } };
+
+/** The profile could not be read (offline, or a Firestore error), so the app will not guess a role. */
+export const Unavailable: Story = { args: { status: "unavailable" } };

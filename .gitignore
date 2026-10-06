@@ -32,3 +32,8 @@ client/.preview/
 # Playwright
 /client/test-results/
 /client/playwright-report/
+
+# Production env files
+.env.production
+.env.*
+!.env.example

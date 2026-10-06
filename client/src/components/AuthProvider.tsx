@@ -21,7 +21,7 @@ async function loadProfile(uid: string): Promise<Loaded | null> {
 
 /**
  * Tracks the signed-in Firebase user and their profile/role, and exposes them through `useAuth()`.
- * A signed-in user whose profile cannot be read is treated as a student (least privilege).
+ * A signed-in user whose profile read fails gets an "unavailable" notice instead of a guessed role; one with no profile document is treated as a student.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -47,7 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           } catch (error) {
             console.error("Error fetching user role:", error);
-            setUserRole("student");
+            setUserRole(null);
+            setUserData(null);
+            setAccountStatus("unavailable");
           }
         } else {
           setCurrentUser(null);
