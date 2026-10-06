@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { m } from "framer-motion";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, signOut } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithPopup, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
@@ -81,6 +81,9 @@ export default function Signup() {
         active: true,
         createdAt: serverTimestamp(),
       });
+
+      // Not fatal if it fails: the notice screen offers "Resend email".
+      await sendEmailVerification(credential.user).catch(() => undefined);
 
       navigate("/student/dashboard", { replace: true });
     } catch (error) {

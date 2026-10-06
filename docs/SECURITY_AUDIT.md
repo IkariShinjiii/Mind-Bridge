@@ -510,9 +510,12 @@ Changes made after the review. Nothing here has been verified against the live F
 | F-09 | **Partly fixed** (2026-10-03) | New passwords (sign-up and change password) now need 8 characters instead of Firebase's minimum of 6. Log-in is not length-checked, so existing shorter passwords keep working. MFA for staff and admin accounts is not done: it needs Firebase Identity Platform. |
 | (unlisted) | Fixed (2026-10-03) | `bookAppointment` did not check for a signed-in user and relied on the SDK to reject an undefined `studentId`. It now fails fast with an `unauthenticated` error. |
 
-F-01 and F-10 are unchanged. F-01 in particular cannot be enforced in
-`firestore.rules` yet: the sign-up flow does not send a verification email, so requiring `email_verified`
-would lock every existing user out.
+F-01 (2026-10-06): **client half built, rules half not yet.** Sign-up now sends a verification email, and a
+signed-in student whose email is not verified sees a "Check your inbox" screen (Check again, Resend email,
+Log out) instead of the app. Staff and admins are exempt, and Google sign-in is verified already. Existing
+unverified students meet the same screen once. The rules do **not** require `email_verified` yet: wait until
+existing students have had a chance to verify, then add `verifiedSchool()` from the recommendation above to
+`isActive()` for students, and test it in `backend-tests/`. F-10 is unchanged.
 
 *Method: static code review and automated checks on 2026-10-02. This report assesses technical controls
 and is not a legal opinion or a penetration test.*

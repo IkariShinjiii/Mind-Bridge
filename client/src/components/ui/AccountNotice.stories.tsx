@@ -24,3 +24,6 @@ export const Deactivated: Story = { args: { status: "deactivated" } };
 
 /** The profile could not be read (offline, or a Firestore error), so the app will not guess a role. */
 export const Unavailable: Story = { args: { status: "unavailable" } };
+
+/** A student who has not clicked the link in the verification email yet. */
+export const Unverified: Story = { args: { status: "unverified", onResend: () => Promise.resolve() } };

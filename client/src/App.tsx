@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, m } from "framer-motion";
+import { sendEmailVerification } from "firebase/auth";
+import { auth } from "./lib/firebase";
 import { pagePreset, useMotionPreset } from "./lib/motion";
 import { useAuth } from "./hooks/useAuth";
 
@@ -40,7 +42,11 @@ function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allow
   if (accountStatus !== "active") {
     return (
       <PublicShell showAuthLinks={false}>
-        <AccountNotice status={accountStatus} onCheckAgain={refreshUserData} onLogout={() => void logout()} />
+        <AccountNotice status={accountStatus} onCheckAgain={refreshUserData}
+          onResend={async () => {
+            if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+          }}
+          onLogout={() => void logout()} />
       </PublicShell>
     );
   }

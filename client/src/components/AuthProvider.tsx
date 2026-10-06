@@ -11,12 +11,12 @@ type LoadedProfile = UserProfile & { role: UserRole };
 type Loaded = { profile: LoadedProfile; status: AccountStatus };
 
 /** Reads `users/{uid}` and normalises the role. Returns null when the document does not exist. */
-async function loadProfile(uid: string): Promise<Loaded | null> {
+async function loadProfile(uid: string, emailVerified: boolean): Promise<Loaded | null> {
   const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) return null;
   const data = snap.data() as UserProfile;
   // The status is read from the stored role: `normalizeRole` folds counselor into admin and would hide it.
-  return { profile: { ...data, role: normalizeRole(data.role) }, status: statusOf(data) };
+  return { profile: { ...data, role: normalizeRole(data.role) }, status: statusOf(data, emailVerified) };
 }
 
 /**
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user) {
           setCurrentUser(user);
           try {
-            const loaded = await loadProfile(user.uid);
+            const loaded = await loadProfile(user.uid, user.emailVerified);
             if (loaded) {
               setUserRole(loaded.profile.role);
               setUserData(loaded.profile);
@@ -74,7 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUserData: async () => {
         if (!auth.currentUser) return;
         try {
-          const loaded = await loadProfile(auth.currentUser.uid);
+          // Pick up a verification done in another tab or the mail app, and refresh the token the rules read.
+          await auth.currentUser.reload();
+          await auth.currentUser.getIdToken(true);
+          const loaded = await loadProfile(auth.currentUser.uid, auth.currentUser.emailVerified);
           if (loaded) {
             setUserRole(loaded.profile.role);
             setUserData(loaded.profile);

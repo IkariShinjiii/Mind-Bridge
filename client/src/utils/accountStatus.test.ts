@@ -30,4 +30,16 @@ describe("accountStatus", () => {
     expect(accountStatus({ role: "student", approved: false })).toBe("active");
     expect(accountStatus({})).toBe("active");
   });
+
+  it("holds an unverified student, but not staff, an admin or a verified student", () => {
+    expect(accountStatus({ role: "student" }, false)).toBe("unverified");
+    expect(accountStatus({ role: "student" }, true)).toBe("active");
+    expect(accountStatus({ role: "admin" }, false)).toBe("active");
+    expect(accountStatus({ role: "counselor", approved: true }, false)).toBe("active");
+  });
+
+  it("deactivated and pending approval win over unverified", () => {
+    expect(accountStatus({ role: "student", active: false }, false)).toBe("deactivated");
+    expect(accountStatus({ role: "counselor", approved: false }, false)).toBe("pending-approval");
+  });
 });

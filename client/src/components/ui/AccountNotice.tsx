@@ -6,6 +6,8 @@ export interface AccountNoticeProps {
   status: Exclude<AccountStatus, "active">;
   /** Re-reads the profile. Offered while an account is waiting for approval or could not be loaded. */
   onCheckAgain?: () => Promise<void>;
+  /** Sends the verification email again. Offered only while an email is waiting to be verified. */
+  onResend?: () => Promise<void>;
   onLogout: () => void;
 }
 
@@ -14,6 +16,11 @@ const COPY = {
     label: "Waiting for approval",
     title: "Your staff account is waiting for approval",
     body: "An administrator needs to approve it before you can see student check-ins. That keeps student information private. You will get in as soon as they do.",
+  },
+  unverified: {
+    label: "Verify your email",
+    title: "Check your inbox to verify your email",
+    body: "We sent a link to your school email. Open it to confirm the address is yours, then come back and press Check again. That keeps one person from signing up with someone else's address.",
   },
   unavailable: {
     label: "Could not load your account",
@@ -28,10 +35,22 @@ const COPY = {
 } as const;
 
 /** Shown in place of the app for an account that is signed in but not allowed in yet (or any more). */
-export default function AccountNotice({ status, onCheckAgain, onLogout }: AccountNoticeProps) {
+export default function AccountNotice({ status, onCheckAgain, onResend, onLogout }: AccountNoticeProps) {
   const copy = COPY[status];
   const [checking, setChecking] = useState(false);
   const [stillWaiting, setStillWaiting] = useState(false);
+  const [resendNote, setResendNote] = useState("");
+
+  async function resend() {
+    if (!onResend) return;
+    setResendNote("");
+    try {
+      await onResend();
+      setResendNote("Sent. Check your inbox and spam folder.");
+    } catch {
+      setResendNote("Could not send it just now. Wait a minute and try again.");
+    }
+  }
 
   async function checkAgain() {
     if (!onCheckAgain) return;
@@ -56,7 +75,7 @@ export default function AccountNotice({ status, onCheckAgain, onLogout }: Accoun
         <p className="mt-3 max-w-[55ch] text-[color:var(--mb-panel-soft)]">{copy.body}</p>
 
         <div className="mt-6 flex flex-wrap gap-3">
-          {(status === "pending-approval" || status === "unavailable") && onCheckAgain && (
+          {(status === "pending-approval" || status === "unavailable" || status === "unverified") && onCheckAgain && (
             <button
               type="button"
               onClick={() => void checkAgain()}
@@ -64,6 +83,15 @@ export default function AccountNotice({ status, onCheckAgain, onLogout }: Accoun
               className="mb-btn !border-[color:var(--mb-panel-ink)] bg-[color:var(--mb-panel-ink)] text-[color:var(--mb-panel)]"
             >
               {checking ? "Checking…" : "Check again"}
+            </button>
+          )}
+          {status === "unverified" && onResend && (
+            <button
+              type="button"
+              onClick={() => void resend()}
+              className="mb-btn !border-[color:var(--mb-panel-ink)] bg-transparent text-[color:var(--mb-panel-ink)] hover:bg-white/10"
+            >
+              Resend email
             </button>
           )}
           <button
@@ -76,7 +104,7 @@ export default function AccountNotice({ status, onCheckAgain, onLogout }: Accoun
         </div>
 
         <p role="status" className="mt-4 min-h-[1.5rem] text-[color:var(--mb-panel-soft)]">
-          {stillWaiting ? status === "unavailable" ? "Still could not load it." : "Still waiting. Nothing has changed yet." : ""}
+          {resendNote || (stillWaiting ? status === "unverified" ? "Not verified yet." : status === "unavailable" ? "Still could not load it." : "Still waiting. Nothing has changed yet." : "")}
         </p>
       </section>
     </div>
