@@ -45,13 +45,17 @@ service cloud.firestore {
       allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.role == 'student'
         && request.resource.data.approved == true
-        && request.resource.data.active == true;
+        && request.resource.data.active == true
+        // Only the fields sign-up writes, with sane sizes.
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'emailVerified', 'approved', 'active', 'createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 200
+        && request.resource.data.email is string && request.resource.data.email.size() <= 200
+        && request.resource.data.emailVerified is bool;
 
-      // Users edit their own settings but not role/approval/active/assignment.
+      // Users edit only the settings fields the Settings page saves (an allowlist, so a new field is not writable by accident).
       allow update: if signedIn() && (
         (request.auth.uid == uid
-          && !request.resource.data.diff(resource.data).affectedKeys()
-              .hasAny(['role', 'approved', 'active', 'assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
+          && touchesOnly(['name', 'phone', 'bio', 'avatarGradient', 'useGoogleAvatar', 'emergencyContact', 'wellnessGoals', 'updatedAt']))
         || isAdmin()
         || (isStaff() && touchesOnly(['assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
       );
@@ -74,9 +78,18 @@ service cloud.firestore {
     match /appointments/{id} {
       // A booking always starts as a request; only staff can confirm it.
       allow create: if isActive() && request.resource.data.studentId == request.auth.uid
-        && request.resource.data.status == 'Pending Review';
+        && request.resource.data.status == 'Pending Review'
+        // Only the fields the booking form writes, with sane sizes.
+        && request.resource.data.keys().hasOnly(['studentId', 'studentName', 'studentEmail', 'slotId', 'counselorId',
+                                                 'counselorName', 'title', 'start', 'end', 'date', 'status', 'createdAt'])
+        && request.resource.data.studentName is string && request.resource.data.studentName.size() <= 200
+        && request.resource.data.studentEmail is string && request.resource.data.studentEmail.size() <= 200
+        && request.resource.data.title is string && request.resource.data.title.size() <= 200;
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
-      allow update: if isStaff()
+      // Staff change the status and the details the dashboard saves with it; the student, owner and booking details stay put.
+      allow update: if (isStaff()
+            && touchesOnly(['status', 'updatedAt', 'slotId', 'start', 'end', 'declineReason', 'cancellationReason',
+                            'cancelledBy', 'rescheduleReason', 'counselorNote']))
         || (isActive() && resource.data.studentId == request.auth.uid
             && touchesOnly(['status', 'updatedAt', 'cancellationReason', 'cancelledBy'])
             && request.resource.data.status == 'Cancelled');
@@ -85,9 +98,14 @@ service cloud.firestore {
 
     match /availability/{id} {
       allow read: if isActive();
-      allow create: if isStaff() && request.resource.data.counselorId == request.auth.uid;
-      // Students may only flip isBooked when booking a slot.
-      allow update: if isStaff() || (isActive() && touchesOnly(['isBooked']));
+      allow create: if isStaff() && request.resource.data.counselorId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['counselorId', 'counselorName', 'start', 'end', 'isBooked', 'createdAt'])
+        && request.resource.data.isBooked == false;
+      // Students may only flip isBooked, and cannot book a slot that is already taken (no double booking).
+      // They can still set it back to false, because they free their own slot when they cancel.
+      allow update: if isStaff()
+        || (isActive() && touchesOnly(['isBooked']) && request.resource.data.isBooked is bool
+            && (request.resource.data.isBooked == false || resource.data.isBooked == false));
       allow delete: if isStaff() && resource.data.counselorId == request.auth.uid;
     }
 

@@ -26,6 +26,8 @@ describe("availability - READ (getAvailability, getMyAvailability)", () => {
 });
 
 describe("availability - CREATE (addAvailability)", () => {
+  it("slot cannot be created already booked", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ isBooked: true }))));
+  it("slot cannot carry extra fields", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ note: "x" }))));
   it("counselor creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "counselor"), "availability"), slot())));
   it("admin creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "admin"), "availability"), slot({ counselorId: "adm1" }))));
   it("counselor cannot create a slot under another counselor's id", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ counselorId: "adm1" }))));
@@ -35,6 +37,15 @@ describe("availability - CREATE (addAvailability)", () => {
 
 describe("availability - UPDATE (booking flips isBooked)", () => {
   it("student can set isBooked when booking", () => assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true })));
+  it("student cannot book a slot that is already booked (no double booking)", async () => {
+    await seed(env, "availability/slot1", slot({ isBooked: true }));
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true }));
+  });
+  it("student can free a slot when cancelling (isBooked -> false)", async () => {
+    await seed(env, "availability/slot1", slot({ isBooked: true }));
+    await assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: false }));
+  });
+  it("student cannot set isBooked to a non-boolean", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: "yes" })));
   it("student cannot alter times", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { start: "2030-01-01T00:00:00.000Z" })));
   it("student cannot reassign a slot to themselves", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { counselorId: "stu1" })));
   it("counselor can update a slot", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "availability/slot1"), { isBooked: true })));
@@ -48,6 +59,10 @@ describe("availability - DELETE (removeAvailability)", () => {
 
 describe("appointments - CREATE (bookAppointment)", () => {
   it("student books for themselves", () => assertSucceeds(addDoc(collection(as(env, "student"), "appointments"), appointment())));
+  it("a booking cannot carry fields the form does not write", () =>
+    assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ counselorNote: "pre-approved" }))));
+  it("a booking cannot carry an oversized title", () =>
+    assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ title: "x".repeat(201) }))));
   it("student cannot book on behalf of another student", () => assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ studentId: "stu2" }))));
   it("deactivated student cannot book", () => assertFails(addDoc(collection(as(env, "deactivated"), "appointments"), appointment({ studentId: "stu3" }))));
   it("unauthenticated cannot book", () => assertFails(addDoc(collection(anon(env), "appointments"), appointment())));
@@ -76,6 +91,9 @@ describe("appointments - UPDATE (updateAppointmentStatus)", () => {
   it("counselor declines", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Declined", updatedAt: "x" })));
   it("student cancels own with a reason", () =>
     assertSucceeds(updateDoc(doc(as(env, "student"), "appointments/ap1"), { status: "Cancelled", updatedAt: "x", cancellationReason: "sick", cancelledBy: "student" })));
+  it("counselor cannot rewrite who the appointment is for", () => assertFails(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { studentId: "stu2" })));
+  it("counselor can save the details a status change carries", () =>
+    assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Rescheduled", updatedAt: "x", start: "s", end: "e", rescheduleReason: "r", counselorNote: "n" })));
   it("student cannot self-confirm", () => assertFails(updateDoc(doc(as(env, "student"), "appointments/ap1"), { status: "Confirmed", updatedAt: "x" })));
   it("student cannot cancel and also change other fields", () =>
     assertFails(updateDoc(doc(as(env, "student"), "appointments/ap1"), { status: "Cancelled", counselorId: "adm1" })));

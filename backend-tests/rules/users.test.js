@@ -8,7 +8,7 @@ beforeAll(async () => { env = await createEnv(); });
 afterAll(async () => { await env.cleanup(); });
 beforeEach(async () => { await env.clearFirestore(); await seedUsers(env); });
 
-const newStudent = (over = {}) => ({ name: "New", email: "new@usa.edu.ph", role: "student", approved: true, active: true, ...over });
+const newStudent = (over = {}) => ({ name: "New", email: "new@usa.edu.ph", role: "student", emailVerified: false, approved: true, active: true, createdAt: "2026-10-01T00:00:00.000Z", ...over });
 
 describe("users - GET profile (getUserSettings, AuthProvider, Login)", () => {
   it("owner reads own profile", () => assertSucceeds(getDoc(doc(as(env, "student"), "users/stu1"))));
@@ -35,6 +35,8 @@ describe("users - CREATE (Signup / Google sign-in)", () => {
   it("cannot self-register as inactive", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ active: false }))));
   it("cannot self-register as unapproved", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ approved: false }))));
   it("unauthenticated create is rejected", () => assertFails(setDoc(ref(anon(env), "ghost"), newStudent())));
+  it("cannot add fields sign-up does not write", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ assignedCounselorId: "cou1" }))));
+  it("cannot store an oversized name", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ name: "x".repeat(201) }))));
 });
 
 describe("users - UPDATE (saveUserSettings, admin actions, assignCounselorToStudent)", () => {
@@ -43,6 +45,12 @@ describe("users - UPDATE (saveUserSettings, admin actions, assignCounselorToStud
     it(`user cannot change own protected field "${field}"`, () =>
       assertFails(updateDoc(doc(as(env, "student"), "users/stu1"), { [field]: field === "role" ? "admin" : "x" })));
   }
+  it("user can save every Settings field", () =>
+    assertSucceeds(updateDoc(doc(as(env, "student"), "users/stu1"), {
+      name: "Ana B.", phone: "0917", bio: "hi", avatarGradient: "a", useGoogleAvatar: false,
+      emergencyContact: { name: "Mom", phone: "1" }, wellnessGoals: ["sleep"], updatedAt: "x" })));
+  it("user cannot write a field Settings does not save", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu1"), { email: "boss@usa.edu.ph" })));
+  it("user cannot invent a new field", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu1"), { isVip: true })));
   it("student cannot edit another student", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu2"), { name: "hax" })));
 
   it("admin approves a counselor (approveCounselor)", () => assertSucceeds(updateDoc(doc(as(env, "admin"), "users/cou2"), { approved: true })));

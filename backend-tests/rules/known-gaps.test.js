@@ -15,12 +15,10 @@ describe("GAP: students can write fields that should be server-controlled", () =
   // Fixed and moved to scheduling.test.js: a student can no longer create an already-'Confirmed' appointment,
   // or post a message labelled with a staff role.
 
-  it("GAP: a student can book against any counselorId / slot, with no conflict check", async () => {
-    await seed(env, "availability/slot1", slot({ isBooked: true }));
-    await assertSucceeds(addDoc(collection(as(env, "student"), "appointments"), appointment({ slotId: "slot1", counselorId: "adm1" })));
-  });
-
-  it("GAP: a student can free someone else's booked slot (isBooked -> false)", async () => {
+  // Fixed and moved to scheduling.test.js: a student can no longer book a slot that is already taken (the isBooked
+  // flip is refused), and bookings, profiles and slots only accept the fields the app writes.
+  it("GAP: a student can still free someone else's booked slot (isBooked -> false)", async () => {
+    // Students free their own slot when they cancel, and the rules cannot tie a slot to its appointment in that order.
     await seed(env, "availability/slot1", slot({ isBooked: true }));
     await assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: false }));
   });
