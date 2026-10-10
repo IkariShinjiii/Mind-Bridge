@@ -331,7 +331,7 @@ describe("getMyMessages (data download)", () => {
 describe("confidential messages", () => {
   it("sendStudentMessage returns id + trimmed payload and persists it", async () => {
     login("student");
-    const m = await api.sendStudentMessage({ studentId: "stu1", senderId: "stu1", senderName: "Ana", senderRole: "student", text: "  hi  " });
+    const m = await api.sendStudentMessage({ studentId: "stu1", senderId: "stu1", senderName: "Ana Student", senderRole: "student", text: "  hi  " });
     expect(m).toMatchObject({ id: expect.any(String), studentId: "stu1", senderId: "stu1", senderRole: "student", text: "hi" });
     expect(await raw(`messages/${m.id}`)).toMatchObject({ text: "hi" });
   });

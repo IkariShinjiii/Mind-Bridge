@@ -32,6 +32,5 @@ describe("GAP: students can write fields that should be server-controlled", () =
         questionSummary: [{ id: "q3", text: "Safety", score: 3, isCrisisItem: true }],
       }))));
 
-  it("GAP: a student can still post a message under any display name (the role is checked, the name is not)", () =>
-    assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Dr. Cruz" }))));
+  // Fixed and moved to scheduling.test.js: the name on a chat message must be the sender's profile name.
 });
