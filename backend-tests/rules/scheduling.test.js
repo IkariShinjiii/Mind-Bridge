@@ -135,8 +135,8 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   it("staff cannot post as a student", () =>
     assertFails(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "student" }))));
   it("staff post with the role the app sends ('admin') as well as 'counselor'", async () => {
-    await assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "admin" })));
-    await assertSucceeds(addDoc(collection(as(env, "admin"), "messages"), message({ senderId: "adm1", senderRole: "admin" })));
+    await assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "admin", senderName: "Dr. Cruz" })));
+    await assertSucceeds(addDoc(collection(as(env, "admin"), "messages"), message({ senderId: "adm1", senderRole: "admin", senderName: "Admin" })));
   });
   it("student cannot post into another student's thread", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ studentId: "stu2" }))));
   it("student cannot forge senderId", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderId: "cou1" }))));
