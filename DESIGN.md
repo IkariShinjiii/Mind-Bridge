@@ -1,29 +1,29 @@
 ---
 name: Mind Bridge Design System
-description: Calm Wayfinding, softened. A teal, high-contrast system for a student mental wellness service, light by default with a dark option.
+description: Calm Wayfinding, softened. A calm sage, high-contrast system for a student mental wellness service, light by default with a dark option.
 colors:
-  ground: "#f4f7f6"
+  ground: "#f5f7f6"
   surface: "#ffffff"
-  surface-2: "#e7eeed"
-  panel: "#0d4652"
+  surface-2: "#edf2f0"
+  panel: "#2a5861"
   panel-ink: "#f6faf9"
-  panel-soft: "#d4e6e4"
-  ink: "#10252b"
-  muted: "#38505a"
-  line: "#d3dedb"
-  field-line: "#6f858c"
+  panel-soft: "#eef5f3"
+  ink: "#22343a"
+  muted: "#3e5157"
+  line: "#dde5e3"
+  field-line: "#74898f"
   link: "#09509a"
   focus: "#0b6bcb"
-  brand-bg: "#e1f0f0"
-  accent: "#2aa6a0"
-  amber: "#f0b13a"
-  amber-ink: "#1f1600"
-  safe: "#0f5a40"
-  safe-bg: "#e2f3ea"
-  warn: "#664000"
-  warn-bg: "#fdf1d6"
-  urgent: "#8c1f14"
-  urgent-bg: "#fcebe8"
+  brand-bg: "#eef5f4"
+  accent: "#7fb5b0"
+  amber: "#f1d9a6"
+  amber-ink: "#40300c"
+  safe: "#265643"
+  safe-bg: "#e4efe9"
+  warn: "#5c4510"
+  warn-bg: "#f7efdc"
+  urgent: "#7d2f27"
+  urgent-bg: "#f6e4e0"
   violet: "#4d3490"
   dark-ground: "#0b171b"
   dark-surface: "#112127"
@@ -49,7 +49,7 @@ rounded:
 
 ## Overview
 
-**Creative North Star: "Calm Wayfinding."** The product is a route to help, so the interface is plain, high-contrast and legible at a glance, and always shows where you are and what comes next. The look is soft and trustworthy rather than clinical: rounded corners, hairline borders, gentle teal-tinted shadows. Emotion is carried by clarity and steadiness, not decoration.
+**Creative North Star: "Calm Wayfinding."** The product is a route to help, so the interface is plain, high-contrast and legible at a glance, and always shows where you are and what comes next. The look is soft and trustworthy rather than clinical: rounded corners, hairline borders, gentle sage-tinted shadows. Emotion is carried by clarity and steadiness, not decoration.
 
 Light is the default (daytime use on campus), with a dark theme for late-night check-ins. The theme is switched by `data-theme` on the `.mb` wrapper and remembered in `localStorage` under `mindbridge_theme`.
 
@@ -59,7 +59,7 @@ Light is the default (daytime use on campus), with a dark theme for late-night c
 - **Neutrals:** `ground` for the page, `surface` for cards, `surface-2` for inset and disabled areas, `ink` for text, `muted` for supporting text, `line` for dividers.
 - **Status:** green = steady (`safe`), amber-brown = moderate (`warn`), red = priority or error (`urgent`). Risk is always also stated in words, never by colour alone.
 - **Amber is for the crisis line only.** The NCMH number (1553) is always one tap away, in amber.
-- **Contrast:** every text pairing (ink, muted, brand, status ink on its tint, light on panel) is at least 7:1 in both themes (WCAG AAA). Input borders (`field-line`) are 3:1 or better. Re-run the checks if a token changes.
+- **Contrast:** every text pairing (ink, muted, brand, status ink on its tint, light on panel) is at least 7:1 in both themes (WCAG AAA). Input borders (`field-line`) are 3:1 or better. Re-run `node client/scripts/check-contrast.mjs` after changing a light-theme token; it checks the pairs and fails below 7:1. The dark theme is not covered by the script yet.
 
 ## Typography
 

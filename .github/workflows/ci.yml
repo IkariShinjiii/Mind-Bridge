@@ -19,6 +19,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - run: node scripts/check-contrast.mjs
       - run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ci

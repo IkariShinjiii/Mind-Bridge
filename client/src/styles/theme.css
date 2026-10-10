@@ -3,42 +3,42 @@
 
 .mb {
   /* Surfaces */
-  --mb-ground: #f4f7f6;
+  --mb-ground: #f5f7f6;
   --mb-surface: #ffffff;
-  --mb-surface-2: #e7eeed;
-  --mb-panel: #0d4652;
+  --mb-surface-2: #edf2f0;
+  --mb-panel: #2a5861;
   --mb-panel-ink: #f6faf9;
-  --mb-panel-soft: #d4e6e4;
+  --mb-panel-soft: #eef5f3;
 
   /* Text and lines */
-  --mb-ink: #10252b;
-  --mb-muted: #38505a;
-  --mb-line: #d3dedb;
-  --mb-field-line: #6f858c; /* 3:1+ against surfaces: WCAG 1.4.11 for input boundaries */
+  --mb-ink: #22343a;
+  --mb-muted: #3e5157;
+  --mb-line: #dde5e3;
+  --mb-field-line: #74898f; /* 3:1+ against surfaces: WCAG 1.4.11 for input boundaries */
   --mb-link: #09509a;
   --mb-focus: #0b6bcb;
 
   /* Brand and decoration. Accent is decorative only (gradients, progress); it never carries text. */
-  --mb-brand: #0d4652;
-  --mb-brand-bg: #e1f0f0;
-  --mb-accent: #2aa6a0;
-  --mb-accent-soft: #cfe9e7;
+  --mb-brand: #2a5861;
+  --mb-brand-bg: #eef5f4;
+  --mb-accent: #7fb5b0;
+  --mb-accent-soft: #d6e8e5;
 
   /* Crisis amber: the crisis line only */
-  --mb-amber: #f0b13a;
-  --mb-amber-ink: #1f1600;
+  --mb-amber: #f1d9a6;
+  --mb-amber-ink: #40300c;
 
   /* Status: green = steady, amber-brown = moderate, red = priority, violet = reschedule/neutral info */
-  --mb-safe: #0f5a40;
-  --mb-safe-bg: #e2f3ea;
-  --mb-safe-solid: #0f5a40;
-  --mb-warn: #664000;
-  --mb-warn-bg: #fdf1d6;
-  --mb-urgent: #8c1f14;
-  --mb-urgent-bg: #fcebe8;
-  --mb-urgent-solid: #8c1f14;
-  --mb-error-bg: #fcebe8;
-  --mb-error-ink: #7a1f14;
+  --mb-safe: #265643;
+  --mb-safe-bg: #e4efe9;
+  --mb-safe-solid: #265643;
+  --mb-warn: #5c4510;
+  --mb-warn-bg: #f7efdc;
+  --mb-urgent: #7d2f27;
+  --mb-urgent-bg: #f6e4e0;
+  --mb-urgent-solid: #7d2f27;
+  --mb-error-bg: #f6e4e0;
+  --mb-error-ink: #7d2f27;
   --mb-violet: #4d3490;
   --mb-violet-bg: #ece7f6;
   --mb-violet-solid: #4d3490;
@@ -47,12 +47,12 @@
   --mb-r-sm: 8px;
   --mb-r-md: 12px;
   --mb-r-lg: 16px;
-  --mb-shadow-sm: 0 1px 2px rgba(13, 70, 82, 0.06), 0 1px 3px rgba(13, 70, 82, 0.08);
-  --mb-shadow-md: 0 4px 12px -2px rgba(13, 70, 82, 0.1), 0 2px 6px -2px rgba(13, 70, 82, 0.08);
-  --mb-shadow-lg: 0 16px 40px -12px rgba(13, 70, 82, 0.28), 0 6px 16px -6px rgba(13, 70, 82, 0.12);
+  --mb-shadow-sm: 0 1px 2px rgba(42, 88, 97, 0.06), 0 1px 3px rgba(42, 88, 97, 0.08);
+  --mb-shadow-md: 0 4px 12px -2px rgba(42, 88, 97, 0.1), 0 2px 6px -2px rgba(42, 88, 97, 0.08);
+  --mb-shadow-lg: 0 16px 40px -12px rgba(42, 88, 97, 0.28), 0 6px 16px -6px rgba(42, 88, 97, 0.12);
   --mb-ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* Dialog backdrop. Dark in both themes: --mb-ink is light text in dark mode and would wash the page out. */
-  --mb-scrim: rgb(16 37 43 / 0.55);
+  --mb-scrim: rgb(34 52 58 / 0.55);
   --mb-fast: 150ms;
   --mb-base: 220ms;
 
