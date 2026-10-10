@@ -28,6 +28,12 @@ describe("availability - READ (getAvailability, getMyAvailability)", () => {
 describe("availability - CREATE (addAvailability)", () => {
   it("slot cannot be created already booked", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ isBooked: true }))));
   it("slot cannot carry extra fields", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ note: "x" }))));
+  it("a student cannot post a chat message under another person's name", () =>
+    assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Dr. Cruz" }))));
+  it("a chat message may use the sender's own profile name or the generic fallback", async () => {
+    await assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Ana Student" })));
+    await assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Student" })));
+  });
   it("counselor creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "counselor"), "availability"), slot())));
   it("admin creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "admin"), "availability"), slot({ counselorId: "adm1" }))));
   it("counselor cannot create a slot under another counselor's id", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ counselorId: "adm1" }))));
@@ -129,8 +135,8 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   it("staff cannot post as a student", () =>
     assertFails(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "student" }))));
   it("staff post with the role the app sends ('admin') as well as 'counselor'", async () => {
-    await assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "admin" })));
-    await assertSucceeds(addDoc(collection(as(env, "admin"), "messages"), message({ senderId: "adm1", senderRole: "admin" })));
+    await assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "admin", senderName: "Dr. Cruz" })));
+    await assertSucceeds(addDoc(collection(as(env, "admin"), "messages"), message({ senderId: "adm1", senderRole: "admin", senderName: "Admin" })));
   });
   it("student cannot post into another student's thread", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ studentId: "stu2" }))));
   it("student cannot forge senderId", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderId: "cou1" }))));

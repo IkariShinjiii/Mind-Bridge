@@ -121,7 +121,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['studentId', 'senderId', 'senderName', 'senderRole', 'text', 'timestamp'])
         && request.resource.data.text is string
         && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 2000
-        && request.resource.data.senderName is string && request.resource.data.senderName.size() <= 200;
+        && request.resource.data.senderName is string && request.resource.data.senderName.size() <= 200
+        // The name shown on a message is the sender's own profile name (or the app's generic fallback when it has none).
+        && (request.resource.data.senderName == me().get('name', '')
+            || request.resource.data.senderName in ['Student', 'Counselor', 'Staff Counselor']);
       allow update, delete: if false;
     }
 
