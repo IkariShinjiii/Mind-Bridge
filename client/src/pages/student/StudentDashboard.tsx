@@ -346,6 +346,15 @@ export default function StudentDashboard() {
   // Gauge Percentage
   const gaugePct = latestScore !== null ? Math.min(100, Math.round((latestScore / maxScore) * 100)) : 0;
 
+  // The soonest session that is still ahead and not closed out (the list also holds past and cancelled ones)
+  const nextAppointment = appointments
+    .filter((a) => {
+      const status = String(a.status || "").toLowerCase();
+      const when = a.start || a.date;
+      return !/completed|cancel|declin/.test(status) && !!when && new Date(when).getTime() >= Date.now();
+    })
+    .sort((a, b) => new Date(a.start || a.date || 0).getTime() - new Date(b.start || b.date || 0).getTime())[0];
+
   // Assigned Counselor info
   const assignedCounselorName =
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Guidance Counselor";
@@ -386,7 +395,7 @@ export default function StudentDashboard() {
       <div className="flex flex-col gap-6 lg:flex-row items-start">
         <section className="lg:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-[repeat(auto-fit,minmax(min(100%,15.5rem),1fr))]">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
             {/* Gauge / Status Card */}
             <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
@@ -455,15 +464,13 @@ export default function StudentDashboard() {
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold">Next Appointment</div>
                 <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">
-                  {appointments.length > 0
-                    ? formatDateTime(appointments[0].start || appointments[0].date)
-                    : "None scheduled"}
+                  {nextAppointment ? formatDateTime(nextAppointment.start || nextAppointment.date) : "None scheduled"}
                 </div>
               </div>
-              {appointments.length > 0 ? (
+              {nextAppointment ? (
                 <div className="mt-2 flex items-center justify-between text-sm text-[color:var(--mb-muted)]">
                   <span>Status</span>
-                  <span className="font-bold text-[color:var(--mb-brand)] capitalize">{appointments[0].status}</span>
+                  <span className="font-bold text-[color:var(--mb-brand)] capitalize">{nextAppointment.status}</span>
                 </div>
               ) : (
                 <Link
@@ -476,7 +483,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Assigned Counselor Card: full row on phones, where the other two sit side by side */}
-            <div className="mb-card mb-card-sm col-span-2 flex flex-col justify-between sm:col-span-1">
+            <div className="mb-card mb-card-sm col-span-2 flex flex-col justify-between md:col-span-1">
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold flex items-center justify-between">
                   <span>Guidance Counselor</span>

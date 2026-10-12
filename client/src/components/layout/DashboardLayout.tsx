@@ -199,7 +199,10 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               <img src={icon} alt="" className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
             </Link>
-            <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{greeting}</p>
+            {/* The student dashboard greets them in its own header, so only staff pages need this. */}
+            {isStaff && (
+              <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{greeting}</p>
+            )}
 
             <div className="relative ml-auto flex shrink-0 items-center gap-2" ref={menuRef}>
               {!isStaff && (
