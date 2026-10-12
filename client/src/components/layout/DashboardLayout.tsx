@@ -143,7 +143,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     }
   };
 
-  const pageTitle = links.find((l) => l.active)?.label ?? (isHere("/settings") ? "Account settings" : "Mind Bridge");
+  const greeting = `Hello, ${safeName.split(" ")[0]}`;
 
   return (
     <div className="mb flex h-[100dvh] w-full overflow-hidden" data-theme={theme}>
@@ -151,7 +151,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         Skip to main content
       </a>
 
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
+      <aside className="hidden w-72 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
         <Link to="/" className="flex min-h-[44px] items-center gap-3 px-6 py-5 text-[color:var(--mb-ink)] no-underline">
           <img src={icon} alt="" className="h-8 w-8 rounded-md" />
           <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
@@ -199,7 +199,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
               <img src={icon} alt="" className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
             </Link>
-            <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{pageTitle}</p>
+            <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{greeting}</p>
 
             <div className="relative ml-auto flex shrink-0 items-center gap-2" ref={menuRef}>
               {!isStaff && (
