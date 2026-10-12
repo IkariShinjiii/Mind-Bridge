@@ -338,10 +338,10 @@ export default function StudentDashboard() {
     latestScore === null
       ? "bg-[color:var(--mb-line)]"
       : latestRisk === "high"
-        ? "bg-[color:var(--mb-urgent-solid)]"
+        ? "bg-[color:var(--mb-chart-high)]"
         : latestRisk === "medium"
-          ? "bg-[color:var(--mb-amber)]"
-          : "bg-[color:var(--mb-safe-solid)]";
+          ? "bg-[color:var(--mb-chart-medium)]"
+          : "bg-[color:var(--mb-chart-low)]";
 
   // Gauge Percentage
   const gaugePct = latestScore !== null ? Math.min(100, Math.round((latestScore / maxScore) * 100)) : 0;
@@ -424,9 +424,9 @@ export default function StudentDashboard() {
                         <path
                           className={
                             latestRisk === "high"
-                              ? "text-[color:var(--mb-urgent-solid)]"
+                              ? "text-[color:var(--mb-chart-high)]"
                               : latestRisk === "medium"
-                                ? "text-[color:var(--mb-amber)]"
+                                ? "text-[color:var(--mb-chart-medium)]"
                                 : "text-[color:var(--mb-brand)]"
                           }
                           strokeDasharray={`${gaugePct}, 100`}
@@ -825,15 +825,15 @@ export default function StudentDashboard() {
                   {/* Score Benchmark Legend */}
                   <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
                     <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-safe-solid)]" />
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-low)]" />
                       <span>0 to 6: balanced</span>
                     </span>
                     <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-amber)]" />
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-medium)]" />
                       <span>7 to 12: moderate</span>
                     </span>
                     <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-urgent-solid)]" />
+                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-high)]" />
                       <span>13 to 21: priority</span>
                     </span>
                   </div>
