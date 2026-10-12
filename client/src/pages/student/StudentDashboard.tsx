@@ -362,7 +362,7 @@ export default function StudentDashboard() {
   return (
     <m.div {...page} className="relative space-y-6">
       {/* Top Welcome Header */}
-      <div className="flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Welcome back, {displayName}</h1>
           <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
