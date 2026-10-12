@@ -299,7 +299,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-lg lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="flex h-16 items-stretch justify-around gap-1 p-1">
+        <div className="flex h-16 items-stretch justify-around gap-1 px-3 py-1">
           {[...links, { to: "/settings", short: "Settings", icon: Settings, active: isHere("/settings") }].map(
             ({ to, short, icon: Icon, active }) => (
               <Link

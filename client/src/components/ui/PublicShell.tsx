@@ -59,9 +59,9 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
       </a>
       <CrisisStrip />
       <header className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
-        <div className="flex w-full items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-6">
+        <div className="flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-2 px-4 py-4 sm:gap-4 sm:px-6">
           <Brand />
-          <nav className="flex items-center gap-2 sm:gap-3" aria-label="Account">
+          <nav className="ml-auto flex items-center gap-2 sm:gap-3" aria-label="Account">
             <button
               type="button"
               onClick={toggle}
