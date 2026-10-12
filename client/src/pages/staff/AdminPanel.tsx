@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { m, AnimatePresence } from "framer-motion";
 import {
   ClipboardList,
@@ -352,6 +352,19 @@ export default function AdminPanel() {
     return assessments.filter((c) => (c.status || "open") === "open").length;
   }, [assessments]);
 
+  /** Side rail: requests waiting on staff first, then the next confirmed sessions. */
+  const railSessions = useMemo(() => {
+    const byStart = (a: Appointment, b: Appointment) =>
+      String(a.start || a.date || "").localeCompare(String(b.start || b.date || ""));
+    const status = (a: Appointment) => String(a.status || "Pending Review").toLowerCase();
+    const now = new Date().toISOString();
+    const pending = appointments.filter((a) => status(a).includes("pending")).sort(byStart);
+    const upcoming = appointments
+      .filter((a) => status(a) === "confirmed" && String(a.start || a.date || "") >= now)
+      .sort(byStart);
+    return { pending: pending.slice(0, 4), upcoming: upcoming.slice(0, 4) };
+  }, [appointments]);
+
   const pendingAppointmentsCount = useMemo(() => {
     return appointments.filter((a) => (a.status || "Pending Review").toLowerCase().includes("pending")).length;
   }, [appointments]);
@@ -495,135 +508,171 @@ export default function AdminPanel() {
       <AnimatePresence mode="wait" initial={false}>
         {mainTab === "cases" && (
           <m.div key="cases" {...panelMotion} className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
-                {CASE_FILTERS.map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFilter(value)}
-                    aria-pressed={filter === value}
-                    className="mb-chip"
-                  >
-                    {label}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setAssignedOnly(!assignedOnly)}
-                  aria-pressed={assignedOnly}
-                  className="mb-chip"
-                >
-                  {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
-                </button>
-              </div>
-              <p className="text-[color:var(--mb-muted)]" aria-live="polite">
-                {triageCases.length} case{triageCases.length !== 1 ? "s" : ""}, highest priority first
-              </p>
-            </div>
-
-            {loading ? (
-              <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
-                <Spinner size={20} className="text-[color:var(--mb-brand)]" />
-                <span>Loading student check-ins...</span>
-              </div>
-            ) : triageCases.length === 0 ? (
-              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center text-[color:var(--mb-muted)]">
-                No cases match this filter.
-              </div>
-            ) : (
-              <ul className="grid gap-3 min-[1700px]:grid-cols-2">
-                {triageCases.map((item, i) => {
-                  const risk = item.riskLevel || "low";
-                  const status = item.status || "open";
-                  const immediate = Boolean(item.flaggedForImmediateReview);
-                  const when = item.submittedAt || item.createdAt;
-                  const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
-                  const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
-                  const riskTone =
-                    risk === "high"
-                      ? "border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
-                      : risk === "medium"
-                        ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
-                        : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
-
-                  return (
-                    <m.li key={item.id} {...cardEntrance(i, cardsMove)}>
-                      {/* Entrance lives on the li: an inline transform here would block the card's CSS hover lift. */}
-                      <div
-                        className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
-                          immediate
-                            ? "border-[color:var(--mb-urgent)] ring-1 ring-[color:var(--mb-urgent)]"
-                            : "border-[color:var(--mb-line)]"
-                        }`}
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
+              <div className="min-w-0 space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
+                    {CASE_FILTERS.map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setFilter(value)}
+                        aria-pressed={filter === value}
+                        className="mb-chip"
                       >
-                        <div
-                          className={`flex flex-row items-center gap-3 rounded-md p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
-                        >
-                          <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
-                          <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
-                        </div>
+                        {label}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setAssignedOnly(!assignedOnly)}
+                      aria-pressed={assignedOnly}
+                      className="mb-chip"
+                    >
+                      {assignedOnly ? "Showing my assigned students" : "Only my assigned students"}
+                    </button>
+                  </div>
+                  <p className="text-[color:var(--mb-muted)]" aria-live="polite">
+                    {triageCases.length} case{triageCases.length !== 1 ? "s" : ""}, highest priority first
+                  </p>
+                </div>
 
-                        <div className="min-w-0">
-                          <p className="mb-sign text-2xl font-bold leading-tight">{item.studentName || "Student"}</p>
-                          <p className="truncate font-mono text-sm text-[color:var(--mb-muted)]">
-                            {item.studentEmail || "Institutional email"}
-                          </p>
-                          <p className="mt-1 text-[color:var(--mb-muted)]">
-                            Score {item.total ?? 0} of {item.maxScore ?? 21} · {submittedAt}
-                          </p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <span
-                              className={`inline-flex rounded border px-2 py-1 text-sm font-bold capitalize ${
-                                STATUS_STYLES[status] ||
-                                "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
-                              }`}
-                            >
-                              {status}
-                            </span>
-                            {immediate && (
-                              <span className="inline-flex items-center gap-1 rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] px-2 py-1 text-sm font-bold">
-                                <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
-                              </span>
-                            )}
-                            {item.riskCorrectedFrom && <RiskCorrectedNote from={item.riskCorrectedFrom} />}
-                          </div>
-                        </div>
+                {loading ? (
+                  <div className="flex min-h-[300px] items-center justify-center gap-3 rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-[color:var(--mb-muted)]">
+                    <Spinner size={20} className="text-[color:var(--mb-brand)]" />
+                    <span>Loading student check-ins...</span>
+                  </div>
+                ) : triageCases.length === 0 ? (
+                  <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-12 text-center text-[color:var(--mb-muted)]">
+                    No cases match this filter.
+                  </div>
+                ) : (
+                  <ul className="grid gap-3 min-[1700px]:grid-cols-2">
+                    {triageCases.map((item, i) => {
+                      const risk = item.riskLevel || "low";
+                      const status = item.status || "open";
+                      const immediate = Boolean(item.flaggedForImmediateReview);
+                      const when = item.submittedAt || item.createdAt;
+                      const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
+                      const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
+                      const riskTone =
+                        risk === "high"
+                          ? "border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
+                          : risk === "medium"
+                            ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
+                            : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
 
-                        <div className="flex flex-wrap gap-2 sm:flex-col">
-                          <button
-                            type="button"
-                            onClick={() => openCaseInspector(item)}
-                            className="mb-btn mb-btn-solid !min-h-[44px]"
+                      return (
+                        <m.li key={item.id} {...cardEntrance(i, cardsMove)}>
+                          {/* Entrance lives on the li: an inline transform here would block the card's CSS hover lift. */}
+                          <div
+                            className={`mb-card-interactive grid gap-4 rounded-lg border bg-[color:var(--mb-surface)] p-4 shadow-mb-sm sm:grid-cols-[8rem_1fr_auto] sm:items-center ${
+                              immediate
+                                ? "border-[color:var(--mb-urgent)] ring-1 ring-[color:var(--mb-urgent)]"
+                                : "border-[color:var(--mb-line)]"
+                            }`}
                           >
-                            Inspect case
-                          </button>
-                          {status !== "reviewed" ? (
-                            <button
-                              type="button"
-                              onClick={() => markAssessmentStatus(item.id, "reviewed")}
-                              disabled={updatingAssessmentId === item.id}
-                              className="mb-btn mb-btn-line !min-h-[44px]"
+                            <div
+                              className={`flex flex-row items-center gap-3 rounded-md p-3 sm:flex-col sm:justify-center sm:gap-1 sm:py-4 ${riskTone}`}
                             >
-                              {updatingAssessmentId === item.id ? "Updating…" : "Mark reviewed"}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => markAssessmentStatus(item.id, "open")}
-                              disabled={updatingAssessmentId === item.id}
-                              className="mb-btn mb-btn-line !min-h-[44px]"
-                            >
-                              {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </m.li>
-                  );
-                })}
-              </ul>
-            )}
+                              <RiskIcon className="h-7 w-7 shrink-0" aria-hidden="true" />
+                              <span className="mb-sign text-xl font-bold capitalize leading-none">{risk} risk</span>
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="mb-sign text-2xl font-bold leading-tight">
+                                {item.studentName || "Student"}
+                              </p>
+                              <p className="truncate font-mono text-sm text-[color:var(--mb-muted)]">
+                                {item.studentEmail || "Institutional email"}
+                              </p>
+                              <p className="mt-1 text-[color:var(--mb-muted)]">
+                                Score {item.total ?? 0} of {item.maxScore ?? 21} · {submittedAt}
+                              </p>
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`inline-flex rounded border px-2 py-1 text-sm font-bold capitalize ${
+                                    STATUS_STYLES[status] ||
+                                    "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]"
+                                  }`}
+                                >
+                                  {status}
+                                </span>
+                                {immediate && (
+                                  <span className="inline-flex items-center gap-1 rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] px-2 py-1 text-sm font-bold">
+                                    <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
+                                  </span>
+                                )}
+                                {item.riskCorrectedFrom && <RiskCorrectedNote from={item.riskCorrectedFrom} />}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 sm:flex-col">
+                              <button
+                                type="button"
+                                onClick={() => openCaseInspector(item)}
+                                className="mb-btn mb-btn-solid !min-h-[44px]"
+                              >
+                                Inspect case
+                              </button>
+                              {status !== "reviewed" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => markAssessmentStatus(item.id, "reviewed")}
+                                  disabled={updatingAssessmentId === item.id}
+                                  className="mb-btn mb-btn-line !min-h-[44px]"
+                                >
+                                  {updatingAssessmentId === item.id ? "Updating…" : "Mark reviewed"}
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => markAssessmentStatus(item.id, "open")}
+                                  disabled={updatingAssessmentId === item.id}
+                                  className="mb-btn mb-btn-line !min-h-[44px]"
+                                >
+                                  {updatingAssessmentId === item.id ? "Updating…" : "Re-open"}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </m.li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+
+              <aside aria-label="Sessions" className="space-y-4 xl:sticky xl:top-0">
+                {(
+                  [
+                    ["Appointment requests", "Nothing waiting on you.", railSessions.pending],
+                    ["Upcoming sessions", "No confirmed sessions yet.", railSessions.upcoming],
+                  ] as const
+                ).map(([title, empty, items]) => (
+                  <section key={title} className="mb-card mb-card-sm">
+                    <h2 className="mb-sign text-xl font-bold text-[color:var(--mb-ink)]">{title}</h2>
+                    {items.length === 0 ? (
+                      <p className="mt-2 text-[color:var(--mb-muted)]">{empty}</p>
+                    ) : (
+                      <ul className="mt-3 divide-y divide-[color:var(--mb-line)]">
+                        {items.map((a) => (
+                          <li key={a.id} className="py-2">
+                            <p className="truncate font-bold">{a.studentName || "Student"}</p>
+                            <p className="text-sm text-[color:var(--mb-muted)]">
+                              {a.start ? formatDateTime(a.start) : a.date || "Time to be set"}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <Link to="/appointments" className="mt-3 inline-block font-bold text-[color:var(--mb-brand)]">
+                      Open schedule
+                    </Link>
+                  </section>
+                ))}
+              </aside>
+            </div>
           </m.div>
         )}
 
