@@ -37,3 +37,4 @@ client/.preview/
 .env.production
 .env.*
 !.env.example
+graphify-out/
