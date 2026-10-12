@@ -40,7 +40,7 @@ test.describe("Staff dashboard does not trust the saved risk level", () => {
 
   test("it is counted as high risk in the headline numbers and the analytics", async ({ page }) => {
     await expect(page.getByText("Need review first").locator("xpath=..")).toHaveText(
-      /high risk\s*1\s*need review first/i,
+      /1\s*high risk\s*need review first/i,
     );
 
     await page.getByRole("button", { name: "Analytics" }).click();
