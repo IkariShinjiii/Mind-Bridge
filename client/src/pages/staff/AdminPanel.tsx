@@ -89,7 +89,7 @@ function Stat({
     <div
       className={`rounded-md border p-4 shadow-mb-sm ${
         urgent
-          ? "border-[color:var(--mb-urgent-solid)] bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
+          ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
           : "border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] text-[color:var(--mb-ink)]"
       } ${className}`}
     >
@@ -542,7 +542,7 @@ export default function AdminPanel() {
                   const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
                   const riskTone =
                     risk === "high"
-                      ? "bg-[color:var(--mb-urgent-solid)] text-[color:var(--mb-panel-ink)]"
+                      ? "border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
                       : risk === "medium"
                         ? "bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)] border border-[color:var(--mb-warn)]"
                         : "bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)] border border-[color:var(--mb-safe)]";
@@ -582,7 +582,7 @@ export default function AdminPanel() {
                               {status}
                             </span>
                             {immediate && (
-                              <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                              <span className="inline-flex items-center gap-1 rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] px-2 py-1 text-sm font-bold">
                                 <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
                               </span>
                             )}
@@ -945,7 +945,7 @@ export default function AdminPanel() {
               <RiskTag risk={activeCase.riskLevel || "low"} />
               {activeCase.riskCorrectedFrom && <RiskCorrectedNote from={activeCase.riskCorrectedFrom} />}
               {activeCase.flaggedForImmediateReview && (
-                <span className="inline-flex items-center gap-1 rounded bg-[color:var(--mb-urgent-solid)] px-2 py-1 text-sm font-bold text-[color:var(--mb-panel-ink)]">
+                <span className="inline-flex items-center gap-1 rounded border border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)] px-2 py-1 text-sm font-bold">
                   <AlertCircle className="h-4 w-4" aria-hidden="true" /> Safety question flagged
                 </span>
               )}
