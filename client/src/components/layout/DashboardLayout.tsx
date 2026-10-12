@@ -143,127 +143,154 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     }
   };
 
+  const pageTitle = links.find((l) => l.active)?.label ?? (isHere("/settings") ? "Account settings" : "Mind Bridge");
+
   return (
-    <div className="mb flex h-[100dvh] w-full flex-col overflow-hidden" data-theme={theme}>
+    <div className="mb flex h-[100dvh] w-full overflow-hidden" data-theme={theme}>
       <a href="#main-content" className="mb-skip">
         Skip to main content
       </a>
-      <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
-        <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
-          <Link
-            to="/"
-            className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
-          >
-            <img src={icon} alt="" className="h-8 w-8 rounded-md" />
-            <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
-          </Link>
 
-          <nav className="mx-4 hidden flex-1 items-center gap-1 lg:flex" aria-label="Main">
-            {links.map(({ to, label, active }) => (
-              <Link
-                key={to}
-                to={to}
-                aria-current={active ? "page" : undefined}
-                className={`flex min-h-[44px] items-center rounded-md px-4 font-bold no-underline transition-colors ${
-                  active
-                    ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)] shadow-mb-sm"
-                    : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="relative ml-auto flex shrink-0 items-center gap-2" ref={menuRef}>
-            {!isStaff && (
-              <a
-                href="tel:1553"
-                className="mb-plate-amber mb-sign hidden min-h-[44px] items-center gap-2 px-3 text-lg font-bold no-underline sm:inline-flex"
-                style={{ color: "var(--mb-amber-ink)" }}
-              >
-                <Phone className="h-4 w-4" aria-hidden="true" />
-                Crisis 1553
-              </a>
-            )}
-            <button
-              type="button"
-              ref={menuButtonRef}
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              aria-label="Account menu"
-              className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-brand)] transition-shadow hover:shadow-mb-md"
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
+        <Link to="/" className="flex min-h-[44px] items-center gap-3 px-6 py-5 text-[color:var(--mb-ink)] no-underline">
+          <img src={icon} alt="" className="h-8 w-8 rounded-md" />
+          <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
+        </Link>
+        <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="Main">
+          {links.map(({ to, label, active, icon: Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-[44px] items-center gap-3 rounded-lg px-3 font-bold no-underline transition-colors ${
+                active
+                  ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                  : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
+              }`}
             >
-              {showGoogleAvatar ? (
-                <img
-                  src={currentUser.photoURL}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span
-                  style={{ backgroundColor: avatarBg }}
-                  className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
-                >
-                  {initials}
-                </span>
-              )}
-            </button>
+              <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <div className="border-t border-[color:var(--mb-line)] p-3">
+          <Link
+            to="/settings"
+            aria-current={isHere("/settings") ? "page" : undefined}
+            className={`flex min-h-[44px] items-center gap-3 rounded-lg px-3 font-bold no-underline transition-colors ${
+              isHere("/settings")
+                ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
+            }`}
+          >
+            <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />
+            Settings
+          </Link>
+        </div>
+      </aside>
 
-            <AnimatePresence>
-              {menuOpen && (
-                <m.div
-                  role="menu"
-                  aria-label="Account"
-                  onKeyDown={onMenuKeyDown}
-                  {...menu}
-                  className="absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)]">
+          <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <Link
+              to="/"
+              className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline lg:hidden"
+            >
+              <img src={icon} alt="" className="h-8 w-8 rounded-md" />
+              <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
+            </Link>
+            <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{pageTitle}</p>
+
+            <div className="relative ml-auto flex shrink-0 items-center gap-2" ref={menuRef}>
+              {!isStaff && (
+                <a
+                  href="tel:1553"
+                  className="mb-plate-amber mb-sign hidden min-h-[44px] items-center gap-2 px-3 text-lg font-bold no-underline sm:inline-flex"
+                  style={{ color: "var(--mb-amber-ink)" }}
                 >
-                  <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
-                    <p className="truncate font-bold">{safeName}</p>
-                    <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
-                    <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
-                  </div>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate("/settings");
-                    }}
-                    className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
-                  >
-                    <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
-                  </button>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
-                  >
-                    {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
-                    {loggingOut ? "Signing out…" : "Sign out"}
-                  </button>
-                </m.div>
+                  <Phone className="h-4 w-4" aria-hidden="true" />
+                  Crisis 1553
+                </a>
               )}
-            </AnimatePresence>
+              <button
+                type="button"
+                ref={menuButtonRef}
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                aria-label="Account menu"
+                className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-brand)] transition-shadow hover:shadow-mb-md"
+              >
+                {showGoogleAvatar ? (
+                  <img
+                    src={currentUser.photoURL}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span
+                    style={{ backgroundColor: avatarBg }}
+                    className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
+                  >
+                    {initials}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {menuOpen && (
+                  <m.div
+                    role="menu"
+                    aria-label="Account"
+                    onKeyDown={onMenuKeyDown}
+                    {...menu}
+                    className="absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
+                  >
+                    <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
+                      <p className="truncate font-bold">{safeName}</p>
+                      <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
+                      <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate("/settings");
+                      }}
+                      className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
+                    >
+                      <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={handleLogout}
+                      disabled={loggingOut}
+                      className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
+                    >
+                      {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
+                      {loggingOut ? "Signing out…" : "Sign out"}
+                    </button>
+                  </m.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main
-        id="main-content"
-        ref={mainRef}
-        tabIndex={-1}
-        className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8"
-      >
-        <div key={location.pathname} className="w-full">
-          {children}
-        </div>
-      </main>
+        <main
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+          className="relative flex-1 focus:outline-none overflow-y-auto overflow-x-hidden px-4 py-6 pb-24 sm:px-6 lg:pb-8 lg:px-8"
+        >
+          <div key={location.pathname} className="w-full">
+            {children}
+          </div>
+        </main>
+      </div>
 
       <ToastViewport />
 
