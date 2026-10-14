@@ -14,7 +14,16 @@ const staff = [
   { role: "counselor", approved: true }, // no email
 ];
 
-const event = (data, id = "a1") => ({ params: { id }, data: data === undefined ? undefined : { data: () => data } });
+import { applyUpdate } from "../stubs/admin-firestore.js";
+
+// The trigger's document: `ref.doc` is what the transaction stub reads and writes; ref.update is the admin SDK's.
+const event = (data, id = "a1") => ({
+  params: { id },
+  data:
+    data === undefined
+      ? undefined
+      : { data: () => data, ref: { doc: data, update: async (patch) => applyUpdate(data, patch) } },
+});
 const highDoc = (over = {}) => ({ studentName: "Ana", total: 14, maxScore: 21, questionSummary: [], ...over });
 
 beforeEach(() => {
@@ -89,6 +98,32 @@ describe("alertOnHighRisk (Firestore trigger: assessments/{id} onCreate)", () =>
     globalThis.__fn.secrets.SMTP_URL = "smtps://real:pw@smtp.example.com:465";
     await alertOnHighRisk(event(highDoc()));
     expect(globalThis.__fn.mail[0].transportUrl).toBe("smtps://real:pw@smtp.example.com:465");
+  });
+});
+
+describe("alertOnHighRisk delivery guarantees", () => {
+  it("marks the check-in alerted and sends only once when the event is delivered twice", async () => {
+    const doc = highDoc();
+    await alertOnHighRisk(event(doc));
+    await alertOnHighRisk(event(doc));
+    expect(globalThis.__fn.mail).toHaveLength(1);
+    expect(doc.alertSentAt).toBeTruthy();
+  });
+
+  it("releases the claim and rethrows when the send fails, so the retry sends it", async () => {
+    const doc = highDoc();
+    globalThis.__fn.failNextSend = true;
+    await expect(alertOnHighRisk(event(doc))).rejects.toThrow();
+    expect(doc.alertSentAt).toBeUndefined();
+    await alertOnHighRisk(event(doc));
+    expect(globalThis.__fn.mail).toHaveLength(1);
+  });
+
+  it("releases the claim when no staff have an email, so a later event can still alert", async () => {
+    const doc = highDoc();
+    globalThis.__fn.users = [];
+    await alertOnHighRisk(event(doc));
+    expect(doc.alertSentAt).toBeUndefined();
   });
 });
 

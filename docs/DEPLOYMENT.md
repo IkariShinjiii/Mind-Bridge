@@ -135,6 +135,14 @@ result), then watch `firebase functions:log`.
 
 ### 4.4 Alert route on Vercel (optional, free alternative to 4.3)
 
+> **Recommendation: use 4.3 (the Cloud Function).** It runs on the server the moment the check-in is saved,
+> so a student closing the tab or losing signal right after submitting cannot stop the alert. This Vercel
+> route is called by the student's browser *after* the save, so that gap exists for it, and it also needs a
+> long-lived service-account key in Vercel. Choose it only if a billing card is truly impossible. On the
+> Blaze plan this app's volume stays inside the free quota; set a Google Cloud budget alert at $1 so a
+> surprise bill is impossible to miss. The function claims each check-in (`alertSentAt`) so duplicate
+> deliveries send one email, and it retries a failed send instead of dropping it.
+
 `client/api/alert-high-risk.ts` does the same job as the Cloud Function without the Blaze plan. It
 ships with the app but is **inert until configured**: with no settings it answers `503` and the app
 never calls it. **Use 4.3 or 4.4, not both**, or staff get two emails.
