@@ -31,6 +31,8 @@ test.describe("Page titles and head tags", () => {
       if (/fonts\.(googleapis|gstatic)\.com/.test(request.url())) thirdParty.push(request.url());
     });
     await page.goto("/");
+    // main.tsx loads the app with a dynamic import, so wait for the first render before asking which fonts loaded.
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     const families = await page.evaluate(() =>
       [...document.fonts].filter((face) => face.status === "loaded").map((face) => face.family.replace(/"/g, "")),

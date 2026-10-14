@@ -103,6 +103,8 @@ export async function signInWithPopup(): Promise<never> {
 
 export async function sendPasswordResetEmail(): Promise<void> {}
 
+export async function sendEmailVerification(): Promise<void> {}
+
 // --- Password change (Settings). Mirrors the real flow: re-authenticate with the current password, then update.
 export const EmailAuthProvider = {
   credential: (email: string, password: string) => ({ email, password }),
