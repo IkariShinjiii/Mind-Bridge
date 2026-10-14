@@ -8,6 +8,7 @@ import App from "./App";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { AuthProvider } from "./components/AuthProvider";
 import { ToastProvider } from "./components/ui/Toast";
+import Preloader from "./components/ui/Preloader";
 import "./styles/index.css";
 import "./styles/theme.css";
 
@@ -18,6 +19,7 @@ ReactDOM.createRoot(container).render(
   <React.StrictMode>
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation} strict>
+        <Preloader />
         <ErrorBoundary>
           <BrowserRouter>
             <AuthProvider>
