@@ -7,7 +7,7 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import nodemailer from "nodemailer";
-import { handleAlert, type AlertDeps, type AssessmentDoc, type StaffUser } from "./_alertCore.js";
+import { handleAlert, type AssessmentDoc, type StaffUser, type SweepDeps } from "./_alertCore.js";
 
 interface Req {
   method?: string;
@@ -20,13 +20,13 @@ interface Res {
   setHeader(name: string, value: string): void;
 }
 
-function configured(): { serviceAccount: string; smtpUrl: string } | null {
+export function configured(): { serviceAccount: string; smtpUrl: string } | null {
   const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
   const smtpUrl = process.env.SMTP_URL;
   return serviceAccount && smtpUrl ? { serviceAccount, smtpUrl } : null;
 }
 
-function buildDeps(config: { serviceAccount: string; smtpUrl: string }): AlertDeps {
+export function buildDeps(config: { serviceAccount: string; smtpUrl: string }): SweepDeps {
   if (!getApps().length) initializeApp({ credential: cert(JSON.parse(config.serviceAccount)) });
   const db = getFirestore();
   const transporter = nodemailer.createTransport(config.smtpUrl);
@@ -52,6 +52,10 @@ function buildDeps(config: { serviceAccount: string; smtpUrl: string }): AlertDe
     getStaff: async () => {
       const snap = await db.collection("users").where("role", "in", ["counselor", "admin"]).get();
       return snap.docs.map((d) => d.data() as StaffUser);
+    },
+    listRecentAssessments: async (sinceIso) => {
+      const snap = await db.collection("assessments").where("createdAt", ">=", sinceIso).get();
+      return snap.docs.map((d) => ({ id: d.id, data: d.data() as AssessmentDoc }));
     },
     sendMail: async (mail) => {
       await transporter.sendMail({ from, ...mail });

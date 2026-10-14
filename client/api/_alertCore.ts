@@ -127,20 +127,53 @@ export async function handleAlert(req: AlertRequest, deps: AlertDeps): Promise<A
   // Only the student who submitted a check-in can trigger its alert.
   if (assessment.studentId !== uid) return respond(403, { sent: false, error: "Not allowed" });
 
+  return deliverAlert(assessmentId, assessment, deps);
+}
+
+/** Claims a check-in, emails staff, and undoes the claim on failure. Shared by the browser call and the sweep. */
+async function deliverAlert(id: string, assessment: AssessmentDoc, deps: AlertDeps): Promise<AlertResult> {
   if (!assess(assessment).high) return respond(200, { sent: false, reason: "not-high-risk" });
 
-  if (!(await deps.claimAlert(assessmentId))) return respond(200, { sent: false, reason: "already-sent" });
+  if (!(await deps.claimAlert(id))) return respond(200, { sent: false, reason: "already-sent" });
 
   try {
     const to = staffEmails(await deps.getStaff());
     if (!to.length) {
-      await deps.releaseAlert(assessmentId);
+      await deps.releaseAlert(id);
       return respond(200, { sent: false, reason: "no-staff-emails" });
     }
     await deps.sendMail(buildMail(assessment, to, deps.appUrl));
     return respond(200, { sent: true });
   } catch {
-    await deps.releaseAlert(assessmentId).catch(() => undefined);
+    await deps.releaseAlert(id).catch(() => undefined);
     return respond(502, { sent: false, error: "Could not send the alert" });
   }
+}
+
+export interface SweepDeps extends AlertDeps {
+  /** Check-ins created at or after `sinceIso` (ISO string compare on `createdAt`). */
+  listRecentAssessments(sinceIso: string): Promise<Array<{ id: string; data: AssessmentDoc }>>;
+}
+
+/** How far back the sweep looks. Wide enough to survive a few missed runs; `alertSentAt` stops repeats. */
+export const SWEEP_WINDOW_MS = 48 * 60 * 60 * 1000;
+
+/**
+ * Safety net for the browser call: emails any high-risk check-in nobody was alerted about (the student closed
+ * the tab, lost signal, or the route was down). Idempotent: already-alerted check-ins are skipped.
+ */
+export async function sweepAlerts(
+  deps: SweepDeps,
+  now: Date = new Date(),
+): Promise<{ checked: number; sent: number; failed: number }> {
+  const recent = await deps.listRecentAssessments(new Date(now.getTime() - SWEEP_WINDOW_MS).toISOString());
+  let sent = 0;
+  let failed = 0;
+  for (const { id, data } of recent) {
+    if (data.alertSentAt || !assess(data).high) continue;
+    const result = await deliverAlert(id, data, deps);
+    if (result.body.sent) sent += 1;
+    else if (result.status >= 500) failed += 1;
+  }
+  return { checked: recent.length, sent, failed };
 }

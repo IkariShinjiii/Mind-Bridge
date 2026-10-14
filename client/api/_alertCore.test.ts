@@ -3,6 +3,8 @@ import {
   assess,
   buildMail,
   handleAlert,
+  sweepAlerts,
+  type SweepDeps,
   staffEmails,
   type AlertDeps,
   type AlertRequest,
@@ -171,5 +173,69 @@ describe("handleAlert", () => {
     expect(result).toEqual({ status: 502, body: { sent: false, error: "Could not send the alert" } });
     expect(JSON.stringify(result)).not.toContain("secret");
     expect(released).toEqual(["a1"]);
+  });
+});
+
+describe("sweepAlerts", () => {
+  const high = { studentId: "s", studentName: "Ana", total: 14, maxScore: 21, questionSummary: [] };
+  const mk = (rows: Array<{ id: string; data: AssessmentDoc }>, over: Partial<SweepDeps> = {}) => {
+    const sent: string[] = [];
+    const claimed = new Set<string>(rows.filter((r) => r.data.alertSentAt).map((r) => r.id));
+    const deps: SweepDeps = {
+      verifyIdToken: async () => ({ uid: "s" }),
+      getAssessment: async () => null,
+      claimAlert: async (id) => (claimed.has(id) ? false : (claimed.add(id), true)),
+      releaseAlert: async (id) => void claimed.delete(id),
+      getStaff: async () => [{ role: "admin", email: "a@usa.edu.ph" }],
+      sendMail: async (m) => void sent.push(m.subject),
+      listRecentAssessments: async () => rows,
+      appUrl: "https://x.test",
+      ...over,
+    };
+    return { deps, sent };
+  };
+
+  it("alerts high-risk check-ins that were never alerted, and skips the rest", async () => {
+    const { deps, sent } = mk([
+      { id: "a", data: high },
+      { id: "b", data: { ...high, total: 1 } },
+      { id: "c", data: { ...high, alertSentAt: "2026-01-01" } },
+    ]);
+    expect(await sweepAlerts(deps)).toEqual({ checked: 3, sent: 1, failed: 0 });
+    expect(sent).toHaveLength(1);
+  });
+
+  it("is idempotent: a second sweep sends nothing new", async () => {
+    const { deps, sent } = mk([{ id: "a", data: high }]);
+    await sweepAlerts(deps);
+    await sweepAlerts(deps);
+    expect(sent).toHaveLength(1);
+  });
+
+  it("counts a failed send, releases the claim, and keeps going", async () => {
+    let calls = 0;
+    const { deps, sent } = mk(
+      [
+        { id: "a", data: high },
+        { id: "b", data: high },
+      ],
+      {
+        sendMail: async (m) => {
+          if (calls++ === 0) throw new Error("smtp down");
+          sent2.push(m.subject);
+        },
+      },
+    );
+    const sent2: string[] = [];
+    expect(await sweepAlerts(deps)).toEqual({ checked: 2, sent: 1, failed: 1 });
+    expect(sent2).toHaveLength(1);
+    expect(sent).toHaveLength(0);
+  });
+
+  it("asks only for check-ins from the last 48 hours", async () => {
+    let since = "";
+    const { deps } = mk([], { listRecentAssessments: async (s) => ((since = s), []) });
+    await sweepAlerts(deps, new Date("2026-10-14T12:00:00.000Z"));
+    expect(since).toBe("2026-10-12T12:00:00.000Z");
   });
 });
