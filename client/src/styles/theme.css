@@ -166,6 +166,12 @@
   border-radius: var(--mb-r-sm);
 }
 
+/* Programmatic focus targets (the page region focused after navigation) are not in the tab order and need no ring;
+   without this the browser draws the focus ring along the edge of the whole content area on page load. */
+.mb [tabindex="-1"]:focus-visible {
+  outline: none;
+}
+
 .mb a {
   text-underline-offset: 3px;
 }

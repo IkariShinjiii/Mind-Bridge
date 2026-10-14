@@ -548,7 +548,7 @@ export default function UserSettings() {
                         className="mb-field"
                       />
                     </Field>
-                    <Field id="set-email" label="Email" hint="school account, cannot be changed">
+                    <Field id="set-email" label="Email" hint="school account, locked">
                       <input
                         id="set-email"
                         type="email"

@@ -36,6 +36,7 @@ import { validate } from "../../lib/validate";
 import { checkInSchema } from "../../lib/schemas";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
+import { firstName } from "../../utils/names";
 import type { Appointment, Assessment, AvailabilitySlot, ScreeningQuestion, StoredDate } from "../../types";
 
 /**
@@ -109,7 +110,7 @@ const SCALE_OPTIONS = [
 export default function StudentDashboard() {
   const { currentUser, userData } = useAuth();
   const userName = userData?.name || currentUser?.displayName || "Student";
-  const displayName = userName.split(" ")[0] || "Student";
+  const displayName = firstName(userName, "Student");
 
   const [qIndex, setQIndex] = useState(0);
   // 1 slides the next question in from the right, -1 brings the previous one back from the left

@@ -93,7 +93,7 @@ function Stat({
   const urgent = tone === "urgent";
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg border p-4 ${
+      className={`flex flex-col items-start gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:gap-3 sm:p-4 ${
         urgent
           ? "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]"
           : "border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-ink)]"
@@ -101,7 +101,7 @@ function Stat({
     >
       <span
         aria-hidden="true"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[color:var(--mb-surface)]"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--mb-surface)] sm:h-11 sm:w-11"
       >
         <Icon className="h-5 w-5" />
       </span>
@@ -579,7 +579,7 @@ export default function AdminPanel() {
       )}
 
       {/* At-a-glance counts, most urgent first */}
-      <section aria-label="Summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <section aria-label="Summary" className="grid grid-cols-2 gap-3 xl:grid-cols-3">
         <Stat tone="urgent" icon={AlertTriangle} label="High risk" value={immediateCount} note="Need review first" />
         <Stat icon={ClipboardList} label="Open cases" value={openCasesCount} note="Waiting in the queue" />
         <Stat icon={Calendar} label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
