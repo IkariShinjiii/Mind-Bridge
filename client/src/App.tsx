@@ -85,11 +85,13 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-gray-950 text-white flex flex-col font-sans">
       <ErrorBoundary resetKey={location.pathname}>
-        <Suspense fallback={<PageLoader />}>
-          {/* mode="wait": the old page fades out (120ms) before the new one rises in, so two pages are never mounted at once.
-              `location` is passed to Routes so the leaving page keeps rendering its own route while the URL has moved on. */}
-          <AnimatePresence mode="wait">
-            <m.div key={location.pathname} className="flex min-h-0 flex-1 flex-col" {...page}>
+        {/* mode="wait": the old page fades out (120ms) before the new one rises in, so two pages are never mounted at once.
+            `location` is passed to Routes so the leaving page keeps rendering its own route while the URL has moved on.
+            Suspense lives INSIDE the animated wrapper: if it wrapped the wrapper, a lazy route still loading would hide the
+            wrapper's subtree, its fade-in would never run, and the page stayed at opacity 0 until a refresh. */}
+        <AnimatePresence mode="wait">
+          <m.div key={location.pathname} className="flex min-h-0 flex-1 flex-col" {...page}>
+            <Suspense fallback={<PageLoader />}>
               <Routes location={location}>
                 <Route path="/" element={<HomePage />} />
                 <Route
@@ -154,9 +156,9 @@ export default function App() {
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
-            </m.div>
-          </AnimatePresence>
-        </Suspense>
+            </Suspense>
+          </m.div>
+        </AnimatePresence>
       </ErrorBoundary>
       {/* After the page in the DOM: the skip link must be the first link a keyboard user reaches. It is fixed-position, so it still shows at the bottom. */}
       <CookieConsent />
