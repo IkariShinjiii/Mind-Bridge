@@ -395,14 +395,14 @@ export default function StudentDashboard() {
       <div className="flex flex-col gap-6 lg:flex-row items-start">
         <section className="lg:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {/* Gauge / Status Card */}
-            <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden">
+            <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden sm:col-span-2">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
               <div>
                 <div className="text-sm text-[color:var(--mb-muted)] font-bold">Latest Wellness Index</div>
-                <div className="mt-2 flex items-center justify-between">
-                  <div>
+                <div className="mt-2 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
                     <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
                       {latestScore !== null ? `${latestScore} / ${maxScore}` : "No check-in"}
                     </div>
@@ -421,10 +421,10 @@ export default function StudentDashboard() {
 
                   {/* Mini Visual Gauge */}
                   {latestScore !== null && (
-                    <div className="relative h-12 w-12 shrink-0">
+                    <div className="relative h-14 w-14 shrink-0">
                       <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
                         <path
-                          className="text-[color:var(--mb-muted)]"
+                          className="text-[color:var(--mb-line)]"
                           strokeWidth="3.5"
                           stroke="currentColor"
                           fill="none"
@@ -482,10 +482,10 @@ export default function StudentDashboard() {
               )}
             </div>
 
-            {/* Assigned Counselor Card: full row on phones, where the other two sit side by side */}
-            <div className="mb-card mb-card-sm col-span-2 flex flex-col justify-between md:col-span-1">
+            {/* Wellness takes a full row (the ring needs room); appointment and counselor share the next one from sm up. */}
+            <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
               <div>
-                <div className="text-sm text-[color:var(--mb-muted)] font-bold flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
                   <span>Guidance Counselor</span>
                   <span className="mb-badge mb-badge-brand uppercase">Assigned</span>
                 </div>
@@ -495,7 +495,7 @@ export default function StudentDashboard() {
               <button
                 type="button"
                 onClick={() => setChatOpen(true)}
-                className="mb-btn mb-btn-line mt-3 self-start whitespace-nowrap !min-h-[44px] !px-4 text-sm"
+                className="mb-btn mb-btn-line mt-3 w-full !min-h-[44px] !px-4 text-sm"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden="true" />
                 Message counselor
