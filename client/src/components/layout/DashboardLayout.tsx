@@ -8,6 +8,7 @@ import { transition, useMotionPreset, type MotionPreset } from "../../lib/motion
 import Spinner from "../ui/Spinner";
 import { ToastViewport } from "../ui/Toast";
 import { avatarColor } from "../../utils/avatar";
+import { firstName } from "../../utils/names";
 import icon from "../../assets/mindbridge-icon.png";
 
 /** Account dropdown: drops 4px and fades in (150ms), fades out in 120ms. */
@@ -143,7 +144,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     }
   };
 
-  const greeting = `Hello, ${safeName.split(" ")[0]}`;
+  const greeting = `Hello, ${firstName(safeName, "Student")}`;
 
   return (
     <div className="mb flex h-[100dvh] w-full overflow-hidden" data-theme={theme}>
