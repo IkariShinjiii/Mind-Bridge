@@ -10,8 +10,9 @@ const STORAGE_KEY = "mb-preloaded";
 const spring = { type: "spring", damping: 40, stiffness: 400, mass: 1 } as const;
 const lift = { duration: 1, ease: [1, 0.01, 0.38, 1.01] } as const;
 
-function alreadyShown(): boolean {
+function skipIntro(): boolean {
   try {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
     return sessionStorage.getItem(STORAGE_KEY) === "1";
   } catch {
     return false;
@@ -21,7 +22,7 @@ function alreadyShown(): boolean {
 /** Full-screen intro, once per browser session. Skipped for reduced motion (DESIGN.md: removed, not shortened). */
 export default function Preloader() {
   const reduced = useReducedMotion();
-  const [open, setOpen] = useState(() => !alreadyShown());
+  const [open, setOpen] = useState(() => !skipIntro());
   const [slogan, setSlogan] = useState(0);
 
   useEffect(() => {
@@ -77,11 +78,11 @@ export default function Preloader() {
             animate={{ x: 0, scale: 1, transition: { type: "spring", bounce: 0.2, duration: 2.2 } }}
           />
           <div className="relative z-10 flex flex-col items-center gap-2 px-4 text-center">
-            <h1 className="flex font-display text-5xl font-bold tracking-tight sm:text-7xl" aria-label="Mind Bridge">
+            {/* Not a heading: the page behind it owns the h1. The overlay's role=status label already names it. */}
+            <p aria-hidden className="flex font-display text-5xl font-bold tracking-tight sm:text-7xl">
               {NAME.split("").map((ch, i) => (
                 <m.span
                   key={i}
-                  aria-hidden
                   className="inline-block whitespace-pre"
                   initial={{ opacity: 0, x: 200, scale: 3, skewY: 3, filter: "blur(10px)" }}
                   animate={{ opacity: 1, x: 0, scale: 1, skewY: 0, filter: "blur(0px)" }}
@@ -90,11 +91,12 @@ export default function Preloader() {
                   {ch}
                 </m.span>
               ))}
-            </h1>
+            </p>
             <div className="h-6 overflow-hidden">
               <AnimatePresence mode="wait">
                 <m.p
                   key={slogan}
+                  aria-hidden
                   className="text-base font-medium"
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
