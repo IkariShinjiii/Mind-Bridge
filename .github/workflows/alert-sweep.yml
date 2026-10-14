@@ -1,0 +1,29 @@
+# Free safety net for the high-risk alert (docs/DEPLOYMENT.md 4.4): every 10 minutes, ask the app to email staff about
+# any recent high-risk check-in that was never alerted (closed tab, lost signal). Scheduled runs are free on a
+# public repo. A failed run means the alert path is broken; GitHub emails the repo owner about it.
+# GitHub pauses scheduled workflows after 60 days without repo activity: re-enable under Actions if that happens.
+name: alert-sweep
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      SWEEP_URL: ${{ secrets.ALERT_SWEEP_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+    steps:
+      - name: Skip when alerts are not set up
+        if: ${{ env.SWEEP_URL == '' || env.CRON_SECRET == '' }}
+        run: echo "ALERT_SWEEP_URL / CRON_SECRET not set; nothing to do."
+      - name: Run the sweep
+        if: ${{ env.SWEEP_URL != '' && env.CRON_SECRET != '' }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 60 -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" "${SWEEP_URL}"

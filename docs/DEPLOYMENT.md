@@ -133,7 +133,7 @@ SMTP provider must allow the `SMTP_FROM` address as a sender.
 Test it by submitting a check-in that includes the self-harm item (the crisis flag forces a high
 result), then watch `firebase functions:log`.
 
-### 4.4 Alert route on Vercel (optional, free alternative to 4.3)
+### 4.4 Alert route on Vercel (the free path, recommended while the project stays on the free plans)
 
 `client/api/alert-high-risk.ts` does the same job as the Cloud Function without the Blaze plan. It
 ships with the app but is **inert until configured**: with no settings it answers `503` and the app
@@ -149,10 +149,22 @@ never calls it. **Use 4.3 or 4.4, not both**, or staff get two emails.
    | `SMTP_FROM` | optional, `Mind Bridge <you@example.com>`; must be an address your SMTP account may send as |
    | `APP_URL` | optional, your production URL |
    | `VITE_ALERT_ENABLED` | `true` (turns on the app's call to the route) |
+   | `CRON_SECRET` | a long random string (for the sweep below) |
 
 3. **Redeploy**, because `VITE_ALERT_ENABLED` is inlined at build time.
 4. Test: sign in as a student and submit a check-in with the self-harm item answered. Staff should
    get one email. Submitting again for the same check-in never sends a second one.
+
+**The sweep (closes the closed-tab gap).** The route above is called by the student's browser right after
+the check-in is saved, so a closed tab or lost signal at that moment would lose the alert. To make that
+impossible, `.github/workflows/alert-sweep.yml` calls `POST /api/alert-sweep` every 10 minutes; it emails
+staff about any high-risk check-in from the last 48 hours that was never alerted (each is alerted once).
+It costs nothing on a public repo and needs no card. Set two **GitHub repository secrets** (Settings >
+Secrets and variables > Actions): `ALERT_SWEEP_URL` = `https://<your-site>/api/alert-sweep` and
+`CRON_SECRET` = the same value as in Vercel. A red run in the Actions tab means the alert path is broken
+(GitHub emails you). GitHub pauses scheduled workflows after 60 days with no repo activity: re-enable it
+under Actions if that happens. The dashboard always shows every high-risk check-in, so the email is a
+prompt, never the only record.
 
 How it stays safe: the caller must send their Firebase ID token, only the student who owns the
 check-in can trigger its alert, risk is recomputed on the server, each check-in alerts at most once
@@ -180,6 +192,8 @@ If some do, add only the origin the message names. See `SECURITY_AUDIT.md` F-05 
 | `APP_URL` | Function parameter, or Vercel (4.4) | No | Link base used in alert emails |
 | `FIREBASE_SERVICE_ACCOUNT` | Vercel (server only) | For route 4.4 | Service account JSON; never a `VITE_*` variable |
 | `VITE_ALERT_ENABLED` | Vercel | For route 4.4 | `true` makes the app call `/api/alert-high-risk` |
+| `CRON_SECRET` | Vercel and GitHub | For the 4.4 sweep | shared secret that lets the scheduled job call `/api/alert-sweep` |
+| `ALERT_SWEEP_URL` | GitHub | For the 4.4 sweep | full URL of `/api/alert-sweep` |
 
 Notes:
 
