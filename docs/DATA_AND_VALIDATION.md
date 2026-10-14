@@ -1,15 +1,18 @@
 # Data types and validation
 
-Mind Bridge is a **plain JavaScript** project. There is no TypeScript and no Zod (or any schema
-library). This page documents the two things those tools would normally cover:
+Mind Bridge is a **strict TypeScript** project and validates every form with **Zod**
+(see [ADR 0001](adr/0001-typescript-and-zod.md)). This page says where each thing lives and what
+the rules are, so you do not have to read the schemas to know them.
 
-- **Types**: the shape of every Firestore document, written as JSDoc `@typedef`s and tables.
-- **Validation**: the hand-written, pure functions in `client/src/lib/validation.js` that check
-  form input before anything is sent.
+- **Types**: the shape of every Firestore document is a TypeScript `interface` in
+  [`client/src/types/models.ts`](../client/src/types/models.ts). That file is the source of truth;
+  this page does not repeat the fields, so it cannot drift.
+- **Validation**: Zod schemas in [`client/src/lib/schemas/`](../client/src/lib/schemas/), one file per
+  area, with shared field rules in `fields.ts`.
 
 Validation here is a **usability** layer (clear messages next to the field). It is not a security
 layer: anyone can bypass the browser and call Firestore directly, so the real gate is
-[`firestore.rules`](../firestore.rules). See [`API.md`](API.md) and the known gaps listed there.
+[`firestore.rules`](../firestore.rules). See [`API.md`](API.md).
 
 Related: [`ARCHITECTURE.md`](ARCHITECTURE.md#3-data-model) (ER diagram),
 [`IPOO.md`](IPOO.md#3-risk-scoring-algorithm) (scoring), [`API.md`](API.md) (operations).
@@ -18,182 +21,63 @@ Related: [`ARCHITECTURE.md`](ARCHITECTURE.md#3-data-model) (ER diagram),
 
 ## 1. Document types
 
-Timestamps are **ISO-8601 strings** (`new Date().toISOString()`), except `users.createdAt`, which
-is written with `serverTimestamp()` at sign-up. Optional fields may be absent.
+| Collection | Type in `models.ts` | Notes |
+|---|---|---|
+| `users/{uid}` | `UserProfile` | Document id is the Firebase Auth uid. `role` is `student`, `counselor` or `admin`; a counselor is treated as `admin` once loaded. |
+| `assessments/{id}` | `Assessment` (with `QuestionSummary`) | A scored check-in. `riskLevel` is saved by the browser but never trusted: staff views and the alert recompute it (`utils/risk.ts`). |
+| `appointments/{id}` | `Appointment` | `status` is free text with known values (`Pending Review`, `Confirmed`, `Rescheduled`, `Completed`, `Declined`, `Cancelled`). |
+| `availability/{id}` | `AvailabilitySlot` | A bookable counselor time window. |
+| `messages/{id}` | `ChatMessage` | One message in a student-counselor thread, keyed by `studentId`. |
 
-```js
-/** users/{uid}: document id is the Firebase Auth uid */
-/**
- * @typedef {Object} UserProfile
- * @property {string} id                       added by api.js from the document id
- * @property {string} name
- * @property {string} email
- * @property {"student"|"counselor"|"admin"} role
- * @property {boolean} approved                counselors need an admin; students are created true
- * @property {boolean} active                  false = treated as signed out everywhere
- * @property {boolean} [emailVerified]
- * @property {string} [phone]
- * @property {string} [bio]
- * @property {string} [avatarGradient]         an AVATAR_COLORS id: cyan|purple|emerald|amber|rose
- * @property {boolean} [useGoogleAvatar]
- * @property {EmergencyContact} [emergencyContact]
- * @property {string[]} [wellnessGoals]
- * @property {string|null} [assignedCounselorId]    staff-only fields (the three below)
- * @property {string|null} [assignedCounselorName]
- * @property {string|null} [assignedAt]
- * @property {string} [updatedAt]
- */
-
-/** @typedef {{ name: string, phone: string, alternatePhone?: string }} EmergencyContact */
-```
-
-```js
-/** assessments/{autoId} */
-/**
- * @typedef {Object} Assessment
- * @property {string} id
- * @property {string} studentId                must equal the creator's uid (rules)
- * @property {string} studentName
- * @property {string} studentEmail
- * @property {Array<number|null>} answers      one 0-3 value per question; null = unanswered
- * @property {QuestionSummary[]} questionSummary
- * @property {number} total                    sum of answers
- * @property {number} maxScore                 3 x number of questions
- * @property {"low"|"medium"|"high"} riskLevel
- * @property {boolean} flaggedForImmediateReview
- * @property {string} status                   "open" on create (rules); staff change it later
- * @property {string} counselorNotes           "" on create
- * @property {string} createdAt
- * @property {string} [reviewedAt]             set by updateAssessmentStatus
- */
-
-/** @typedef {{ id: string, text: string, score: number|null, isCrisisItem: boolean }} QuestionSummary */
-```
-
-```js
-/** availability/{autoId}: a counselor's open slot */
-/**
- * @typedef {Object} AvailabilitySlot
- * @property {string} id
- * @property {string} counselorId              must equal the creator's uid (rules)
- * @property {string} counselorName
- * @property {string} start                    datetime-local or ISO string
- * @property {string} end
- * @property {boolean} isBooked                students may change ONLY this field
- * @property {string} createdAt
- */
-
-/** appointments/{autoId} */
-/**
- * @typedef {Object} Appointment
- * @property {string} id
- * @property {string} studentId                must equal the creator's uid (rules)
- * @property {string} studentName
- * @property {string} studentEmail
- * @property {string|null} slotId              null for a generic request
- * @property {string} [counselorId]
- * @property {string} [counselorName]
- * @property {string} title
- * @property {string} [start]
- * @property {string} [end]
- * @property {string} [date]                   only on generic requests (tomorrow)
- * @property {"Pending Review"|"Confirmed"|"Declined"|"Cancelled"|"Rescheduled"} status
- * @property {string} createdAt
- * @property {string} [updatedAt]
- * @property {string} [cancellationReason]
- * @property {string} [cancelledBy]
- */
-
-/** messages/{autoId}: immutable once written */
-/**
- * @typedef {Object} Message
- * @property {string} id
- * @property {string} studentId                the thread owner
- * @property {string} senderId                 must equal the writer's uid (rules)
- * @property {string} senderName
- * @property {"student"|"counselor"} senderRole
- * @property {string} text                     trimmed, never empty
- * @property {string} timestamp
- */
-```
-
-`Appointment.status` values are strings the UI uses; the rules only enforce that a **student** may
-set `"Cancelled"` and nothing else. The `Rescheduled` value comes from the counselor flow.
-
-### Using the types
-
-JSDoc typedefs give editor hints without a build step. To get them in VS Code, annotate a variable:
-
-```js
-/** @type {import("./types").Assessment[]} */
-const rows = await getMyAssessments();
-```
-
-(The typedefs above are documentation; there is no `types.d.ts` file. Add one only if you decide
-to migrate, see §4.)
+Timestamps are **ISO-8601 strings** (`new Date().toISOString()`), except `users.createdAt`, which is
+written with `serverTimestamp()` at sign-up. The `StoredDate` type covers both. Optional fields may
+be absent.
 
 ---
 
-## 2. Validation functions
+## 2. Validation schemas
 
-All live in `client/src/lib/validation.js`, are pure, and return **an object of `field -> message`**.
-An empty object means valid.
+Each schema turns a form value into either parsed data or a `{ field: message }` map.
+`lib/validate.ts` has three helpers: `validate(schema, input)` returns `{ ok, data }` or
+`{ ok: false, error }`, `fieldErrorsOf(schema, input)` returns only the message map (empty when
+valid), and `toFieldErrors(zodError)` does the conversion. Nested paths are joined with dots
+(`answers.3`) and only the first message per field is kept.
 
-| Function | Used by | Rules |
+| Schema | Used by | Rules |
 |---|---|---|
-| `isEmail(v)` | login, signup | one `@`, a dot in the domain, no whitespace; surrounding spaces ignored |
-| `isSchoolEmail(v)` | signup | `isEmail` and ends with `@usa.edu.ph` (case-insensitive) |
-| `isPhone(v)` | emergency contact | starts with `+`, a digit or `(`; only digits, spaces, `().-`; 7 to 13 digits |
-| `validateSignup({ name, email, password, consent? })` | `Signup.jsx` | name required; school email required; password at least **6** characters; `consent` defaults to `true` when omitted |
-| `validateLogin({ email, password })` | `Login.jsx` | well-formed email; password required (no length rule) |
-| `validateEmergencyContact({ name, phone, alternatePhone? })` | `UserSettings.jsx` | name and phone required; alternate phone optional but valid if present |
-| `validatePasswordChange({ currentPassword, newPassword, confirmPassword })` | `UserSettings.jsx` | new password at least 6 characters and different from the current one; confirmation must match exactly |
-| `validateAvailabilityWindow(start, end, now?)` | `ManageAvailability.jsx`, `Appointments.jsx` | both parse; start not in the past; end strictly after start |
+| `signupSchema` | Sign-up | Name required (max 200). School email required (`@usa.edu.ph`). Password at least **8** characters. `consent` must be true (defaults to true when the form has no checkbox). |
+| `loginSchema` | Log in | Well-formed email; password required, with no length rule (Firebase decides if it is right). |
+| `passwordChangeSchema` | Settings > Password | Current password required. New password at least 8 characters and different from the current one. Confirmation must match. |
+| `profileSchema` | Settings > Profile | Name required (max 80). Phone optional but valid if present. About-you text up to 500 characters. |
+| `emergencyContactSchema` | Settings > Emergency contact | Name and phone required; alternate phone optional but valid if present; notes up to 500. |
+| `goalsSchema` / `goalSchema` | Settings > Goals | Each goal 1 to 120 characters; at most 5 goals. |
+| `checkInSchema` | Check-in | Exactly 7 answers, each a whole number from 0 to 3. |
+| `bookingSlotSchema` | Booking | Slot id, counselor and valid start and end; the end must be after the start. |
+| `timeWindowSchema(now)` | Availability, reschedule | Both times parse; start not in the past; end strictly after start. `now` is injectable so tests do not depend on the clock. |
+| `appointmentActionSchema` | Decline, cancel, reschedule dialog | Decline needs a reason (max 500). Cancel's reason is optional. Reschedule needs a start time. |
+| `caseReviewSchema` | Case inspector | Case id; status `open`, `reviewed` or `escalated`; notes up to 2000. |
+| `counselorAssignmentSchema`, `accountActionSchema` | Accounts tab | Ids must be present. |
+| `chatMessageSchema` | Chat | Text trimmed, 1 to 2000 characters. |
 
-Constants: `SCHOOL_EMAIL_DOMAIN = "@usa.edu.ph"`, `MIN_PASSWORD_LENGTH = 6`.
-
-### Example
-
-```js
-import { validateSignup } from "../lib/validation";
-
-validateSignup({ name: "Ana", email: "ana@gmail.com", password: "123" });
-// {
-//   email:    "Student registrations must use an @usa.edu.ph email address.",
-//   password: "Password must be at least 6 characters."
-// }
-
-validateSignup({ name: "Ana", email: "ana@usa.edu.ph", password: "secret1" });
-// {}  -> valid
-```
-
-```js
-import { validateAvailabilityWindow } from "../lib/validation";
-
-validateAvailabilityWindow("2026-10-03T10:00", "2026-10-03T09:00", new Date("2026-10-02T08:00"));
-// { end: "The end time must be after the start time." }
-```
+The messages are written for students and are part of the UI contract: the e2e suite asserts several
+of them, so change them together.
 
 ### Edge cases worth knowing
 
-- Whitespace-only `name` / `email` count as empty. Passwords are **not** trimmed.
-- If the start time is already invalid, the end-ordering error is not also reported.
-- `validateAvailabilityWindow` accepts a start exactly equal to `now`.
-- Forms use `noValidate` and render these messages beside the field (see `README.md`, Contributing).
+- Missing values are treated as empty, so a form shows "Enter your email." instead of a technical
+  "expected string" message.
+- Passwords are never trimmed; names, notes and chat text are.
+- A phone number may start with `+`, a digit or `(`, may contain spaces, dots, dashes and parentheses, and must have 7 to 13 digits (for example `0917 123 4567` or `+63 917 123 4567`).
 
 ### Turning errors into sentences
 
-`lib/errors.js` has `friendlyError(error, fallback?)`, which maps Firebase codes
-(`auth/invalid-credential`, `permission-denied`, ...) to student-readable text and never shows raw
-codes or messages. Wrong-password, unknown-user and invalid-credential deliberately share one
-message so the form does not reveal which emails have accounts. `isPopupDismissed(error)` is true
-when the user simply closed the Google sign-in window, so no error should be shown.
+`utils/errors.ts` has `friendlyError(error, fallback?)`, which maps Firebase error codes to a
+sentence a student can act on, and `AppError`, the one error shape the API layer throws.
 
 ### Tests
 
-`client/src/lib/validation.test.js` and `validation.edge.test.js` cover every function above,
-including boundaries (6-character passwords, 7 and 13 digit phones, `start === now`).
-Run with `cd client && npm test`.
+Schemas are covered in `client/src/lib/schemas/schemas.test.ts`, the predicates in
+`utils/validation*.test.ts`, and the forms end to end in the Playwright specs under `client/e2e/`.
 
 ---
 
@@ -208,20 +92,6 @@ medium   if total >= 30% of maxScore
 low      otherwise
 ```
 
-Implemented once in `client/src/lib/scoring.js` and mirrored in `functions/index.js`; a test in
-`backend-tests/functions/alertOnHighRisk.test.js` fails if the two drift apart.
-
----
-
-## 4. If you later migrate to TypeScript / Zod
-
-Not needed for the current scope, but this is the order that would cost least:
-
-1. Rename `lib/*.js` to `.ts` leaf-first (`dates`, `errors`, `scoring`, `validation`); they are pure
-   and already covered by tests.
-2. Turn the typedefs in section 1 into `export type` declarations in `lib/types.ts`.
-3. Replace `validation.js` with Zod schemas **per form**; keep the same `field -> message` output
-   (`schema.safeParse(v).error.flatten().fieldErrors`) so the screens do not change.
-4. Validate documents **read** from Firestore with the same schemas at the `api.js` boundary, which
-   also fixes the stored-`id`-overrides-doc-id quirk noted in the unit tests.
-5. Keep `firestore.rules` as the authority; schemas in the browser can never replace it.
+Implemented in `client/src/utils/scoring.ts`. The alert code recomputes "high" from the saved
+answers (`client/api/_alertCore.ts`, mirrored by `functions/index.js`), and tests fail if the rules
+drift apart.

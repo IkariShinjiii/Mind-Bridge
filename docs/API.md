@@ -194,7 +194,13 @@ Any collection not listed above is closed to everyone (`match /{document=**} →
 
 ---
 
-## 6. Cloud Function: `alertOnHighRisk` (not deployed)
+## 6. Cloud Function: `alertOnHighRisk` (optional, not used)
+
+> The live alert path is free: `client/api/alert-high-risk.ts` (called by the browser after a high-risk
+> check-in) and `client/api/alert-sweep.ts` (called every 10 minutes by `.github/workflows/alert-sweep.yml`).
+> They share the same rules as below, claim each check-in with `alertSentAt` so it alerts once, and are
+> described in [`DEPLOYMENT.md` 4.4](DEPLOYMENT.md). The Cloud Function below is the equivalent that
+> needs the paid Blaze plan; never run both.
 
 Trigger: `assessments/{id}` onCreate. It recomputes risk itself from `total`, `maxScore` and
 `questionSummary` (it ignores the client's `riskLevel`). If high, it emails every active, approved

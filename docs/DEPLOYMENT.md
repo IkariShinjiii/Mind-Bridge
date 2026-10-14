@@ -9,8 +9,8 @@ procedures and troubleshooting. For the system design see [`ARCHITECTURE.md`](AR
 |---|---|---|---|
 | Web app (static) | Vercel | `client/` | Git push to `main` |
 | Security rules | Firebase | `firestore.rules` | `firebase deploy --only firestore:rules` |
-| Alert function (optional) | Firebase Cloud Functions | `functions/` | `firebase deploy --only functions` |
-| Alert route (optional, free alternative) | Vercel serverless | `client/api/` | Git push to `main`, once configured (4.4) |
+| Alert function (optional, paid Blaze plan, unused) | Firebase Cloud Functions | `functions/` | `firebase deploy --only functions` |
+| Alert routes (the free path in use) | Vercel serverless + GitHub Actions sweep | `client/api/`, `.github/workflows/alert-sweep.yml` | Git push to `main`, once configured (4.4) |
 | Auth and database | Firebase | Console configuration | Manual, once |
 
 The three parts deploy independently. The app works without the function. The app does **not**

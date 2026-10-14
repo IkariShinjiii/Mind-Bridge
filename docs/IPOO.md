@@ -243,7 +243,7 @@ code stays the same.
 | 2 | **Evaluate risk** objectively with a multi-tier result | Process | `utils/scoring.ts`, `api.ts` `submitResponse()` | `scoring.test.js`, `scoring.edge.test.js`, `api.test.js` |
 | 3 | Give **immediate, actionable guidance** and crisis resources | Output | Result card in `StudentDashboard.tsx`, `CrisisResources.tsx` | `e2e/results.spec.js`, `e2e/crisis-resources.spec.js` |
 | 4 | Let counselors **triage flagged cases first** and record notes | Process / Output | `AdminPanel.tsx` (filters, priority sort, status, notes) | `e2e/counselor.spec.js` |
-| 5 | **Notify staff** when a high-risk check-in arrives | Output | `functions/index.js` `alertOnHighRisk` (not yet deployed) | `backend-tests/functions/alertOnHighRisk.test.js` |
+| 5 | **Notify staff** when a high-risk check-in arrives | Output | `client/api/alert-high-risk.ts` and `alert-sweep.ts` (free Vercel routes; `functions/index.js` is the unused paid alternative) | `backend-tests/functions/alertOnHighRisk.test.js` |
 | 6 | **Book and manage appointments** with counselors | Process / Output | `BookingFlow.jsx`, `Appointments.jsx`, `ManageAvailability.jsx`, `api.ts` | `backend-tests/api/api.test.js` |
 | 7 | **Confidential communication** between student and counselor | Input / Output | `ConfidentialChatModal.jsx`, `api.ts` (`listenToStudentMessages`, `sendStudentMessage`), `messages` rules | `backend-tests/rules/scheduling.test.js`, `known-gaps.test.js` (partial) |
 | 8 | **Role-based access and governance** (approve counselors, deactivate users) | Process | `AuthContext.jsx`, `AdminPanel.tsx`, `firestore.rules` | `backend-tests/rules/users.test.js` |
