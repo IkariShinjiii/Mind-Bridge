@@ -448,7 +448,7 @@ export default function UserSettings() {
                   setActiveTab(id);
                 }}
                 aria-current={activeTab === id ? "page" : undefined}
-                className="mb-chip"
+                className="mb-chip shrink-0 whitespace-nowrap"
               >
                 <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {label}
