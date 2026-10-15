@@ -178,14 +178,15 @@ function ScheduleCard({ appointments }: { appointments: Appointment[] }) {
               type="button"
               onClick={() => setSelected(startOfDay(d))}
               aria-pressed={active}
-              aria-label={d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
+              // WCAG 2.5.3: the name starts with the visible text ("Mon 12") so voice control matches it.
+              aria-label={`${d.toLocaleDateString([], { weekday: "short" })} ${d.getDate()}, ${d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}`}
               className={`flex min-h-[44px] flex-col items-center justify-center rounded-lg text-sm font-bold transition-colors ${
                 active
                   ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                   : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"
               }`}
             >
-              <span className="text-xs font-normal">{d.toLocaleDateString([], { weekday: "short" })}</span>
+              <span className="text-xs font-normal">{d.toLocaleDateString([], { weekday: "short" })}</span>{" "}
               {d.getDate()}
             </button>
           );

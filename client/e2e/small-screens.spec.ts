@@ -49,7 +49,7 @@ for (const width of WIDTHS) {
         expect(await elementsPastEdge(page), path).toEqual([]);
       }
       await page.goto("/resources");
-      const landline = page.getByRole("link", { name: /Call Hopeline Philippines, PLDT landline/ });
+      const landline = page.getByRole("link", { name: /Call Hopeline Philippines: PLDT landline/ });
       await landline.scrollIntoViewIfNeeded();
       const box = await landline.boundingBox();
       expect(box, "hotline link is rendered").not.toBeNull();

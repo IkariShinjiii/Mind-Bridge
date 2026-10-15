@@ -105,7 +105,8 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
           <li key={n.tel}>
             <a
               href={`tel:${n.tel}`}
-              aria-label={`Call ${name}, ${n.label}, ${n.display}`}
+              // The name ends with the visible text ("Toll-free 1553") so voice control can match it (WCAG 2.5.3).
+              aria-label={`Call ${name}: ${n.label} ${n.display}`}
               className={`group flex min-h-[56px] flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-md border px-4 py-2 no-underline transition-colors ${edge} ${
                 i === 0
                   ? urgent
@@ -117,7 +118,7 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
               <span className="flex items-center gap-3">
                 <Phone className="h-5 w-5 shrink-0" aria-hidden="true" />
                 <span className="text-sm font-bold">{n.label}</span>
-              </span>
+              </span>{" "}
               <span className="mb-sign whitespace-nowrap text-2xl font-bold tabular-nums">{n.display}</span>
             </a>
           </li>

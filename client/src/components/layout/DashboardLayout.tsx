@@ -222,7 +222,8 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                aria-label="Account menu"
+                // WCAG 2.5.3: the name contains the visible initials as a word, so voice control can match what is shown.
+                aria-label={`Account menu for ${initials}`}
                 className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-brand)] transition-shadow hover:shadow-mb-md"
               >
                 {showGoogleAvatar ? (
@@ -234,6 +235,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                   />
                 ) : (
                   <span
+                    aria-hidden="true"
                     style={{ backgroundColor: avatarBg }}
                     className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
                   >
