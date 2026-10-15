@@ -19,6 +19,20 @@ export default defineConfig(({ mode }) => ({
           ]
         : [],
   },
+  // Pre-bundle everything the app imports at runtime. Without this the dev server finds some of these late (route
+  // chunks load lazily), re-optimizes and reloads the page, which made the first cold Playwright run flaky.
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "react-router-dom",
+      "framer-motion",
+      "zod",
+      "lucide-react",
+      "recharts",
+    ],
+  },
   build: {
     // The two vendor chunks left over 500 kB are Firebase (Firestore) and Recharts; both are split out and cached.
     chunkSizeWarningLimit: 700,

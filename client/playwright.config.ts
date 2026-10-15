@@ -20,5 +20,12 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
+    // main.tsx refuses to start without these. The e2e mode swaps Firebase for fakes, so any value works; supplying
+    // them here means a fresh clone can run the suite with no setup (CI sets the same dummies).
+    env: {
+      VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY ?? "e2e",
+      VITE_FIREBASE_AUTH_DOMAIN: process.env.VITE_FIREBASE_AUTH_DOMAIN ?? "e2e",
+      VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID ?? "e2e",
+    },
   },
 });
