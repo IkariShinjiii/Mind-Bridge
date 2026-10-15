@@ -580,14 +580,16 @@ export default function AdminPanel() {
       )}
 
       {/* At-a-glance counts, most urgent first */}
-      <section aria-label="Summary" className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-        <Stat tone="urgent" icon={AlertTriangle} label="High risk" value={immediateCount} note="Need review first" />
-        <Stat icon={ClipboardList} label="Open cases" value={openCasesCount} note="Waiting in the queue" />
-        <Stat icon={Calendar} label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
-        <Stat icon={CircleCheck} label="Reviewed" value={reviewedCount} note="Cases closed out" />
-        <Stat icon={Users} label="Students" value={analytics.totalStudents} note="With check-ins" />
-        <Stat icon={UserCheck} label="Staff" value={analytics.totalStaff} note="Approved accounts" />
-      </section>
+      {mainTab !== "accounts" && (
+        <section aria-label="Summary" className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <Stat tone="urgent" icon={AlertTriangle} label="High risk" value={immediateCount} note="Need review first" />
+          <Stat icon={ClipboardList} label="Open cases" value={openCasesCount} note="Waiting in the queue" />
+          <Stat icon={Calendar} label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
+          <Stat icon={CircleCheck} label="Reviewed" value={reviewedCount} note="Cases closed out" />
+          <Stat icon={Users} label="Students" value={analytics.totalStudents} note="With check-ins" />
+          <Stat icon={UserCheck} label="Staff" value={analytics.totalStaff} note="Approved accounts" />
+        </section>
+      )}
 
       {/* Section switcher */}
       {mainTab !== "accounts" && (

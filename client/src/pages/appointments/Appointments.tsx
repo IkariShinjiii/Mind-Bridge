@@ -374,14 +374,19 @@ export default function Appointments() {
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter appointments by status">
+        {/* One scrollable strip on phones (it bleeds to the screen edge); wraps from sm up. */}
+        <div
+          className="-mx-4 mb-6 flex gap-2 overflow-x-auto px-4 py-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+          role="group"
+          aria-label="Filter appointments by status"
+        >
           {FILTERS.map(([val, label]) => (
             <button
               key={val}
               type="button"
               aria-pressed={filter === val}
               onClick={() => setFilter(val)}
-              className="mb-chip"
+              className="mb-chip shrink-0"
             >
               {label}
               <span className="ml-2 font-display text-base tabular-nums opacity-80">{counts[val]}</span>
