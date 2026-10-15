@@ -38,7 +38,8 @@ Key features:
 - Role-based access (student, counselor, admin) enforced by Firestore security rules.
 - Appointment booking and counselor availability management.
 - Confidential student-counselor chat.
-- Email alert to staff when a high-risk assessment is submitted (Cloud Function, optional).
+- Email alert to staff when a high-risk assessment is submitted. It runs on free tiers only (a Vercel route plus a scheduled GitHub Actions sweep that catches any missed alert); a Cloud Function version also exists but needs the paid Blaze plan and is not used.
+- A short once-per-session intro screen (skipped for reduced motion).
 - Accessibility target of WCAG 2.2 AA, with keyboard-safe dialogs and 44px tap targets.
 
 Product and design intent live in [`PRODUCT.md`](PRODUCT.md) and [`DESIGN.md`](DESIGN.md).
@@ -50,13 +51,13 @@ Product and design intent live in [`PRODUCT.md`](PRODUCT.md) and [`DESIGN.md`](D
 | Frontend | React 18, Vite 5, React Router 7, Tailwind CSS 3, Framer Motion, Recharts, Lucide icons |
 | Auth and data | Firebase Authentication (email/password and Google) and Cloud Firestore, called directly from the browser |
 | Access control | `firestore.rules` (the only server-side gate for student data) |
-| Alerts | Firebase Cloud Functions (Node 20, `firebase-functions` v6, `firebase-admin`, Nodemailer) |
+| Alerts | Vercel serverless routes (`client/api/`, `firebase-admin`, Nodemailer) triggered by the browser and by a GitHub Actions sweep. Optional alternative: Firebase Cloud Functions (`functions/`, needs Blaze, unused) |
 | Unit tests | Vitest |
 | End-to-end tests | Playwright (Firebase SDK replaced by in-memory fakes) |
 | Backend tests | Vitest with the Firebase Emulator Suite (`@firebase/rules-unit-testing`) |
 | UI documentation | Storybook 10 with the a11y addon |
 | CI | GitHub Actions (`.github/workflows/ci.yml`) |
-| Hosting | Vercel (client), Firebase (rules and functions) |
+| Hosting | Vercel (client and alert routes), Firebase (Auth, Firestore and rules) |
 
 There is no REST server. The browser talks straight to Firebase; see
 [`docs/API.md`](docs/API.md) for how operations map onto the usual endpoint and status-code model.
@@ -168,16 +169,18 @@ to `main` and every pull request.
 │   │   │                       validate.ts (Zod -> field errors), schemas/ (Zod: auth, check-in,
 │   │   │                       appointment, counselor, profile, chat)
 │   │   └── styles/             index.css (Tailwind base), theme.css (design tokens)
-│   ├── e2e/                    Playwright specs and Firebase fakes
+│   ├── e2e/                    Playwright specs and Firebase fakes (run in CI)
+│   ├── api/                    Vercel routes: alert-high-risk (sends the email) and alert-sweep (safety net)
 │   ├── vercel.json             SPA rewrite for Vercel
 │   ├── tsconfig.json           Strict TypeScript config (npm run typecheck)
 │   └── vite.config.ts          Build config and vendor chunk splitting
-├── functions/                  Cloud Function: emails staff on high-risk assessments
+├── functions/                  Optional Cloud Function version of the alert (needs the paid Blaze plan; unused)
 ├── backend-tests/              Emulator-based tests for rules, API operations and the function
 ├── docs/API.md                 Backend operations, roles and expected outcomes
 ├── firestore.rules             Firestore security rules
 ├── firebase.json               Firebase CLI config (rules and functions)
-├── .github/workflows/ci.yml    Continuous integration
+├── .github/workflows/ci.yml    Continuous integration (typecheck, unit, contrast, build, e2e, backend, audit)
+├── .github/workflows/alert-sweep.yml  Every 10 minutes: emails any high-risk check-in that was never alerted
 ├── PRODUCT.md                  Users, purpose and constraints
 └── DESIGN.md                   Design tokens and visual language
 ```
@@ -256,17 +259,17 @@ firebase deploy --only firestore:rules
 
 Alternatively, paste `firestore.rules` into the Firebase console.
 
-### Alert function (optional, requires the Firebase Blaze plan)
+### High-risk alert email (free)
 
-```bash
-cd functions && npm install && cd ..
-firebase functions:secrets:set SMTP_URL    # e.g. smtps://user:pass@smtp.host:465
-firebase deploy --only functions
-```
+The alert uses only free services: the browser calls `client/api/alert-high-risk.ts` right after a
+high-risk check-in is saved, and `.github/workflows/alert-sweep.yml` calls `client/api/alert-sweep.ts`
+every 10 minutes to email any high-risk check-in from the last 48 hours that was never alerted (for
+example the student closed the tab). Each check-in is alerted once (`alertSentAt`), risk is recomputed on
+the server, and the email carries no answers. It stays off until you set its environment variables and
+GitHub secrets; the steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) section 4.4.
 
-The function `alertOnHighRisk` fires when a document is created in `assessments`, recomputes risk
-on the server rather than trusting the client, and emails staff when the result is high. It is
-written and tested but **not deployed yet**.
+`functions/` holds an equivalent Cloud Function (`alertOnHighRisk`). It needs the paid Blaze plan, is
+not deployed, and must never run together with the route above (staff would get two emails).
 
 ## Documentation
 
@@ -274,7 +277,7 @@ written and tested but **not deployed yet**.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): system diagram, data model, security model, scaling
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): Vercel and Firebase deployment, rollback, troubleshooting
 - [`docs/API.md`](docs/API.md): backend operations, roles and expected outcomes
-- [`docs/DATA_AND_VALIDATION.md`](docs/DATA_AND_VALIDATION.md): document types (JSDoc), form validation rules with examples, scoring summary. The project is plain JavaScript; there is no TypeScript or Zod
+- [`docs/DATA_AND_VALIDATION.md`](docs/DATA_AND_VALIDATION.md): where the TypeScript types and Zod schemas live, form validation rules, scoring summary
 - [`PRODUCT.md`](PRODUCT.md): product purpose, users and constraints
 - [`DESIGN.md`](DESIGN.md): design system and tokens
 - Storybook (`npm run storybook` in `client/`): UI components and design foundations

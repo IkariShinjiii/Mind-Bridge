@@ -8,7 +8,7 @@ where it will strain as usage grows. For setup and release steps see
 
 Mind Bridge is a **serverless single-page app**. There is no application server. The browser talks
 directly to Firebase, and Firestore security rules are the only server-side gate for data access. A
-single optional Cloud Function sends email alerts.
+pair of small Vercel serverless routes (`client/api/`) sends the high-risk email alerts, so the project stays on free plans. An equivalent Cloud Function exists in `functions/` but needs the paid Blaze plan and is not used.
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
         Auth["Authentication<br/>(Email/Password, Google)"]
         Rules{{"firestore.rules<br/>(access control)"}}
         DB[("Cloud Firestore<br/>users, assessments, appointments,<br/>availability, messages")]
-        Fn["Cloud Function<br/>alertOnHighRisk (optional)"]
+        Fn["Vercel routes<br/>alert-high-risk + alert-sweep"]
     end
 
     SMTP["SMTP provider"]
@@ -47,9 +47,9 @@ The same picture as plain text:
         ├──sign in──▶ Firebase Auth
         │
         └──read/write (ID token)──▶ firestore.rules ──▶ Cloud Firestore
-                                                           │ onCreate assessments/{id}
+                                                           │ browser call + 10-minute sweep
                                                            ▼
-                                                  Cloud Function ──▶ SMTP ──▶ staff email
+                                                  Vercel route ──▶ SMTP ──▶ staff email
 ```
 
 ### Design decisions
@@ -75,7 +75,7 @@ pages ──▶ lib/api.ts ──▶ lib/firebase.js ──▶ Firebase SDK
 | Routing | `src/App.tsx` | Lazy-loaded routes, auth and role redirects |
 | Auth state | `src/components/AuthProvider.tsx` | Current user, role, approval and active flags |
 | Data access | `src/lib/api.ts` | The only module that calls Firestore; everything else imports from it |
-| Business logic | `src/utils/scoring.ts`, `validation.js`, `errors.ts`, `dates.js` | Pure functions, covered by unit tests |
+| Business logic | `src/utils/scoring.ts`, `predicates.ts`, `errors.ts`, `dates.ts`, plus Zod schemas in `src/lib/schemas/` | Pure functions, covered by unit tests |
 | UI primitives | `src/components/ui/` | Shared components with Storybook stories |
 | Features | `src/features/{student,appointments,staff,settings,chat}` | One folder per user-facing area |
 
@@ -162,10 +162,10 @@ denied on every collection.
 sequenceDiagram
     participant S as Student browser
     participant F as Firestore
-    participant C as alertOnHighRisk
+    participant C as api/alert-high-risk (Vercel)
     participant M as SMTP
     S->>F: create assessments/{id} (status "open")
-    F-->>C: onDocumentCreated trigger
+    S->>C: POST assessmentId (ID token); the 10-minute sweep covers a missed call
     C->>C: recompute risk (crisis item OR total >= 60% of max)
     alt not high risk
         C-->>F: return, no email
@@ -176,8 +176,8 @@ sequenceDiagram
     end
 ```
 
-If the SMTP send fails, the error is logged and no email is sent: the function does not enable
-retries. See [scaling](#6-scaling-considerations).
+Each check-in is claimed with `alertSentAt` before sending, so it alerts once; if the SMTP send fails the
+claim is released and the next sweep (every 10 minutes) retries it. See [scaling](#6-scaling-considerations).
 
 ## 6. Scaling considerations
 
