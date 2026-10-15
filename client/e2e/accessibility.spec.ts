@@ -39,7 +39,7 @@ async function expectNoViolations(page: Page, label: string): Promise<void> {
     (v) =>
       `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes
         .slice(0, 3)
-        .map((n) => n.target.join(" "))
+        .map((n) => `${n.target.join(" ")}  ${n.html.slice(0, 140)}`)
         .join("\n    ")}`,
   );
   expect(summary, `${label}: WCAG 2.1 AA violations`).toEqual([]);
