@@ -18,8 +18,9 @@ async function elementsPastEdge(page: Page): Promise<string[]> {
           style.position !== "fixed" &&
           style.visibility !== "hidden" &&
           !el.closest(".sr-only") &&
-          // Intentional: the settings section list scrolls sideways on phones.
-          !el.closest("nav[aria-label='Settings sections']")
+          // Intentional: these strips scroll sideways on phones.
+          !el.closest("nav[aria-label='Settings sections']") &&
+          !el.closest("[aria-label='Filter appointments by status']")
         );
       })
       .slice(0, 5)
