@@ -587,7 +587,8 @@ export default function StudentDashboard() {
                         : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
                     }`}
                   >
-                    {label} <span className="font-normal opacity-80">({size})</span>
+                    <span className="block whitespace-nowrap">{label}</span>
+                    <span className="block text-sm font-normal opacity-80">{size}</span>
                   </button>
                 ))}
               </div>
