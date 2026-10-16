@@ -295,6 +295,21 @@ describe("getMyAssessments / getAppointments / getMyAvailability", () => {
   );
 });
 
+describe("getMyAssessments ordering", () => {
+  it("returns the newest check-in first, whatever order Firestore sends", async () => {
+    fs.getDocs.mockResolvedValue(
+      snap([
+        ["b", { createdAt: "2026-10-05T10:00:00.000Z" }],
+        ["c", { createdAt: "2026-10-12T10:00:00.000Z" }],
+        ["a", { createdAt: "2026-09-20T10:00:00.000Z" }],
+        ["z", {}],
+      ]),
+    );
+    const out = (await call("getMyAssessments")) as Array<{ id: string }>;
+    expect(out.map((x) => x.id)).toEqual(["c", "b", "a", "z"]);
+  });
+});
+
 describe("updateAssessmentStatus", () => {
   it("writes status and reviewedAt, plus notes when given", async () => {
     await api.updateAssessmentStatus("a1", "reviewed", "called");
