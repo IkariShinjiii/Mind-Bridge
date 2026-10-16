@@ -25,7 +25,7 @@ import ErrorBoundary from "./components/ui/ErrorBoundary";
 import PageLoader from "./components/ui/PageLoader";
 import PublicShell from "./components/ui/PublicShell";
 import type { UserRole } from "./types";
-import { pageTitle } from "./utils/pageTitle";
+import { pageDescription, pageTitle } from "./utils/pageTitle";
 
 function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: UserRole[] }) {
   const { currentUser, userRole, accountStatus, loading, logout, refreshUserData } = useAuth();
@@ -80,6 +80,7 @@ export default function App() {
 
   useEffect(() => {
     document.title = pageTitle(location.pathname);
+    document.querySelector('meta[name="description"]')?.setAttribute("content", pageDescription(location.pathname));
   }, [location.pathname]);
 
   return (
