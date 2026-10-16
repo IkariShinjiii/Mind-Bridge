@@ -215,7 +215,10 @@ export default function UserSettings() {
         .then((data) => {
           if (isMounted) setAppointmentsList(data);
         })
-        .catch((err: unknown) => console.error("Error fetching sessions:", err))
+        .catch((err: unknown) => {
+          console.error("Error fetching sessions:", err);
+          if (isMounted) toast.error(friendlyError(err, "Your sessions could not be loaded. Try again."));
+        })
         .finally(() => {
           if (isMounted) setLoadingApts(false);
         });

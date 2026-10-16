@@ -73,3 +73,11 @@ test.describe("Toast notifications", () => {
     await expect(toast).toBeVisible();
   });
 });
+
+test("a dashboard that fails to load says so instead of looking empty", async ({ page }) => {
+  await seed(page);
+  await logIn(page, STUDENT);
+  await page.evaluate(() => localStorage.setItem("mb_e2e_fail_reads", "appointments"));
+  await page.reload();
+  await expect(page.getByRole("alert").filter({ hasText: "could not load" })).toBeVisible();
+});
