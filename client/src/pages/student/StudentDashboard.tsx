@@ -36,6 +36,7 @@ import { validate } from "../../lib/validate";
 import { checkInSchema } from "../../lib/schemas";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
+import { useToast } from "../../components/ui/Toast";
 import { firstName } from "../../utils/names";
 import type { Appointment, Assessment, AvailabilitySlot, ScreeningQuestion, StoredDate } from "../../types";
 
@@ -108,6 +109,7 @@ const SCALE_OPTIONS = [
 ];
 
 export default function StudentDashboard() {
+  const toast = useToast();
   const { currentUser, userData } = useAuth();
   const userName = userData?.name || currentUser?.displayName || "Student";
   const displayName = firstName(userName, "Student");
@@ -145,10 +147,20 @@ export default function StudentDashboard() {
       setLoadingAppointments(true);
       setLoadingHistory(true);
       try {
+        let failed = false;
         const [apts, history] = await Promise.all([
-          getAppointments().catch((): Appointment[] => []),
-          getMyAssessments().catch((): Assessment[] => []),
+          getAppointments().catch((): Appointment[] => {
+            failed = true;
+            return [];
+          }),
+          getMyAssessments().catch((): Assessment[] => {
+            failed = true;
+            return [];
+          }),
         ]);
+        if (failed && mounted) {
+          toast.error("Some of your dashboard could not load, so it may look empty. Refresh the page to try again.");
+        }
         if (!mounted) return;
         setAppointments(Array.isArray(apts) ? apts : []);
         setPastAssessments(Array.isArray(history) ? history : []);

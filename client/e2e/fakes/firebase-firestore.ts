@@ -66,6 +66,8 @@ export const query = (ref: CollectionRef, ...wheres: WhereClause[]): CollectionR
 export const serverTimestamp = (): string => new Date().toISOString();
 
 export async function getDocs(ref: CollectionRef): Promise<FakeSnapshot> {
+  // Tests set localStorage `mb_e2e_fail_reads` to a collection name to make reads of it fail.
+  if (localStorage.getItem("mb_e2e_fail_reads") === ref.name) throw new Error("E2E injected read failure");
   return snapshot(ref);
 }
 
