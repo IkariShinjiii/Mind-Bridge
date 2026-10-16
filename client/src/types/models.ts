@@ -87,6 +87,17 @@ export interface Assessment {
   screenRaised?: boolean;
 }
 
+/** Document in `wellbeing/{id}`: one WHO-5 Well-Being Index, kept apart from the check-in. */
+export interface WellbeingEntry {
+  id: string;
+  studentId: string;
+  /** Five answers, 0 to 5 each. */
+  answers: number[];
+  /** 0 to 100 (raw 0 to 25, times 4). */
+  score: number;
+  createdAt: string;
+}
+
 /** Document in `appointments/{id}`. */
 export interface Appointment {
   id: string;

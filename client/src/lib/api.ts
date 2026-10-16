@@ -16,6 +16,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { db } from "./firebase";
 import { scoreAnswers, type QuestionLike } from "../utils/scoring";
+import { scoreWho5 } from "../utils/clinical";
 import { AppError, toAppError } from "../utils/errors";
 import type {
   Appointment,
@@ -26,6 +27,7 @@ import type {
   ChatMessage,
   MessageSenderRole,
   UserProfile,
+  WellbeingEntry,
 } from "../types";
 
 /**
@@ -179,6 +181,44 @@ export const getAssessments = (): Promise<Assessment[]> =>
       console.warn("Could not enrich assessment names", err);
       return assessments;
     }
+  });
+
+const newestFirst = <T extends { createdAt?: string }>(items: T[]): T[] =>
+  items.sort((x, y) => new Date(y.createdAt || 0).getTime() - new Date(x.createdAt || 0).getTime());
+
+/**
+ * Saves a WHO-5 wellbeing questionnaire for the signed-in student. The score is worked out here from the answers,
+ * and the database rules check it again. It is informational: it never changes a check-in's risk level.
+ * @param answers - five values from 0 to 5
+ */
+export const submitWellbeing = (answers: ReadonlyArray<number>): Promise<WellbeingEntry> =>
+  guard(async () => {
+    const uid = getCurrentUserId();
+    if (!uid) throw new AppError("permission-denied", "Sign in to save your wellbeing score.");
+    const payload: Omit<WellbeingEntry, "id"> = {
+      studentId: uid,
+      answers: [...answers],
+      score: scoreWho5(answers).score,
+      createdAt: new Date().toISOString(),
+    };
+    const docRef = await addDoc(collection(db, "wellbeing"), payload);
+    return { id: docRef.id, ...payload };
+  });
+
+/** The signed-in student's own wellbeing entries, newest first. Empty when nobody is signed in. */
+export const getMyWellbeing = (): Promise<WellbeingEntry[]> =>
+  guard(async () => {
+    const uid = getCurrentUserId();
+    if (!uid) return [];
+    const q = query(collection(db, "wellbeing"), where("studentId", "==", uid));
+    return newestFirst(mapDocs<WellbeingEntry>(await getDocs(q)));
+  });
+
+/** One student's wellbeing entries, newest first. For staff reading a case. */
+export const getWellbeingFor = (studentId: string): Promise<WellbeingEntry[]> =>
+  guard(async () => {
+    const q = query(collection(db, "wellbeing"), where("studentId", "==", studentId));
+    return newestFirst(mapDocs<WellbeingEntry>(await getDocs(q)));
   });
 
 /** Lists the signed-in student's own check-ins. Empty when nobody is signed in. */

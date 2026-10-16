@@ -310,6 +310,43 @@ describe("getMyAssessments ordering", () => {
   });
 });
 
+describe("wellbeing (WHO-5)", () => {
+  it("submitWellbeing saves the answers with a score worked out from them, for the signed-in student", async () => {
+    fs.addDoc.mockResolvedValue({ id: "w9" });
+    const out = (await call("submitWellbeing", [3, 3, 3, 3, 3])) as { id: string; studentId: string; score: number };
+    expect(out).toMatchObject({ id: "w9", studentId: "stu1", score: 60 });
+    const [ref, payload] = lastWrite(fs.addDoc) as [{ name: string }, Record<string, unknown>];
+    expect(ref.name).toBe("wellbeing");
+    expect(payload).toMatchObject({ studentId: "stu1", answers: [3, 3, 3, 3, 3], score: 60 });
+    expect(Object.keys(payload).sort()).toEqual(["answers", "createdAt", "score", "studentId"]);
+  });
+
+  it("getMyWellbeing lists only the student's own entries, newest first, and is empty when signed out", async () => {
+    fs.getDocs.mockResolvedValue(
+      snap([
+        ["a", { createdAt: "2026-09-01T00:00:00.000Z" }],
+        ["b", { createdAt: "2026-10-01T00:00:00.000Z" }],
+      ]),
+    );
+    expect(((await call("getMyWellbeing")) as Array<{ id: string }>).map((x) => x.id)).toEqual(["b", "a"]);
+    expect(lastWrite(fs.getDocs)[0]).toEqual({
+      kind: "query",
+      name: "wellbeing",
+      clauses: [{ field: "studentId", op: "==", value: "stu1" }],
+    });
+    signIn(null);
+    fs.getDocs.mockClear();
+    expect(await call("getMyWellbeing")).toEqual([]);
+    expect(fs.getDocs).not.toHaveBeenCalled();
+  });
+
+  it("submitWellbeing refuses when nobody is signed in", async () => {
+    signIn(null);
+    await expect(call("submitWellbeing", [1, 1, 1, 1, 1])).rejects.toMatchObject({ code: "permission-denied" });
+    expect(fs.addDoc).not.toHaveBeenCalled();
+  });
+});
+
 describe("updateAssessmentStatus", () => {
   it("writes status and reviewedAt, plus notes when given", async () => {
     await api.updateAssessmentStatus("a1", "reviewed", "called");

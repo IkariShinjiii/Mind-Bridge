@@ -37,6 +37,21 @@ service cloud.firestore {
         && (d.total * 10 < d.maxScore * 3 || d.riskLevel != 'low');
     }
 
+    // A WHO-5 wellbeing entry: only these fields, five whole-number answers from 0 to 5, and a score that is exactly
+    // the answers added up and multiplied by 4 (0 to 100). It is informational and never changes a check-in's risk.
+    function validNewWellbeing(d) {
+      return d.keys().hasOnly(['studentId', 'answers', 'score', 'createdAt'])
+        && d.createdAt is string
+        && d.answers is list && d.answers.size() == 5
+        && d.answers[0] is int && d.answers[0] >= 0 && d.answers[0] <= 5
+        && d.answers[1] is int && d.answers[1] >= 0 && d.answers[1] <= 5
+        && d.answers[2] is int && d.answers[2] >= 0 && d.answers[2] <= 5
+        && d.answers[3] is int && d.answers[3] >= 0 && d.answers[3] <= 5
+        && d.answers[4] is int && d.answers[4] >= 0 && d.answers[4] <= 5
+        && d.score is int
+        && d.score == (d.answers[0] + d.answers[1] + d.answers[2] + d.answers[3] + d.answers[4]) * 4;
+    }
+
     match /users/{uid} {
       // Staff need to read student profiles (names, emails, assignments).
       allow read: if signedIn() && (request.auth.uid == uid || isStaff());
@@ -73,6 +88,13 @@ service cloud.firestore {
         && touchesOnly(['status', 'reviewedAt', 'counselorNotes'])
         && request.resource.data.status in ['open', 'reviewed', 'escalated'];
       allow delete: if false;
+    }
+
+    match /wellbeing/{id} {
+      allow create: if isActive() && request.resource.data.studentId == request.auth.uid
+        && validNewWellbeing(request.resource.data);
+      allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
+      allow update, delete: if false;
     }
 
     match /appointments/{id} {

@@ -131,3 +131,46 @@ export function fullAnswersOf(a: {
   const source = fromAnswers ?? fromSummary;
   return source ? source.map((v) => Number(v) || 0) : null;
 }
+
+/**
+ * WHO-5 Well-Being Index (1998 version): five positively worded statements about the last two weeks, each answered
+ * 0 (at no time) to 5 (all of the time). Raw score 0 to 25, multiplied by 4 for a percentage from 0 to 100. A
+ * percentage below 50 (raw below 13) suggests low wellbeing and is the published prompt to look further.
+ * Free to use. WHO-5 Well-Being Index, Psychiatric Research Unit, WHO Collaborating Centre for Mental Health,
+ * Frederiksborg General Hospital, Hillerød, Denmark.
+ */
+export const WHO5_QUESTIONS: ReadonlyArray<string> = [
+  "I have felt cheerful and in good spirits",
+  "I have felt calm and relaxed",
+  "I have felt active and vigorous",
+  "I woke up feeling fresh and rested",
+  "My daily life has been filled with things that interest me",
+];
+
+export const WHO5_OPTIONS: ReadonlyArray<{ value: number; label: string }> = [
+  { value: 5, label: "All of the time" },
+  { value: 4, label: "Most of the time" },
+  { value: 3, label: "More than half of the time" },
+  { value: 2, label: "Less than half of the time" },
+  { value: 1, label: "Some of the time" },
+  { value: 0, label: "At no time" },
+];
+
+export const WHO5_LOW_BELOW = 50;
+
+export interface Who5Result {
+  raw: number;
+  /** 0 to 100 */
+  score: number;
+  low: boolean;
+}
+
+/** Scores five WHO-5 answers (0 to 5 each). */
+export function scoreWho5(answers: ReadonlyArray<number | null | undefined>): Who5Result {
+  const raw = Array.from({ length: WHO5_QUESTIONS.length }, (_, i) => Math.min(5, Math.max(0, val(answers[i])))).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  const score = raw * 4;
+  return { raw, score, low: score < WHO5_LOW_BELOW };
+}
