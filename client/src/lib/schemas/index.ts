@@ -4,3 +4,4 @@ export * from "./appointment";
 export * from "./counselor";
 export * from "./profile";
 export * from "./chat";
+export * from "./wellbeing";

@@ -28,6 +28,7 @@ import {
   reactivateUser,
   assignCounselorToStudent,
   getUserSettings,
+  getWellbeingFor,
 } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
@@ -326,6 +327,8 @@ export default function AdminPanel() {
   // Case Inspector Modal State
   const [activeCase, setActiveCase] = useState<Assessment | null>(null);
   const [studentContact, setStudentContact] = useState<StaffUser | null>(null);
+  /** The open case's student's most recent WHO-5 wellbeing score (0 to 100), if they have answered it. */
+  const [wellbeingScore, setWellbeingScore] = useState<{ score: number; date: string } | null>(null);
   const [loadingContact, setLoadingContact] = useState(false);
   const [counselorNoteInput, setCounselorNoteInput] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
@@ -395,7 +398,11 @@ export default function AdminPanel() {
     setActiveCase(item);
     setCounselorNoteInput(item.counselorNotes || "");
     setStudentContact(null);
+    setWellbeingScore(null);
     if (item.studentId && item.studentId !== "anonymous") {
+      getWellbeingFor(item.studentId)
+        .then((list) => setWellbeingScore(list[0] ? { score: list[0].score, date: list[0].createdAt } : null))
+        .catch((err: unknown) => console.warn("Could not load wellbeing score", err));
       setLoadingContact(true);
       try {
         const studentDoc = await getUserSettings(item.studentId);
@@ -1131,6 +1138,13 @@ export default function AdminPanel() {
               </span>
             </div>
             <ScreenSummary assessment={activeCase} />
+            {wellbeingScore && (
+              <p className="text-[color:var(--mb-muted)]">
+                Wellbeing (WHO-5) {wellbeingScore.score} of 100
+                {wellbeingScore.score < 50 ? ", low (under 50)" : ""}, answered{" "}
+                {new Date(wellbeingScore.date).toLocaleDateString()}. Informational; it does not change the risk level.
+              </p>
+            )}
 
             <section aria-labelledby="resp-heading">
               <h3 id="resp-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">

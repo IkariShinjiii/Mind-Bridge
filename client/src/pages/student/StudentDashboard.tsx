@@ -35,6 +35,7 @@ import { formatDateTime, parseDate } from "../../utils/dates";
 import { validate } from "../../lib/validate";
 import { checkInSchema, fullCheckInSchema } from "../../lib/schemas";
 import { FULL_QUESTIONS } from "../../lib/fullQuestions";
+import WellbeingCheck from "../../components/student/WellbeingCheck";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
@@ -1078,6 +1079,8 @@ export default function StudentDashboard() {
               )}
             </AnimatePresence>
           </div>
+
+          <WellbeingCheck />
         </section>
 
         {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}

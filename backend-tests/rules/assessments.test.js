@@ -51,6 +51,15 @@ describe("assessments - CREATE (submitResponse)", () => {
       await assertFails(submit({ total: 0, maxScore: 0 }));
       await assertFails(submit({ total: 0, maxScore: 61 }));
     });
+    it("a full PHQ-9 + GAD-7 check-in (16 answers, out of 48) fits the same rules", async () => {
+      const sixteen = (n) => Array.from({ length: 16 }, (_, i) => ({ id: `q${i + 1}`, text: "q", score: n, isCrisisItem: i === 8 }));
+      const full = { answers: Array(16).fill(1), questionSummary: sixteen(1), maxScore: 48 };
+      await assertSucceeds(submit({ ...full, total: 14, riskLevel: "low" })); // 14 of 48 is under 30%
+      // PHQ-9 of 15 is high by the published bands but only 31% of 48, so "high" is allowed (raising is fine)...
+      await assertSucceeds(submit({ ...full, total: 15, riskLevel: "high" }));
+      // ...and the percentage floor still applies: 29 of 48 is 60% and cannot be filed lower than high.
+      await assertFails(submit({ ...full, total: 29, riskLevel: "medium" }));
+    });
     it("extra fields are refused, including a pre-set review time or notes", async () => {
       await assertFails(submit({ isAdmin: true }));
       await assertFails(submit({ reviewedAt: "2026-10-01T00:00:00.000Z" }));

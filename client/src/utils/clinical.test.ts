@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gad7Band, phq9Band, quickScreen, QUICK_SOURCE, scoreFull } from "./clinical";
+import { gad7Band, phq9Band, quickScreen, QUICK_SOURCE, scoreFull, scoreWho5 } from "./clinical";
 import { scoreAnswers } from "./scoring";
 
 describe("published bands", () => {
@@ -64,5 +64,18 @@ describe("scoreFull", () => {
     expect(scoreFull(answers(zeros9, [2, 1, 0, 0, 0, 0, 0])).level).toBe("medium");
     // Items 4 and 5 of the PHQ-9 are NOT the GAD-2.
     expect(scoreFull(answers([0, 0, 0, 2, 1, 0, 0, 0, 0], zeros7)).level).toBe("low");
+  });
+});
+
+describe("scoreWho5", () => {
+  it("multiplies the raw 0 to 25 by 4 and calls anything under 50 low", () => {
+    expect(scoreWho5([5, 5, 5, 5, 5])).toEqual({ raw: 25, score: 100, low: false });
+    expect(scoreWho5([0, 0, 0, 0, 0])).toEqual({ raw: 0, score: 0, low: true });
+    expect(scoreWho5([3, 3, 3, 3, 3])).toMatchObject({ score: 60, low: false });
+    expect(scoreWho5([3, 2, 3, 2, 2])).toMatchObject({ raw: 12, score: 48, low: true });
+    expect(scoreWho5([3, 3, 2, 2, 3])).toMatchObject({ raw: 13, score: 52, low: false });
+  });
+  it("keeps stray values inside 0 to 5", () => {
+    expect(scoreWho5([9, -3, 5, 5, 5]).raw).toBe(20);
   });
 });

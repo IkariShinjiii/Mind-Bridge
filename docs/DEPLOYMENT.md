@@ -110,6 +110,10 @@ cd backend-tests && npm test        # needs Java 21
 Rules take effect within about a minute. Alternatively paste `firestore.rules` into the console
 and use the **Rules Playground** to simulate requests before publishing.
 
+**Publish the rules after the WHO-5 wellbeing change.** It adds a `wellbeing` collection. Until the new rules are
+published, saving a wellbeing score fails with a "could not be saved" message (the rest of the app is unaffected, and
+the check-in, including the full PHQ-9 + GAD-7 one, needs no rules change).
+
 ### 4.3 Alert function (optional)
 
 Requires the **Blaze** plan. The function is written and tested but **not deployed yet**.

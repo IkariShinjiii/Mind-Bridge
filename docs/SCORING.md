@@ -75,10 +75,19 @@ check-in exactly when the browser says high. A test feeds 500 generated answer s
 Firestore rules need no change: 16 answers and a maximum of 48 fit the existing limits, and the percentage rule they
 enforce can only be met or exceeded.
 
+## Wellbeing add-on (WHO-5)
+
+An optional card on the student dashboard, kept apart from the check-in. Five positive statements about the last two
+weeks, each 0 (at no time) to 5 (all of the time). Raw 0 to 25, times 4, so 0 to 100. Below 50 is the published prompt to
+look further, and the card says so gently and offers a counselor. It is stored in its own `wellbeing` collection, staff
+see the latest score in the case view, and it **never changes a check-in's risk level** and never sends an alert. The
+Firestore rules check that the score is exactly the answers added up times 4.
+
 ## Sources
 
 * Kroenke K, Spitzer RL, Williams JBW. The PHQ-9. J Gen Intern Med 2001 (public domain).
 * Spitzer RL et al. A brief measure for assessing generalized anxiety disorder: the GAD-7. Arch Intern Med 2006.
 * Kroenke K et al. The Patient Health Questionnaire-2. Med Care 2003 (cutoff 3).
 * Kroenke K et al. Anxiety disorders in primary care: the GAD-2. Ann Intern Med 2007 (cutoff 3).
+* Bech P et al. WHO (Five) Well-Being Index (1998 version), Psychiatric Research Unit, Frederiksborg General Hospital, Hillerød, Denmark. Free to use.
 * Cutoffs cross-checked against [urtuba/psytools](https://github.com/urtuba/psytools) (MIT code; no code copied).
