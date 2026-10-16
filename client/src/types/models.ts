@@ -83,6 +83,8 @@ export interface Assessment {
   assignedCounselorId?: string;
   /** Set by the staff dashboard (never stored) when the saved risk level or safety flag was lower than the answers justify. */
   riskCorrectedFrom?: RiskLevel;
+  /** Set by the staff dashboard (never stored) when a positive PHQ-2 or GAD-2 screen lifted a low check-in to medium. */
+  screenRaised?: boolean;
 }
 
 /** Document in `appointments/{id}`. */

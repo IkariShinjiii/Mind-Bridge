@@ -81,3 +81,29 @@ describe("withVerifiedRisk", () => {
     expect(out.riskLevel).toBe("low");
   });
 });
+
+describe("positive PHQ-2 / GAD-2 screen", () => {
+  const answers = [2, 1, 0, 2, 1, 0, 0];
+
+  it("lifts a low check-in to medium and says why, without calling it a correction", () => {
+    const out = withVerifiedRisk(base({ answers, total: 6 }));
+    expect(out).toMatchObject({ riskLevel: "medium", screenRaised: true, flaggedForImmediateReview: false });
+    expect(out.riskCorrectedFrom).toBeUndefined();
+  });
+
+  it("reads the scores from the question summary when answers are missing", () => {
+    const questionSummary = answers.map((score, i) => ({ id: `q${i + 1}`, text: "", score, isCrisisItem: i === 6 }));
+    expect(withVerifiedRisk(base({ answers: [], questionSummary, total: 6 })).riskLevel).toBe("medium");
+  });
+
+  it("leaves negative screens low, and never lowers or touches higher levels", () => {
+    expect(withVerifiedRisk(base({ answers: [1, 1, 0, 1, 1, 1, 0], total: 5 })).riskLevel).toBe("low");
+    const high = withVerifiedRisk(base({ answers, total: 6, riskLevel: "high" }));
+    expect(high.riskLevel).toBe("high");
+    expect(high.screenRaised).toBeUndefined();
+  });
+
+  it("ignores check-ins that are not the seven-question quick form", () => {
+    expect(withVerifiedRisk(base({ answers: [3, 3, 3, 3] })).riskLevel).toBe("low");
+  });
+});

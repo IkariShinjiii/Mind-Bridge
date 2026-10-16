@@ -177,3 +177,27 @@ test.describe("Counselor accessing student data", () => {
     });
   });
 });
+
+test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({ page }) => {
+  const answers = [2, 1, 0, 2, 1, 0, 0];
+  await seed(page, {
+    docs: {
+      assessments: {
+        s1: {
+          ...lowCase,
+          answers,
+          questionSummary: questionSummary.map((q, i) => ({ ...q, score: answers[i] })),
+          total: 6,
+        },
+      },
+    },
+  });
+  await logIn(page, COUNSELOR);
+  await page.getByRole("group", { name: "Filter cases" }).getByRole("button", { name: "Medium risk", exact: true }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "Carlo Other" })).toContainText("medium risk");
+  await page.getByRole("button", { name: "Inspect case" }).click();
+  const dialog = page.getByRole("dialog", { name: "Carlo Other" });
+  await expect(dialog).toContainText("Depression screen (PHQ-2) 3 of 6, positive");
+  await expect(dialog).toContainText("Anxiety screen (GAD-2) 3 of 6, positive");
+  await expect(dialog).toContainText("Raised to medium because a screen is positive");
+});

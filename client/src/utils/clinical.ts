@@ -62,6 +62,18 @@ export interface QuickScreen {
   gad2Positive: boolean;
 }
 
+/** The seven quick check-in answers of a saved check-in, or null when it is some other shape. */
+export function quickAnswersOf(a: {
+  answers?: ReadonlyArray<number | null | undefined>;
+  questionSummary?: ReadonlyArray<{ score?: number | null }>;
+}): number[] | null {
+  const fromAnswers = Array.isArray(a.answers) && a.answers.length === 7 ? a.answers : null;
+  const fromSummary =
+    Array.isArray(a.questionSummary) && a.questionSummary.length === 7 ? a.questionSummary.map((q) => q.score) : null;
+  const source = fromAnswers ?? fromSummary;
+  return source ? source.map((v) => Number(v) || 0) : null;
+}
+
 const val = (v: number | null | undefined): number => Number(v) || 0;
 
 /** The PHQ-2 and GAD-2 inside a quick check-in (answers in question order). */

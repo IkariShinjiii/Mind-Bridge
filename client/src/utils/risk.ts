@@ -1,4 +1,5 @@
 import type { Assessment, RiskLevel } from "../types";
+import { quickAnswersOf, quickScreen } from "./clinical";
 
 const RANK: Readonly<Record<RiskLevel, number>> = { low: 0, medium: 1, high: 2 };
 
@@ -28,7 +29,14 @@ export function withVerifiedRisk(assessment: Assessment): Assessment {
   const riskLevel = RANK[fromScore] > RANK[stored] ? fromScore : stored;
   const flaggedForImmediateReview = Boolean(assessment.flaggedForImmediateReview) || crisis;
 
+  // A positive PHQ-2 or GAD-2 (3 or more of 6) lifts a low check-in to medium. Never lowers, and never alerts: only high does.
+  const answers = quickAnswersOf(assessment);
+  const screen = answers ? quickScreen(answers) : null;
+  const screenRaised = riskLevel === "low" && Boolean(screen && (screen.phq2Positive || screen.gad2Positive));
+  const level: RiskLevel = screenRaised ? "medium" : riskLevel;
+
   const raised = riskLevel !== stored || flaggedForImmediateReview !== Boolean(assessment.flaggedForImmediateReview);
-  if (!raised) return { ...assessment, riskLevel };
-  return { ...assessment, riskLevel, flaggedForImmediateReview, riskCorrectedFrom: stored };
+  const extra = screenRaised ? { screenRaised: true } : {};
+  if (!raised) return { ...assessment, riskLevel: level, ...extra };
+  return { ...assessment, riskLevel: level, flaggedForImmediateReview, riskCorrectedFrom: stored, ...extra };
 }
