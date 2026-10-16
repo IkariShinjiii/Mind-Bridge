@@ -239,3 +239,32 @@ describe("sweepAlerts", () => {
     expect(since).toBe("2026-10-12T12:00:00.000Z");
   });
 });
+
+describe("assess for the full PHQ-9 + GAD-7 check-in", async () => {
+  const { scoreFull } = await import("../src/utils/clinical");
+  const doc = (answers: number[]): AssessmentDoc => ({
+    total: answers.reduce((a, b) => a + b, 0),
+    maxScore: 48,
+    questionSummary: answers.map((score, i) => ({ score, isCrisisItem: i === 8 })),
+  });
+
+  it("is high at PHQ-9 15 even though that is under 60% of 48", () => {
+    expect(assess(doc([2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0])).high).toBe(true);
+  });
+
+  it("is high at GAD-7 15, and not at 14", () => {
+    expect(assess(doc([0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 2, 0, 0])).high).toBe(false);
+    expect(assess(doc([0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 0, 0])).high).toBe(true);
+  });
+
+  it("agrees with the browser's scoring on every kind of answer set", () => {
+    let seed = 7;
+    const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+    for (let n = 0; n < 500; n++) {
+      const answers = Array.from({ length: 16 }, () => Math.floor(rand() * rand() * 4));
+      const total = answers.reduce((a, b) => a + b, 0);
+      const browserHigh = scoreFull(answers).level === "high" || total >= 48 * 0.6;
+      expect(assess(doc(answers)).high, answers.join(",")).toBe(browserHigh);
+    }
+  });
+});

@@ -33,7 +33,9 @@ import Modal from "../../components/ui/Modal";
 import BookingFlow from "../../components/appointments/BookingFlow";
 import { formatDateTime, parseDate } from "../../utils/dates";
 import { validate } from "../../lib/validate";
-import { checkInSchema } from "../../lib/schemas";
+import { checkInSchema, fullCheckInSchema } from "../../lib/schemas";
+import { FULL_QUESTIONS } from "../../lib/fullQuestions";
+import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
 import { useToast } from "../../components/ui/Toast";
@@ -53,7 +55,7 @@ function formatShortDate(val: StoredDate): string {
 
 // Seven items adapted (paraphrased) from the PHQ-9 and GAD-7. These are not the validated instruments themselves,
 // so the app calls the result a screening aid, never a diagnosis.
-const SCREENING_QUESTIONS: ScreeningQuestion[] = [
+const QUICK_QUESTIONS: ScreeningQuestion[] = [
   {
     id: "q1",
     text: "Little interest or pleasure in doing academic or daily activities",
@@ -99,7 +101,9 @@ const SCREENING_QUESTIONS: ScreeningQuestion[] = [
 ];
 
 /** A fresh, unanswered check-in. */
-const emptyAnswers = (): Array<number | null> => SCREENING_QUESTIONS.map(() => null);
+const emptyAnswers = (count: number): Array<number | null> => Array.from({ length: count }, () => null);
+
+type CheckInMode = "quick" | "full";
 
 const SCALE_OPTIONS = [
   { value: 0, label: "0 - Not at all", desc: "Never in the past 2 weeks" },
@@ -117,7 +121,9 @@ export default function StudentDashboard() {
   const [qIndex, setQIndex] = useState(0);
   // 1 slides the next question in from the right, -1 brings the previous one back from the left
   const [dir, setDir] = useState<1 | -1>(1);
-  const [answers, setAnswers] = useState<Array<number | null>>(emptyAnswers);
+  const [mode, setMode] = useState<CheckInMode>("quick");
+  const SCREENING_QUESTIONS = mode === "full" ? FULL_QUESTIONS : QUICK_QUESTIONS;
+  const [answers, setAnswers] = useState<Array<number | null>>(() => emptyAnswers(QUICK_QUESTIONS.length));
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [lastSubmission, setLastSubmission] = useState<Assessment | null>(null);
   const [submittingSurvey, setSubmittingSurvey] = useState(false);
@@ -222,6 +228,15 @@ export default function StudentDashboard() {
     setAnswers(copy);
   }
 
+  /** Switch between the quick and the full check-in. Only offered before the first answer, so nothing is lost. */
+  function chooseMode(next: CheckInMode) {
+    if (next === mode) return;
+    setMode(next);
+    setAnswers(emptyAnswers((next === "full" ? FULL_QUESTIONS : QUICK_QUESTIONS).length));
+    setQIndex(0);
+    setSubmitError("");
+  }
+
   function goToQuestion(index: number) {
     if (index === qIndex) return;
     setDir(index > qIndex ? 1 : -1);
@@ -232,7 +247,7 @@ export default function StudentDashboard() {
     if (qIndex < SCREENING_QUESTIONS.length - 1) {
       goToQuestion(qIndex + 1);
     } else {
-      const check = validate(checkInSchema, { answers });
+      const check = validate(mode === "full" ? fullCheckInSchema : checkInSchema, { answers });
       if (!check.ok) {
         setSubmitError(check.error.userMessage);
         return;
@@ -240,8 +255,8 @@ export default function StudentDashboard() {
       setSubmittingSurvey(true);
       setSubmitError("");
       try {
-        // Crisis detection rule: Question 7 (index 6) > 0 triggers immediate review
-        const crisisScore = Number(answers[6] || 0);
+        // Crisis detection rule: the safety question (quick: question 7, full: PHQ-9 item 9) above 0 triggers immediate review
+        const crisisScore = Number(answers[SCREENING_QUESTIONS.findIndex((q) => q.isCrisisItem)] || 0);
         const flaggedForImmediateReview = crisisScore > 0;
 
         const result = await submitResponse(answers, {
@@ -267,7 +282,7 @@ export default function StudentDashboard() {
   }
 
   function resetCheckIn() {
-    setAnswers(emptyAnswers());
+    setAnswers(emptyAnswers(SCREENING_QUESTIONS.length));
     setDir(1);
     setQIndex(0);
     setSurveyCompleted(false);
@@ -523,13 +538,50 @@ export default function StudentDashboard() {
                 Check-in
               </h2>
               <p className="text-[color:var(--mb-muted)]">
-                Seven questions about the last two weeks. About a minute. Your answers are visible to you and approved
-                guidance staff only.
+                {mode === "full"
+                  ? "Sixteen questions about the last two weeks (PHQ-9 and GAD-7). About three minutes."
+                  : "Seven questions about the last two weeks. About a minute."}{" "}
+                Your answers are visible to you and approved guidance staff only.
               </p>
               <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
                 By taking part, you consent to your answers being collected and processed for triage and support.
               </p>
+              {mode === "full" && (
+                <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
+                  The PHQ-9 and GAD-7 were developed by Drs. Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke and
+                  colleagues, with an educational grant from Pfizer Inc.
+                </p>
+              )}
             </div>
+
+            {!surveyCompleted && answeredCount === 0 && qIndex === 0 && (
+              <div
+                role="group"
+                aria-label="Check-in length"
+                className="mb-6 flex flex-wrap items-center gap-1 self-start rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1 sm:inline-flex"
+              >
+                {(
+                  [
+                    ["quick", "Quick check-in", "7 questions"],
+                    ["full", "Full check-in", "16 questions"],
+                  ] as const
+                ).map(([value, label, size]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => chooseMode(value)}
+                    aria-pressed={mode === value}
+                    className={`min-h-[44px] flex-1 rounded-md px-4 font-bold transition ${
+                      mode === value
+                        ? "bg-[color:var(--mb-brand)] text-[color:var(--mb-surface)]"
+                        : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
+                    }`}
+                  >
+                    {label} <span className="font-normal opacity-80">({size})</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             <AnimatePresence mode="wait" initial={false}>
               {surveyCompleted ? (
@@ -537,6 +589,8 @@ export default function StudentDashboard() {
                   const high = lastSubmission?.riskLevel === "high" || lastSubmission?.flaggedForImmediateReview;
                   const medium = !high && lastSubmission?.riskLevel === "medium";
                   const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
+                  const fullAnswers = lastSubmission ? fullAnswersOf(lastSubmission) : null;
+                  const fullResult = fullAnswers ? scoreFull(fullAnswers) : null;
                   return (
                     <m.div key="results" {...listMotion} exit={fade.exit} className="space-y-4" aria-live="polite">
                       <m.div {...itemMotion} className="mb-plate p-6 sm:p-6">
@@ -569,6 +623,23 @@ export default function StudentDashboard() {
                           </div>
                         </div>
                       </m.div>
+
+                      {fullResult && (
+                        <m.div {...itemMotion} className="mb-tile">
+                          <p className="font-bold text-[color:var(--mb-ink)]">Your scores on the two questionnaires</p>
+                          <ul className="mt-2 space-y-1 text-[color:var(--mb-ink)]">
+                            <li>
+                              Depression (PHQ-9): {fullResult.phq9} of 27, {fullResult.phq9Band.label.toLowerCase()}
+                            </li>
+                            <li>
+                              Anxiety (GAD-7): {fullResult.gad7} of 21, {fullResult.gad7Band.label.toLowerCase()}
+                            </li>
+                          </ul>
+                          <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
+                            These are screening scores, not a diagnosis. A counselor can talk them through with you.
+                          </p>
+                        </m.div>
+                      )}
 
                       {high && (
                         <m.div {...itemMotion} className="mb-plate-amber p-6">
@@ -620,7 +691,7 @@ export default function StudentDashboard() {
                     const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
                     // Phones: seven 37px buttons miss the 44px target, and the progress bar plus Back already cover it.
                     return (
-                      <ol className="mb-6 hidden gap-2 sm:flex" aria-label="Check-in progress">
+                      <ol className={`mb-6 hidden gap-2 ${mode === "quick" ? "sm:flex" : ""}`} aria-label="Check-in progress">
                         {SCREENING_QUESTIONS.map((q, i) => {
                           const done = answers[i] !== null;
                           const here = i === qIndex;

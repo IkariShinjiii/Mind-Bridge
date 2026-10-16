@@ -47,7 +47,7 @@ import {
 import { friendlyError } from "../../utils/errors";
 import { plural } from "../../utils/plural";
 import { withVerifiedRisk } from "../../utils/risk";
-import { quickAnswersOf, quickScreen } from "../../utils/clinical";
+import { fullAnswersOf, quickAnswersOf, quickScreen, scoreFull } from "../../utils/clinical";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
 import { caseReviewSchema } from "../../lib/schemas";
@@ -241,6 +241,17 @@ function RiskTag({ risk }: { risk: RiskLevel }) {
 
 /** What the two published two-question screens inside a quick check-in say, for staff reading a case. */
 function ScreenSummary({ assessment }: { assessment: Assessment }) {
+  const fullAnswers = fullAnswersOf(assessment);
+  if (fullAnswers) {
+    const f = scoreFull(fullAnswers);
+    return (
+      <p className="text-[color:var(--mb-muted)]">
+        Full check-in. Depression (PHQ-9) {f.phq9} of 27, {f.phq9Band.label.toLowerCase()} · Anxiety (GAD-7) {f.gad7} of
+        21, {f.gad7Band.label.toLowerCase()}. Priority follows the published bands: PHQ-9 or GAD-7 of 15 or more, or any
+        answer on the PHQ-9 safety item.
+      </p>
+    );
+  }
   const answers = quickAnswersOf(assessment);
   if (!answers) return null;
   const s = quickScreen(answers);

@@ -18,7 +18,13 @@ function assess(a) {
   const total = Number(a.total) || 0;
   const maxScore = Number(a.maxScore) || 0;
   const crisis = (a.questionSummary || []).some((q) => q.isCrisisItem && Number(q.score) > 0);
-  const high = crisis || (maxScore > 0 && total >= maxScore * 0.6);
+  let high = crisis || (maxScore > 0 && total >= maxScore * 0.6);
+  // Full PHQ-9 + GAD-7 check-in (16 questions): also high at PHQ-9 15+ or GAD-7 15+, the published bands.
+  const items = a.questionSummary || [];
+  if (items.length === 16) {
+    const sum = (from, to) => items.slice(from, to).reduce((s, q) => s + (Number(q.score) || 0), 0);
+    high = high || sum(0, 9) >= 15 || sum(9, 16) >= 15;
+  }
   return { total, maxScore, crisis, high };
 }
 
