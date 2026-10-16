@@ -38,6 +38,7 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
+import { bandLimits, describeChange, summarizeTrend } from "../../utils/trend";
 import { useToast } from "../../components/ui/Toast";
 import { firstName } from "../../utils/names";
 import type { Appointment, Assessment, AvailabilitySlot, ScreeningQuestion, StoredDate } from "../../types";
@@ -311,7 +312,9 @@ export default function StudentDashboard() {
       (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
     );
 
-    return sorted.map((item, index) => {
+    // One chart, one scale: only the check-ins out of the same maximum as the latest. History lists them all.
+    const latestMax = sorted[sorted.length - 1].maxScore || 21;
+    return sorted.filter((item) => (item.maxScore || 21) === latestMax).map((item, index) => {
       const score = Number.isFinite(item.total) ? item.total : 0;
       return {
         id: item.id || `checkin-${index}`,
@@ -324,6 +327,12 @@ export default function StudentDashboard() {
       };
     });
   }, [pastAssessments]);
+
+  const trendSummary = useMemo(
+    () => summarizeTrend(chartData.map((d) => ({ score: d.score, max: d.max, date: d.rawDate }))),
+    [chartData],
+  );
+  const limits = bandLimits(trendSummary?.max ?? 21);
 
   // Insights computation
   const trendInsight = useMemo(() => {
@@ -892,6 +901,35 @@ export default function StudentDashboard() {
               )}
             </div>
 
+            {trendSummary && !loadingHistory && (
+              <div className="mb-5">
+                <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    ["Latest", `${trendSummary.latest} of ${trendSummary.max}`],
+                    ["Average", `${trendSummary.average}`],
+                    ["Lowest so far", `${trendSummary.lowest}`],
+                    [
+                      "Last check-in",
+                      trendSummary.daysAgo === null
+                        ? "Date unknown"
+                        : trendSummary.daysAgo === 0
+                          ? "Today"
+                          : `${trendSummary.daysAgo} ${trendSummary.daysAgo === 1 ? "day" : "days"} ago`,
+                    ],
+                  ].map(([label, value]) => (
+                    <div key={label} className="mb-tile mb-tile-sm">
+                      <dt className="text-sm text-[color:var(--mb-muted)]">{label}</dt>
+                      <dd className="mb-sign text-xl font-bold text-[color:var(--mb-ink)]">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-3 text-[color:var(--mb-ink)]">{describeChange(trendSummary)}</p>
+                <p className="text-sm text-[color:var(--mb-muted)]">
+                  A lower score means fewer or less frequent difficulties. This is a guide, not a diagnosis.
+                </p>
+              </div>
+            )}
+
             {/* Skeleton, empty state, chart and history crossfade; the chart/history toggle uses the same swap */}
             <AnimatePresence mode="wait" initial={false}>
               {loadingHistory ? (
@@ -917,15 +955,15 @@ export default function StudentDashboard() {
                   <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
                     <span className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-low)]" />
-                      <span>0 to 6: balanced</span>
+                      <span>0 to {limits.lowTop}: balanced</span>
                     </span>
                     <span className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-medium)]" />
-                      <span>7 to 12: moderate</span>
+                      <span>{limits.lowTop + 1} to {limits.mediumTop}: moderate</span>
                     </span>
                     <span className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-high)]" />
-                      <span>13 to 21: priority</span>
+                      <span>{limits.mediumTop + 1} to {trendSummary?.max ?? 21}: priority</span>
                     </span>
                   </div>
 
@@ -958,7 +996,7 @@ export default function StudentDashboard() {
                           axisLine={false}
                         />
                         <YAxis
-                          domain={[0, 21]}
+                          domain={[0, trendSummary?.max ?? 21]}
                           stroke="var(--mb-muted)"
                           tick={{ fontSize: 12 }}
                           tickLine={false}
@@ -996,8 +1034,8 @@ export default function StudentDashboard() {
                             return null;
                           }}
                         />
-                        <ReferenceLine y={6} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
-                        <ReferenceLine y={12} stroke="var(--mb-warn)" strokeDasharray="3 3" opacity={0.6} />
+                        <ReferenceLine y={limits.lowTop} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
+                        <ReferenceLine y={limits.mediumTop} stroke="var(--mb-warn)" strokeDasharray="3 3" opacity={0.6} />
                         <Area
                           type="monotone"
                           dataKey="score"

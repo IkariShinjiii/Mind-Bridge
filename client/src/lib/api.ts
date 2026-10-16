@@ -187,7 +187,11 @@ export const getMyAssessments = (): Promise<Assessment[]> =>
     const uid = getCurrentUserId();
     if (!uid) return [];
     const q = query(collection(db, "assessments"), where("studentId", "==", uid));
-    return mapDocs<Assessment>(await getDocs(q));
+    // Newest first. Firestore returns documents by random id, and the dashboard reads [0] as the latest check-in.
+    // Sorted here, not in the query, so no composite index is needed.
+    return mapDocs<Assessment>(await getDocs(q)).sort(
+      (x, y) => new Date(y.createdAt || 0).getTime() - new Date(x.createdAt || 0).getTime(),
+    );
   });
 
 /**
