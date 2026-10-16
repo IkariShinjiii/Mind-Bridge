@@ -30,7 +30,7 @@ export default function CookieConsent() {
         <p className="flex-1 text-[color:var(--mb-ink)]">
           Mind Bridge uses only essential cookies, which keep you signed in and the site secure.{" "}
           <Link to="/cookie-policy" className="font-bold text-[color:var(--mb-ink)]">
-            Learn more
+            Read the cookie policy
           </Link>
         </p>
         <div className="flex shrink-0 items-center gap-3">
