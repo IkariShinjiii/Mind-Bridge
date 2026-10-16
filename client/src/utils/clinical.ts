@@ -74,11 +74,60 @@ export function quickAnswersOf(a: {
   return source ? source.map((v) => Number(v) || 0) : null;
 }
 
-const val = (v: number | null | undefined): number => Number(v) || 0;
+const val = (v: unknown): number => Number(v) || 0;
 
 /** The PHQ-2 and GAD-2 inside a quick check-in (answers in question order). */
 export function quickScreen(answers: ReadonlyArray<number | null | undefined>): QuickScreen {
   const phq2 = val(answers[0]) + val(answers[1]);
   const gad2 = val(answers[3]) + val(answers[4]);
   return { phq2, gad2, phq2Positive: phq2 >= TWO_ITEM_CUTOFF, gad2Positive: gad2 >= TWO_ITEM_CUTOFF };
+}
+
+/** The full check-in: PHQ-9 (9 questions) then GAD-7 (7 questions), 16 answers of 0 to 3. */
+export const FULL_QUESTION_COUNT = 16;
+export const PHQ9_COUNT = 9;
+
+/** Severe enough to need priority follow-up: PHQ-9 moderately severe (15+) or GAD-7 severe (15+). */
+export const HIGH_SCALE_CUTOFF = 15;
+/** Moderate or worse on either scale (10+) is at least medium. */
+export const MEDIUM_SCALE_CUTOFF = 10;
+
+export interface FullResult {
+  phq9: number;
+  gad7: number;
+  phq9Band: Band;
+  gad7Band: Band;
+  /** PHQ-9 item 9 (thoughts of death or self-harm) above zero. */
+  safetyItem: boolean;
+  /** What the published bands alone suggest; the percentage rule can still raise it. */
+  level: "low" | "medium" | "high";
+}
+
+/** Scores the 16 full check-in answers on the two published scales. Items 1 to 9 are PHQ-9, 10 to 16 are GAD-7. */
+export function scoreFull(answers: ReadonlyArray<number | string | null | undefined>): FullResult {
+  const nums = Array.from({ length: FULL_QUESTION_COUNT }, (_, i) => val(answers[i]));
+  const phq9 = nums.slice(0, PHQ9_COUNT).reduce((a, b) => a + b, 0);
+  const gad7 = nums.slice(PHQ9_COUNT).reduce((a, b) => a + b, 0);
+  const safetyItem = nums[PHQ9_COUNT - 1] > 0;
+  // PHQ-2 is the first two PHQ-9 items; GAD-2 is the first two GAD-7 items (positions 10 and 11 here).
+  const phq2Positive = nums[0] + nums[1] >= TWO_ITEM_CUTOFF;
+  const gad2Positive = nums[PHQ9_COUNT] + nums[PHQ9_COUNT + 1] >= TWO_ITEM_CUTOFF;
+  let level: FullResult["level"] = "low";
+  if (safetyItem || phq9 >= HIGH_SCALE_CUTOFF || gad7 >= HIGH_SCALE_CUTOFF) level = "high";
+  else if (phq9 >= MEDIUM_SCALE_CUTOFF || gad7 >= MEDIUM_SCALE_CUTOFF || phq2Positive || gad2Positive) level = "medium";
+  return { phq9, gad7, phq9Band: phq9Band(phq9), gad7Band: gad7Band(gad7), safetyItem, level };
+}
+
+/** The 16 answers of a saved full check-in, or null when it is some other shape. */
+export function fullAnswersOf(a: {
+  answers?: ReadonlyArray<number | null | undefined>;
+  questionSummary?: ReadonlyArray<{ score?: number | null }>;
+}): number[] | null {
+  const fromAnswers = Array.isArray(a.answers) && a.answers.length === FULL_QUESTION_COUNT ? a.answers : null;
+  const fromSummary =
+    Array.isArray(a.questionSummary) && a.questionSummary.length === FULL_QUESTION_COUNT
+      ? a.questionSummary.map((q) => q.score)
+      : null;
+  const source = fromAnswers ?? fromSummary;
+  return source ? source.map((v) => Number(v) || 0) : null;
 }

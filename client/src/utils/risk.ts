@@ -1,5 +1,5 @@
 import type { Assessment, RiskLevel } from "../types";
-import { quickAnswersOf, quickScreen } from "./clinical";
+import { fullAnswersOf, quickAnswersOf, quickScreen, scoreFull } from "./clinical";
 
 const RANK: Readonly<Record<RiskLevel, number>> = { low: 0, medium: 1, high: 2 };
 
@@ -33,9 +33,15 @@ export function withVerifiedRisk(assessment: Assessment): Assessment {
   const answers = quickAnswersOf(assessment);
   const screen = answers ? quickScreen(answers) : null;
   const screenRaised = riskLevel === "low" && Boolean(screen && (screen.phq2Positive || screen.gad2Positive));
-  const level: RiskLevel = screenRaised ? "medium" : riskLevel;
+  let level: RiskLevel = screenRaised ? "medium" : riskLevel;
 
-  const raised = riskLevel !== stored || flaggedForImmediateReview !== Boolean(assessment.flaggedForImmediateReview);
+  // A full PHQ-9 + GAD-7 check-in is also held to each scale's published bands (raise only, like everything here).
+  const fullAnswers = fullAnswersOf(assessment);
+  const published = fullAnswers ? scoreFull(fullAnswers).level : "low";
+  if (RANK[published] > RANK[level]) level = published;
+  const fullRaised = RANK[published] > RANK[riskLevel];
+
+  const raised = fullRaised || riskLevel !== stored || flaggedForImmediateReview !== Boolean(assessment.flaggedForImmediateReview);
   const extra = screenRaised ? { screenRaised: true } : {};
   if (!raised) return { ...assessment, riskLevel: level, ...extra };
   return { ...assessment, riskLevel: level, flaggedForImmediateReview, riskCorrectedFrom: stored, ...extra };

@@ -93,3 +93,33 @@ test.describe("Completing a wellness check-in", () => {
     await expect(checkIn.locator("input[type=radio]:checked")).toHaveCount(0);
   });
 });
+
+test.describe("Full PHQ-9 + GAD-7 check-in", () => {
+  test("a student can choose it, finish 16 questions, and see both scores; a PHQ-9 of 15 is high", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+    await page.getByRole("button", { name: /Full check-in/ }).click();
+    await expect(page.getByText("Sixteen questions about the last two weeks")).toBeVisible();
+
+    // PHQ-9 = 15 across items 1 to 7, item 9 untouched, GAD-7 = 2.
+    await completeCheckIn(page, [2, 2, 2, 2, 2, 2, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0]);
+
+    await expect(page.getByText("Depression (PHQ-9): 15 of 27, moderately severe")).toBeVisible();
+    await expect(page.getByText("Anxiety (GAD-7): 2 of 21, minimal")).toBeVisible();
+    await expect(page.getByText("Priority support suggested")).toBeVisible();
+
+    const [saved] = await readCollection(page, "assessments");
+    expect(saved).toMatchObject({ maxScore: 48, total: 17, riskLevel: "high", flaggedForImmediateReview: false });
+    expect(saved.answers).toHaveLength(16);
+    expect(saved.questionSummary).toHaveLength(16);
+  });
+
+  test("the choice is offered only before the first answer", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+    await page.getByRole("button", { name: /Full check-in/ }).click();
+    const checkIn = page.getByRole("region", { name: "Check-in" });
+    await checkIn.locator('input[type=radio][value="1"]').check({ force: true });
+    await expect(page.getByRole("group", { name: "Check-in length" })).toHaveCount(0);
+  });
+});

@@ -1,4 +1,5 @@
 import type { RiskLevel } from "../types";
+import { FULL_QUESTION_COUNT, scoreFull } from "./clinical";
 
 /** The parts of a question that scoring looks at. Extra fields are fine. */
 export interface QuestionLike {
@@ -38,6 +39,13 @@ export function scoreAnswers(
   let riskLevel: RiskLevel = "low";
   if (flaggedForImmediateReview || total >= maxScore * 0.6) riskLevel = "high";
   else if (total >= maxScore * 0.3) riskLevel = "medium";
+
+  // The full PHQ-9 + GAD-7 check-in also uses each scale's published bands. Only ever raises the percentage result.
+  if (count === FULL_QUESTION_COUNT) {
+    const rank = { low: 0, medium: 1, high: 2 } as const;
+    const published = scoreFull(answers).level;
+    if (rank[published] > rank[riskLevel]) riskLevel = published;
+  }
 
   return { total, maxScore, riskLevel, flaggedForImmediateReview };
 }

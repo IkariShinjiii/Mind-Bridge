@@ -201,3 +201,28 @@ test("a low check-in with a positive depression and anxiety screen is shown as m
   await expect(dialog).toContainText("Anxiety screen (GAD-2) 3 of 6, positive");
   await expect(dialog).toContainText("Raised to medium because a screen is positive");
 });
+
+test("a counselor sees the PHQ-9 and GAD-7 bands for a full check-in", async ({ page }) => {
+  const answers = [2, 2, 2, 2, 2, 2, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0]; // PHQ-9 15, GAD-7 2
+  await seed(page, {
+    docs: {
+      assessments: {
+        f1: {
+          ...flaggedCase,
+          answers,
+          questionSummary: answers.map((score, i) => ({ id: `q${i + 1}`, text: `Question ${i + 1}`, score, isCrisisItem: i === 8 })),
+          total: 17,
+          maxScore: 48,
+          riskLevel: "high",
+          flaggedForImmediateReview: false,
+        },
+      },
+    },
+  });
+  await logIn(page, COUNSELOR);
+  await page.getByRole("button", { name: "Inspect case" }).click();
+  const dialog = page.getByRole("dialog", { name: STUDENT.name });
+  await expect(dialog).toContainText("Depression (PHQ-9) 15 of 27, moderately severe");
+  await expect(dialog).toContainText("Anxiety (GAD-7) 2 of 21, minimal");
+  await expect(dialog).toContainText("Score 17 of 48");
+});

@@ -53,9 +53,27 @@ Tests in `client/src/utils/clinical.test.ts` pin the published bands and the kno
 
 ## What follows from this
 
-The staff view shows the published wording (see the "severity bands" change), and a positive PHQ-2 or GAD-2 raises a
-check-in to at least medium. Nothing is ever lowered. The optional full PHQ-9 + GAD-7 check-in scores each scale on its
-own published bands.
+* **Quick check-in:** a positive PHQ-2 or GAD-2 raises a low check-in to at least medium (never to high, never lowers).
+  The staff case view shows both screens. Only the seven quick questions are used, so no PHQ-9 severity band is shown for
+  them: five PHQ-9 items are not enough to place someone in a published band.
+* **Full check-in (optional, student chooses before answering):** the 16 standard questions, PHQ-9 then GAD-7, out of
+  48. Each scale is scored on its published bands, and staff see the score and band (minimal to severe) for both.
+
+### Risk level for the full check-in
+
+The highest of the percentage rule (30% and 60% of 48) and the published bands:
+
+| Level | When |
+|---|---|
+| High | PHQ-9 item 9 above 0, **or** PHQ-9 15 or more, **or** GAD-7 15 or more, **or** total 29 or more |
+| Medium | PHQ-9 or GAD-7 10 or more, **or** positive PHQ-2 or GAD-2, **or** total 15 or more |
+| Low | otherwise |
+
+The same rule runs in the browser (`scoreFull`, `scoreAnswers`), on the staff dashboard (`withVerifiedRisk`, which only
+raises) and in the alert code (`api/_alertCore.ts` and `functions/index.js`), so the high-risk email fires for a full
+check-in exactly when the browser says high. A test feeds 500 generated answer sets to both and checks they agree.
+Firestore rules need no change: 16 answers and a maximum of 48 fit the existing limits, and the percentage rule they
+enforce can only be met or exceeded.
 
 ## Sources
 

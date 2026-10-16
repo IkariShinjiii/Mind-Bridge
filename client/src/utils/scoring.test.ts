@@ -30,3 +30,23 @@ describe("scoreAnswers", () => {
     expect(scoreAnswers([null, null, null, null, null, null, null], qs).total).toBe(0);
   });
 });
+
+describe("scoreAnswers for the 16-question full check-in", () => {
+  const questions = Array.from({ length: 16 }, (_, i) => ({ isCrisisItem: i === 8 }));
+
+  it("scores out of 48 and applies the published scale bands on top of the percentage rule", () => {
+    // PHQ-9 = 15 (items 1 to 7), nothing else: 15 of 48 is only 31% by percentage, but PHQ-9 15 is high.
+    const answers = [2, 2, 2, 2, 2, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    expect(scoreAnswers(answers, questions)).toMatchObject({ total: 15, maxScore: 48, riskLevel: "high" });
+  });
+
+  it("never goes below the percentage rule", () => {
+    const answers = Array(16).fill(2); // 32 of 48 = 67%
+    expect(scoreAnswers(answers, questions).riskLevel).toBe("high");
+  });
+
+  it("flags the PHQ-9 safety item", () => {
+    const answers = [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
+    expect(scoreAnswers(answers, questions)).toMatchObject({ flaggedForImmediateReview: true, riskLevel: "high" });
+  });
+});
