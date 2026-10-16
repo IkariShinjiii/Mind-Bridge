@@ -47,6 +47,7 @@ import {
 import { friendlyError } from "../../utils/errors";
 import { plural } from "../../utils/plural";
 import { withVerifiedRisk } from "../../utils/risk";
+import { quickAnswersOf, quickScreen } from "../../utils/clinical";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
 import { caseReviewSchema } from "../../lib/schemas";
@@ -235,6 +236,21 @@ function RiskTag({ risk }: { risk: RiskLevel }) {
       <Icon className="h-4 w-4" aria-hidden="true" />
       {risk} risk
     </span>
+  );
+}
+
+/** What the two published two-question screens inside a quick check-in say, for staff reading a case. */
+function ScreenSummary({ assessment }: { assessment: Assessment }) {
+  const answers = quickAnswersOf(assessment);
+  if (!answers) return null;
+  const s = quickScreen(answers);
+  const word = (positive: boolean) => (positive ? "positive" : "negative");
+  return (
+    <p className="text-[color:var(--mb-muted)]">
+      Depression screen (PHQ-2) {s.phq2} of 6, {word(s.phq2Positive)} · Anxiety screen (GAD-2) {s.gad2} of 6,{" "}
+      {word(s.gad2Positive)}. A score of 3 or more is positive.
+      {assessment.screenRaised && " Raised to medium because a screen is positive."}
+    </p>
   );
 }
 
@@ -1103,6 +1119,7 @@ export default function AdminPanel() {
                 Score {activeCase.total ?? 0} of {activeCase.maxScore || 21}
               </span>
             </div>
+            <ScreenSummary assessment={activeCase} />
 
             <section aria-labelledby="resp-heading">
               <h3 id="resp-heading" className="mb-2 text-lg font-bold text-[color:var(--mb-ink)]">
