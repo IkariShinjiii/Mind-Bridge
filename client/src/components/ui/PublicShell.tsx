@@ -112,7 +112,11 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
             <p className="font-bold text-[color:var(--mb-ink)]">University of San Agustin, Guidance Services</p>
             <p>General Luna Street, City Proper, Iloilo City 5000</p>
             <p>
-              Phone 0951 189 6559 ·{" "}
+              Phone{" "}
+              <a href="tel:+639511896559" className="text-[color:var(--mb-ink)]">
+                0951 189 6559
+              </a>{" "}
+              ·{" "}
               <a href="mailto:guidance@usa.edu.ph" className="text-[color:var(--mb-ink)]">
                 guidance@usa.edu.ph
               </a>

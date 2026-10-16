@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pageTitle } from "./pageTitle";
+import { pageDescription, pageTitle } from "./pageTitle";
 
 describe("pageTitle", () => {
   it("names the home page after the service", () => {
@@ -29,5 +29,14 @@ describe("pageTitle", () => {
     expect(pageTitle("/nope")).toBe("Page not found | Mind Bridge");
     expect(pageTitle("/constructor")).toBe("Page not found | Mind Bridge");
     expect(pageTitle("/__proto__")).toBe("Page not found | Mind Bridge");
+  });
+});
+
+describe("pageDescription", () => {
+  it("gives public pages their own description and falls back to the site one", () => {
+    expect(pageDescription("/login")).toMatch(/Log in/);
+    expect(pageDescription("/privacy-policy/")).toMatch(/protects/);
+    expect(pageDescription("/student/dashboard")).toBe(pageDescription("/"));
+    expect(pageDescription("/constructor")).toBe(pageDescription("/"));
   });
 });
