@@ -1,41 +1,19 @@
-import { useState, useRef, useEffect, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { AnimatePresence, m } from "framer-motion";
-import { LayoutDashboard, Calendar, LifeBuoy, Settings, LogOut, Users, Phone } from "lucide-react";
+import { useRef, useEffect, type ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { LayoutDashboard, Calendar, LifeBuoy, Settings, Users, Phone } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
-import { transition, useMotionPreset, type MotionPreset } from "../../lib/motion";
-import Spinner from "../ui/Spinner";
+import AccountMenu from "./AccountMenu";
 import { ToastViewport } from "../ui/Toast";
-import { avatarColor } from "../../utils/avatar";
-import { firstName } from "../../utils/names";
 import icon from "../../assets/mindbridge-icon.png";
 
-/** Account dropdown: drops 4px and fades in (150ms), fades out in 120ms. */
-const menuPreset: MotionPreset = {
-  initial: { opacity: 0, y: -4 },
-  animate: { opacity: 1, y: 0, transition: transition.fast },
-  exit: { opacity: 0, transition: transition.exit },
-};
-
 export default function DashboardLayout({ children }: { children?: ReactNode }) {
-  const { currentUser, userRole, userData, logout } = useAuth();
-  const navigate = useNavigate();
+  const { userRole } = useAuth();
   const location = useLocation();
   const [theme] = useTheme();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-  const menu = useMotionPreset(menuPreset);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mainRef = useRef<HTMLElement>(null);
 
-  const safeName = userData?.name || currentUser?.displayName || "Student";
   const isStaff = userRole === "admin";
-  const roleLabel = isStaff ? "Staff" : "Student";
-  const initials = (safeName || "U").slice(0, 2).toUpperCase();
-  const showGoogleAvatar = userData?.useGoogleAvatar !== false && currentUser?.photoURL;
-  const avatarBg = avatarColor(userData?.avatarGradient);
 
   const isAccountsTab = location.pathname === "/admin/dashboard" && location.search.includes("tab=accounts");
   const isHere = (path: string) => location.pathname === path;
@@ -88,41 +66,6 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         },
       ];
 
-  useEffect(() => {
-    function onDown(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
-    }
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setMenuOpen((open) => {
-          if (open) menuButtonRef.current?.focus();
-          return false;
-        });
-      }
-    }
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
-
-  // Open menu: focus the first item; arrow keys move between items
-  useEffect(() => {
-    if (menuOpen) menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
-  }, [menuOpen]);
-
-  function onMenuKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
-    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
-    const items = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
-    if (!items.length) return;
-    event.preventDefault();
-    const i = items.indexOf(document.activeElement as HTMLElement);
-    const step = event.key === "ArrowDown" ? 1 : -1;
-    items[(i + step + items.length) % items.length]?.focus();
-  }
-
   // After navigating, move focus to the page so keyboard and screen reader users start at the top of it.
   // App remounts this layout on every route change, so "first render" can't tell a navigation from the initial
   // load; the router gives the first entry the key "default" and every later one a unique key.
@@ -131,20 +74,6 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
     mainRef.current?.focus({ preventScroll: true });
     mainRef.current?.scrollTo({ top: 0 });
   }, [location.key]);
-
-  const handleLogout = async () => {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Failed to log out", error);
-      setLoggingOut(false);
-    }
-  };
-
-  const greeting = `Hello, ${firstName(safeName, "Student")}`;
 
   return (
     <div className="mb flex h-[100dvh] w-full overflow-hidden" data-theme={theme}>
@@ -174,7 +103,17 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
             </Link>
           ))}
         </nav>
-        <div className="border-t border-[color:var(--mb-line)] p-3">
+        <div className="space-y-1 border-t border-[color:var(--mb-line)] p-3">
+          {!isStaff && (
+            <a
+              href="tel:1553"
+              className="mb-plate-amber mb-sign mb-2 flex min-h-[44px] items-center justify-center gap-2 px-3 text-lg font-bold no-underline"
+              style={{ color: "var(--mb-amber-ink)" }}
+            >
+              <Phone className="h-4 w-4" aria-hidden="true" />
+              Crisis 1553
+            </a>
+          )}
           <Link
             to="/settings"
             aria-current={isHere("/settings") ? "page" : undefined}
@@ -187,25 +126,20 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
             <Settings className="h-5 w-5 shrink-0" aria-hidden="true" />
             Settings
           </Link>
+          <AccountMenu placement="above" showName />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)]">
-          <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6 lg:px-8">
-            <Link
-              to="/"
-              className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline lg:hidden"
-            >
+        {/* Phones have no sidebar, so they keep a slim top bar. From lg up everything lives in the sidebar. */}
+        <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:hidden">
+          <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
+            <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline">
               <img src={icon} alt="" className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
             </Link>
-            {/* The student dashboard greets them in its own header, so only staff pages need this. */}
-            {isStaff && (
-              <p className="mb-sign hidden text-xl font-bold text-[color:var(--mb-ink)] lg:block">{greeting}</p>
-            )}
 
-            <div className="relative ml-auto flex shrink-0 items-center gap-2" ref={menuRef}>
+            <div className="ml-auto flex shrink-0 items-center gap-2">
               {!isStaff && (
                 <a
                   href="tel:1553"
@@ -216,72 +150,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
                   Crisis 1553
                 </a>
               )}
-              <button
-                type="button"
-                ref={menuButtonRef}
-                onClick={() => setMenuOpen((o) => !o)}
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                // WCAG 2.5.3: the name contains the visible initials as a word, so voice control can match what is shown.
-                aria-label={`Account menu for ${initials}`}
-                className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border-2 border-[color:var(--mb-brand)] transition-shadow hover:shadow-mb-md"
-              >
-                {showGoogleAvatar ? (
-                  <img
-                    src={currentUser.photoURL}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    style={{ backgroundColor: avatarBg }}
-                    className="flex h-full w-full items-center justify-center text-sm font-bold text-white"
-                  >
-                    {initials}
-                  </span>
-                )}
-              </button>
-
-              <AnimatePresence>
-                {menuOpen && (
-                  <m.div
-                    role="menu"
-                    aria-label="Account"
-                    onKeyDown={onMenuKeyDown}
-                    {...menu}
-                    className="absolute right-0 top-14 z-50 w-64 rounded-lg border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-2 shadow-mb-lg"
-                  >
-                    <div className="border-b border-[color:var(--mb-line)] px-3 py-2">
-                      <p className="truncate font-bold">{safeName}</p>
-                      <p className="truncate text-sm text-[color:var(--mb-muted)]">{currentUser?.email}</p>
-                      <p className="text-sm font-bold text-[color:var(--mb-muted)]">{roleLabel}</p>
-                    </div>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        navigate("/settings");
-                      }}
-                      className="mt-1 flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold transition-colors hover:bg-[color:var(--mb-brand-bg)]"
-                    >
-                      <Settings className="h-5 w-5" aria-hidden="true" /> Account settings
-                    </button>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={handleLogout}
-                      disabled={loggingOut}
-                      className="flex min-h-[44px] w-full items-center gap-3 rounded-md px-3 font-bold text-[color:var(--mb-error-ink)] transition-colors hover:bg-[color:var(--mb-error-bg)]"
-                    >
-                      {loggingOut ? <Spinner size={18} /> : <LogOut className="h-5 w-5" aria-hidden="true" />}
-                      {loggingOut ? "Signing out…" : "Sign out"}
-                    </button>
-                  </m.div>
-                )}
-              </AnimatePresence>
+              <AccountMenu placement="below" />
             </div>
           </div>
         </header>
