@@ -409,7 +409,7 @@ export default function StudentDashboard() {
   return (
     <m.div {...page} className="relative space-y-6">
       {/* Top Welcome Header */}
-      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Welcome back, {displayName}</h1>
           <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
@@ -430,8 +430,8 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main 2-Column Dashboard Grid */}
-      <div className="flex flex-col gap-6 lg:flex-row items-start">
-        <section className="lg:w-2/3 flex flex-col gap-6 w-full">
+      <div className="flex flex-col gap-6 xl:flex-row items-start">
+        <section className="xl:w-2/3 flex flex-col gap-6 w-full">
           {/* Quick Info Cards */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {/* Gauge / Status Card */}
@@ -1085,7 +1085,7 @@ export default function StudentDashboard() {
         </section>
 
         {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
-        <aside className="lg:w-1/3 space-y-6 w-full">
+        <aside className="xl:w-1/3 space-y-6 w-full">
           {/* Crisis help stays one tap away, in amber, on every visit */}
           <section aria-labelledby="crisis-card-h" className="mb-plate-amber p-6 shadow-mb-md">
             <h2 id="crisis-card-h" className="mb-sign text-2xl font-bold">
