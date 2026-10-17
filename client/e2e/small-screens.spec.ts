@@ -3,7 +3,7 @@ import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
 
 // The app clips horizontal overflow (overflow-x: hidden), so a too-wide element is cut off silently
 // instead of scrolling. These tests fail when anything sits past the right edge of a small phone.
-const WIDTHS = [320, 375];
+const WIDTHS = [320, 375, 768, 1024];
 
 async function elementsPastEdge(page: Page): Promise<string[]> {
   return page.evaluate(() => {

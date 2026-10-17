@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         Skip to main content
       </a>
 
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
+      <aside className="hidden w-64 xl:w-72 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
         <Link to="/" className="flex min-h-[44px] items-center gap-3 px-6 py-5 text-[color:var(--mb-ink)] no-underline">
           <img src={icon} alt="" className="h-8 w-8 rounded-md" />
           <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
