@@ -44,3 +44,20 @@ test("the dashboard treats the newest check-in as the latest, and the trend card
   await trend.getByRole("button", { name: "History" }).click();
   await expect(trend.getByText("Score: 14 / 21")).toBeVisible();
 });
+
+test("an old latest check-in gets a gentle nudge in the welcome text", async ({ page }) => {
+  const days = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+  await seed(page, { docs: { assessments: { a1: checkIn(5, "low", days(30)) } } });
+  await logIn(page, STUDENT);
+  await page.goto("/student/dashboard");
+  await expect(page.getByText(/Your last check-in was 4 weeks ago/)).toBeVisible();
+});
+
+test("a recent check-in keeps the usual welcome text", async ({ page }) => {
+  const days = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString();
+  await seed(page, { docs: { assessments: { a1: checkIn(5, "low", days(3)) } } });
+  await logIn(page, STUDENT);
+  await page.goto("/student/dashboard");
+  await expect(page.getByText(/How are you feeling today/)).toBeVisible();
+  await expect(page.getByText(/Your last check-in was/)).toHaveCount(0);
+});

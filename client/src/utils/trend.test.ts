@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bandLimits, describeChange, summarizeTrend } from "./trend";
+import { bandLimits, describeChange, summarizeTrend, checkInNudge } from "./trend";
 
 const pt = (score: number, date?: string) => ({ score, max: 21, date });
 
@@ -38,5 +38,19 @@ describe("describeChange", () => {
     expect(describeChange(summarizeTrend([pt(5), pt(6)])!)).toBe("1 point higher than your last check-in. Things have felt harder lately.");
     expect(describeChange(summarizeTrend([pt(5), pt(5)])!)).toBe("Same as your last check-in.");
     expect(describeChange(summarizeTrend([pt(5)])!)).toMatch(/first check-in/);
+  });
+});
+
+describe("checkInNudge", () => {
+  it("stays quiet for a recent check-in or an unknown date", () => {
+    expect(checkInNudge(0)).toBeNull();
+    expect(checkInNudge(13)).toBeNull();
+    expect(checkInNudge(null)).toBeNull();
+  });
+
+  it("starts at two weeks and counts whole weeks", () => {
+    expect(checkInNudge(14)).toMatch(/2 weeks ago/);
+    expect(checkInNudge(20)).toMatch(/2 weeks ago/);
+    expect(checkInNudge(30)).toMatch(/4 weeks ago/);
   });
 });
