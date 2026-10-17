@@ -56,3 +56,13 @@ export function describeChange(s: TrendSummary): string {
   if (s.direction === "higher") return `${pts} ${unit} higher than your last check-in. Things have felt harder lately.`;
   return "Same as your last check-in.";
 }
+
+/** The check-in questions cover the last two weeks, so a gentle nudge starts once the latest one is that old. */
+export const NUDGE_AFTER_DAYS = 14;
+
+/** A calm nudge to check in again, or null when the latest check-in is recent (or its date is unknown). */
+export function checkInNudge(daysAgo: number | null): string | null {
+  if (daysAgo === null || daysAgo < NUDGE_AFTER_DAYS) return null;
+  const weeks = Math.floor(daysAgo / 7);
+  return `Your last check-in was ${weeks} ${weeks === 1 ? "week" : "weeks"} ago. A new one takes about a minute whenever you are ready.`;
+}

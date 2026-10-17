@@ -39,7 +39,7 @@ import WellbeingCheck from "../../components/student/WellbeingCheck";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
-import { bandLimits, describeChange, summarizeTrend } from "../../utils/trend";
+import { bandLimits, checkInNudge, describeChange, summarizeTrend } from "../../utils/trend";
 import { useToast } from "../../components/ui/Toast";
 import { firstName } from "../../utils/names";
 import type { Appointment, Assessment, AvailabilitySlot, ScreeningQuestion, StoredDate } from "../../types";
@@ -413,7 +413,8 @@ export default function StudentDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Welcome back, {displayName}</h1>
           <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-            How are you feeling today? Take a quick confidential check-in.
+            {(!loadingHistory && checkInNudge(trendSummary?.daysAgo ?? null)) ||
+              "How are you feeling today? Take a quick confidential check-in."}
           </p>
         </div>
         {/* Below lg the bottom bar already carries both, so they would only push the check-in off the first screen. */}
