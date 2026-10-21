@@ -59,7 +59,7 @@ Light is the default (daytime use on campus), with a dark theme for late-night c
 - **Neutrals:** `ground` for the page, `surface` for cards, `surface-2` for inset and disabled areas, `ink` for text, `muted` for supporting text, `line` for dividers.
 - **Status:** green = steady (`safe`), amber-brown = moderate (`warn`), red = priority or error (`urgent`). Risk is always also stated in words, never by colour alone.
 - **Amber is for the crisis line only.** The NCMH number (1553) is always one tap away, in amber.
-- **Contrast:** every text pairing (ink, muted, brand, status ink on its tint, light on panel) is at least 7:1 in both themes (WCAG AAA). Input borders (`field-line`) are 3:1 or better. Re-run `node client/scripts/check-contrast.mjs` after changing a light-theme token; it checks the pairs and fails below 7:1. The dark theme is not covered by the script yet.
+- **Contrast:** every text pairing (ink, muted, brand, status ink on its tint, light on panel) is at least 7:1 in both themes (WCAG AAA). Input borders (`field-line`) are 3:1 or better. Re-run `node client/scripts/check-contrast.mjs` after changing a colour token; it checks the pairs in both the light and dark theme and fails below 7:1.
 
 ## Typography
 
