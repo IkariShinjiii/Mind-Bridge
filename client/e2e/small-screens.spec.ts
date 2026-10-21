@@ -20,7 +20,8 @@ async function elementsPastEdge(page: Page): Promise<string[]> {
           !el.closest(".sr-only") &&
           // Intentional: these strips scroll sideways on phones.
           !el.closest("nav[aria-label='Settings sections']") &&
-          !el.closest("[aria-label='Filter appointments by status']")
+          !el.closest("[aria-label='Filter appointments by status']") &&
+          !el.closest("[aria-label='Filter cases']")
         );
       })
       .slice(0, 5)

@@ -103,14 +103,14 @@ function Stat({
     >
       <span
         aria-hidden="true"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--mb-surface)] sm:h-11 sm:w-11"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--mb-surface)] max-sm:hidden sm:h-11 sm:w-11"
       >
         <Icon className="h-5 w-5" />
       </span>
       <div className="min-w-0">
         <p className="mb-sign text-3xl font-bold leading-none tabular-nums">{value}</p>
         <p className="mt-1 font-bold">{label}</p>
-        <p className={`text-sm ${urgent ? "" : "text-[color:var(--mb-muted)]"}`}>{note}</p>
+        <p className={`text-sm max-sm:hidden ${urgent ? "" : "text-[color:var(--mb-muted)]"}`}>{note}</p>
       </div>
     </div>
   );
@@ -595,9 +595,9 @@ export default function AdminPanel() {
   }, [users, accountSubTab]);
 
   return (
-    <div className="w-full space-y-8 pb-12">
+    <div className="w-full space-y-5 pb-12 sm:space-y-8">
       {/* Header */}
-      <div className="border-b border-[color:var(--mb-line)] pb-6">
+      <div className="border-b border-[color:var(--mb-line)] pb-4 sm:pb-6">
         <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Staff dashboard</h1>
         <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
           Triage student check-ins, manage accounts and availability, and review system-wide trends.
@@ -615,13 +615,13 @@ export default function AdminPanel() {
 
       {/* At-a-glance counts, most urgent first */}
       {mainTab !== "accounts" && (
-        <section aria-label="Summary" className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <section aria-label="Summary" className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
           <Stat tone="urgent" icon={AlertTriangle} label="High risk" value={immediateCount} note="Need review first" />
           <Stat icon={ClipboardList} label="Open cases" value={openCasesCount} note="Waiting in the queue" />
           <Stat icon={Calendar} label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
-          <Stat icon={CircleCheck} label="Reviewed" value={reviewedCount} note="Cases closed out" />
-          <Stat icon={Users} label="Students" value={analytics.totalStudents} note="With check-ins" />
-          <Stat icon={UserCheck} label="Staff" value={analytics.totalStaff} note="Approved accounts" />
+          <Stat icon={CircleCheck} label="Reviewed" value={reviewedCount} note="Cases closed out" className="max-sm:hidden" />
+          <Stat icon={Users} label="Students" value={analytics.totalStudents} note="With check-ins" className="max-sm:hidden" />
+          <Stat icon={UserCheck} label="Staff" value={analytics.totalStaff} note="Approved accounts" className="max-sm:hidden" />
         </section>
       )}
 
@@ -629,7 +629,7 @@ export default function AdminPanel() {
       {mainTab !== "accounts" && (
         <nav
           aria-label="Dashboard sections"
-          className="flex flex-wrap gap-2 border-b border-[color:var(--mb-line)] pb-4"
+          className="flex flex-wrap gap-2 border-b border-[color:var(--mb-line)] pb-3 sm:pb-4"
         >
           {MAIN_TAB_LINKS.map(([tab, Icon, label]) => (
             <button
@@ -655,7 +655,11 @@ export default function AdminPanel() {
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
               <div className="min-w-0 space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter cases">
+                  <div
+                    className="flex max-w-full items-center gap-2 overflow-x-auto pb-1 max-sm:[&>*]:shrink-0 sm:flex-wrap sm:overflow-visible sm:pb-0"
+                    role="group"
+                    aria-label="Filter cases"
+                  >
                     {CASE_FILTERS.map(([value, label]) => (
                       <button
                         key={value}
