@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import PublicShell from "./PublicShell";
-import icon from "../../assets/mindbridge-icon.png";
+import Logo from "./Logo";
 
 export function GoogleIcon() {
   return (
@@ -50,7 +50,7 @@ export default function AuthFrame({ title, intro, children, footer }: AuthFrameP
     <PublicShell showAuthLinks={false} calm>
       <div className="mx-auto w-full max-w-[450px] px-4 py-12 sm:py-16">
         <div className="mb-8 text-center">
-          <img src={icon} alt="" className="mx-auto mb-4 h-14 w-14 rounded-lg shadow-mb-md" />
+          <Logo className="mx-auto mb-4 h-14 w-14 rounded-lg shadow-mb-md" />
           <h1 className="mb-sign text-4xl font-bold">{title}</h1>
           <p className="mx-auto mt-2 max-w-[40ch] text-[color:var(--mb-muted)]">{intro}</p>
         </div>

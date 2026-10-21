@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { Moon, Sun, Phone } from "lucide-react";
-import icon from "../../assets/mindbridge-icon.png";
+import Logo from "./Logo";
 
 export function Brand({ small = false }) {
   return (
     <Link to="/" className="inline-flex min-h-[44px] items-center gap-3 no-underline text-[color:var(--mb-ink)]">
-      <img src={icon} alt="" className={small ? "h-8 w-8 rounded" : "h-10 w-10 rounded"} />
+      <Logo className={small ? "h-8 w-8 rounded" : "h-10 w-10 rounded"} />
       <span className="leading-tight">
         <span className="mb-sign block whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
         {!small && (
