@@ -704,7 +704,7 @@ export default function AdminPanel() {
                       const status = item.status || "open";
                       const immediate = Boolean(item.flaggedForImmediateReview);
                       const when = item.submittedAt || item.createdAt;
-                      const submittedAt = when ? new Date(when).toLocaleString() : "Unknown";
+                      const submittedAt = when ? new Date(when).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Unknown";
                       const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
                       const riskTone =
                         risk === "high"

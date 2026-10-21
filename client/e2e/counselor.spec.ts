@@ -178,6 +178,15 @@ test.describe("Counselor accessing student data", () => {
   });
 });
 
+test("case times read as a short date and time, and the sidebar link says Schedule", async ({ page }) => {
+  await seed(page, { docs: { assessments: { c1: flaggedCase } } });
+  await logIn(page, COUNSELOR);
+  const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
+  await expect(flagged).toContainText(/Sep (19|20|21), 2026/);
+  await expect(flagged).not.toContainText(/\d:\d\d:\d\d/);
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Schedule", exact: true })).toBeVisible();
+});
+
 test("on a phone the flagged case is on the first screen, under a compact summary", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await seed(page, { docs: { assessments: { c1: flaggedCase } } });
