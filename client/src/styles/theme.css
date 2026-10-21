@@ -304,6 +304,34 @@
   box-shadow: var(--mb-shadow-sm);
 }
 
+/* Section tab (aria-current): switches the whole page, so it sits on an underline rule, unlike the .mb-chip filters. */
+.mb-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--mb-muted);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--mb-fast),
+    border-color var(--mb-fast);
+}
+.mb-tab:hover {
+  color: var(--mb-ink);
+  border-bottom-color: var(--mb-line);
+}
+.mb-tab[aria-current="page"] {
+  color: var(--mb-ink);
+  border-bottom-color: var(--mb-brand);
+}
+
 /* ── Buttons ──────────────────────────────────────────────────────────────── */
 
 /* display lives in :where() so Tailwind utilities like `hidden` can still override it */
@@ -604,7 +632,8 @@ textarea.mb-field {
   }
   .mb-btn,
   .mb-card-interactive,
-  .mb-chip {
+  .mb-chip,
+  .mb-tab {
     transition: none;
   }
   .mb-btn:hover,

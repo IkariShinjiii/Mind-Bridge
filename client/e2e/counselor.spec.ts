@@ -187,6 +187,22 @@ test("case times read as a short date and time, and the sidebar link says Schedu
   await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Schedule", exact: true })).toBeVisible();
 });
 
+test("on a phone the flagged case is on the first screen, under a compact summary", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seed(page, { docs: { assessments: { c1: flaggedCase } } });
+  await logIn(page, COUNSELOR);
+  const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
+  await expect(flagged).toBeVisible();
+  const box = await flagged.boundingBox();
+  // The bottom nav covers the last ~80 px, so the card must start well inside the viewport.
+  expect(box!.y).toBeLessThan(600);
+  const summary = page.getByRole("region", { name: "Summary" });
+  await expect(summary.getByText("High risk")).toBeVisible();
+  await expect(summary.getByText("Open cases")).toBeVisible();
+  await expect(summary.getByText("Pending sessions")).toBeVisible();
+  await expect(summary.getByText("Students", { exact: true })).toBeHidden();
+});
+
 test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({ page }) => {
   const answers = [2, 1, 0, 2, 1, 0, 0];
   await seed(page, {

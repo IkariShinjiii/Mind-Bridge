@@ -136,18 +136,18 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
           <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
             <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline">
               <img src={icon} alt="" className="h-8 w-8 rounded-md" />
-              <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
+              <span className="mb-sign whitespace-nowrap text-2xl font-bold max-[379px]:sr-only">Mind Bridge</span>
             </Link>
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
               {!isStaff && (
                 <a
                   href="tel:1553"
-                  className="mb-plate-amber mb-sign hidden min-h-[44px] items-center gap-2 px-3 text-lg font-bold no-underline sm:inline-flex"
+                  className="mb-plate-amber mb-sign inline-flex min-h-[44px] items-center gap-2 px-3 text-lg font-bold no-underline"
                   style={{ color: "var(--mb-amber-ink)" }}
                 >
                   <Phone className="h-4 w-4" aria-hidden="true" />
-                  Crisis 1553
+                  <span className="max-sm:sr-only">Crisis </span>1553
                 </a>
               )}
               <AccountMenu placement="below" />

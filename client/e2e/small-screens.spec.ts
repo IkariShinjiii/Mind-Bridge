@@ -20,7 +20,8 @@ async function elementsPastEdge(page: Page): Promise<string[]> {
           !el.closest(".sr-only") &&
           // Intentional: these strips scroll sideways on phones.
           !el.closest("nav[aria-label='Settings sections']") &&
-          !el.closest("[aria-label='Filter appointments by status']")
+          !el.closest("[aria-label='Filter appointments by status']") &&
+          !el.closest("[aria-label='Filter cases']")
         );
       })
       .slice(0, 5)
@@ -56,6 +57,23 @@ for (const width of WIDTHS) {
       expect(box, "hotline link is rendered").not.toBeNull();
       expect(box!.x).toBeGreaterThanOrEqual(0);
       expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    });
+
+    test("the crisis line is in the top bar on every phone width, for students only", async ({ page }) => {
+      test.skip(width >= 1024, "from 1024 px the sidebar carries it");
+      await seed(page);
+      await logIn(page, STUDENT);
+      const crisis = page.getByRole("banner").getByRole("link", { name: /1553/ });
+      await expect(crisis).toBeVisible();
+      const box = await crisis.boundingBox();
+      expect(box!.y + box!.height).toBeLessThanOrEqual(80);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      await page.getByRole("button", { name: /Account menu/ }).click();
+      await page.getByRole("menuitem", { name: "Sign out" }).click();
+      await logIn(page, COUNSELOR);
+      await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
+      await expect(page.getByRole("banner").getByRole("link", { name: /1553/ })).toHaveCount(0);
     });
 
     test("staff dashboard fits", async ({ page }) => {
