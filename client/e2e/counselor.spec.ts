@@ -201,6 +201,10 @@ test("on a phone the flagged case is on the first screen, under a compact summar
   await expect(summary.getByText("Open cases")).toBeVisible();
   await expect(summary.getByText("Pending sessions")).toBeVisible();
   await expect(summary.getByText("Students", { exact: true })).toBeHidden();
+  // The three section tabs share one row; none wraps under the others.
+  const tabs = page.getByRole("navigation", { name: "Dashboard sections" }).getByRole("button");
+  const tops = await tabs.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(1);
 });
 
 test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({ page }) => {
