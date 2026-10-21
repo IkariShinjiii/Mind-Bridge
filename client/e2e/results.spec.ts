@@ -28,7 +28,7 @@ test.describe("Viewing assessment results", () => {
     await seed(page);
     await logIn(page, STUDENT);
 
-    await expect(page.getByText("Latest Wellness Index").locator("..")).toContainText("No check-in");
+    await expect(page.getByText("Your latest check-in").locator("..")).toContainText("No check-in");
     await expect(page.getByText("No check-ins yet")).toBeVisible();
     await expect(page.getByRole("group", { name: "Trend view" })).toHaveCount(0);
   });

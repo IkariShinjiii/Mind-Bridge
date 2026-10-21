@@ -381,8 +381,6 @@ export default function StudentDashboard() {
           ? "bg-[color:var(--mb-chart-medium)]"
           : "bg-[color:var(--mb-chart-low)]";
 
-  // Gauge Percentage
-  const gaugePct = latestScore !== null ? Math.min(100, Math.round((latestScore / maxScore) * 100)) : 0;
 
   // The soonest session that is still ahead and not closed out (the list also holds past and cancelled ones)
   const nextAppointment = appointments
@@ -439,7 +437,7 @@ export default function StudentDashboard() {
             <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden sm:col-span-2">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
               <div>
-                <div className="text-sm text-[color:var(--mb-muted)] font-bold">Latest Wellness Index</div>
+                <div className="text-sm text-[color:var(--mb-muted)] font-bold">Your latest check-in</div>
                 <div className="mt-2 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
@@ -456,40 +454,10 @@ export default function StudentDashboard() {
                               : "Balanced / Stable"}
                       </span>
                     </div>
+                    {latestScore !== null && (
+                      <p className="mt-2 text-sm text-[color:var(--mb-muted)]">A lower score means less strain.</p>
+                    )}
                   </div>
-
-                  {/* Mini Visual Gauge */}
-                  {latestScore !== null && (
-                    <div className="relative h-14 w-14 shrink-0">
-                      <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
-                        <path
-                          className="text-[color:var(--mb-line)]"
-                          strokeWidth="3.5"
-                          stroke="currentColor"
-                          fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                        <path
-                          className={
-                            latestRisk === "high"
-                              ? "text-[color:var(--mb-chart-high)]"
-                              : latestRisk === "medium"
-                                ? "text-[color:var(--mb-chart-medium)]"
-                                : "text-[color:var(--mb-brand)]"
-                          }
-                          strokeDasharray={`${gaugePct}, 100`}
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          stroke="currentColor"
-                          fill="none"
-                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                      </svg>
-                      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[color:var(--mb-ink)]">
-                        {gaugePct}%
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
 
