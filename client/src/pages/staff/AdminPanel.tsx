@@ -157,7 +157,7 @@ function ScheduleCard({ appointments }: { appointments: Appointment[] }) {
             type="button"
             onClick={() => shift(-7)}
             aria-label="Previous week"
-            className="mb-btn mb-btn-line !min-h-[44px] !px-2"
+            className="mb-btn mb-btn-line !min-h-[44px] !min-w-[44px] !px-2"
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -165,13 +165,13 @@ function ScheduleCard({ appointments }: { appointments: Appointment[] }) {
             type="button"
             onClick={() => shift(7)}
             aria-label="Next week"
-            className="mb-btn mb-btn-line !min-h-[44px] !px-2"
+            className="mb-btn mb-btn-line !min-h-[44px] !min-w-[44px] !px-2"
           >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-7 gap-1" role="group" aria-label="Choose a day">
+      <div className="mt-3 grid grid-cols-7 gap-0.5" role="group" aria-label="Choose a day">
         {days.map((d) => {
           const active = sameDay(d, selected);
           return (
@@ -212,7 +212,10 @@ function ScheduleCard({ appointments }: { appointments: Appointment[] }) {
           ))}
         </ul>
       )}
-      <Link to="/appointments" className="mt-3 inline-block font-bold text-[color:var(--mb-brand)]">
+      <Link
+        to="/appointments"
+        className="mt-1 inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)]"
+      >
         Open schedule
       </Link>
     </section>

@@ -1168,8 +1168,11 @@ export default function StudentDashboard() {
               </ul>
             ) : (
               <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
-                No goals chosen yet.{" "}
-                <Link to="/settings" className="font-bold text-[color:var(--mb-brand)] underline">
+                <p>No goals chosen yet.</p>
+                <Link
+                  to="/settings"
+                  className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                >
                   Pick your goals
                 </Link>
               </div>
