@@ -5,7 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import AccountMenu from "./AccountMenu";
 import { ToastViewport } from "../ui/Toast";
-import icon from "../../assets/mindbridge-icon.png";
+import Logo from "../ui/Logo";
 
 export default function DashboardLayout({ children }: { children?: ReactNode }) {
   const { userRole } = useAuth();
@@ -83,7 +83,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
 
       <aside className="hidden w-64 xl:w-72 shrink-0 flex-col border-r border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:flex">
         <Link to="/" className="flex min-h-[44px] items-center gap-3 px-6 py-5 text-[color:var(--mb-ink)] no-underline">
-          <img src={icon} alt="" className="h-8 w-8 rounded-md" />
+          <Logo className="h-8 w-8 rounded-md" />
           <span className="mb-sign whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="Main">
@@ -135,7 +135,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:hidden">
           <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
             <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline">
-              <img src={icon} alt="" className="h-8 w-8 rounded-md" />
+              <Logo className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold max-[379px]:sr-only">Mind Bridge</span>
             </Link>
 

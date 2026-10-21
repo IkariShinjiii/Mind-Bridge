@@ -304,6 +304,15 @@
   box-shadow: var(--mb-shadow-sm);
 }
 
+/* Logo: the teal mark on light, the lighter teal one on dark */
+.mb-logo-dark,
+.mb[data-theme="dark"] .mb-logo-light {
+  display: none;
+}
+.mb[data-theme="dark"] .mb-logo-dark {
+  display: block;
+}
+
 /* Section tab (aria-current): switches the whole page, so it sits on an underline rule, unlike the .mb-chip filters. */
 .mb-tab {
   display: inline-flex;
