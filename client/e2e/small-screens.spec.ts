@@ -28,6 +28,36 @@ async function elementsPastEdge(page: Page): Promise<string[]> {
   });
 }
 
+/** Links and buttons that are visible but smaller than 44 x 44 px. */
+async function smallTargets(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll("a, button")]
+      .filter((el) => !el.closest(".sr-only, .mb-skip"))
+      .map((el) => ({ el, box: el.getBoundingClientRect() }))
+      .filter(({ el, box }) => box.width > 0 && box.height > 0 && getComputedStyle(el).visibility !== "hidden")
+      .filter(({ box }) => box.width < 43.5 || box.height < 43.5)
+      .map(({ el, box }) => `${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)} ${Math.round(box.width)}x${Math.round(box.height)}`),
+  );
+}
+
+test.describe("dashboard touch targets on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("student dashboard", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+    await expect(page.getByRole("heading", { name: /Welcome back/ })).toBeVisible();
+    expect(await smallTargets(page)).toEqual([]);
+  });
+
+  test("staff dashboard", async ({ page }) => {
+    await seed(page);
+    await logIn(page, COUNSELOR);
+    await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
+    expect(await smallTargets(page)).toEqual([]);
+  });
+});
+
 for (const width of WIDTHS) {
   test.describe(`${width}px wide`, () => {
     test.use({ viewport: { width, height: 700 } });
