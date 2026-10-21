@@ -637,9 +637,9 @@ export default function AdminPanel() {
               type="button"
               onClick={() => handleTabSelect(tab)}
               aria-current={mainTab === tab ? "page" : undefined}
-              className="mb-chip"
+              className="mb-tab"
             >
-              <Icon className="h-5 w-5" aria-hidden="true" />
+              <Icon className="h-5 w-5 max-sm:hidden" aria-hidden="true" />
               {label}
             </button>
           ))}
