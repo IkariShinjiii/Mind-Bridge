@@ -29,7 +29,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         },
         {
           to: "/appointments",
-          label: "Schedule and appointments",
+          label: "Schedule",
           short: "Schedule",
           icon: Calendar,
           active: isHere("/appointments"),

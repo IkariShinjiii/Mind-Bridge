@@ -94,7 +94,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: num
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className={`pointer-events-auto flex items-start gap-3 rounded-lg border border-l-4 bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-mb-lg ${
+      className={`pointer-events-auto flex items-start gap-3 rounded-lg border bg-[color:var(--mb-surface)] py-3 pl-4 pr-2 shadow-mb-lg ${
         isError ? "border-[color:var(--mb-urgent)]" : "border-[color:var(--mb-safe)]"
       }`}
     >

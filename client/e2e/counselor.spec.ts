@@ -178,6 +178,15 @@ test.describe("Counselor accessing student data", () => {
   });
 });
 
+test("case times read as a short date and time, and the sidebar link says Schedule", async ({ page }) => {
+  await seed(page, { docs: { assessments: { c1: flaggedCase } } });
+  await logIn(page, COUNSELOR);
+  const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
+  await expect(flagged).toContainText(/Sep (19|20|21), 2026/);
+  await expect(flagged).not.toContainText(/\d:\d\d:\d\d/);
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Schedule", exact: true })).toBeVisible();
+});
+
 test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({ page }) => {
   const answers = [2, 1, 0, 2, 1, 0, 0];
   await seed(page, {

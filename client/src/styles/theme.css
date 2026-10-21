@@ -495,7 +495,6 @@ textarea.mb-field {
   background: var(--mb-error-bg);
   color: var(--mb-error-ink);
   border: 1px solid currentColor;
-  border-left-width: 4px;
   border-radius: var(--mb-r-md);
   padding: 0.75rem 1rem;
 }
@@ -503,7 +502,6 @@ textarea.mb-field {
   background: var(--mb-safe-bg);
   color: var(--mb-safe);
   border: 1px solid currentColor;
-  border-left-width: 4px;
   border-radius: var(--mb-r-md);
   padding: 0.75rem 1rem;
 }
