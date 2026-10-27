@@ -269,10 +269,11 @@ function ScreenSummary({ assessment }: { assessment: Assessment }) {
   );
 }
 
-const MAIN_TAB_LINKS: ReadonlyArray<readonly [Exclude<MainTab, "accounts">, LucideIcon, string]> = [
-  ["cases", ClipboardList, "Cases and triage"],
-  ["analytics", BarChart3, "Analytics"],
-  ["availability", Calendar, "My availability"],
+/** [tab, icon, label, shorter label for phones] */
+const MAIN_TAB_LINKS: ReadonlyArray<readonly [Exclude<MainTab, "accounts">, LucideIcon, string, string]> = [
+  ["cases", ClipboardList, "Cases and triage", "Cases"],
+  ["analytics", BarChart3, "Analytics", "Analytics"],
+  ["availability", Calendar, "My availability", "Availability"],
 ];
 
 const CASE_FILTERS: ReadonlyArray<readonly [CaseFilter, string]> = [
@@ -632,9 +633,9 @@ export default function AdminPanel() {
       {mainTab !== "accounts" && (
         <nav
           aria-label="Dashboard sections"
-          className="flex flex-wrap gap-2 border-b border-[color:var(--mb-line)] pb-3 sm:pb-4"
+          className="flex gap-1 border-b border-[color:var(--mb-line)] sm:gap-3"
         >
-          {MAIN_TAB_LINKS.map(([tab, Icon, label]) => (
+          {MAIN_TAB_LINKS.map(([tab, Icon, label, shortLabel]) => (
             <button
               key={tab}
               type="button"
@@ -643,7 +644,8 @@ export default function AdminPanel() {
               className="mb-tab"
             >
               <Icon className="h-5 w-5 max-sm:hidden" aria-hidden="true" />
-              {label}
+              <span className="max-sm:hidden">{label}</span>
+              <span className="sm:hidden">{shortLabel}</span>
             </button>
           ))}
         </nav>
