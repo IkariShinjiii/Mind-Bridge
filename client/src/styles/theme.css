@@ -3,26 +3,26 @@
 
 .mb {
   /* Surfaces */
-  --mb-ground: #f5f7f6;
+  --mb-ground: #fbf7f6;
   --mb-surface: #ffffff;
-  --mb-surface-2: #edf2f0;
-  --mb-panel: #2a5861;
-  --mb-panel-ink: #f6faf9;
-  --mb-panel-soft: #eef5f3;
+  --mb-surface-2: #f5ebe9;
+  --mb-panel: #8c1527;
+  --mb-panel-ink: #fffafa;
+  --mb-panel-soft: #fbe9e8;
 
   /* Text and lines */
-  --mb-ink: #22343a;
-  --mb-muted: #3e5157;
-  --mb-line: #dde5e3;
-  --mb-field-line: #74898f; /* 3:1+ against surfaces: WCAG 1.4.11 for input boundaries */
+  --mb-ink: #2b1a1c;
+  --mb-muted: #5b4649;
+  --mb-line: #eadcda;
+  --mb-field-line: #8a7174; /* 3:1+ against surfaces: WCAG 1.4.11 for input boundaries */
   --mb-link: #09509a;
   --mb-focus: #0b6bcb;
 
   /* Brand and decoration. Accent is decorative only (gradients, progress); it never carries text. */
-  --mb-brand: #2a5861;
-  --mb-brand-bg: #eef5f4;
-  --mb-accent: #7fb5b0;
-  --mb-accent-soft: #d6e8e5;
+  --mb-brand: #8c1527;
+  --mb-brand-bg: #fbeceb;
+  --mb-accent: #d4545e;
+  --mb-accent-soft: #f6dcdc;
 
   /* Crisis amber: the crisis line only */
   --mb-amber: #f1d9a6;
@@ -50,12 +50,12 @@
   --mb-r-sm: 8px;
   --mb-r-md: 12px;
   --mb-r-lg: 16px;
-  --mb-shadow-sm: 0 1px 2px rgba(42, 88, 97, 0.06), 0 1px 3px rgba(42, 88, 97, 0.08);
-  --mb-shadow-md: 0 4px 12px -2px rgba(42, 88, 97, 0.1), 0 2px 6px -2px rgba(42, 88, 97, 0.08);
-  --mb-shadow-lg: 0 16px 40px -12px rgba(42, 88, 97, 0.28), 0 6px 16px -6px rgba(42, 88, 97, 0.12);
+  --mb-shadow-sm: 0 1px 2px rgba(140, 21, 39, 0.06), 0 1px 3px rgba(140, 21, 39, 0.08);
+  --mb-shadow-md: 0 4px 12px -2px rgba(140, 21, 39, 0.1), 0 2px 6px -2px rgba(140, 21, 39, 0.08);
+  --mb-shadow-lg: 0 16px 40px -12px rgba(140, 21, 39, 0.28), 0 6px 16px -6px rgba(140, 21, 39, 0.12);
   --mb-ease: cubic-bezier(0.22, 1, 0.36, 1);
   /* Dialog backdrop. Dark in both themes: --mb-ink is light text in dark mode and would wash the page out. */
-  --mb-scrim: rgb(34 52 58 / 0.55);
+  --mb-scrim: rgb(43 26 28 / 0.55);
   --mb-fast: 150ms;
   --mb-base: 220ms;
 
@@ -70,23 +70,23 @@
 }
 
 .mb[data-theme="dark"] {
-  --mb-scrim: rgb(2 8 10 / 0.72);
-  --mb-ground: #0b171b;
-  --mb-surface: #112127;
-  --mb-surface-2: #1a2f36;
-  --mb-panel: #134853;
-  --mb-panel-ink: #f4faf8;
-  --mb-panel-soft: #d2e6e3;
-  --mb-ink: #e9f2f0;
-  --mb-muted: #b4c8cc;
-  --mb-line: #28434c;
-  --mb-field-line: #5f7d86;
+  --mb-scrim: rgb(10 3 4 / 0.72);
+  --mb-ground: #170d0f;
+  --mb-surface: #221317;
+  --mb-surface-2: #321c21;
+  --mb-panel: #7d1225;
+  --mb-panel-ink: #fffafa;
+  --mb-panel-soft: #f6d9d9;
+  --mb-ink: #f8eeec;
+  --mb-muted: #d4bec0;
+  --mb-line: #4a2b31;
+  --mb-field-line: #8f6d73;
   --mb-link: #8cc4f5;
   --mb-focus: #ffc857;
-  --mb-brand: #8ed6dc;
-  --mb-brand-bg: #12363d;
-  --mb-accent: #3cc2ba;
-  --mb-accent-soft: #14424a;
+  --mb-brand: #ffb4ba;
+  --mb-brand-bg: #3b1b22;
+  --mb-accent: #ef6f79;
+  --mb-accent-soft: #4d222a;
   --mb-safe: #76dcb0;
   --mb-safe-bg: #14352a;
   --mb-safe-solid: #2f9e75;
@@ -304,13 +304,11 @@
   box-shadow: var(--mb-shadow-sm);
 }
 
-/* Logo: the teal mark on light, the lighter teal one on dark */
-.mb-logo-dark,
-.mb[data-theme="dark"] .mb-logo-light {
-  display: none;
-}
-.mb[data-theme="dark"] .mb-logo-dark {
-  display: block;
+/* Logo: the crest has black outlines, so on dark it sits on a white tile */
+.mb[data-theme="dark"] .mb-logo {
+  background: #ffffff;
+  border-radius: var(--mb-r-sm);
+  padding: 2px;
 }
 
 /* Section tab (aria-current): switches the whole page, so it sits on an underline rule, unlike the .mb-chip filters. */

@@ -1,12 +1,6 @@
-import lightIcon from "../../assets/mindbridge-icon.png";
-import darkIcon from "../../assets/mindbridge-icon-dark.png";
+import logo from "../../assets/usa-logo.png";
 
-/** The Mind Bridge mark in the button teal; dark theme swaps to the lighter brand teal so it stays visible. */
+/** The University of San Agustin crest. Dark theme seats it on a white tile so its black outlines stay readable. */
 export default function Logo({ className = "" }: { className?: string }) {
-  return (
-    <>
-      <img src={lightIcon} alt="" className={`mb-logo-light ${className}`} />
-      <img src={darkIcon} alt="" className={`mb-logo-dark ${className}`} />
-    </>
-  );
+  return <img src={logo} alt="" className={`mb-logo object-contain ${className}`} />;
 }
