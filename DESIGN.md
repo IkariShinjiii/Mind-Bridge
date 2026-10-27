@@ -1,6 +1,6 @@
 ---
 name: Mind Bridge Design System
-description: Calm Wayfinding, softened. A calm sage, high-contrast system for a student mental wellness service, light by default with a dark option.
+description: Calm Wayfinding, softened. A University of San Agustin crimson-and-white, high-contrast system for a student mental wellness service, light by default with a dark option.
 colors:
   ground: "#f5f7f6"
   surface: "#ffffff"
@@ -55,7 +55,7 @@ Light is the default (daytime use on campus), with a dark theme for late-night c
 
 ## Colour
 
-- **Primary: deep teal** (`panel`, `brand`). Filled for the main action, outlined for the secondary one, and used for navigation's active state. `accent` (bright teal) is decorative only: gradients and progress fills, never text.
+- **Primary: deep crimson** (`panel`, `brand`, from the USA crest). Filled for the main action, outlined for the secondary one, and used for navigation's active state. `accent` (bright red) is decorative only: gradients and progress fills, never text.
 - **Neutrals:** `ground` for the page, `surface` for cards, `surface-2` for inset and disabled areas, `ink` for text, `muted` for supporting text, `line` for dividers.
 - **Status:** green = steady (`safe`), amber-brown = moderate (`warn`), red = priority or error (`urgent`). Risk is always also stated in words, never by colour alone.
 - **Amber is for the crisis line only.** The NCMH number (1553) is always one tap away, in amber.
