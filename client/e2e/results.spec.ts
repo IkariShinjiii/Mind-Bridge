@@ -62,6 +62,21 @@ test.describe("Viewing assessment results", () => {
     await expect(page.getByRole("region", { name: "Breathing exercise" })).toHaveCount(0);
   });
 
+  test("the result lists what is going well, but not for a high result", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+
+    await completeCheckIn(page, [2, 1, 0, 1, 1, 0, 0]); // 5 of 21 is low
+    await expect(page.getByText("What's going well")).toBeVisible();
+    await expect(page.getByText("You are sleeping reasonably well.")).toBeVisible();
+    await expect(page.getByText("You can concentrate on your schoolwork.")).toBeVisible();
+
+    await page.getByRole("button", { name: "Take the check-in again" }).click();
+    await completeCheckIn(page, [0, 0, 0, 0, 0, 0, 2]); // the safety item above 0 is high
+    await expect(page.getByRole("heading", { name: "You don't have to carry this alone." })).toBeVisible();
+    await expect(page.getByText("What's going well")).toHaveCount(0);
+  });
+
   test("previous check-ins load on login and the latest score is shown", async ({ page }) => {
     await seed(page, {
       docs: { assessments: { ...past("a1", "2026-09-01T09:00:00.000Z", 12, "medium") } },
