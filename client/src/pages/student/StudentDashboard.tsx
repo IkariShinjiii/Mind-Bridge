@@ -38,6 +38,7 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
+import { goingWell } from "../../utils/goingWell";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
 import { bandLimits, checkInNudge, describeChange, summarizeTrend } from "../../utils/trend";
@@ -572,6 +573,8 @@ export default function StudentDashboard() {
                   const Icon = high ? HeartPulse : medium ? Sprout : Sparkles;
                   const fullAnswers = lastSubmission ? fullAnswersOf(lastSubmission) : null;
                   const fullResult = fullAnswers ? scoreFull(fullAnswers) : null;
+                  // Not for a high result: the page should stay about getting support.
+                  const wellLines = lastSubmission && !high ? goingWell(lastSubmission) : [];
                   return (
                     <m.div key="results" {...listMotion} exit={fade.exit} className="space-y-4" aria-live="polite">
                       <m.div {...itemMotion} className="mb-plate p-6 sm:p-6">
@@ -619,6 +622,20 @@ export default function StudentDashboard() {
                           <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
                             These are screening scores, not a diagnosis. A counselor can talk them through with you.
                           </p>
+                        </m.div>
+                      )}
+
+                      {wellLines.length > 0 && (
+                        <m.div {...itemMotion} className="mb-tile">
+                          <p className="font-bold text-[color:var(--mb-ink)]">What's going well</p>
+                          <ul className="mt-2 space-y-1 text-[color:var(--mb-ink)]">
+                            {wellLines.map((line) => (
+                              <li key={line} className="flex items-start gap-2">
+                                <Check className="mt-1 h-4 w-4 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
                         </m.div>
                       )}
 
