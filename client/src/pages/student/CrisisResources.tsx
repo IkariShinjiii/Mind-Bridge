@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { PhoneCall, Phone, HeartHandshake, Building2, Calendar, ArrowLeft, type LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { PhoneCall, Phone, HeartHandshake, Building2, Calendar, type LucideIcon } from "lucide-react";
 import { m } from "framer-motion";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import { pagePreset, useMotionPreset } from "../../lib/motion";
@@ -111,17 +111,12 @@ function HotlineCard({ hotline }: { hotline: Hotline }) {
 }
 
 export default function CrisisResources() {
-  const navigate = useNavigate();
   const page = useMotionPreset(pagePreset);
 
   return (
     <m.div {...page} className="w-full space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
-        <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          Back
-        </button>
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Crisis resources</h1>
           <p className="max-w-[65ch] text-[color:var(--mb-muted)]">
