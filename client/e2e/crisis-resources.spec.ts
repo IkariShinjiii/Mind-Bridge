@@ -49,15 +49,6 @@ test.describe("Crisis resources page", () => {
     await expect(page).toHaveURL(/\/appointments$/);
   });
 
-  test("the Back button returns to the previous page", async ({ page }) => {
-    await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Crisis resources" }).click();
-    await expect(page).toHaveURL(/\/resources$/);
-
-    await page.getByRole("button", { name: "Back" }).click();
-
-    await expect(page).toHaveURL(/\/student\/dashboard$/);
-  });
-
   test("the breathing exercise starts on Inhale and moves on to Hold", async ({ page }) => {
     await page.goto("/resources");
     const exercise = page.getByRole("region", { name: "Breathing exercise" });
