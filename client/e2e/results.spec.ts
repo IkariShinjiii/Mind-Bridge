@@ -47,6 +47,21 @@ test.describe("Viewing assessment results", () => {
     await expect(page.getByRole("img", { name: /Line chart of 1 check-in scores, latest 7 out of 21/ })).toBeVisible();
   });
 
+  test("a medium result offers a short breathing reset and a low result does not", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+
+    await completeCheckIn(page, [2, 1, 1, 1, 1, 1, 0]);
+    const reset = page.getByRole("region", { name: "Breathing exercise" });
+    await expect(reset.getByRole("heading", { name: "A short reset" })).toBeVisible();
+    await expect(reset.getByRole("button", { name: "Calming 4-7-8" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Take the check-in again" }).click();
+    await completeCheckIn(page, [0, 0, 0, 0, 0, 0, 0]);
+    await expect(page.getByRole("heading", { name: "Check-in complete. You're doing well." })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Breathing exercise" })).toHaveCount(0);
+  });
+
   test("previous check-ins load on login and the latest score is shown", async ({ page }) => {
     await seed(page, {
       docs: { assessments: { ...past("a1", "2026-09-01T09:00:00.000Z", 12, "medium") } },
