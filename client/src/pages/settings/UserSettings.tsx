@@ -17,7 +17,6 @@ import {
   HeartPulse,
   Target,
   ClipboardList,
-  ArrowLeft,
   Calendar,
   Check,
   KeyRound,
@@ -92,9 +91,10 @@ function Field({ id, label, hint, error, required, children }: FieldProps) {
         "aria-describedby": error ? `${id}-error` : undefined,
       })
     : children;
+  // Column layout, label first: in a two-column row the inputs line up even when one label wraps and the other doesn't.
   return (
-    <div>
-      <label htmlFor={id} className="mb-1 block font-bold text-[color:var(--mb-ink)]">
+    <div className="flex flex-col">
+      <label htmlFor={id} className="mb-1 block flex-1 font-bold text-[color:var(--mb-ink)]">
         {label}
         {required && <span aria-hidden="true"> *</span>}
         {hint && <span className="ml-1 font-normal text-[color:var(--mb-muted)]">({hint})</span>}
@@ -418,10 +418,6 @@ export default function UserSettings() {
     <div className="w-full">
       {/* Header */}
       <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-[color:var(--mb-line)] pb-6">
-        <button type="button" onClick={() => navigate(-1)} className="mb-btn mb-btn-line !px-4 text-sm">
-          <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          Back
-        </button>
         <div>
           <h1 className="text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">Settings</h1>
           <p className="max-w-[65ch] text-[color:var(--mb-muted)]">

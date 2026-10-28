@@ -683,7 +683,7 @@ export default function StudentDashboard() {
                         </m.div>
                       )}
 
-                      <m.div {...itemMotion} className="flex flex-wrap gap-3">
+                      <m.div {...itemMotion} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
                           <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
                         </button>
