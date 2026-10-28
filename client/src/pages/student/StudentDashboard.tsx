@@ -13,6 +13,7 @@ import {
   Check,
   LifeBuoy,
   Phone,
+  Printer,
 } from "lucide-react";
 import { m, AnimatePresence } from "framer-motion";
 import {
@@ -39,6 +40,7 @@ import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { goingWell } from "../../utils/goingWell";
+import { buildSummaryHtml, printHtml } from "../../utils/summary";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
 import { bandLimits, checkInNudge, describeChange, summarizeTrend } from "../../utils/trend";
@@ -684,6 +686,32 @@ export default function StudentDashboard() {
                       <m.div {...itemMotion} className="flex flex-wrap gap-3">
                         <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
                           <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            lastSubmission &&
+                            printHtml(
+                              buildSummaryHtml({
+                                name: userName,
+                                date: formatDateTime(lastSubmission.submittedAt ?? lastSubmission.createdAt),
+                                kind: fullResult ? "Full check-in" : "Quick check-in",
+                                total: lastSubmission.total,
+                                max: lastSubmission.maxScore,
+                                level: high ? "high" : medium ? "medium" : "low",
+                                scales: fullResult
+                                  ? [
+                                      { label: "Depression (PHQ-9)", score: fullResult.phq9, max: 27, band: fullResult.phq9Band.label },
+                                      { label: "Anxiety (GAD-7)", score: fullResult.gad7, max: 21, band: fullResult.gad7Band.label },
+                                    ]
+                                  : undefined,
+                                wellLines,
+                              }),
+                            )
+                          }
+                          className="mb-btn mb-btn-line"
+                        >
+                          <Printer className="h-5 w-5" aria-hidden="true" /> Save or print my summary
                         </button>
                         <button type="button" onClick={resetCheckIn} className="mb-btn mb-btn-line">
                           Take the check-in again
