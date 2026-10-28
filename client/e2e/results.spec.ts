@@ -77,6 +77,19 @@ test.describe("Viewing assessment results", () => {
     await expect(page.getByText("What's going well")).toHaveCount(0);
   });
 
+  test("the result can be printed or saved as a summary", async ({ page }) => {
+    await seed(page);
+    await logIn(page, STUDENT);
+
+    await completeCheckIn(page, [2, 1, 0, 1, 1, 0, 0]);
+    await page.getByRole("button", { name: "Save or print my summary" }).click();
+
+    // The summary is built in a hidden frame (removed a second after printing); nothing leaves the browser.
+    const frame = page.locator('iframe[srcdoc*="check-in summary"]');
+    await expect(frame).toHaveAttribute("srcdoc", /Total score: 5 of 21/);
+    await expect(frame).toHaveAttribute("srcdoc", /You are sleeping reasonably well\./);
+  });
+
   test("previous check-ins load on login and the latest score is shown", async ({ page }) => {
     await seed(page, {
       docs: { assessments: { ...past("a1", "2026-09-01T09:00:00.000Z", 12, "medium") } },
