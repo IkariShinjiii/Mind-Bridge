@@ -36,6 +36,7 @@ import { validate } from "../../lib/validate";
 import { checkInSchema, fullCheckInSchema } from "../../lib/schemas";
 import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
+import BreathingPacer from "../../components/student/BreathingPacer";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
@@ -650,6 +651,16 @@ export default function StudentDashboard() {
                               Office.
                             </li>
                           </ul>
+                        </m.div>
+                      )}
+
+                      {(high || medium) && (
+                        <m.div {...itemMotion}>
+                          <BreathingPacer
+                            as="h3"
+                            title="A short reset"
+                            intro="If you feel tense right now, take a minute to breathe. Pick a pattern and follow the circle."
+                          />
                         </m.div>
                       )}
 

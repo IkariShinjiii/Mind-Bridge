@@ -58,9 +58,9 @@ test.describe("Crisis resources page", () => {
     await expect(page).toHaveURL(/\/student\/dashboard$/);
   });
 
-  test("the box breathing exercise starts on Inhale and moves on to Hold", async ({ page }) => {
+  test("the breathing exercise starts on Inhale and moves on to Hold", async ({ page }) => {
     await page.goto("/resources");
-    const exercise = page.getByRole("region", { name: "Box breathing exercise" });
+    const exercise = page.getByRole("region", { name: "Breathing exercise" });
     const announcement = exercise.getByRole("status");
 
     await exercise.getByRole("button", { name: "Start breathing exercise" }).click();
@@ -71,9 +71,25 @@ test.describe("Crisis resources page", () => {
     await expect(announcement).toHaveText("Hold", { timeout: 6_000 });
   });
 
+  test("the calming 4-7-8 pattern holds for seven seconds", async ({ page }) => {
+    await page.goto("/resources");
+    const exercise = page.getByRole("region", { name: "Breathing exercise" });
+    const announcement = exercise.getByRole("status");
+
+    await exercise.getByRole("button", { name: "Calming 4-7-8" }).click();
+    await expect(exercise.getByRole("button", { name: "Calming 4-7-8" })).toHaveAttribute("aria-pressed", "true");
+    await exercise.getByRole("button", { name: "Start breathing exercise" }).click();
+    await expect(announcement).toHaveText("Inhale");
+    await expect(announcement).toHaveText("Hold", { timeout: 6_000 });
+    // Still holding after 4 seconds of hold; a 4-4-4 box would already be exhaling.
+    await page.waitForTimeout(4_500);
+    await expect(announcement).toHaveText("Hold");
+    await expect(announcement).toHaveText("Exhale", { timeout: 4_000 });
+  });
+
   test("stopping the breathing exercise resets it so it can be started again", async ({ page }) => {
     await page.goto("/resources");
-    const exercise = page.getByRole("region", { name: "Box breathing exercise" });
+    const exercise = page.getByRole("region", { name: "Breathing exercise" });
 
     await exercise.getByRole("button", { name: "Start breathing exercise" }).click();
     await exercise.getByRole("button", { name: "Stop" }).click();
