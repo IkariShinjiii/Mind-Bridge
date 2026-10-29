@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, type FormEvent, type ReactNode } from "react";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, CalendarPlus, Plus } from "lucide-react";
 import { m, AnimatePresence, LazyMotion, type Variants } from "framer-motion";
 import { fadePreset, pagePreset, transition, useMotionPreset, useNoMotion } from "../../lib/motion";
 import {
@@ -20,6 +20,7 @@ import { validateAvailabilityWindow } from "../../utils/validation";
 import { validate } from "../../lib/validate";
 import { appointmentActionSchema } from "../../lib/schemas";
 import { validateSlotForBooking } from "../../utils/booking";
+import { canAddToCalendar, downloadIcs } from "../../utils/calendar";
 import { focusById } from "../../utils/dom";
 import type { Appointment, AppointmentStatus, AvailabilitySlot, StoredDate } from "../../types";
 
@@ -535,6 +536,19 @@ export default function Appointments() {
 
                         {/* Actions */}
                         <div className="mt-4 flex flex-wrap items-center gap-2">
+                          {(isConfirmed || isRescheduled) && canAddToCalendar(apt) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (downloadIcs(apt))
+                                  showFeedback("success", "Calendar file downloaded. Open it to add the session.");
+                              }}
+                              className="mb-btn mb-btn-line !px-4 text-sm"
+                            >
+                              <CalendarPlus size={16} aria-hidden="true" />
+                              Add to calendar
+                            </button>
+                          )}
                           {isCounselor ? (
                             <>
                               {isPending && (
