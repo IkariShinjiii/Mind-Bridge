@@ -9,6 +9,8 @@ import ErrorBoundary from "./components/ui/ErrorBoundary";
 import { AuthProvider } from "./components/AuthProvider";
 import { ToastProvider } from "./components/ui/Toast";
 import Preloader from "./components/ui/Preloader";
+import OfflineBanner from "./components/ui/OfflineBanner";
+import { registerServiceWorker } from "./lib/registerServiceWorker";
 import "./styles/index.css";
 import "./styles/theme.css";
 
@@ -20,6 +22,7 @@ ReactDOM.createRoot(container).render(
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation} strict>
         <Preloader />
+        <OfflineBanner />
         <ErrorBoundary>
           <BrowserRouter>
             <AuthProvider>
@@ -33,3 +36,5 @@ ReactDOM.createRoot(container).render(
     </MotionConfig>
   </React.StrictMode>,
 );
+
+registerServiceWorker();

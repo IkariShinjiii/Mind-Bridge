@@ -1,0 +1,16 @@
+{
+  "name": "Mind Bridge",
+  "short_name": "Mind Bridge",
+  "description": "A private wellness check-in and counselor booking for University of San Agustin students. Free 24/7 crisis support: call 1553.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf7f6",
+  "theme_color": "#8c1527",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
