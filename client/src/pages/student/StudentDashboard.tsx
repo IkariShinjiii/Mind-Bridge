@@ -30,6 +30,7 @@ import { getAppointments, bookAppointment, submitResponse, getAvailability, getM
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
 import { LoadError } from "../../components/ui/LoadError";
+import SessionReminder from "../../components/appointments/SessionReminder";
 const ConfidentialChatModal = lazy(() => import("../../components/chat/ConfidentialChatModal"));
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "../../components/appointments/BookingFlow";
@@ -410,6 +411,8 @@ export default function StudentDashboard() {
           onRetry={() => void loadData()}
         />
       )}
+
+      <SessionReminder appointments={appointments} role="student" />
 
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">
