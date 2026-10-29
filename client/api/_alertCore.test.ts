@@ -93,6 +93,15 @@ describe("staffEmails", () => {
     expect(staffEmails(staff)).toEqual(["admin@usa.edu.ph", "cruz@usa.edu.ph"]);
     expect(staffEmails([{ role: "admin", email: "a@x.ph" }])).toEqual(["a@x.ph"]);
   });
+
+  it("never emails the demo accounts used for presentations", () => {
+    const users: StaffUser[] = [
+      { role: "admin", email: "admin@demo.mindbridge.test" },
+      { role: "counselor", email: "Villanueva@Demo.MindBridge.test", approved: true },
+      { role: "admin", email: "real@usa.edu.ph" },
+    ];
+    expect(staffEmails(users)).toEqual(["real@usa.edu.ph"]);
+  });
 });
 
 describe("buildMail", () => {
@@ -259,7 +268,7 @@ describe("assess for the full PHQ-9 + GAD-7 check-in", async () => {
 
   it("agrees with the browser's scoring on every kind of answer set", () => {
     let seed = 7;
-    const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+    const rand = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
     for (let n = 0; n < 500; n++) {
       const answers = Array.from({ length: 16 }, () => Math.floor(rand() * rand() * 4));
       const total = answers.reduce((a, b) => a + b, 0);
