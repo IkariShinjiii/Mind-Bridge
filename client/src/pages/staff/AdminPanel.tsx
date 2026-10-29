@@ -35,6 +35,7 @@ import Spinner from "../../components/ui/Spinner";
 import { useToast } from "../../components/ui/Toast";
 import Modal from "../../components/ui/Modal";
 import ManageAvailability from "../../components/staff/ManageAvailability";
+import SessionReminder from "../../components/appointments/SessionReminder";
 const ConfidentialChatModal = lazy(() => import("../../components/chat/ConfidentialChatModal"));
 
 import {
@@ -607,6 +608,13 @@ export default function AdminPanel() {
           Triage student check-ins, manage accounts and availability, and review system-wide trends.
         </p>
       </div>
+
+      {!loading && (
+        <SessionReminder
+          appointments={appointments.filter((a) => a.counselorId === currentUser?.uid)}
+          role="counselor"
+        />
+      )}
 
       {loadError && !loading && (
         <div role="alert" className="mb-alert flex flex-wrap items-center justify-between gap-3 font-medium">
