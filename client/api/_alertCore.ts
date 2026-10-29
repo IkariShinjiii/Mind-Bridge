@@ -70,7 +70,10 @@ export function assess(a: AssessmentDoc): { total: number; maxScore: number; cri
   return { total, maxScore, crisis, high };
 }
 
-/** Active, approved staff (admins always), lower-cased and de-duplicated. */
+/** Demo accounts (scripts/seed-demo.mjs) use this reserved domain; mail to it would only bounce. */
+const DEMO_EMAIL_SUFFIX = "@demo.mindbridge.test";
+
+/** Active, approved staff (admins always), lower-cased and de-duplicated. Demo accounts are never emailed. */
 export function staffEmails(users: StaffUser[]): string[] {
   const set = new Set<string>();
   for (const u of users) {
@@ -78,7 +81,7 @@ export function staffEmails(users: StaffUser[]): string[] {
     if (u.active === false) continue;
     if (u.role !== "admin" && u.approved !== true) continue;
     const email = (u.email ?? "").trim().toLowerCase();
-    if (email) set.add(email);
+    if (email && !email.endsWith(DEMO_EMAIL_SUFFIX)) set.add(email);
   }
   return [...set];
 }
