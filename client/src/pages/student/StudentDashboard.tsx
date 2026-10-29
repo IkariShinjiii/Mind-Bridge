@@ -29,6 +29,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 import { getAppointments, bookAppointment, submitResponse, getAvailability, getMyAssessments } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
+import { LoadError } from "../../components/ui/LoadError";
 const ConfidentialChatModal = lazy(() => import("../../components/chat/ConfidentialChatModal"));
 import Modal from "../../components/ui/Modal";
 import BookingFlow from "../../components/appointments/BookingFlow";
@@ -44,7 +45,6 @@ import { buildSummaryHtml, printHtml } from "../../utils/summary";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
 import { bandLimits, checkInNudge, describeChange, summarizeTrend } from "../../utils/trend";
-import { useToast } from "../../components/ui/Toast";
 import { firstName } from "../../utils/names";
 import type { Appointment, Assessment, AvailabilitySlot, ScreeningQuestion, StoredDate } from "../../types";
 
@@ -119,7 +119,6 @@ const SCALE_OPTIONS = [
 ];
 
 export default function StudentDashboard() {
-  const toast = useToast();
   const { currentUser, userData } = useAuth();
   const userName = userData?.name || currentUser?.displayName || "Student";
   const displayName = firstName(userName, "Student");
@@ -153,42 +152,37 @@ export default function StudentDashboard() {
   // Confidential Chat State
   const [chatOpen, setChatOpen] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    async function loadData() {
-      setLoadingAppointments(true);
-      setLoadingHistory(true);
-      try {
-        let failed = false;
-        const [apts, history] = await Promise.all([
-          getAppointments().catch((): Appointment[] => {
-            failed = true;
-            return [];
-          }),
-          getMyAssessments().catch((): Assessment[] => {
-            failed = true;
-            return [];
-          }),
-        ]);
-        if (failed && mounted) {
-          toast.error("Some of your dashboard could not load, so it may look empty. Refresh the page to try again.");
-        }
-        if (!mounted) return;
-        setAppointments(Array.isArray(apts) ? apts : []);
-        setPastAssessments(Array.isArray(history) ? history : []);
-      } catch (err) {
-        console.error("Failed to load student dashboard data", err);
-      } finally {
-        if (mounted) {
-          setLoadingAppointments(false);
-          setLoadingHistory(false);
-        }
-      }
+  const [loadFailed, setLoadFailed] = useState(false);
+
+  async function loadData() {
+    setLoadingAppointments(true);
+    setLoadingHistory(true);
+    try {
+      let failed = false;
+      const [apts, history] = await Promise.all([
+        getAppointments().catch((): Appointment[] => {
+          failed = true;
+          return [];
+        }),
+        getMyAssessments().catch((): Assessment[] => {
+          failed = true;
+          return [];
+        }),
+      ]);
+      setLoadFailed(failed);
+      setAppointments(Array.isArray(apts) ? apts : []);
+      setPastAssessments(Array.isArray(history) ? history : []);
+    } catch (err) {
+      console.error("Failed to load student dashboard data", err);
+      setLoadFailed(true);
+    } finally {
+      setLoadingAppointments(false);
+      setLoadingHistory(false);
     }
+  }
+
+  useEffect(() => {
     void loadData();
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   async function openBookingModal() {
@@ -410,6 +404,13 @@ export default function StudentDashboard() {
 
   return (
     <m.div {...page} className="relative space-y-6">
+      {loadFailed && !loadingAppointments && (
+        <LoadError
+          message="Some of your dashboard could not load, so it may look empty. Your data is safe."
+          onRetry={() => void loadData()}
+        />
+      )}
+
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">
         <div>

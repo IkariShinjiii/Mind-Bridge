@@ -34,6 +34,7 @@ import { getUserSettings, saveUserSettings, getAppointments, getMyAssessments, g
 import { buildDataExport, dataExportFileName, downloadJson } from "../../utils/dataExport";
 import { AVATAR_COLORS, avatarColor } from "../../utils/avatar";
 import Spinner from "../../components/ui/Spinner";
+import { LoadError } from "../../components/ui/LoadError";
 import { useToast } from "../../components/ui/Toast";
 import PanelHead from "../../components/ui/PanelHead";
 import { validateEmergencyContact, validatePasswordChange } from "../../utils/validation";
@@ -133,6 +134,9 @@ export default function UserSettings() {
 
   const [activeTab, setActiveTab] = useState<TabId>("profile");
   const [loading, setLoading] = useState(true);
+  // A profile that did not load must never be shown as a blank form: saving it would overwrite the real one.
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [saving, setSaving] = useState(false);
 
   // Profile
@@ -165,6 +169,8 @@ export default function UserSettings() {
   // Sessions
   const [appointmentsList, setAppointmentsList] = useState<Appointment[]>([]);
   const [loadingApts, setLoadingApts] = useState(false);
+  const [aptsError, setAptsError] = useState("");
+  const [aptsReloadKey, setAptsReloadKey] = useState(0);
 
   const isGoogleUser = currentUser?.providerData?.some((p) => p.providerId === "google.com");
   const isStudent = (userRole || "student") === "student";
@@ -175,6 +181,7 @@ export default function UserSettings() {
     async function loadData() {
       if (!currentUser) return;
       setLoading(true);
+      setLoadFailed(false);
       try {
         const data = await getUserSettings(currentUser.uid);
         if (!isMounted) return;
@@ -193,7 +200,7 @@ export default function UserSettings() {
         }
       } catch (err) {
         console.error("Error loading user settings:", err);
-        if (isMounted) showFeedback("error", "Could not load your settings. Reload the page to try again.");
+        if (isMounted) setLoadFailed(true);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -203,7 +210,7 @@ export default function UserSettings() {
     return () => {
       isMounted = false;
     };
-  }, [currentUser]);
+  }, [currentUser, reloadKey]);
 
   // Load session history when its tab is opened
   useEffect(() => {
@@ -211,13 +218,14 @@ export default function UserSettings() {
     {
       let isMounted = true;
       setLoadingApts(true);
+      setAptsError("");
       getAppointments()
         .then((data) => {
           if (isMounted) setAppointmentsList(data);
         })
         .catch((err: unknown) => {
           console.error("Error fetching sessions:", err);
-          if (isMounted) toast.error(friendlyError(err, "Your sessions could not be loaded. Try again."));
+          if (isMounted) setAptsError(friendlyError(err, "Your sessions could not be loaded."));
         })
         .finally(() => {
           if (isMounted) setLoadingApts(false);
@@ -226,7 +234,7 @@ export default function UserSettings() {
         isMounted = false;
       };
     }
-  }, [activeTab, currentUser]);
+  }, [activeTab, currentUser, aptsReloadKey]);
 
   const [downloading, setDownloading] = useState(false);
   const toast = useToast();
@@ -431,6 +439,11 @@ export default function UserSettings() {
           <Spinner size={20} className="text-[color:var(--mb-brand)]" />
           <span>Loading your settings…</span>
         </div>
+      ) : loadFailed ? (
+        <LoadError
+          message="Could not load your settings. Nothing has been changed. Check your connection and try again."
+          onRetry={() => setReloadKey((k) => k + 1)}
+        />
       ) : (
         <div className="grid gap-6 md:grid-cols-[15rem_1fr]">
           {/* Section list: a column on desktop, a scrolling row on phones */}
@@ -964,6 +977,8 @@ export default function UserSettings() {
                       <Spinner size={18} className="text-[color:var(--mb-brand)]" />
                       <span>Loading your sessions…</span>
                     </div>
+                  ) : aptsError ? (
+                    <LoadError message={aptsError} onRetry={() => setAptsReloadKey((k) => k + 1)} />
                   ) : appointmentsList.length === 0 ? (
                     <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center">
                       <div className="mb-plate mx-auto mb-3 flex h-12 w-12 items-center justify-center">

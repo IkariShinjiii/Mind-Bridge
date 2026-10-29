@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { getMyAvailability, addAvailability, removeAvailability } from "../../lib/api";
 import Spinner from "../ui/Spinner";
+import { LoadError } from "../ui/LoadError";
 import { validateAvailabilityWindow } from "../../utils/validation";
 import { friendlyError } from "../../utils/errors";
 import { parseDate } from "../../utils/dates";
@@ -43,10 +44,15 @@ export default function ManageAvailability() {
       setLoadError("");
     } catch (err) {
       console.error("Failed to load availability", err);
-      setLoadError("Could not load your slots. Check your connection and reload.");
+      setLoadError("Could not load your slots. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function reload() {
+    setLoading(true);
+    await load();
   }
 
   useEffect(() => {
@@ -182,9 +188,7 @@ export default function ManageAvailability() {
             <span>Loading your slots…</span>
           </div>
         ) : loadError ? (
-          <p role="alert" className="mb-alert font-medium">
-            {loadError}
-          </p>
+          <LoadError message={loadError} onRetry={() => void reload()} />
         ) : sorted.length === 0 ? (
           <div className="rounded-md border border-dashed border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-8 text-center text-[color:var(--mb-muted)]">
             No slots published yet. Add one above so students can book you.
