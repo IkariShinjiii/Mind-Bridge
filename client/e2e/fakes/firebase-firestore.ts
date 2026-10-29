@@ -72,6 +72,8 @@ export async function getDocs(ref: CollectionRef): Promise<FakeSnapshot> {
 }
 
 export async function getDoc(ref: DocRef) {
+  // Same idea for single documents: `mb_e2e_fail_docs` names a collection whose document reads fail.
+  if (localStorage.getItem("mb_e2e_fail_docs") === ref.name) throw new Error("E2E injected read failure");
   const data = col(ref.name)[ref.id];
   return { id: ref.id, exists: () => data !== undefined, data: () => (data ? { ...data } : undefined) };
 }
