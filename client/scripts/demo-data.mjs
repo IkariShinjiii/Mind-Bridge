@@ -60,6 +60,8 @@ function slotTime(now, days, hour) {
   const d = new Date(now.getTime() + MANILA_OFFSET + days * DAY);
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(hour)}:00`;
 }
+/** A calendar day ("2026-11-02") in Manila time, `days` from today; the format of a case's follow-up date. */
+const dayKey = (now, days) => slotTime(now, days, 0).slice(0, 10);
 const isWeekday = (now, days) => {
   const dow = new Date(now.getTime() + MANILA_OFFSET + days * DAY).getUTCDay();
   return dow !== 0 && dow !== 6;
@@ -171,7 +173,7 @@ export function buildDemoData(now = new Date()) {
 
   // Jon: a fresh high-risk case with a safety answer, in the triage queue and not yet assigned
   addCheckIn("jon", 1, 14, 3, [2, 2, 1, 2, 2, 2, 0]);
-  addCheckIn("jon", 2, 0, 3, [2, 3, 2, 3, 3, 3, 1], { alertSentAt: ago(0, 3) });
+  addCheckIn("jon", 2, 0, 3, [2, 3, 2, 3, 3, 3, 1], { alertSentAt: ago(0, 3), followUpDate: dayKey(now, 0) });
 
   // Angela: an escalated case from last week, reviewed and followed up since
   addCheckIn("angela", 1, 12, 5, [3, 3, 2, 2, 2, 2, 1], {
@@ -180,6 +182,7 @@ export function buildDemoData(now = new Date()) {
     counselorNotes:
       "Contacted the same day. Student is staying with a relative and has agreed to weekly sessions. Referred to the campus clinic for sleep concerns.",
     alertSentAt: ago(12, 5),
+    followUpDate: dayKey(now, -3), // overdue, so the queue shows an overdue badge
   });
   addCheckIn("angela", 2, 5, 4, [2, 2, 2, 2, 2, 1, 0], {
     status: "reviewed",

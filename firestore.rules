@@ -16,6 +16,12 @@ service cloud.firestore {
     }
     function touchesOnly(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
 
+    // A case follow-up date is a calendar day ("2026-11-03") or empty to clear it; absent is fine.
+    function validFollowUp(d) {
+      return !('followUpDate' in d)
+        || (d.followUpDate is string && d.followUpDate.matches('^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$'));
+    }
+
     // A check-in as the app writes it: only these fields, sane types and sizes, nothing pre-filled by the student,
     // and a risk level that is not lower than the score allows (high from 60% of the maximum, medium from 30%).
     // The rules cannot add up the answers or read the crisis item, so the safety flag is still taken on trust here;
@@ -82,11 +88,12 @@ service cloud.firestore {
         && request.resource.data.status == 'open'
         && validNewAssessment(request.resource.data);
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
-      // Staff review a check-in: they can set the case status, the review time and their notes, nothing else.
-      // The answers, score, risk level and owner stay exactly as the student submitted them.
+      // Staff review a check-in: they can set the case status, the review time, their notes and a follow-up date,
+      // nothing else. The answers, score, risk level and owner stay exactly as the student submitted them.
       allow update: if isStaff()
-        && touchesOnly(['status', 'reviewedAt', 'counselorNotes'])
-        && request.resource.data.status in ['open', 'reviewed', 'escalated'];
+        && touchesOnly(['status', 'reviewedAt', 'counselorNotes', 'followUpDate'])
+        && request.resource.data.status in ['open', 'reviewed', 'escalated']
+        && validFollowUp(request.resource.data);
       allow delete: if false;
     }
 

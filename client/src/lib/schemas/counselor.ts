@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FOLLOW_UP_PATTERN } from "../../utils/followUp";
 import { optionalText } from "./fields";
 
 /** Case status values a counselor can set. */
@@ -9,6 +10,12 @@ export const caseReviewSchema = z.object({
   id: z.string().min(1, "No case selected."),
   status: caseStatusSchema,
   counselorNotes: optionalText(2000),
+  /** "YYYY-MM-DD", or "" to clear. Leave out to keep the stored date. */
+  followUpDate: z
+    .string()
+    .regex(FOLLOW_UP_PATTERN, "Pick a valid follow-up date.")
+    .or(z.literal(""))
+    .optional(),
 });
 export type CaseReviewInput = z.infer<typeof caseReviewSchema>;
 

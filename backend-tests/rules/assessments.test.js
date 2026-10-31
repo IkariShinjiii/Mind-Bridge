@@ -105,6 +105,20 @@ describe("assessments - UPDATE (updateAssessmentStatus)", () => {
   });
   it("staff can save notes on their own", () =>
     assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { counselorNotes: "called the student" })));
+  it("staff can set, change and clear a follow-up date", async () => {
+    const ref = () => doc(as(env, "counselor"), "assessments/a1");
+    await assertSucceeds(updateDoc(ref(), { followUpDate: "2026-11-03" }));
+    await assertSucceeds(updateDoc(ref(), { status: "escalated", reviewedAt: "2026-10-02T00:00:00.000Z", followUpDate: "2026-11-10" }));
+    await assertSucceeds(updateDoc(ref(), { followUpDate: "" }));
+  });
+  it("a follow-up date must be a plain calendar day", async () => {
+    const ref = () => doc(as(env, "counselor"), "assessments/a1");
+    for (const bad of ["tomorrow", "2026-11-3", "2026-11-03T10:00", 20261103, null, "x".repeat(500)]) {
+      await assertFails(updateDoc(ref(), { followUpDate: bad }));
+    }
+  });
+  it("a student cannot set a follow-up date", () =>
+    assertFails(updateDoc(doc(as(env, "student"), "assessments/a1"), { followUpDate: "2026-11-03" })));
   it("staff cannot change what the student submitted: score, risk, answers, flag or owner", async () => {
     const ref = () => doc(as(env, "admin"), "assessments/a1");
     await assertFails(updateDoc(ref(), { riskLevel: "high" }));

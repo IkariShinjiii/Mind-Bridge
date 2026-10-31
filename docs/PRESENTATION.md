@@ -47,8 +47,9 @@ Use this to show the safety net. Pick one of two ways:
   submit. **Check your inbox** and read the alert aloud. (It says who and the score, never the answers.) The email goes to your real staff addresses, so this also proves the alert works.
 
 3. **Counselor window.** The queue is sorted by urgency, high risk and safety flags first. Click **Inspect case**:
-   the answers, the PHQ-2 / GAD-2 screens, WHO-5 wellbeing, the student's earlier check-ins. Add a note, set the status
-   to **Escalated** or **Reviewed**, save.
+   the answers, the PHQ-2 / GAD-2 screens, WHO-5 wellbeing, the student's earlier check-ins. Add a note, set a
+   **follow-up date**, set the status to **Escalated** or **Reviewed**, save. Point at the badges in the queue
+   (_Follow up today_ on Jon, _Follow-up overdue_ on Angela) and the **Follow-up due** filter: nothing slips through.
 4. **Chat.** In the case view, open the confidential chat and send a message; show it appears live in the student's
    window (Maria's **Message counselor** button, for a student who has a counselor assigned).
 

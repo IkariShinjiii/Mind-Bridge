@@ -9,6 +9,7 @@ import {
   Diamond,
   CircleCheck,
   BarChart3,
+  CalendarClock,
   MessageSquare,
   Users,
   UserCheck,
@@ -49,6 +50,7 @@ import {
 import { friendlyError } from "../../utils/errors";
 import { plural } from "../../utils/plural";
 import { withVerifiedRisk } from "../../utils/risk";
+import { followUpState, formatFollowUp, type FollowUpState } from "../../utils/followUp";
 import { fullAnswersOf, quickAnswersOf, quickScreen, scoreFull } from "../../utils/clinical";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
 import { validate } from "../../lib/validate";
@@ -57,7 +59,7 @@ import type { Appointment, Assessment, CaseStatus, RiskLevel, StoredRole, UserPr
 
 type StaffUser = UserProfile & { id: string };
 type MainTab = "cases" | "analytics" | "availability" | "accounts";
-type CaseFilter = "flagged" | "open" | "reviewed" | "escalated" | "high" | "medium" | "all";
+type CaseFilter = "flagged" | "followup" | "open" | "reviewed" | "escalated" | "high" | "medium" | "all";
 const MAIN_TABS: readonly MainTab[] = ["cases", "analytics", "availability", "accounts"];
 const isMainTab = (value: string | null): value is MainTab =>
   value !== null && (MAIN_TABS as readonly string[]).includes(value);
@@ -270,6 +272,29 @@ function ScreenSummary({ assessment }: { assessment: Assessment }) {
   );
 }
 
+const FOLLOW_UP_TONES: Record<FollowUpState, string> = {
+  overdue: "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]",
+  today: "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]",
+  upcoming: "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]",
+};
+
+/** Says when to check back on a case. Shows nothing for a reviewed case or one with no date. */
+function FollowUpBadge({ date, status }: { date: string | undefined; status: CaseStatus }) {
+  const state = followUpState(date, status);
+  if (!state || !date) return null;
+  const text =
+    state === "overdue"
+      ? `Follow-up overdue since ${formatFollowUp(date)}`
+      : state === "today"
+        ? "Follow up today"
+        : `Follow up ${formatFollowUp(date)}`;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-sm font-bold ${FOLLOW_UP_TONES[state]}`}>
+      <CalendarClock className="h-4 w-4" aria-hidden="true" /> {text}
+    </span>
+  );
+}
+
 /** [tab, icon, label, shorter label for phones] */
 const MAIN_TAB_LINKS: ReadonlyArray<readonly [Exclude<MainTab, "accounts">, LucideIcon, string, string]> = [
   ["cases", ClipboardList, "Cases and triage", "Cases"],
@@ -279,6 +304,7 @@ const MAIN_TAB_LINKS: ReadonlyArray<readonly [Exclude<MainTab, "accounts">, Luci
 
 const CASE_FILTERS: ReadonlyArray<readonly [CaseFilter, string]> = [
   ["flagged", "Flagged / urgent"],
+  ["followup", "Follow-up due"],
   ["open", "Open"],
   ["reviewed", "Reviewed"],
   ["escalated", "Escalated"],
@@ -336,6 +362,7 @@ export default function AdminPanel() {
   const [wellbeingScore, setWellbeingScore] = useState<{ score: number; date: string } | null>(null);
   const [loadingContact, setLoadingContact] = useState(false);
   const [counselorNoteInput, setCounselorNoteInput] = useState("");
+  const [followUpInput, setFollowUpInput] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [chatStudent, setChatStudent] = useState<{ id: string; name: string } | null>(null);
 
@@ -402,6 +429,7 @@ export default function AdminPanel() {
   async function openCaseInspector(item: Assessment) {
     setActiveCase(item);
     setCounselorNoteInput(item.counselorNotes || "");
+    setFollowUpInput(item.followUpDate || "");
     setStudentContact(null);
     setWellbeingScore(null);
     if (item.studentId && item.studentId !== "anonymous") {
@@ -422,10 +450,13 @@ export default function AdminPanel() {
 
   async function handleSaveNotes() {
     if (!activeCase) return;
+    // Sent only when changed, so saving notes never depends on the date field being accepted.
+    const followUpChanged = followUpInput !== (activeCase.followUpDate || "");
     const review = validate(caseReviewSchema, {
       id: activeCase.id,
       status: activeCase.status || "open",
       counselorNotes: counselorNoteInput,
+      ...(followUpChanged ? { followUpDate: followUpInput } : {}),
     });
     if (!review.ok) {
       showNotice("error", review.error.userMessage);
@@ -433,8 +464,21 @@ export default function AdminPanel() {
     }
     setSavingNotes(true);
     try {
-      await updateAssessmentStatus(review.data.id, review.data.status, review.data.counselorNotes);
-      setActiveCase((prev) => (prev ? { ...prev, counselorNotes: review.data.counselorNotes } : prev));
+      await updateAssessmentStatus(
+        review.data.id,
+        review.data.status,
+        review.data.counselorNotes,
+        review.data.followUpDate,
+      );
+      setActiveCase((prev) =>
+        prev
+          ? {
+              ...prev,
+              counselorNotes: review.data.counselorNotes,
+              followUpDate: review.data.followUpDate ?? prev.followUpDate,
+            }
+          : prev,
+      );
       await loadData();
       showNotice("success", "Case notes saved.");
     } catch (err) {
@@ -567,6 +611,10 @@ export default function AdminPanel() {
       const isFlagged = item.flaggedForImmediateReview || risk === "high";
 
       if (filter === "flagged") return isFlagged;
+      if (filter === "followup") {
+        const due = followUpState(item.followUpDate, item.status || "open");
+        return due === "overdue" || due === "today";
+      }
       if (filter === "open") return (item.status || "open") === "open";
       if (filter === "reviewed") return (item.status || "open") === "reviewed";
       if (filter === "escalated") return (item.status || "open") === "escalated";
@@ -576,14 +624,18 @@ export default function AdminPanel() {
     });
   }, [assessments, filter, assignedOnly, currentUser?.uid]);
 
-  // Highest priority first: safety-flagged, then high, medium, low; open before reviewed; newest first.
+  // Highest priority first: safety-flagged, then high, medium, low; overdue follow-ups first within a level;
+  // open before reviewed; newest first.
   const triageCases = useMemo(() => {
     const rank = (c: Assessment) =>
       c.flaggedForImmediateReview ? 0 : (({ high: 1, medium: 2, low: 3 } as const)[c.riskLevel || "low"] ?? 3);
     const when = (c: Assessment) => new Date(c.submittedAt || c.createdAt || 0).getTime() || 0;
+    const overdue = (c: Assessment) => (followUpState(c.followUpDate, c.status || "open") === "overdue" ? 0 : 1);
     return [...visibleCases].sort((x, y) => {
       const byRank = rank(x) - rank(y);
       if (byRank) return byRank;
+      const byOverdue = overdue(x) - overdue(y);
+      if (byOverdue) return byOverdue;
       const xDone = (x.status || "open") === "reviewed" ? 1 : 0;
       const yDone = (y.status || "open") === "reviewed" ? 1 : 0;
       if (xDone !== yDone) return xDone - yDone;
@@ -765,6 +817,7 @@ export default function AdminPanel() {
                                   </span>
                                 )}
                                 {item.riskCorrectedFrom && <RiskCorrectedNote from={item.riskCorrectedFrom} />}
+                                <FollowUpBadge date={item.followUpDate} status={status} />
                               </div>
                             </div>
 
@@ -1272,6 +1325,29 @@ export default function AdminPanel() {
                 placeholder="Assessment, outreach taken, sessions scheduled…"
                 className="mb-field"
               />
+
+              <div className="mt-3 flex flex-wrap items-end gap-3">
+                <div>
+                  <label htmlFor="case-follow-up" className="block font-bold text-[color:var(--mb-ink)]">
+                    Follow-up date
+                  </label>
+                  <input
+                    id="case-follow-up"
+                    type="date"
+                    value={followUpInput}
+                    onChange={(e) => setFollowUpInput(e.target.value)}
+                    className="mb-field !w-auto"
+                  />
+                </div>
+                {followUpInput && (
+                  <button type="button" onClick={() => setFollowUpInput("")} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
+                    Clear date
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-[color:var(--mb-muted)]">
+                Saved with the notes. After this day the case shows as overdue until it is marked reviewed.
+              </p>
 
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Case status">
