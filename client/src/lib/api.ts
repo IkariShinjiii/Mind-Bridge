@@ -235,17 +235,20 @@ export const getMyAssessments = (): Promise<Assessment[]> =>
   });
 
 /**
- * Updates a case status and, optionally, the counselor notes.
+ * Updates a case status and, optionally, the counselor notes and the follow-up date.
  * @param counselorNotes - left unchanged when undefined; an empty string clears the notes
+ * @param followUpDate - "YYYY-MM-DD"; left unchanged when undefined; an empty string clears it
  */
 export const updateAssessmentStatus = (
   id: string,
   status: CaseStatus | string,
   counselorNotes?: string,
+  followUpDate?: string,
 ): Promise<void> =>
   guard(() => {
     const updates: Record<string, string> = { status, reviewedAt: new Date().toISOString() };
     if (counselorNotes !== undefined) updates["counselorNotes"] = counselorNotes;
+    if (followUpDate !== undefined) updates["followUpDate"] = followUpDate;
     return updateDoc(doc(db, "assessments", id), updates);
   });
 

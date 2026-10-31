@@ -54,7 +54,7 @@ export function buildDataExport(data: MyData, now: Date = new Date()): DataExpor
       "Notes written by guidance staff are not included. To ask about them, contact the Guidance Services and Testing Center (guidance@usa.edu.ph).",
     profile: data.profile ? (toPlain(profile) as Record<string, unknown>) : null,
     checkIns: data.assessments.map((a) => {
-      const { id: _id, counselorNotes: _notes, ...rest } = a;
+      const { id: _id, counselorNotes: _notes, followUpDate: _followUp, ...rest } = a;
       return toPlain(rest) as Record<string, unknown>;
     }),
     appointments: data.appointments.map((a) => {

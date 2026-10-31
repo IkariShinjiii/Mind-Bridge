@@ -58,6 +58,14 @@ const data = (over: Partial<MyData> = {}): MyData => ({
 });
 
 describe("buildDataExport", () => {
+  it("leaves out the staff follow-up date along with the staff notes", () => {
+    const base = data();
+    const withDate = { ...base, assessments: [{ ...base.assessments[0]!, followUpDate: "2026-11-03" }] };
+    const out = buildDataExport(withDate, NOW);
+    expect(out.checkIns[0]).not.toHaveProperty("followUpDate");
+    expect(JSON.stringify(out)).not.toContain("2026-11-03");
+  });
+
   it("contains the person's profile, check-ins, appointments and messages", () => {
     const out = buildDataExport(data(), NOW);
     expect(out.exportedAt).toBe("2026-10-03T08:30:00.000Z");

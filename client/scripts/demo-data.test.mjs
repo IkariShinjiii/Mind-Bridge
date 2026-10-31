@@ -83,6 +83,14 @@ describe("demo data", () => {
     for (const a of data.assessments.filter((x) => x.status !== "open")) expect(a.reviewedAt).toBeTruthy();
   });
 
+  it("gives the queue one follow-up due today and one overdue, in the format the rules accept", () => {
+    const days = data.assessments.filter((a) => a.followUpDate).map((a) => a.followUpDate);
+    for (const d of days) expect(d).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const manilaToday = new Date(NOW.getTime() + 8 * 3_600_000).toISOString().slice(0, 10);
+    expect(days.some((d) => d === manilaToday)).toBe(true);
+    expect(days.some((d) => d < manilaToday)).toBe(true);
+  });
+
   it("stores WHO-5 scores as the answers added up times four", () => {
     for (const w of data.wellbeing) {
       expect(w.answers).toHaveLength(5);

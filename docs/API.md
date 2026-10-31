@@ -104,7 +104,8 @@ Document shape:
   "total": 2, "maxScore": 21,
   "riskLevel": "low | medium | high", "flaggedForImmediateReview": false,
   "status": "open", "counselorNotes": "", "createdAt": "<ISO>",
-  "reviewedAt": "<ISO, set on review>"
+  "reviewedAt": "<ISO, set on review>",
+  "followUpDate": "<YYYY-MM-DD, optional, staff only; \"\" clears it>"
 }
 ```
 
@@ -113,7 +114,7 @@ Document shape:
 | `submitResponse(answers, {questions, flaggedForImmediateReview})` | create | own `studentId`, `status: "open"` | same rule (studentId must be their own uid) |
 | `getMyAssessments()` | list `where studentId == uid` | 200 | 200 |
 | `getAssessments()` | list all (+ name enrichment from `users`) | **403** | 200 |
-| `updateAssessmentStatus(id, status, notes?)` | update | **403** | 200 |
+| `updateAssessmentStatus(id, status, notes?, followUpDate?)` | update | **403** | 200 |
 | – | delete | 403 | 403 |
 
 Scoring (`utils/scoring.ts`): `maxScore = 3 × questions`; **high** if any crisis item > 0 or

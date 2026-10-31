@@ -120,6 +120,16 @@ describe("counselor forms", () => {
       fieldErrorsOf(caseReviewSchema, { id: "c1", status: "open", counselorNotes: "x".repeat(2001) }),
     ).toHaveProperty("counselorNotes");
   });
+  it("case review takes an optional follow-up day, or an empty one to clear it", () => {
+    const review = { id: "c1", status: "open", counselorNotes: "" };
+    expect(validate(caseReviewSchema, { ...review, followUpDate: "2026-11-03" }).ok).toBe(true);
+    expect(validate(caseReviewSchema, { ...review, followUpDate: "" }).ok).toBe(true);
+    expect(validate(caseReviewSchema, review).ok).toBe(true);
+    expect(fieldErrorsOf(caseReviewSchema, { ...review, followUpDate: "next week" })).toHaveProperty("followUpDate");
+    expect(fieldErrorsOf(caseReviewSchema, { ...review, followUpDate: "2026-11-03T10:00" })).toHaveProperty(
+      "followUpDate",
+    );
+  });
   it("assignment allows clearing the counselor with null", () => {
     expect(validate(counselorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(
       true,
