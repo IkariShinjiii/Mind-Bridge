@@ -50,6 +50,7 @@ import {
 import { friendlyError } from "../../utils/errors";
 import { plural } from "../../utils/plural";
 import { withVerifiedRisk } from "../../utils/risk";
+import { appointmentPhase, isScheduled } from "../../utils/appointmentLifecycle";
 import { followUpState, formatFollowUp, type FollowUpState } from "../../utils/followUp";
 import { fullAnswersOf, quickAnswersOf, quickScreen, scoreFull } from "../../utils/clinical";
 import { pagePreset, transition, useMotionPreset } from "../../lib/motion";
@@ -123,10 +124,10 @@ const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDat
 const sameDay = (a: Date, b: Date) => startOfDay(a).getTime() === startOfDay(b).getTime();
 
 function sessionBadge(status: string): string {
-  const v = status.toLowerCase();
-  if (v.includes("pending")) return "mb-badge mb-badge-warn";
-  if (v.includes("confirm") || v.includes("resched")) return "mb-badge mb-badge-safe";
-  if (v.includes("declin") || v.includes("cancel")) return "mb-badge mb-badge-urgent";
+  const phase = appointmentPhase(status);
+  if (phase === "pending") return "mb-badge mb-badge-warn";
+  if (isScheduled(phase)) return "mb-badge mb-badge-safe";
+  if (phase === "declined" || phase === "cancelled") return "mb-badge mb-badge-urgent";
   return "mb-badge";
 }
 
@@ -556,8 +557,7 @@ export default function AdminPanel() {
   const railSessions = useMemo(() => {
     const byStart = (a: Appointment, b: Appointment) =>
       String(a.start || a.date || "").localeCompare(String(b.start || b.date || ""));
-    const status = (a: Appointment) => String(a.status || "Pending Review").toLowerCase();
-    const pending = appointments.filter((a) => status(a).includes("pending")).sort(byStart);
+    const pending = appointments.filter((a) => appointmentPhase(a.status) === "pending").sort(byStart);
     return { pending: pending.slice(0, 4) };
   }, [appointments]);
 
@@ -567,7 +567,7 @@ export default function AdminPanel() {
   );
 
   const pendingAppointmentsCount = useMemo(() => {
-    return appointments.filter((a) => (a.status || "Pending Review").toLowerCase().includes("pending")).length;
+    return appointments.filter((a) => appointmentPhase(a.status) === "pending").length;
   }, [appointments]);
 
   const analytics = useMemo(() => {

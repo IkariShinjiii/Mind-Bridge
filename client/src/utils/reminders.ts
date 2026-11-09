@@ -1,4 +1,5 @@
 import type { Appointment } from "../types";
+import { appointmentPhase, isScheduled } from "./appointmentLifecycle";
 import { parseDate } from "./dates";
 
 /** Sessions closer than this are worth a reminder. */
@@ -8,7 +9,7 @@ export const REMINDER_WINDOW_MS = 24 * 60 * 60 * 1000;
 export function sessionsSoon(appointments: ReadonlyArray<Appointment>, now: Date = new Date()): Appointment[] {
   const from = now.getTime();
   return appointments
-    .filter((a) => /^(confirmed|rescheduled)$/i.test(String(a.status ?? "").trim()))
+    .filter((a) => isScheduled(appointmentPhase(a.status)))
     .map((a) => ({ a, at: parseDate(a.start || a.date || null)?.getTime() ?? Number.NaN }))
     .filter(({ at }) => at >= from && at <= from + REMINDER_WINDOW_MS)
     .sort((x, y) => x.at - y.at)

@@ -511,6 +511,47 @@ describe("updateAppointmentStatus", () => {
     expect(fs.updateDoc).toHaveBeenCalledTimes(2);
   });
 
+  describe("stale clicks", () => {
+    const stored = (status: unknown) => fs.getDoc.mockResolvedValue({ exists: () => true, data: () => ({ status }) });
+
+    it("refuses to confirm a booking that was cancelled in the meantime, and writes nothing", async () => {
+      stored("Cancelled");
+      await expect(api.updateAppointmentStatus("ap1", "Confirmed", { slotId: "s1" })).rejects.toMatchObject({
+        code: "conflict",
+      });
+      expect(fs.updateDoc).not.toHaveBeenCalled();
+    });
+
+    it("refuses to cancel a session that was already completed", async () => {
+      stored("Completed");
+      await expect(api.updateAppointmentStatus("ap1", "Cancelled")).rejects.toMatchObject({ code: "conflict" });
+    });
+
+    it("lets a normal move through", async () => {
+      stored("Pending Review");
+      await api.updateAppointmentStatus("ap1", "Confirmed");
+      expect(fs.updateDoc).toHaveBeenCalledTimes(1);
+    });
+
+    it("lets a student cancel a confirmed session", async () => {
+      stored("Confirmed");
+      await api.updateAppointmentStatus("ap1", "Cancelled", { slotId: "s1" });
+      expect(fs.updateDoc).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not block an unrecognised stored status", async () => {
+      stored("Archived");
+      await api.updateAppointmentStatus("ap1", "Confirmed");
+      expect(fs.updateDoc).toHaveBeenCalledTimes(1);
+    });
+
+    it("still writes when the status check cannot be read", async () => {
+      fs.getDoc.mockRejectedValue(new Error("offline"));
+      await api.updateAppointmentStatus("ap1", "Confirmed");
+      expect(fs.updateDoc).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("propagates a failure of the appointment write itself", async () => {
     fs.updateDoc.mockRejectedValue(new Error("denied"));
     await expect(api.updateAppointmentStatus("ap1", "Confirmed")).rejects.toThrow("denied");

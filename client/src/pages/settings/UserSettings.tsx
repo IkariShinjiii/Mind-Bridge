@@ -44,6 +44,7 @@ import { friendlyError, codeOf } from "../../utils/errors";
 import { focusById } from "../../utils/dom";
 import type { Appointment, EmergencyContact, FieldErrors } from "../../types";
 import { formatDateTime } from "../../utils/dates";
+import { appointmentPhase } from "../../utils/appointmentLifecycle";
 import { pagePreset, useMotionPreset } from "../../lib/motion";
 
 const PRESET_GOALS = [
@@ -65,12 +66,12 @@ type TabId = "profile" | "appearance" | "password" | "privacy" | "emergency" | "
  * @returns {string} Tailwind classes
  */
 function statusTone(status?: string): string {
-  const s = (status || "").toLowerCase();
-  if (s.includes("confirm"))
+  const phase = appointmentPhase(status);
+  if (phase === "confirmed")
     return "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]";
-  if (s.includes("pending"))
+  if (phase === "pending")
     return "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]";
-  if (s.includes("declin") || s.includes("cancel"))
+  if (phase === "declined" || phase === "cancelled")
     return "border-[color:var(--mb-urgent)] bg-[color:var(--mb-urgent-bg)] text-[color:var(--mb-urgent)]";
   return "border-[color:var(--mb-line)] bg-[color:var(--mb-surface-2)] text-[color:var(--mb-muted)]";
 }
