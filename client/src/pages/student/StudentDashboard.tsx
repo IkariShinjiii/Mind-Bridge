@@ -42,6 +42,7 @@ import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { goingWell } from "../../utils/goingWell";
+import { appointmentPhase, isClosed } from "../../utils/appointmentLifecycle";
 import { buildSummaryHtml, printHtml } from "../../utils/summary";
 import { validateSlotForBooking } from "../../utils/booking";
 import { friendlyError } from "../../utils/errors";
@@ -384,9 +385,8 @@ export default function StudentDashboard() {
   // The soonest session that is still ahead and not closed out (the list also holds past and cancelled ones)
   const nextAppointment = appointments
     .filter((a) => {
-      const status = String(a.status || "").toLowerCase();
       const when = a.start || a.date;
-      return !/completed|cancel|declin/.test(status) && !!when && new Date(when).getTime() >= Date.now();
+      return !isClosed(appointmentPhase(a.status)) && !!when && new Date(when).getTime() >= Date.now();
     })
     .sort((a, b) => new Date(a.start || a.date || 0).getTime() - new Date(b.start || b.date || 0).getTime())[0];
 
@@ -1169,9 +1169,9 @@ export default function StudentDashboard() {
                         <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Counseling Session"}</div>
                         <span
                           className={`mb-badge shrink-0 capitalize ${
-                            (apt.status || "").toLowerCase().includes("confirm")
+                            appointmentPhase(apt.status) === "confirmed"
                               ? "mb-badge-safe"
-                              : (apt.status || "").toLowerCase().includes("pending")
+                              : appointmentPhase(apt.status) === "pending"
                                 ? "mb-badge-warn"
                                 : ""
                           }`}

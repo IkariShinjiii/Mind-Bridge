@@ -277,6 +277,7 @@ not deployed, and must never run together with the route above (staff would get 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): system diagram, data model, security model, scaling
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): Vercel and Firebase deployment, rollback, troubleshooting
 - [`docs/API.md`](docs/API.md): backend operations, roles and expected outcomes
+- [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md): every status and flow with its allowed moves, and where each one is defined
 - [`docs/DATA_AND_VALIDATION.md`](docs/DATA_AND_VALIDATION.md): where the TypeScript types and Zod schemas live, form validation rules, scoring summary
 - [`PRODUCT.md`](PRODUCT.md): product purpose, users and constraints
 - [`DESIGN.md`](DESIGN.md): design system and tokens

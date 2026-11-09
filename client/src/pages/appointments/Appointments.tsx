@@ -22,9 +22,16 @@ import { appointmentActionSchema } from "../../lib/schemas";
 import { validateSlotForBooking } from "../../utils/booking";
 import { canAddToCalendar, downloadIcs } from "../../utils/calendar";
 import { focusById } from "../../utils/dom";
+import {
+  actionsFor,
+  appointmentPhase,
+  isScheduled,
+  STATUS_FOR,
+  type AppointmentAction,
+  type AppointmentPhase,
+} from "../../utils/appointmentLifecycle";
 import type { Appointment, AppointmentStatus, AvailabilitySlot, StoredDate } from "../../types";
 
-type StatusKind = "confirmed" | "pending" | "rescheduled" | "completed" | "declined" | "cancelled" | "other";
 type ActionType = "decline" | "cancel" | "reschedule";
 interface ActionModalState {
   type: ActionType;
@@ -46,23 +53,6 @@ function plateParts(val: StoredDate): { month: string; day: number; time: string
   };
 }
 
-/**
- * Normalises a free-text appointment status into one of: confirmed, pending, rescheduled, completed,
- * declined, cancelled, other.
- * @param {string} [status]
- * @returns {string}
- */
-function statusKind(status?: string): StatusKind {
-  const s = (status || "Pending Review").toLowerCase();
-  if (s.includes("confirm")) return "confirmed";
-  if (s.includes("pending")) return "pending";
-  if (s.includes("reschedul")) return "rescheduled";
-  if (s.includes("complet")) return "completed";
-  if (s.includes("declin")) return "declined";
-  if (s.includes("cancel")) return "cancelled";
-  return "other";
-}
-
 const FILTERS = [
   ["all", "All"],
   ["pending", "Pending"],
@@ -79,12 +69,12 @@ const FILTERS = [
  * @returns {boolean}
  */
 function matchesFilter(apt: Pick<Appointment, "status">, filter: string): boolean {
-  const kind = statusKind(apt.status);
+  const kind = appointmentPhase(apt.status);
   if (filter === "cancelled_declined") return kind === "declined" || kind === "cancelled";
   return filter === "all" || kind === filter;
 }
 
-const STATUS_TONE: Record<StatusKind, string> = {
+const STATUS_TONE: Record<AppointmentPhase, string> = {
   confirmed: "border-[color:var(--mb-safe)] bg-[color:var(--mb-safe-bg)] text-[color:var(--mb-safe)]",
   pending: "border-[color:var(--mb-warn)] bg-[color:var(--mb-warn-bg)] text-[color:var(--mb-warn)]",
   rescheduled: "border-[color:var(--mb-violet)] bg-[color:var(--mb-violet-bg)] text-[color:var(--mb-violet)]",
@@ -103,6 +93,18 @@ const NOTE_TONE: Record<"urgent" | "violet" | "brand", string> = {
 // Destructive outline button: overrides the hover fill of .mb-btn-line
 const DANGER_LINE =
   "!border-[color:var(--mb-urgent)] !text-[color:var(--mb-urgent)] hover:!bg-[color:var(--mb-urgent-bg)] hover:!text-[color:var(--mb-urgent)]";
+
+/** How each lifecycle action looks on a card. What is offered, and to whom, comes from `actionsFor`. */
+const ACTION_UI: Record<
+  AppointmentAction,
+  { label: string; busy?: string; studentLabel?: string; solid?: boolean; danger?: boolean }
+> = {
+  confirm: { label: "Confirm", busy: "Confirming…", solid: true },
+  complete: { label: "Mark completed", busy: "Updating…", solid: true },
+  reschedule: { label: "Reschedule" },
+  decline: { label: "Decline", danger: true },
+  cancel: { label: "Cancel session", studentLabel: "Cancel booking", danger: true },
+};
 
 function Note({ tone, label, children }: { tone: keyof typeof NOTE_TONE; label: string; children: ReactNode }) {
   return (
@@ -446,11 +448,9 @@ export default function Appointments() {
             >
               <AnimatePresence mode="popLayout" initial={true}>
                 {filteredAppointments.map((apt, index) => {
-                  const kind = statusKind(apt.status);
+                  const kind = appointmentPhase(apt.status);
                   const status = apt.status || "Pending Review";
-                  const isPending = kind === "pending";
-                  const isConfirmed = kind === "confirmed";
-                  const isRescheduled = kind === "rescheduled";
+                  const actions = actionsFor(kind, isCounselor ? "counselor" : "student");
                   const plate = plateParts(apt.start || apt.date);
                   const busy = updatingId === apt.id;
 
@@ -536,7 +536,7 @@ export default function Appointments() {
 
                         {/* Actions */}
                         <div className="mt-4 flex flex-wrap items-center gap-2">
-                          {(isConfirmed || isRescheduled) && canAddToCalendar(apt) && (
+                          {isScheduled(kind) && canAddToCalendar(apt) && (
                             <button
                               type="button"
                               onClick={() => {
@@ -549,78 +549,28 @@ export default function Appointments() {
                               Add to calendar
                             </button>
                           )}
-                          {isCounselor ? (
-                            <>
-                              {isPending && (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleQuickStatusUpdate(apt.id, "Confirmed")}
-                                    disabled={busy}
-                                    className="mb-btn mb-btn-solid !px-4 text-sm"
-                                  >
-                                    {busy && <Spinner size={16} />}
-                                    {busy ? "Confirming…" : "Confirm"}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openActionModal("reschedule", apt)}
-                                    className="mb-btn mb-btn-line !px-4 text-sm"
-                                  >
-                                    Reschedule
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openActionModal("decline", apt)}
-                                    className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                                  >
-                                    Decline
-                                  </button>
-                                </>
-                              )}
-                              {(isConfirmed || isRescheduled) && (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleQuickStatusUpdate(apt.id, "Completed")}
-                                    disabled={busy}
-                                    className="mb-btn mb-btn-solid !px-4 text-sm"
-                                  >
-                                    {busy && <Spinner size={16} />}
-                                    {busy ? "Updating…" : "Mark completed"}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openActionModal("reschedule", apt)}
-                                    className="mb-btn mb-btn-line !px-4 text-sm"
-                                  >
-                                    Reschedule
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => openActionModal("cancel", apt)}
-                                    className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
-                                  >
-                                    Cancel session
-                                  </button>
-                                </>
-                              )}
-                              {!isPending && !isConfirmed && !isRescheduled && (
-                                <span className="text-sm text-[color:var(--mb-muted)]">
-                                  Closed. No further actions.
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            (isPending || isConfirmed || isRescheduled) && (
+                          {actions.map((action) => {
+                            const ui = ACTION_UI[action];
+                            const quick = action === "confirm" || action === "complete";
+                            return (
                               <button
+                                key={action}
                                 type="button"
-                                onClick={() => openActionModal("cancel", apt)}
-                                className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
+                                onClick={() =>
+                                  quick
+                                    ? handleQuickStatusUpdate(apt.id, STATUS_FOR[action])
+                                    : openActionModal(action, apt)
+                                }
+                                disabled={quick && busy}
+                                className={`mb-btn ${ui.solid ? "mb-btn-solid" : "mb-btn-line"} !px-4 text-sm ${ui.danger ? DANGER_LINE : ""}`}
                               >
-                                Cancel booking
+                                {quick && busy && <Spinner size={16} />}
+                                {quick && busy ? ui.busy : isCounselor ? ui.label : (ui.studentLabel ?? ui.label)}
                               </button>
-                            )
+                            );
+                          })}
+                          {isCounselor && actions.length === 0 && (
+                            <span className="text-sm text-[color:var(--mb-muted)]">Closed. No further actions.</span>
                           )}
                         </div>
                       </div>

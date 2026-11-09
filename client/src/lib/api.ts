@@ -18,6 +18,7 @@ import { db } from "./firebase";
 import { scoreAnswers, type QuestionLike } from "../utils/scoring";
 import { scoreWho5 } from "../utils/clinical";
 import { AppError, toAppError } from "../utils/errors";
+import { appointmentPhase, canMove, releasesSlot } from "../utils/appointmentLifecycle";
 import type {
   Appointment,
   AppointmentStatus,
@@ -398,7 +399,16 @@ export const updateAppointmentStatus = (
   guard(async () => {
     const updates = { status, updatedAt: new Date().toISOString(), ...extraData };
 
-    if ((status === "Declined" || status === "Cancelled") && extraData.slotId) {
+    // Refuse a stale click: the screen may be showing a session someone else has already closed, such as a
+    // counselor confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
+    const current = await getDoc(doc(db, "appointments", id)).catch(() => null);
+    if (current?.exists() && !canMove(appointmentPhase(current.data()?.["status"]), status)) {
+      throw new AppError("conflict", "This appointment was just changed by someone else. Refresh to see where it stands.", {
+        message: `Cannot move an appointment from ${String(current.data()?.["status"])} to ${status}`,
+      });
+    }
+
+    if (releasesSlot(status) && extraData.slotId) {
       try {
         await updateDoc(doc(db, "availability", extraData.slotId), { isBooked: false });
       } catch (err) {
