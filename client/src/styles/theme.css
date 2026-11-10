@@ -70,25 +70,25 @@
 }
 
 .mb[data-theme="dark"] {
-  --mb-scrim: rgb(10 3 4 / 0.72);
-  --mb-ground: #130a0c;
-  --mb-surface: #25151a;
-  --mb-surface-2: #38222a;
+  --mb-scrim: rgb(0 0 0 / 0.75);
+  --mb-ground: #0a0a0a;
+  --mb-surface: #171717;
+  --mb-surface-2: #262626;
   --mb-panel: #9a172c;
   --mb-panel-ink: #fffafa;
   --mb-panel-soft: #fff0f0;
   --mb-ink: #f8eeec;
   --mb-muted: #d4bec0;
-  --mb-line: #5c3840;
-  --mb-field-line: #9b777d;
+  --mb-line: #404040;
+  --mb-field-line: #8c8c8c;
   /* Crisis amber, dimmed so it still stands out without glaring on a dark page */
   --mb-amber: #e4c27c;
   --mb-link: #8cc4f5;
   --mb-focus: #ffc857;
   --mb-brand: #ffb4ba;
-  --mb-brand-bg: #3f1d26;
+  --mb-brand-bg: #2a1519;
   --mb-accent: #ef6f79;
-  --mb-accent-soft: #55272f;
+  --mb-accent-soft: #3a1d22;
   --mb-safe: #76dcb0;
   --mb-safe-bg: #14352a;
   --mb-safe-solid: #2f9e75;
