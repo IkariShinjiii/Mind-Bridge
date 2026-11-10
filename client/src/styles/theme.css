@@ -71,22 +71,24 @@
 
 .mb[data-theme="dark"] {
   --mb-scrim: rgb(10 3 4 / 0.72);
-  --mb-ground: #170d0f;
-  --mb-surface: #221317;
-  --mb-surface-2: #321c21;
-  --mb-panel: #7d1225;
+  --mb-ground: #130a0c;
+  --mb-surface: #25151a;
+  --mb-surface-2: #38222a;
+  --mb-panel: #9a172c;
   --mb-panel-ink: #fffafa;
-  --mb-panel-soft: #f6d9d9;
+  --mb-panel-soft: #fff0f0;
   --mb-ink: #f8eeec;
   --mb-muted: #d4bec0;
-  --mb-line: #4a2b31;
-  --mb-field-line: #8f6d73;
+  --mb-line: #5c3840;
+  --mb-field-line: #9b777d;
+  /* Crisis amber, dimmed so it still stands out without glaring on a dark page */
+  --mb-amber: #e4c27c;
   --mb-link: #8cc4f5;
   --mb-focus: #ffc857;
   --mb-brand: #ffb4ba;
-  --mb-brand-bg: #3b1b22;
+  --mb-brand-bg: #3f1d26;
   --mb-accent: #ef6f79;
-  --mb-accent-soft: #4d222a;
+  --mb-accent-soft: #55272f;
   --mb-safe: #76dcb0;
   --mb-safe-bg: #14352a;
   --mb-safe-solid: #2f9e75;
