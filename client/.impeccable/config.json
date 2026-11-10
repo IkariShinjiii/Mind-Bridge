@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-10-29T12:24:32.753Z",
+        "reason": "Claude: HTML alert email in api/_alertCore.ts; email clients cannot load web fonts, so a system font is required"
+      }
+    ]
+  }
+}
