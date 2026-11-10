@@ -399,19 +399,6 @@
   background: color-mix(in srgb, var(--mb-panel) 85%, white);
 }
 
-/* Black: solid black with a light rim in dark mode, so it still reads on the black page */
-.mb-btn-dark {
-  background: #000000;
-  color: #ffffff;
-  border-color: var(--mb-ink);
-  box-shadow: var(--mb-shadow-sm);
-}
-.mb-btn-dark:hover,
-.mb-btn-dark[data-force-hover] {
-  background: #262626;
-  box-shadow: var(--mb-shadow-md);
-}
-
 /* Secondary: outline */
 .mb-btn-line {
   background: transparent;
