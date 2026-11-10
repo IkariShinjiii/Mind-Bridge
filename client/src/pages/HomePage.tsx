@@ -83,10 +83,10 @@ export default function HomePage() {
             screening, see what it suggests, and book a time with a campus counselor.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link to="/login" className="mb-btn mb-btn-solid">
+            <Link to="/login" className="mb-btn mb-btn-line">
               Log in to check in <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
-            <Link to="/signup" className="mb-btn mb-btn-line">
+            <Link to="/signup" className="mb-btn mb-btn-solid">
               Create student account
             </Link>
           </div>
