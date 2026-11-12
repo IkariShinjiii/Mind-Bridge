@@ -36,6 +36,20 @@ describe("users - CREATE (Signup / Google sign-in)", () => {
   it("cannot self-register as unapproved", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ approved: false }))));
   it("unauthenticated create is rejected", () => assertFails(setDoc(ref(anon(env), "ghost"), newStudent())));
   it("cannot add fields sign-up does not write", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ assignedCounselorId: "cou1" }))));
+  it("accepts a mixed-case address that matches the token email", () =>
+    assertSucceeds(setDoc(ref(noProfile(env, "new@usa.edu.ph"), "ghost"), newStudent({ email: "New@USA.edu.ph" }))));
+  it("rejects an outside email address (not @usa.edu.ph)", () =>
+    assertFails(setDoc(ref(noProfile(env, "attacker@example.com"), "ghost"), newStudent({ email: "attacker@example.com" }))));
+  it("rejects a look-alike domain", async () => {
+    for (const email of ["x@usa.edu.ph.evil.com", "x@notusa.edu.ph", "x@usa-edu.ph", "x@usa.edu.ph@evil.com"])
+      await assertFails(setDoc(ref(noProfile(env, email), "ghost"), newStudent({ email })));
+  });
+  it("rejects a profile email that differs from the sign-in email", () =>
+    assertFails(setDoc(ref(noProfile(env, "attacker@example.com"), "ghost"), newStudent({ email: "new@usa.edu.ph" }))));
+  it("rejects a school profile email on an outside sign-in", () =>
+    assertFails(setDoc(ref(noProfile(env, "outsider@gmail.com"), "ghost"), newStudent({ email: "boss@usa.edu.ph" }))));
+  it("rejects a sign-in token with no email at all", () =>
+    assertFails(setDoc(doc(env.authenticatedContext("ghost").firestore(), "users", "ghost"), newStudent())));
   it("cannot store an oversized name", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ name: "x".repeat(201) }))));
 });
 

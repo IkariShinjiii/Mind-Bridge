@@ -71,7 +71,13 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'emailVerified', 'approved', 'active', 'createdAt'])
         && request.resource.data.name is string && request.resource.data.name.size() <= 200
         && request.resource.data.email is string && request.resource.data.email.size() <= 200
-        && request.resource.data.emailVerified is bool;
+        && request.resource.data.emailVerified is bool
+        // New profiles need a school sign-in: the Auth token's email is an @usa.edu.ph address and the profile
+        // carries that same email. This is not proof of ownership (password sign-up does not verify the address
+        // before the profile is written), but it stops outside addresses from getting a profile at all.
+        && request.auth.token.email is string
+        && request.auth.token.email.lower().matches('.*@usa[.]edu[.]ph')
+        && request.resource.data.email.lower() == request.auth.token.email.lower();
 
       // Users edit only the settings fields the Settings page saves (an allowlist, so a new field is not writable by accident).
       allow update: if signedIn() && (

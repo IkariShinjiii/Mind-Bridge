@@ -145,10 +145,13 @@ denied on every collection.
 
 - **Client is untrusted.** Role, approval and active flags cannot be self-edited; the rules check
   the stored profile, not anything the client sends.
-- **Email domain is enforced in the UI only.** `Signup.tsx` and `Login.tsx` reject non-`@usa.edu.ph`
-  accounts, but the rules do not check the domain. Someone calling the Firebase API directly could
-  create a student account with another email. If that matters, add a domain check to the `users`
-  create rule or use a blocking Auth function.
+- **Email domain is enforced in the UI and, for new profiles, in the rules.** The `users` create rule
+  requires the Auth token's email to be an `@usa.edu.ph` address and the profile email to equal it, so
+  an outside address cannot get a profile (and without a profile nothing else is readable or writable).
+  It is not proof of ownership: password sign-up writes the profile before the address is verified, so
+  someone could still type a school address they do not own, and `email_verified` is not required.
+  Accounts that already have a profile are unaffected. Demo accounts (`@demo.mindbridge.test`) are made
+  by the seed script with the Admin SDK, so they never go through this rule.
 - **Firebase web config is public by design.** `VITE_FIREBASE_*` values ship in the bundle. They
   identify the project; they do not grant access. The rules do.
 - **The rules file is headed "DRAFT".** It is covered by the emulator tests but should be reviewed
