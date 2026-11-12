@@ -1,4 +1,5 @@
 import type { AppErrorShape, ErrorCode } from "../types";
+import { MIN_PASSWORD_LENGTH } from "./predicates";
 
 const GENERIC = "Something went wrong. Please try again.";
 
@@ -9,7 +10,7 @@ const AUTH_MESSAGES: Readonly<Record<string, string>> = {
   "auth/invalid-email": "That does not look like a valid email address.",
   "auth/user-disabled": "This account has been deactivated. Contact an administrator.",
   "auth/email-already-in-use": "An account with that email already exists. Try logging in instead.",
-  "auth/weak-password": "Password must be at least 6 characters.",
+  "auth/weak-password": `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
   "auth/too-many-requests": "Too many attempts. Wait a few minutes, then try again.",
   "auth/network-request-failed": "No connection. Check your internet and try again.",
   "auth/requires-recent-login": "For your security, log in again before making this change.",
