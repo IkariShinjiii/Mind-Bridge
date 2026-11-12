@@ -43,6 +43,17 @@ describe("POST /api/alert-high-risk when not configured", () => {
   });
 });
 
+describe("POST /api/alert-high-risk when Firebase setup fails", () => {
+  it("answers a generic 502 instead of the platform default 500", async () => {
+    vi.stubEnv("FIREBASE_SERVICE_ACCOUNT", "this is not json");
+    vi.stubEnv("SMTP_URL", "smtp://x");
+    const res = fakeRes();
+    await handler({ method: "POST", headers: { authorization: "Bearer x" }, body: { assessmentId: "a1" } }, res);
+    expect(res.code).toBe(502);
+    expect(res.body).toEqual({ sent: false, error: "Could not send the alert" });
+  });
+});
+
 describe("POST /api/alert-sweep", () => {
   it("answers 503 until the alert settings and CRON_SECRET are all present", async () => {
     vi.stubEnv("FIREBASE_SERVICE_ACCOUNT", "{}");

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   assess,
   buildMail,
+  cleanName,
   handleAlert,
   sweepAlerts,
   type SweepDeps,
@@ -38,6 +39,7 @@ let released: string[];
 let docs: Record<string, AssessmentDoc>;
 let deps: AlertDeps;
 let windows: Set<string>;
+let profileNames: Record<string, string>;
 
 beforeEach(() => {
   sent = [];
@@ -45,6 +47,7 @@ beforeEach(() => {
   released = [];
   docs = { a1: high() };
   windows = new Set();
+  profileNames = { stu1: "Ana" };
   deps = {
     verifyIdToken: async (t) => {
       if (t !== "good") throw new Error("bad token");
@@ -67,6 +70,7 @@ beforeEach(() => {
       return true;
     },
     releaseStudentWindow: async (uid) => void windows.delete(uid),
+    getStudentName: async (uid) => profileNames[uid] ?? null,
     sendMail: async (m) => void sent.push(m),
     appUrl: "https://app.example/",
   };
@@ -77,6 +81,15 @@ const post = (over: Partial<AlertRequest> = {}): AlertRequest => ({
   authorization: "Bearer good",
   body: { assessmentId: "a1" },
   ...over,
+});
+
+describe("cleanName", () => {
+  it("flattens line breaks and control characters and caps the length", () => {
+    const dirty = "Ana" + String.fromCharCode(13, 10) + "Bcc: x@y.z" + String.fromCharCode(0);
+    expect(cleanName(dirty)).toBe("Ana Bcc: x@y.z");
+    expect(cleanName("x".repeat(200))).toHaveLength(80);
+    expect(cleanName(undefined)).toBe("");
+  });
 });
 
 describe("assess", () => {
@@ -163,6 +176,21 @@ describe("handleAlert cooldown", () => {
 });
 
 describe("handleAlert", () => {
+  it("puts the profile name in the alert, not the name typed on the check-in", async () => {
+    docs.a1 = high({ studentName: "URGENT: call this number now" });
+    await handleAlert(post(), deps);
+    expect(sent[0]?.subject).toBe("High-risk wellness alert: Ana");
+    expect(sent[0]?.text).toContain("Student: Ana");
+    expect(sent[0]?.text).not.toContain("URGENT");
+  });
+
+  it("falls back to a generic subject when the profile has no name", async () => {
+    profileNames = {};
+    docs.a1 = high({ studentName: "Spoofed" });
+    await handleAlert(post(), deps);
+    expect(sent[0]?.subject).toBe("High-risk wellness alert: student");
+  });
+
   it("emails staff once for the student's own high-risk check-in", async () => {
     const result = await handleAlert(post(), deps);
     expect(result).toEqual({ status: 200, body: { sent: true } });
@@ -240,6 +268,7 @@ describe("sweepAlerts", () => {
       getStaff: async () => [{ role: "admin", email: "a@usa.edu.ph" }],
       claimStudentWindow: async (id) => (windowed.has(id) ? false : (windowed.add(id), true)),
       releaseStudentWindow: async (id) => void windowed.delete(id),
+      getStudentName: async () => "Ana",
       sendMail: async (m) => void sent.push(m.subject),
       listRecentAssessments: async () => rows,
       appUrl: "https://x.test",
