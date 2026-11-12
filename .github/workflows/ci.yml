@@ -18,6 +18,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
       - run: npm ci
       - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
       - run: node scripts/check-contrast.mjs
       - run: npm run build

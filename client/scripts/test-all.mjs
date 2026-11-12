@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One command to run every local check and print a summary:  npm run test:all [-- --e2e] [-- --fast]
-//   default : typecheck, unit tests (vitest), contrast check, production build
+//   default : typecheck, lint, unit tests (vitest), contrast check, production build
 //   --e2e   : also run the Playwright suite (uses in-memory Firebase fakes; no credentials, no network)
 //   --fast  : skip the build
 // Exits 1 when any step fails. Nothing here talks to real Firebase, Vercel or email.
@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = new Set(process.argv.slice(2));
+const npm = process.platform === "win32" ? "npm.cmd" : "npm";
 const npx = process.platform === "win32" ? "npx.cmd" : "npx";
 
 // The build refuses to run without Firebase config; dummies are fine because only the bundle is produced.
@@ -22,6 +23,7 @@ const buildEnv = {
 
 const steps = [
   { name: "typecheck", cmd: npx, args: ["tsc", "--noEmit"] },
+  { name: "lint", cmd: npm, args: ["run", "lint", "--silent"] },
   { name: "unit tests", cmd: npx, args: ["vitest", "run"] },
   { name: "contrast", cmd: process.execPath, args: ["scripts/check-contrast.mjs"] },
 ];
