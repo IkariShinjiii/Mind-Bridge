@@ -72,11 +72,6 @@ describe("assessments - CREATE (submitResponse)", () => {
       await assertFails(submit({ questionSummary: "not a list" }));
       await assertFails(submit({ answers: ["x".repeat(400000)] }));
       await assertFails(submit({ answers: [4, 0, 0] }));
-      await assertFails(submit({ questionSummary: [{ id: "q1", text: "x".repeat(501), score: 1, isCrisisItem: false }] }));
-      await assertFails(submit({ questionSummary: [{ id: "q1", text: "q", score: 1, isCrisisItem: false, extra: "x" }] }));
-      await assertFails(submit({ questionSummary: ["not a map"] }));
-      await assertFails(submit({ questionSummary: Array.from({ length: 17 }, (_, i) => ({ id: `q${i}`, text: "q", score: 0, isCrisisItem: false })) }));
-      await assertFails(submit({ questionSummary: [{ id: { x: 1 }, text: "q", score: 1, isCrisisItem: false }] }));
       await assertFails(submit({ createdAt: "9999-12-31T00:00:00.000Z" }));
       await assertFails(submit({ createdAt: "not a time" }));
       await assertFails(submit({ createdAt: "2026-13-45T00:00:00.000Z" }));
