@@ -34,18 +34,20 @@ service cloud.firestore {
            <= request.time + duration.value(1, 'd');
     }
 
-    // One line of a check-in's questionSummary: the four fields the app writes, short text, nothing else. Checked
-    // by position because the rules cannot loop; a check-in has at most 20 items.
+    // One line of a check-in's questionSummary: a map with only the four fields the app writes, and the id and text
+    // together at most 540 characters (a non-string id or text makes the sum fail, which denies the write). Checked by
+    // position because the rules cannot loop, and kept cheap: a rule may evaluate at most 1000 expressions, and the
+    // full PHQ-9 + GAD-7 check-in has 16 items, the most the app ever sends (see the size limit in validNewAssessment).
     function summaryItemOk(l, i) {
       return l.size() <= i
         || (l[i] is map && l[i].keys().hasOnly(['id', 'text', 'score', 'isCrisisItem'])
-            && shortText(l[i].get('id', ''), 40) && shortText(l[i].get('text', ''), 500));
+            && (l[i].get('id', '') + l[i].get('text', '')).size() <= 540);
     }
     function summaryOk(l) {
-      return summaryItemOk(l, 0) && summaryItemOk(l, 1) && summaryItemOk(l, 2) && summaryItemOk(l, 3) && summaryItemOk(l, 4)
-        && summaryItemOk(l, 5) && summaryItemOk(l, 6) && summaryItemOk(l, 7) && summaryItemOk(l, 8) && summaryItemOk(l, 9)
-        && summaryItemOk(l, 10) && summaryItemOk(l, 11) && summaryItemOk(l, 12) && summaryItemOk(l, 13) && summaryItemOk(l, 14)
-        && summaryItemOk(l, 15) && summaryItemOk(l, 16) && summaryItemOk(l, 17) && summaryItemOk(l, 18) && summaryItemOk(l, 19);
+      return summaryItemOk(l, 0) && summaryItemOk(l, 1) && summaryItemOk(l, 2) && summaryItemOk(l, 3)
+        && summaryItemOk(l, 4) && summaryItemOk(l, 5) && summaryItemOk(l, 6) && summaryItemOk(l, 7)
+        && summaryItemOk(l, 8) && summaryItemOk(l, 9) && summaryItemOk(l, 10) && summaryItemOk(l, 11)
+        && summaryItemOk(l, 12) && summaryItemOk(l, 13) && summaryItemOk(l, 14) && summaryItemOk(l, 15);
     }
 
     // A check-in as the app writes it: only these fields, sane types and sizes, nothing pre-filled by the student,
@@ -60,7 +62,7 @@ service cloud.firestore {
         && plausibleTime(d.createdAt)
         && d.answers is list && d.answers.size() <= 20
         && d.answers.hasOnly([0, 1, 2, 3, null])
-        && d.questionSummary is list && d.questionSummary.size() <= 20
+        && d.questionSummary is list && d.questionSummary.size() <= 16
         && summaryOk(d.questionSummary)
         && d.total is int && d.maxScore is int
         && d.maxScore > 0 && d.maxScore <= 60 && d.total >= 0 && d.total <= d.maxScore
