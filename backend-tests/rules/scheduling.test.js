@@ -27,6 +27,12 @@ describe("availability - READ (getAvailability, getMyAvailability)", () => {
 
 describe("availability - CREATE (addAvailability)", () => {
   it("slot cannot be created already booked", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ isBooked: true }))));
+  it("slot times must be short strings", async () => {
+    const db = as(env, "counselor");
+    await assertFails(addDoc(collection(db, "availability"), slot({ start: { x: 1 } })));
+    await assertFails(addDoc(collection(db, "availability"), slot({ end: 5 })));
+    await assertFails(addDoc(collection(db, "availability"), slot({ start: "s".repeat(41) })));
+  });
   it("slot cannot carry extra fields", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ note: "x" }))));
   it("a student cannot post a chat message under another person's name", () =>
     assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Dr. Cruz" }))));
@@ -76,6 +82,19 @@ describe("appointments - CREATE (bookAppointment)", () => {
     for (const status of ["Confirmed", "Completed", "Rescheduled", "Declined"]) {
       await assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ status })));
     }
+  });
+  it("a booking carries the student's own profile name and email, not a spoofed one", async () => {
+    const db = as(env, "student");
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ studentName: "Dr. Cruz (staff)" })));
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ studentEmail: "ben@usa.edu.ph" })));
+    await assertSucceeds(addDoc(collection(db, "appointments"), appointment()));
+  });
+  it("a booking cannot carry a far-future createdAt or non-string times", async () => {
+    const db = as(env, "student");
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ createdAt: "9999-12-31T00:00:00.000Z" })));
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ createdAt: 5 })));
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ start: { x: 1 } })));
+    await assertFails(addDoc(collection(db, "appointments"), appointment({ end: "e".repeat(41) })));
   });
   it("a booking with no status at all is refused too", () => {
     const { status, ...withoutStatus } = appointment();

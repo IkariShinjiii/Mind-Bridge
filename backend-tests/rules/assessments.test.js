@@ -70,6 +70,14 @@ describe("assessments - CREATE (submitResponse)", () => {
       await assertFails(submit({ answers: Array(21).fill(0) }));
       await assertFails(submit({ studentName: "x".repeat(201) }));
       await assertFails(submit({ questionSummary: "not a list" }));
+      await assertFails(submit({ answers: ["x".repeat(400000)] }));
+      await assertFails(submit({ answers: [4, 0, 0] }));
+      await assertFails(submit({ questionSummary: [{ id: "q1", text: "x".repeat(501), score: 1, isCrisisItem: false }] }));
+      await assertFails(submit({ questionSummary: [{ id: "q1", text: "q", score: 1, isCrisisItem: false, extra: "x" }] }));
+      await assertFails(submit({ questionSummary: ["not a map"] }));
+      await assertFails(submit({ createdAt: "9999-12-31T00:00:00.000Z" }));
+      await assertFails(submit({ createdAt: "not a time" }));
+      await assertFails(submit({ createdAt: "2026-13-45T00:00:00.000Z" }));
     });
     it("a normal 7-question check-in still goes through, at every risk level", async () => {
       await assertSucceeds(submit({ total: 0, maxScore: 21, riskLevel: "low", answers: [0, 0, 0, 0, 0, 0, 0] }));
