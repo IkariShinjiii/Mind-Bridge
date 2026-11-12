@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { friendlyError, isPopupDismissed } from "./errors";
+import { MIN_PASSWORD_LENGTH } from "./predicates";
 
 const FALLBACK = "Something went wrong. Please try again.";
 
@@ -23,6 +24,10 @@ describe("friendlyError", () => {
     expect(msg).not.toBe(FALLBACK);
     expect(msg).toMatch(/^[A-Z].*[.]$/); // a sentence, never a raw code
     expect(msg).not.toContain(code);
+  });
+
+  it("states the real minimum password length for auth/weak-password", () => {
+    expect(friendlyError({ code: "auth/weak-password" })).toContain(`${MIN_PASSWORD_LENGTH} characters`);
   });
 
   it("gives identical text for wrong password, unknown user and invalid credential (no account enumeration)", () => {
