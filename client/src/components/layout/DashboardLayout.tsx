@@ -134,7 +134,10 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
         {/* Phones have no sidebar, so they keep a slim top bar. From lg up everything lives in the sidebar. */}
         <header className="relative z-30 shrink-0 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] lg:hidden">
           <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
-            <Link to="/" className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline">
+            <Link
+              to="/"
+              className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
+            >
               <Logo className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold max-[379px]:sr-only">Mind Bridge</span>
             </Link>

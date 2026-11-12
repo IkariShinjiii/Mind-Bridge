@@ -23,23 +23,36 @@ const buildEnv = {
 
 const steps = [
   { name: "typecheck", cmd: npx, args: ["tsc", "--noEmit"] },
+  { name: "format", cmd: npx, args: ["prettier", "--check", "."] },
   { name: "lint", cmd: npm, args: ["run", "lint", "--silent"] },
   { name: "unit tests", cmd: npx, args: ["vitest", "run"] },
   { name: "contrast", cmd: process.execPath, args: ["scripts/check-contrast.mjs"] },
 ];
 if (!args.has("--fast")) steps.push({ name: "build", cmd: npx, args: ["vite", "build"], env: buildEnv });
-if (args.has("--e2e")) steps.push({ name: "e2e (Playwright)", cmd: npx, args: ["playwright", "test", "--reporter=line"] });
+if (args.has("--e2e"))
+  steps.push({ name: "e2e (Playwright)", cmd: npx, args: ["playwright", "test", "--reporter=line"] });
 
 const results = [];
 for (const step of steps) {
   console.log(`\n=== ${step.name} ===`);
   const t0 = Date.now();
-  const r = spawnSync(step.cmd, step.args, { cwd: root, stdio: "inherit", env: step.env ?? process.env, shell: process.platform === "win32" && step.cmd.endsWith(".cmd") });
-  results.push({ name: step.name, ok: r.status === 0, optional: step.optional, secs: ((Date.now() - t0) / 1000).toFixed(1) });
+  const r = spawnSync(step.cmd, step.args, {
+    cwd: root,
+    stdio: "inherit",
+    env: step.env ?? process.env,
+    shell: process.platform === "win32" && step.cmd.endsWith(".cmd"),
+  });
+  results.push({
+    name: step.name,
+    ok: r.status === 0,
+    optional: step.optional,
+    secs: ((Date.now() - t0) / 1000).toFixed(1),
+  });
 }
 
 console.log("\n=== summary ===");
-for (const r of results) console.log(`${r.ok ? "PASS" : r.optional ? "WARN" : "FAIL"}  ${r.name.padEnd(20)} ${r.secs}s`);
+for (const r of results)
+  console.log(`${r.ok ? "PASS" : r.optional ? "WARN" : "FAIL"}  ${r.name.padEnd(20)} ${r.secs}s`);
 const failed = results.filter((r) => !r.ok && !r.optional);
 console.log(failed.length ? `\n${failed.length} step(s) failed.` : "\nAll required steps passed.");
 process.exit(failed.length ? 1 : 0);

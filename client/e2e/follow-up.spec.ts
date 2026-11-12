@@ -55,7 +55,9 @@ test.describe("case follow-up dates", () => {
   const card = (page: import("@playwright/test").Page, name: string) =>
     page.getByRole("listitem").filter({ hasText: `${name.toLowerCase()}@usa.edu.ph` });
 
-  test("the queue says which follow-ups are overdue, due today or coming, and puts overdue ones first", async ({ page }) => {
+  test("the queue says which follow-ups are overdue, due today or coming, and puts overdue ones first", async ({
+    page,
+  }) => {
     await expect(card(page, "Olive")).toContainText("Follow-up overdue since");
     await expect(card(page, "Tess")).toContainText("Follow up today");
     await expect(card(page, "Lena")).toContainText(/Follow up [A-Z][a-z]{2} \d/);

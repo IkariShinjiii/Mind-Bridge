@@ -27,7 +27,9 @@ const changeElsewhere = (page: import("@playwright/test").Page, id: string, stat
   );
 
 test.describe("appointment lifecycle", () => {
-  test("a counselor is told when a request was cancelled before they confirmed it, and nothing is overwritten", async ({ page }) => {
+  test("a counselor is told when a request was cancelled before they confirmed it, and nothing is overwritten", async ({
+    page,
+  }) => {
     await seed(page, { docs: { appointments: { a1: session("Pending Review") } } });
     await logIn(page, COUNSELOR);
     await page.goto("/appointments");
@@ -58,7 +60,12 @@ test.describe("appointment lifecycle", () => {
     const pending = page.getByRole("listitem").filter({ hasText: "Pending Review" }).first();
     await expect(pending.getByRole("button")).toHaveText(["Confirm", "Reschedule", "Decline"]);
     const confirmed = page.getByRole("listitem").filter({ hasText: "Add to calendar" });
-    await expect(confirmed.getByRole("button")).toHaveText(["Add to calendar", "Mark completed", "Reschedule", "Cancel session"]);
+    await expect(confirmed.getByRole("button")).toHaveText([
+      "Add to calendar",
+      "Mark completed",
+      "Reschedule",
+      "Cancel session",
+    ]);
     const done = page.getByRole("listitem").filter({ hasText: "Closed. No further actions." });
     await expect(done).toHaveCount(1);
   });

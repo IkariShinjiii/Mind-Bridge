@@ -6,13 +6,29 @@ describe("published bands", () => {
   it("PHQ-9 edges", () => {
     const at = (n: number) => phq9Band(n).severity;
     expect([at(0), at(4), at(5), at(9), at(10), at(14), at(15), at(19), at(20), at(27)]).toEqual([
-      "minimal", "minimal", "mild", "mild", "moderate", "moderate", "moderately-severe", "moderately-severe", "severe", "severe",
+      "minimal",
+      "minimal",
+      "mild",
+      "mild",
+      "moderate",
+      "moderate",
+      "moderately-severe",
+      "moderately-severe",
+      "severe",
+      "severe",
     ]);
   });
   it("GAD-7 edges", () => {
     const at = (n: number) => gad7Band(n).severity;
     expect([at(0), at(4), at(5), at(9), at(10), at(14), at(15), at(21)]).toEqual([
-      "minimal", "minimal", "mild", "mild", "moderate", "moderate", "severe", "severe",
+      "minimal",
+      "minimal",
+      "mild",
+      "mild",
+      "moderate",
+      "moderate",
+      "severe",
+      "severe",
     ]);
   });
 });

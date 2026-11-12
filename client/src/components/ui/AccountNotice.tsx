@@ -104,7 +104,14 @@ export default function AccountNotice({ status, onCheckAgain, onResend, onLogout
         </div>
 
         <p role="status" className="mt-4 min-h-[1.5rem] text-[color:var(--mb-panel-soft)]">
-          {resendNote || (stillWaiting ? status === "unverified" ? "Not verified yet." : status === "unavailable" ? "Still could not load it." : "Still waiting. Nothing has changed yet." : "")}
+          {resendNote ||
+            (stillWaiting
+              ? status === "unverified"
+                ? "Not verified yet."
+                : status === "unavailable"
+                  ? "Still could not load it."
+                  : "Still waiting. Nothing has changed yet."
+              : "")}
         </p>
       </section>
     </div>

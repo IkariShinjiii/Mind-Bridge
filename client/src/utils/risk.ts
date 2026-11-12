@@ -41,7 +41,8 @@ export function withVerifiedRisk(assessment: Assessment): Assessment {
   if (RANK[published] > RANK[level]) level = published;
   const fullRaised = RANK[published] > RANK[riskLevel];
 
-  const raised = fullRaised || riskLevel !== stored || flaggedForImmediateReview !== Boolean(assessment.flaggedForImmediateReview);
+  const raised =
+    fullRaised || riskLevel !== stored || flaggedForImmediateReview !== Boolean(assessment.flaggedForImmediateReview);
   const extra = screenRaised ? { screenRaised: true } : {};
   if (!raised) return { ...assessment, riskLevel: level, ...extra };
   return { ...assessment, riskLevel: level, flaggedForImmediateReview, riskCorrectedFrom: stored, ...extra };

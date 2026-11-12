@@ -11,11 +11,7 @@ export const caseReviewSchema = z.object({
   status: caseStatusSchema,
   counselorNotes: optionalText(2000),
   /** "YYYY-MM-DD", or "" to clear. Leave out to keep the stored date. */
-  followUpDate: z
-    .string()
-    .regex(FOLLOW_UP_PATTERN, "Pick a valid follow-up date.")
-    .or(z.literal(""))
-    .optional(),
+  followUpDate: z.string().regex(FOLLOW_UP_PATTERN, "Pick a valid follow-up date.").or(z.literal("")).optional(),
 });
 export type CaseReviewInput = z.infer<typeof caseReviewSchema>;
 

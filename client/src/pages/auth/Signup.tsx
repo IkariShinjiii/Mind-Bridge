@@ -1,7 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { m } from "framer-motion";
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithPopup, signOut } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, provider } from "../../lib/firebase";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";

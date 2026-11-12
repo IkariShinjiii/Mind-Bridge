@@ -34,8 +34,12 @@ describe("summarizeTrend", () => {
 
 describe("describeChange", () => {
   it("speaks plainly in each direction", () => {
-    expect(describeChange(summarizeTrend([pt(9), pt(6)])!)).toBe("3 points lower than your last check-in. Fewer difficulties this time.");
-    expect(describeChange(summarizeTrend([pt(5), pt(6)])!)).toBe("1 point higher than your last check-in. Things have felt harder lately.");
+    expect(describeChange(summarizeTrend([pt(9), pt(6)])!)).toBe(
+      "3 points lower than your last check-in. Fewer difficulties this time.",
+    );
+    expect(describeChange(summarizeTrend([pt(5), pt(6)])!)).toBe(
+      "1 point higher than your last check-in. Things have felt harder lately.",
+    );
     expect(describeChange(summarizeTrend([pt(5), pt(5)])!)).toBe("Same as your last check-in.");
     expect(describeChange(summarizeTrend([pt(5)])!)).toMatch(/first check-in/);
   });

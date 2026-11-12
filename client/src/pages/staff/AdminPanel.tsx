@@ -290,7 +290,9 @@ function FollowUpBadge({ date, status }: { date: string | undefined; status: Cas
         ? "Follow up today"
         : `Follow up ${formatFollowUp(date)}`;
   return (
-    <span className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-sm font-bold ${FOLLOW_UP_TONES[state]}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-sm font-bold ${FOLLOW_UP_TONES[state]}`}
+    >
       <CalendarClock className="h-4 w-4" aria-hidden="true" /> {text}
     </span>
   );
@@ -683,18 +685,33 @@ export default function AdminPanel() {
           <Stat tone="urgent" icon={AlertTriangle} label="High risk" value={immediateCount} note="Need review first" />
           <Stat icon={ClipboardList} label="Open cases" value={openCasesCount} note="Waiting in the queue" />
           <Stat icon={Calendar} label="Pending sessions" value={pendingAppointmentsCount} note="Appointment requests" />
-          <Stat icon={CircleCheck} label="Reviewed" value={reviewedCount} note="Cases closed out" className="max-sm:hidden" />
-          <Stat icon={Users} label="Students" value={analytics.totalStudents} note="With check-ins" className="max-sm:hidden" />
-          <Stat icon={UserCheck} label="Staff" value={analytics.totalStaff} note="Approved accounts" className="max-sm:hidden" />
+          <Stat
+            icon={CircleCheck}
+            label="Reviewed"
+            value={reviewedCount}
+            note="Cases closed out"
+            className="max-sm:hidden"
+          />
+          <Stat
+            icon={Users}
+            label="Students"
+            value={analytics.totalStudents}
+            note="With check-ins"
+            className="max-sm:hidden"
+          />
+          <Stat
+            icon={UserCheck}
+            label="Staff"
+            value={analytics.totalStaff}
+            note="Approved accounts"
+            className="max-sm:hidden"
+          />
         </section>
       )}
 
       {/* Section switcher */}
       {mainTab !== "accounts" && (
-        <nav
-          aria-label="Dashboard sections"
-          className="flex gap-1 border-b border-[color:var(--mb-line)] sm:gap-3"
-        >
+        <nav aria-label="Dashboard sections" className="flex gap-1 border-b border-[color:var(--mb-line)] sm:gap-3">
           {MAIN_TAB_LINKS.map(([tab, Icon, label, shortLabel]) => (
             <button
               key={tab}
@@ -766,7 +783,9 @@ export default function AdminPanel() {
                       const status = item.status || "open";
                       const immediate = Boolean(item.flaggedForImmediateReview);
                       const when = item.submittedAt || item.createdAt;
-                      const submittedAt = when ? new Date(when).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Unknown";
+                      const submittedAt = when
+                        ? new Date(when).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+                        : "Unknown";
                       const RiskIcon = risk === "high" ? AlertTriangle : risk === "medium" ? Diamond : CircleCheck;
                       const riskTone =
                         risk === "high"
@@ -1340,7 +1359,11 @@ export default function AdminPanel() {
                   />
                 </div>
                 {followUpInput && (
-                  <button type="button" onClick={() => setFollowUpInput("")} className="mb-btn mb-btn-line !min-h-[44px] !px-4">
+                  <button
+                    type="button"
+                    onClick={() => setFollowUpInput("")}
+                    className="mb-btn mb-btn-line !min-h-[44px] !px-4"
+                  >
                     Clear date
                   </button>
                 )}

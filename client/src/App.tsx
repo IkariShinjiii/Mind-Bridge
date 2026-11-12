@@ -42,11 +42,14 @@ function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allow
   if (accountStatus !== "active") {
     return (
       <PublicShell showAuthLinks={false}>
-        <AccountNotice status={accountStatus} onCheckAgain={refreshUserData}
+        <AccountNotice
+          status={accountStatus}
+          onCheckAgain={refreshUserData}
           onResend={async () => {
             if (auth.currentUser) await sendEmailVerification(auth.currentUser);
           }}
-          onLogout={() => void logout()} />
+          onLogout={() => void logout()}
+        />
       </PublicShell>
     );
   }

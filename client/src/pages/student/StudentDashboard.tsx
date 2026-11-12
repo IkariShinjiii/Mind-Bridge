@@ -315,18 +315,20 @@ export default function StudentDashboard() {
 
     // One chart, one scale: only the check-ins out of the same maximum as the latest. History lists them all.
     const latestMax = sorted[sorted.length - 1].maxScore || 21;
-    return sorted.filter((item) => (item.maxScore || 21) === latestMax).map((item, index) => {
-      const score = Number.isFinite(item.total) ? item.total : 0;
-      return {
-        id: item.id || `checkin-${index}`,
-        rawDate: item.createdAt,
-        formattedDate: formatShortDate(item.createdAt) || `Check-in ${index + 1}`,
-        fullDate: formatDateTime(item.createdAt, ""),
-        score,
-        riskLevel: item.riskLevel || "low",
-        max: item.maxScore || 21,
-      };
-    });
+    return sorted
+      .filter((item) => (item.maxScore || 21) === latestMax)
+      .map((item, index) => {
+        const score = Number.isFinite(item.total) ? item.total : 0;
+        return {
+          id: item.id || `checkin-${index}`,
+          rawDate: item.createdAt,
+          formattedDate: formatShortDate(item.createdAt) || `Check-in ${index + 1}`,
+          fullDate: formatDateTime(item.createdAt, ""),
+          score,
+          riskLevel: item.riskLevel || "low",
+          max: item.maxScore || 21,
+        };
+      });
   }, [pastAssessments]);
 
   const trendSummary = useMemo(
@@ -380,7 +382,6 @@ export default function StudentDashboard() {
         : latestRisk === "medium"
           ? "bg-[color:var(--mb-chart-medium)]"
           : "bg-[color:var(--mb-chart-low)]";
-
 
   // The soonest session that is still ahead and not closed out (the list also holds past and cancelled ones)
   const nextAppointment = appointments
@@ -637,7 +638,10 @@ export default function StudentDashboard() {
                           <ul className="mt-2 space-y-1 text-[color:var(--mb-ink)]">
                             {wellLines.map((line) => (
                               <li key={line} className="flex items-start gap-2">
-                                <Check className="mt-1 h-4 w-4 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                                <Check
+                                  className="mt-1 h-4 w-4 shrink-0 text-[color:var(--mb-brand)]"
+                                  aria-hidden="true"
+                                />
                                 {line}
                               </li>
                             ))}
@@ -705,8 +709,18 @@ export default function StudentDashboard() {
                                 level: high ? "high" : medium ? "medium" : "low",
                                 scales: fullResult
                                   ? [
-                                      { label: "Depression (PHQ-9)", score: fullResult.phq9, max: 27, band: fullResult.phq9Band.label },
-                                      { label: "Anxiety (GAD-7)", score: fullResult.gad7, max: 21, band: fullResult.gad7Band.label },
+                                      {
+                                        label: "Depression (PHQ-9)",
+                                        score: fullResult.phq9,
+                                        max: 27,
+                                        band: fullResult.phq9Band.label,
+                                      },
+                                      {
+                                        label: "Anxiety (GAD-7)",
+                                        score: fullResult.gad7,
+                                        max: 21,
+                                        band: fullResult.gad7Band.label,
+                                      },
                                     ]
                                   : undefined,
                                 wellLines,
@@ -731,7 +745,10 @@ export default function StudentDashboard() {
                     const reach = firstOpen === -1 ? SCREENING_QUESTIONS.length - 1 : firstOpen;
                     // Phones: seven 37px buttons miss the 44px target, and the progress bar plus Back already cover it.
                     return (
-                      <ol className={`mb-6 hidden gap-2 ${mode === "quick" ? "sm:flex" : ""}`} aria-label="Check-in progress">
+                      <ol
+                        className={`mb-6 hidden gap-2 ${mode === "quick" ? "sm:flex" : ""}`}
+                        aria-label="Check-in progress"
+                      >
                         {SCREENING_QUESTIONS.map((q, i) => {
                           const done = answers[i] !== null;
                           const here = i === qIndex;
@@ -990,11 +1007,15 @@ export default function StudentDashboard() {
                     </span>
                     <span className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-medium)]" />
-                      <span>{limits.lowTop + 1} to {limits.mediumTop}: moderate</span>
+                      <span>
+                        {limits.lowTop + 1} to {limits.mediumTop}: moderate
+                      </span>
                     </span>
                     <span className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-high)]" />
-                      <span>{limits.mediumTop + 1} to {trendSummary?.max ?? 21}: priority</span>
+                      <span>
+                        {limits.mediumTop + 1} to {trendSummary?.max ?? 21}: priority
+                      </span>
                     </span>
                   </div>
 
@@ -1066,7 +1087,12 @@ export default function StudentDashboard() {
                           }}
                         />
                         <ReferenceLine y={limits.lowTop} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
-                        <ReferenceLine y={limits.mediumTop} stroke="var(--mb-warn)" strokeDasharray="3 3" opacity={0.6} />
+                        <ReferenceLine
+                          y={limits.mediumTop}
+                          stroke="var(--mb-warn)"
+                          strokeDasharray="3 3"
+                          opacity={0.6}
+                        />
                         <Area
                           type="monotone"
                           dataKey="score"

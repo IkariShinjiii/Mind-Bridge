@@ -15,7 +15,10 @@ export default tseslint.config(
       // Only the classic hooks rules; the React Compiler rules in recommended are heavy (OOM) and flag working code.
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "@typescript-eslint/no-unused-vars": ["error", { varsIgnorePattern: "^_", argsIgnorePattern: "^_", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
     },
   },

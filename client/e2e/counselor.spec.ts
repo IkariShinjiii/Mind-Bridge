@@ -184,7 +184,9 @@ test("case times read as a short date and time, and the sidebar link says Schedu
   const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
   await expect(flagged).toContainText(/Sep (19|20|21), 2026/);
   await expect(flagged).not.toContainText(/\d:\d\d:\d\d/);
-  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Schedule", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Schedule", exact: true }),
+  ).toBeVisible();
 });
 
 test("on a phone the flagged case is on the first screen, under a compact summary", async ({ page }) => {
@@ -207,7 +209,9 @@ test("on a phone the flagged case is on the first screen, under a compact summar
   expect(new Set(tops).size).toBe(1);
 });
 
-test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({ page }) => {
+test("a low check-in with a positive depression and anxiety screen is shown as medium, with the reason", async ({
+  page,
+}) => {
   const answers = [2, 1, 0, 2, 1, 0, 0];
   await seed(page, {
     docs: {
@@ -222,7 +226,10 @@ test("a low check-in with a positive depression and anxiety screen is shown as m
     },
   });
   await logIn(page, COUNSELOR);
-  await page.getByRole("group", { name: "Filter cases" }).getByRole("button", { name: "Medium risk", exact: true }).click();
+  await page
+    .getByRole("group", { name: "Filter cases" })
+    .getByRole("button", { name: "Medium risk", exact: true })
+    .click();
   await expect(page.getByRole("listitem").filter({ hasText: "Carlo Other" })).toContainText("medium risk");
   await page.getByRole("button", { name: "Inspect case" }).click();
   const dialog = page.getByRole("dialog", { name: "Carlo Other" });
@@ -239,7 +246,12 @@ test("a counselor sees the PHQ-9 and GAD-7 bands for a full check-in", async ({ 
         f1: {
           ...flaggedCase,
           answers,
-          questionSummary: answers.map((score, i) => ({ id: `q${i + 1}`, text: `Question ${i + 1}`, score, isCrisisItem: i === 8 })),
+          questionSummary: answers.map((score, i) => ({
+            id: `q${i + 1}`,
+            text: `Question ${i + 1}`,
+            score,
+            isCrisisItem: i === 8,
+          })),
           total: 17,
           maxScore: 48,
           riskLevel: "high",
