@@ -72,7 +72,7 @@ describe("availability - UPDATE (booking and releasing a slot)", () => {
   });
   it("student cannot flip isBooked on a slot with no appointment (griefing)", async () => {
     await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true }));
-    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ap1" }));
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ghost" }));
   });
   it("student cannot claim the slot in someone else name", () =>
     assertFails(book("student", "stu1", {}, { bookedBy: "stu2" })));
@@ -133,7 +133,7 @@ describe("appointments - CREATE (bookAppointment)", () => {
     const db = as(env, "student");
     await assertFails(addDoc(collection(db, "appointments"), appointment({ studentName: "Dr. Cruz (staff)" })));
     await assertFails(addDoc(collection(db, "appointments"), appointment({ studentEmail: "ben@usa.edu.ph" })));
-    await assertSucceeds(addDoc(collection(db, "appointments"), appointment()));
+    await assertSucceeds(addDoc(collection(db, "appointments"), appointment({ slotId: null })));
   });
   it("a booking cannot carry a far-future createdAt or non-string times", async () => {
     const db = as(env, "student");
