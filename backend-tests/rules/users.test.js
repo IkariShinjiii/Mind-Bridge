@@ -36,6 +36,20 @@ describe("users - CREATE (Signup / Google sign-in)", () => {
   it("cannot self-register as unapproved", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ approved: false }))));
   it("unauthenticated create is rejected", () => assertFails(setDoc(ref(anon(env), "ghost"), newStudent())));
   it("cannot add fields sign-up does not write", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ assignedCounselorId: "cou1" }))));
+  it("accepts a mixed-case address that matches the token email", () =>
+    assertSucceeds(setDoc(ref(noProfile(env, "new@usa.edu.ph"), "ghost"), newStudent({ email: "New@USA.edu.ph" }))));
+  it("rejects an outside email address (not @usa.edu.ph)", () =>
+    assertFails(setDoc(ref(noProfile(env, "attacker@example.com"), "ghost"), newStudent({ email: "attacker@example.com" }))));
+  it("rejects a look-alike domain", async () => {
+    for (const email of ["x@usa.edu.ph.evil.com", "x@notusa.edu.ph", "x@usa-edu.ph", "x@usa.edu.ph@evil.com"])
+      await assertFails(setDoc(ref(noProfile(env, email), "ghost"), newStudent({ email })));
+  });
+  it("rejects a profile email that differs from the sign-in email", () =>
+    assertFails(setDoc(ref(noProfile(env, "attacker@example.com"), "ghost"), newStudent({ email: "new@usa.edu.ph" }))));
+  it("rejects a school profile email on an outside sign-in", () =>
+    assertFails(setDoc(ref(noProfile(env, "outsider@gmail.com"), "ghost"), newStudent({ email: "boss@usa.edu.ph" }))));
+  it("rejects a sign-in token with no email at all", () =>
+    assertFails(setDoc(doc(env.authenticatedContext("ghost").firestore(), "users", "ghost"), newStudent())));
   it("cannot store an oversized name", () => assertFails(setDoc(ref(noProfile(env), "ghost"), newStudent({ name: "x".repeat(201) }))));
 });
 
@@ -49,6 +63,44 @@ describe("users - UPDATE (saveUserSettings, admin actions, assignCounselorToStud
     assertSucceeds(updateDoc(doc(as(env, "student"), "users/stu1"), {
       name: "Ana B.", phone: "0917", bio: "hi", avatarGradient: "a", useGoogleAvatar: false,
       emergencyContact: { name: "Mom", phone: "1" }, wellnessGoals: ["sleep"], updatedAt: "x" })));
+  describe("profile field types and sizes", () => {
+    const save = (patch) => updateDoc(doc(as(env, "student"), "users/stu1"), patch);
+    it("rejects a name that is not a string", async () => {
+      await assertFails(save({ name: { not: "a string" } }));
+      await assertFails(save({ name: 42 }));
+      await assertFails(save({ name: ["a"] }));
+    });
+    it("rejects an oversized name, phone, bio or avatar id", async () => {
+      await assertFails(save({ name: "A".repeat(201) }));
+      await assertFails(save({ name: "A".repeat(500000) }));
+      await assertFails(save({ phone: "1".repeat(41) }));
+      await assertFails(save({ bio: "b".repeat(1001) }));
+      await assertFails(save({ avatarGradient: "g".repeat(41) }));
+    });
+    it("accepts values at the limits", async () => {
+      await assertSucceeds(save({ name: "A".repeat(200), phone: "1".repeat(40), bio: "b".repeat(1000) }));
+    });
+    it("rejects a non-boolean useGoogleAvatar", () => assertFails(save({ useGoogleAvatar: "yes" })));
+    it("rejects an emergency contact that is not a small map of strings", async () => {
+      await assertFails(save({ emergencyContact: "Mom" }));
+      await assertFails(save({ emergencyContact: { name: { x: 1 }, phone: "1" } }));
+      await assertFails(save({ emergencyContact: { name: "M".repeat(201), phone: "1" } }));
+      await assertFails(save({ emergencyContact: { notes: "n".repeat(1001) } }));
+      await assertFails(save({ emergencyContact: Object.fromEntries(Array.from({ length: 11 }, (_, i) => [`k${i}`, "x"])) }));
+    });
+    it("rejects goals that are not at most five short strings", async () => {
+      await assertFails(save({ wellnessGoals: "sleep" }));
+      await assertFails(save({ wellnessGoals: ["a", "b", "c", "d", "e", "f"] }));
+      await assertFails(save({ wellnessGoals: [{ x: 1 }] }));
+      await assertFails(save({ wellnessGoals: ["g".repeat(121)] }));
+    });
+    it("accepts a full valid profile", () =>
+      assertSucceeds(save({ name: "Ana B.", phone: "0917 123 4567", bio: "hi", avatarGradient: "cyan", useGoogleAvatar: true,
+        emergencyContact: { name: "Mom", relationship: "Parent", phone: "0917", alternatePhone: "", notes: "n" },
+        wellnessGoals: ["sleep", "focus", "calm", "move", "talk"], updatedAt: "2026-11-13T00:00:00.000Z" })));
+    it("admin can still edit another user's fields", () =>
+      assertSucceeds(updateDoc(doc(as(env, "admin"), "users/stu1"), { name: "Renamed by admin" })));
+  });
   it("user cannot write a field Settings does not save", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu1"), { email: "boss@usa.edu.ph" })));
   it("user cannot invent a new field", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu1"), { isVip: true })));
   it("student cannot edit another student", () => assertFails(updateDoc(doc(as(env, "student"), "users/stu2"), { name: "hax" })));
