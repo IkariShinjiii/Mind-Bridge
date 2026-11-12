@@ -1,6 +1,6 @@
 import { describe, it, beforeAll, afterAll, beforeEach } from "vitest";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
-import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, where } from "firebase/firestore";
+import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, writeBatch, collection, query, where } from "firebase/firestore";
 import { createEnv, seedUsers, seed, as, anon, slot, appointment, message } from "../helpers/env.js";
 
 let env;
@@ -47,15 +47,60 @@ describe("availability - CREATE (addAvailability)", () => {
   it("unapproved counselor cannot create slots", () => assertFails(addDoc(collection(as(env, "pendingCounselor"), "availability"), slot({ counselorId: "cou2" }))));
 });
 
-describe("availability - UPDATE (booking flips isBooked)", () => {
-  it("student can set isBooked when booking", () => assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true })));
-  it("student cannot book a slot that is already booked (no double booking)", async () => {
-    await seed(env, "availability/slot1", slot({ isBooked: true }));
-    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true }));
+/** The client booking: one batch creating the appointment and claiming the slot. */
+const book = (who, uid, over = {}, slotPatch = {}, slotId = "slot1") => {
+  const db = as(env, who);
+  const ref = doc(collection(db, "appointments"));
+  const batch = writeBatch(db);
+  const names = uid === "stu2" ? { studentName: "Ben Student", studentEmail: "ben@usa.edu.ph" } : {};
+  batch.set(ref, appointment({ studentId: uid, ...names, slotId, ...over }));
+  batch.update(doc(db, "availability", slotId), { isBooked: true, bookedBy: uid, bookedAppointmentId: ref.id, ...slotPatch });
+  return batch.commit();
+};
+const bookedSlot = { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ap1" };
+const freed = { isBooked: false, bookedBy: null, bookedAppointmentId: null };
+
+describe("availability - UPDATE (booking and releasing a slot)", () => {
+  it("student books a free slot (appointment and slot in one batch)", () => assertSucceeds(book("student", "stu1")));
+  it("a second student cannot book a slot that is taken (no double booking)", async () => {
+    await seed(env, "availability/slot1", slot(bookedSlot));
+    await assertFails(book("otherStudent", "stu2"));
   });
-  it("student can free a slot when cancelling (isBooked -> false)", async () => {
-    await seed(env, "availability/slot1", slot({ isBooked: true }));
-    await assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: false }));
+  it("two students racing for one slot: the second batch fails", async () => {
+    await assertSucceeds(book("student", "stu1"));
+    await assertFails(book("otherStudent", "stu2"));
+  });
+  it("student cannot flip isBooked on a slot with no appointment (griefing)", async () => {
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true }));
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ap1" }));
+  });
+  it("student cannot claim the slot in someone else name", () =>
+    assertFails(book("student", "stu1", {}, { bookedBy: "stu2" })));
+  it("student cannot book a slot while the appointment points at another slot", () =>
+    assertFails(book("student", "stu1", { slotId: "slot2" })));
+  it("student cannot free a slot booked by someone else", async () => {
+    await seed(env, "availability/slot1", slot({ ...bookedSlot, bookedBy: "stu2" }));
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), freed));
+  });
+  it("student cannot free a slot without cancelling their appointment", async () => {
+    await seed(env, "availability/slot1", slot(bookedSlot));
+    await assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), freed));
+  });
+  it("student cancelling their appointment frees the slot (one batch)", async () => {
+    await seed(env, "availability/slot1", slot(bookedSlot));
+    const db = as(env, "student");
+    const batch = writeBatch(db);
+    batch.update(doc(db, "availability/slot1"), freed);
+    batch.update(doc(db, "appointments/ap1"), { status: "Cancelled", updatedAt: "x", cancellationReason: "sick", cancelledBy: "student" });
+    await assertSucceeds(batch.commit());
+  });
+  it("staff declining an appointment frees the slot (one batch)", async () => {
+    await seed(env, "availability/slot1", slot(bookedSlot));
+    const db = as(env, "counselor");
+    const batch = writeBatch(db);
+    batch.update(doc(db, "availability/slot1"), freed);
+    batch.update(doc(db, "appointments/ap1"), { status: "Declined", updatedAt: "x" });
+    await assertSucceeds(batch.commit());
   });
   it("student cannot set isBooked to a non-boolean", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: "yes" })));
   it("student cannot alter times", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { start: "2030-01-01T00:00:00.000Z" })));
@@ -70,7 +115,8 @@ describe("availability - DELETE (removeAvailability)", () => {
 });
 
 describe("appointments - CREATE (bookAppointment)", () => {
-  it("student books for themselves", () => assertSucceeds(addDoc(collection(as(env, "student"), "appointments"), appointment())));
+  it("student books for themselves (no slot)", () => assertSucceeds(addDoc(collection(as(env, "student"), "appointments"), appointment({ slotId: null }))));
+  it("an appointment that names a slot must claim it in the same batch", () => assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment())));
   it("a booking cannot carry fields the form does not write", () =>
     assertFails(addDoc(collection(as(env, "student"), "appointments"), appointment({ counselorNote: "pre-approved" }))));
   it("a booking cannot carry an oversized title", () =>

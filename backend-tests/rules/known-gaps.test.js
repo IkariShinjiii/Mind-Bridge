@@ -3,8 +3,8 @@
 // fails and should be flipped to assertFails. None of these are fixed by this suite.
 import { describe, it, beforeAll, afterAll, beforeEach } from "vitest";
 import { assertSucceeds } from "@firebase/rules-unit-testing";
-import { doc, addDoc, updateDoc, collection } from "firebase/firestore";
-import { createEnv, seedUsers, seed, as, slot, assessment, appointment, message } from "../helpers/env.js";
+import { addDoc, collection } from "firebase/firestore";
+import { createEnv, seedUsers, as, assessment } from "../helpers/env.js";
 
 let env;
 beforeAll(async () => { env = await createEnv(); });
@@ -17,11 +17,8 @@ describe("GAP: students can write fields that should be server-controlled", () =
 
   // Fixed and moved to scheduling.test.js: a student can no longer book a slot that is already taken (the isBooked
   // flip is refused), and bookings, profiles and slots only accept the fields the app writes.
-  it("GAP: a student can still free someone else's booked slot (isBooked -> false)", async () => {
-    // Students free their own slot when they cancel, and the rules cannot tie a slot to its appointment in that order.
-    await seed(env, "availability/slot1", slot({ isBooked: true }));
-    await assertSucceeds(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: false }));
-  });
+  // Fixed and moved to scheduling.test.js (#137, #138): a slot is freed only by the student who booked it, in a
+  // batch that also cancels their appointment, and is booked only together with its appointment.
 
   // A score can no longer be filed under-reported (see assessments.test.js), but the rules cannot read the crisis
   // answer, so the safety flag is still taken on trust. The staff dashboard and the alert re-check it.

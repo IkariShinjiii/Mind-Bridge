@@ -4,11 +4,29 @@ import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vite
 // Rules and real persistence are covered separately by backend-tests/ (Firestore emulator).
 type AnyFn = (...args: any[]) => any;
 type Row = Record<string, unknown>;
-const h = vi.hoisted(() => ({ user: null as Row | null }));
+const h = vi.hoisted(() => ({
+  user: null as Row | null,
+  batches: [] as Array<{ sets: unknown[][]; updates: unknown[][] }>,
+  commitFails: false,
+}));
 
 vi.mock("firebase/firestore", () => ({
   collection: (_db: unknown, name: string) => ({ kind: "collection", name }),
-  doc: (_db: unknown, col: string, id: string) => ({ kind: "doc", col, id }),
+  doc: (_db: unknown, col?: string, id?: string) =>
+    col === undefined ? { kind: "doc", col: (_db as { name: string }).name, id: "newDoc1" } : { kind: "doc", col, id },
+  writeBatch: () => {
+    const b = {
+      sets: [] as unknown[][],
+      updates: [] as unknown[][],
+      set: (...a: unknown[]) => (b.sets.push(a), b),
+      update: (...a: unknown[]) => (b.updates.push(a), b),
+      commit: async () => {
+        if (h.commitFails) throw new Error("denied");
+      },
+    };
+    h.batches.push(b);
+    return b;
+  },
   where: (field: string, op: string, value: unknown) => ({ field, op, value }),
   query: (c: { name: string }, ...clauses: unknown[]) => ({ kind: "query", name: c.name, clauses }),
   getDocs: vi.fn(),
@@ -47,6 +65,8 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(NOW);
   vi.clearAllMocks();
+  h.batches.length = 0;
+  h.commitFails = false;
   fs.getDocs.mockResolvedValue(snap([]));
   fs.getDoc.mockResolvedValue({ exists: () => false });
   fs.addDoc.mockResolvedValue({ id: "new1" });
@@ -367,12 +387,17 @@ describe("updateAssessmentStatus", () => {
 describe("bookAppointment", () => {
   const slot = { id: "s1", counselorId: "cou1", counselorName: "Dr. Cruz", start: "S", end: "E" };
 
-  it("marks the slot booked, then creates a Pending Review appointment", async () => {
+  it("books in one batch: a Pending Review appointment plus the claim on the slot", async () => {
     const ref = await api.bookAppointment(slot);
-    expect(ref).toEqual({ id: "new1" });
-    expect(fs.updateDoc).toHaveBeenCalledWith({ kind: "doc", col: "availability", id: "s1" }, { isBooked: true });
-    expect(lastWrite(fs.addDoc)[0]).toEqual({ kind: "collection", name: "appointments" });
-    expect(lastWrite(fs.addDoc)[1]).toEqual({
+    expect(ref).toEqual({ kind: "doc", col: "appointments", id: "newDoc1" });
+    expect(fs.addDoc).not.toHaveBeenCalled();
+    expect(fs.updateDoc).not.toHaveBeenCalled();
+    const [batch] = h.batches;
+    expect(batch!.updates).toEqual([
+      [{ kind: "doc", col: "availability", id: "s1" }, { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "newDoc1" }],
+    ]);
+    expect(batch!.sets[0]![0]).toEqual({ kind: "doc", col: "appointments", id: "newDoc1" });
+    expect(batch!.sets[0]![1]).toEqual({
       studentId: "stu1",
       studentName: "Ana Student",
       studentEmail: "ana@usa.edu.ph",
@@ -390,25 +415,26 @@ describe("bookAppointment", () => {
   it("prefers the profile document's name and email over the auth user's", async () => {
     fs.getDoc.mockResolvedValue({ exists: () => true, data: () => ({ name: "Profile Name", email: "p@usa.edu.ph" }) });
     await api.bookAppointment(slot);
-    expect(lastWrite(fs.addDoc)[1]).toMatchObject({ studentName: "Profile Name", studentEmail: "p@usa.edu.ph" });
+    expect(h.batches[0]!.sets[0]![1]).toMatchObject({ studentName: "Profile Name", studentEmail: "p@usa.edu.ph" });
   });
 
   it("falls back to auth data (and warns) when the profile read fails", async () => {
     fs.getDoc.mockRejectedValue(new Error("offline"));
     await api.bookAppointment(slot);
     expect(console.warn).toHaveBeenCalled();
-    expect(lastWrite(fs.addDoc)[1]).toMatchObject({ studentName: "Ana Student" });
+    expect(h.batches[0]!.sets[0]![1]).toMatchObject({ studentName: "Ana Student" });
   });
 
-  it("still creates the appointment if marking the slot fails", async () => {
-    fs.updateDoc.mockRejectedValue(new Error("denied"));
-    await expect(api.bookAppointment(slot)).resolves.toEqual({ id: "new1" });
-    expect(fs.addDoc).toHaveBeenCalledTimes(1);
+  it("rejects, creating nothing, when the batch is refused (slot already taken)", async () => {
+    h.commitFails = true;
+    await expect(api.bookAppointment(slot)).rejects.toThrow("denied");
+    expect(fs.addDoc).not.toHaveBeenCalled();
   });
 
   it("skips the slot update for a slot without an id and uses default counselor labels", async () => {
     await api.bookAppointment({ counselorId: "cou1", start: "S", end: "E" });
     expect(fs.updateDoc).not.toHaveBeenCalled();
+    expect(h.batches).toHaveLength(0);
     expect(lastWrite(fs.addDoc)[1]).toMatchObject({
       slotId: null,
       counselorName: "Assigned Counselor",
@@ -445,7 +471,7 @@ describe("bookAppointment", () => {
 
   it("propagates a failed appointment write", async () => {
     fs.addDoc.mockRejectedValue(new Error("quota"));
-    await expect(api.bookAppointment(slot)).rejects.toThrow("quota");
+    await expect(api.bookAppointment({ counselorId: "cou1" })).rejects.toThrow("quota");
   });
 });
 
@@ -488,10 +514,15 @@ describe("updateAppointmentStatus", () => {
     ]);
   });
 
-  it.each(["Declined", "Cancelled"])("%s with a slotId frees that slot first", async (status) => {
+  it.each(["Declined", "Cancelled"])("%s with a slotId frees that slot in the same batch", async (status) => {
     await api.updateAppointmentStatus("ap1", status, { slotId: "s1" });
-    expect(fs.updateDoc.mock.calls[0]).toEqual([{ kind: "doc", col: "availability", id: "s1" }, { isBooked: false }]);
-    expect(fs.updateDoc.mock.calls[1][0]).toEqual({ kind: "doc", col: "appointments", id: "ap1" });
+    expect(fs.updateDoc).not.toHaveBeenCalled();
+    const [batch] = h.batches;
+    expect(batch!.updates[0]).toEqual([
+      { kind: "doc", col: "availability", id: "s1" },
+      { isBooked: false, bookedBy: null, bookedAppointmentId: null },
+    ]);
+    expect(batch!.updates[1]![0]).toEqual({ kind: "doc", col: "appointments", id: "ap1" });
   });
 
   it.each([
@@ -502,13 +533,15 @@ describe("updateAppointmentStatus", () => {
   ])("%s with %j does not touch availability", async (status, extra) => {
     await api.updateAppointmentStatus("ap1", status, extra);
     expect(fs.updateDoc).toHaveBeenCalledTimes(1);
+    expect(h.batches).toHaveLength(0);
   });
 
-  it("still updates the appointment (and warns) if freeing the slot fails", async () => {
-    fs.updateDoc.mockRejectedValueOnce(new Error("denied")).mockResolvedValueOnce(undefined);
+  it("still closes the appointment (and warns) if the batch with the slot is refused", async () => {
+    h.commitFails = true;
     await expect(api.updateAppointmentStatus("ap1", "Cancelled", { slotId: "s1" })).resolves.toBeUndefined();
     expect(console.warn).toHaveBeenCalled();
-    expect(fs.updateDoc).toHaveBeenCalledTimes(2);
+    expect(fs.updateDoc).toHaveBeenCalledTimes(1);
+    expect(fs.updateDoc.mock.calls[0]![0]).toEqual({ kind: "doc", col: "appointments", id: "ap1" });
   });
 
   describe("stale clicks", () => {
@@ -536,7 +569,7 @@ describe("updateAppointmentStatus", () => {
     it("lets a student cancel a confirmed session", async () => {
       stored("Confirmed");
       await api.updateAppointmentStatus("ap1", "Cancelled", { slotId: "s1" });
-      expect(fs.updateDoc).toHaveBeenCalledTimes(2);
+      expect(h.batches).toHaveLength(1);
     });
 
     it("does not block an unrecognised stored status", async () => {
