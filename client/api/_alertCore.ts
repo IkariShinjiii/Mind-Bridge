@@ -34,6 +34,14 @@ export interface AlertDeps {
   /** Undoes `claimAlert` after a failed send so the client can retry. */
   releaseAlert(id: string): Promise<void>;
   getStaff(): Promise<StaffUser[]>;
+  /**
+   * Per-student cooldown: atomically records "this student triggered an alert now" unless one was recorded less than
+   * `windowMs` ago. Returns false when the student is still inside the window. Stops one account from making the
+   * app email every staff address over and over.
+   */
+  claimStudentWindow(studentId: string, windowMs: number): Promise<boolean>;
+  /** Undoes `claimStudentWindow` after a failed send. */
+  releaseStudentWindow(studentId: string): Promise<void>;
   /** The student's own profile name (users/{uid}.name), or null. The name typed on the check-in is never trusted. */
   getStudentName(uid: string): Promise<string | null>;
   sendMail(mail: Mail): Promise<void>;
@@ -125,6 +133,9 @@ export function buildMail(a: AssessmentDoc, to: string[], appUrl: string): Mail 
   };
 }
 
+/** At most one alert email per student per hour. Further check-ins stay on the dashboard; the sweep alerts them once the hour is up. */
+export const STUDENT_ALERT_COOLDOWN_MS = 60 * 60 * 1000;
+
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
 export async function handleAlert(req: AlertRequest, deps: AlertDeps): Promise<AlertResult> {
@@ -159,10 +170,19 @@ async function deliverAlert(id: string, assessment: AssessmentDoc, deps: AlertDe
 
   if (!(await deps.claimAlert(id))) return respond(200, { sent: false, reason: "already-sent" });
 
+  const studentId = assessment.studentId ?? "";
+  let windowClaimed = false;
   try {
+    // The cooldown is claimed after the check-in so a retry of the same check-in never counts twice.
+    if (studentId && !(await deps.claimStudentWindow(studentId, STUDENT_ALERT_COOLDOWN_MS))) {
+      await deps.releaseAlert(id);
+      return respond(200, { sent: false, reason: "rate-limited" });
+    }
+    windowClaimed = !!studentId;
     const to = staffEmails(await deps.getStaff());
     if (!to.length) {
       await deps.releaseAlert(id);
+      if (windowClaimed) await deps.releaseStudentWindow(studentId);
       return respond(200, { sent: false, reason: "no-staff-emails" });
     }
     // The name comes from the student's profile on the server, not from the check-in, which the student can edit freely.
@@ -171,6 +191,7 @@ async function deliverAlert(id: string, assessment: AssessmentDoc, deps: AlertDe
     return respond(200, { sent: true });
   } catch {
     await deps.releaseAlert(id).catch(() => undefined);
+    if (windowClaimed) await deps.releaseStudentWindow(studentId).catch(() => undefined);
     return respond(502, { sent: false, error: "Could not send the alert" });
   }
 }

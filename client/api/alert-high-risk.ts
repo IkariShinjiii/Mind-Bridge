@@ -49,6 +49,18 @@ export function buildDeps(config: { serviceAccount: string; smtpUrl: string }): 
     releaseAlert: async (id) => {
       await db.collection("assessments").doc(id).update({ alertSentAt: FieldValue.delete() });
     },
+    // alertThrottle/{studentId} is only reachable through the Admin SDK: firestore.rules deny every client read and write.
+    claimStudentWindow: (studentId, windowMs) =>
+      db.runTransaction(async (tx) => {
+        const ref = db.collection("alertThrottle").doc(studentId);
+        const last = Number((await tx.get(ref)).data()?.lastAlertAtMs) || 0;
+        if (Date.now() - last < windowMs) return false;
+        tx.set(ref, { lastAlertAtMs: Date.now() });
+        return true;
+      }),
+    releaseStudentWindow: async (studentId) => {
+      await db.collection("alertThrottle").doc(studentId).delete();
+    },
     getStaff: async () => {
       const snap = await db.collection("users").where("role", "in", ["counselor", "admin"]).get();
       return snap.docs.map((d) => d.data() as StaffUser);
