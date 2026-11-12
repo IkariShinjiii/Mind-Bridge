@@ -34,6 +34,16 @@ export interface AlertDeps {
   /** Undoes `claimAlert` after a failed send so the client can retry. */
   releaseAlert(id: string): Promise<void>;
   getStaff(): Promise<StaffUser[]>;
+  /**
+   * Per-student cooldown: atomically records "this student triggered an alert now" unless one was recorded less than
+   * `windowMs` ago. Returns false when the student is still inside the window. Stops one account from making the
+   * app email every staff address over and over.
+   */
+  claimStudentWindow(studentId: string, windowMs: number): Promise<boolean>;
+  /** Undoes `claimStudentWindow` after a failed send. */
+  releaseStudentWindow(studentId: string): Promise<void>;
+  /** The student's own profile name (users/{uid}.name), or null. The name typed on the check-in is never trusted. */
+  getStudentName(uid: string): Promise<string | null>;
   sendMail(mail: Mail): Promise<void>;
   appUrl: string;
 }
@@ -86,14 +96,25 @@ export function staffEmails(users: StaffUser[]): string[] {
   return [...set];
 }
 
+/** A name that is safe to show in a subject line: one line, no control characters, at most 80 characters. */
+export function cleanName(raw: unknown): string {
+  // Drop control characters (newlines, tabs, NUL...) by code point; no control characters in a regex.
+  const flat = [...String(raw ?? "")]
+    .map((ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? " " : ch))
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+  return flat.slice(0, 80);
+}
+
 /** No answers in the email: sensitive detail stays inside the app. */
 export function buildMail(a: AssessmentDoc, to: string[], appUrl: string): Mail {
   const { total, maxScore, crisis } = assess(a);
   const link = `${appUrl.replace(/\/$/, "")}/admin/dashboard`;
-  const name = a.studentName || "Unknown";
+  const name = cleanName(a.studentName) || "Unknown";
   return {
     to,
-    subject: `High-risk wellness alert: ${a.studentName || "student"}`,
+    subject: `High-risk wellness alert: ${cleanName(a.studentName) || "student"}`,
     text: [
       "A wellness assessment has been flagged as high risk.",
       "",
@@ -111,6 +132,9 @@ export function buildMail(a: AssessmentDoc, to: string[], appUrl: string): Mail 
       <p><a href="${esc(link)}">Open dashboard</a></p></div>`,
   };
 }
+
+/** At most one alert email per student per hour. Further check-ins stay on the dashboard; the sweep alerts them once the hour is up. */
+export const STUDENT_ALERT_COOLDOWN_MS = 60 * 60 * 1000;
 
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
@@ -146,16 +170,28 @@ async function deliverAlert(id: string, assessment: AssessmentDoc, deps: AlertDe
 
   if (!(await deps.claimAlert(id))) return respond(200, { sent: false, reason: "already-sent" });
 
+  const studentId = assessment.studentId ?? "";
+  let windowClaimed = false;
   try {
+    // The cooldown is claimed after the check-in so a retry of the same check-in never counts twice.
+    if (studentId && !(await deps.claimStudentWindow(studentId, STUDENT_ALERT_COOLDOWN_MS))) {
+      await deps.releaseAlert(id);
+      return respond(200, { sent: false, reason: "rate-limited" });
+    }
+    windowClaimed = !!studentId;
     const to = staffEmails(await deps.getStaff());
     if (!to.length) {
       await deps.releaseAlert(id);
+      if (windowClaimed) await deps.releaseStudentWindow(studentId);
       return respond(200, { sent: false, reason: "no-staff-emails" });
     }
-    await deps.sendMail(buildMail(assessment, to, deps.appUrl));
+    // The name comes from the student's profile on the server, not from the check-in, which the student can edit freely.
+    const studentName = assessment.studentId ? await deps.getStudentName(assessment.studentId) : null;
+    await deps.sendMail(buildMail({ ...assessment, studentName: studentName ?? undefined }, to, deps.appUrl));
     return respond(200, { sent: true });
   } catch {
     await deps.releaseAlert(id).catch(() => undefined);
+    if (windowClaimed) await deps.releaseStudentWindow(studentId).catch(() => undefined);
     return respond(502, { sent: false, error: "Could not send the alert" });
   }
 }

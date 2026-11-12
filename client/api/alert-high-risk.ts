@@ -49,9 +49,25 @@ export function buildDeps(config: { serviceAccount: string; smtpUrl: string }): 
     releaseAlert: async (id) => {
       await db.collection("assessments").doc(id).update({ alertSentAt: FieldValue.delete() });
     },
+    // alertThrottle/{studentId} is only reachable through the Admin SDK: firestore.rules deny every client read and write.
+    claimStudentWindow: (studentId, windowMs) =>
+      db.runTransaction(async (tx) => {
+        const ref = db.collection("alertThrottle").doc(studentId);
+        const last = Number((await tx.get(ref)).data()?.lastAlertAtMs) || 0;
+        if (Date.now() - last < windowMs) return false;
+        tx.set(ref, { lastAlertAtMs: Date.now() });
+        return true;
+      }),
+    releaseStudentWindow: async (studentId) => {
+      await db.collection("alertThrottle").doc(studentId).delete();
+    },
     getStaff: async () => {
       const snap = await db.collection("users").where("role", "in", ["counselor", "admin"]).get();
       return snap.docs.map((d) => d.data() as StaffUser);
+    },
+    getStudentName: async (uid) => {
+      const name = (await db.collection("users").doc(uid).get()).data()?.name;
+      return typeof name === "string" ? name : null;
     },
     listRecentAssessments: async (sinceIso) => {
       const snap = await db.collection("assessments").where("createdAt", ">=", sinceIso).get();
@@ -72,9 +88,14 @@ export default async function handler(req: Req, res: Res): Promise<void> {
     return;
   }
   const auth = req.headers.authorization;
-  const result = await handleAlert(
-    { method: req.method, authorization: Array.isArray(auth) ? auth[0] : auth, body: req.body },
-    buildDeps(config),
-  );
-  res.status(result.status).json(result.body);
+  try {
+    const result = await handleAlert(
+      { method: req.method, authorization: Array.isArray(auth) ? auth[0] : auth, body: req.body },
+      buildDeps(config),
+    );
+    res.status(result.status).json(result.body);
+  } catch {
+    // A bad service account, a Firestore error: answer with a generic message, never the platform's default 500 page.
+    res.status(502).json({ sent: false, error: "Could not send the alert" });
+  }
 }

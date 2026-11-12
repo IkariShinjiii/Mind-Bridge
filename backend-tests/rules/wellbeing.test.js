@@ -44,6 +44,8 @@ describe("wellbeing - CREATE (submitWellbeing)", () => {
   it("extra fields and a missing date are refused", async () => {
     await assertFails(submit("student", { riskLevel: "low" }));
     await assertFails(submit("student", { createdAt: 5 }));
+    await assertFails(submit("student", { createdAt: "9999-12-31T00:00:00.000Z" }));
+    await assertFails(submit("student", { createdAt: "yesterday" }));
   });
 });
 

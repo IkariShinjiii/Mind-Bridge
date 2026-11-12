@@ -178,9 +178,13 @@ them out of `VITE_*` variables and out of git.
 
 ### 4.5 Security headers and the CSP
 
-`client/vercel.json` sets the response headers on every route. The Content Security Policy is
-`Content-Security-Policy-Report-Only`, so it logs violations in the browser console without blocking anything.
-Before enforcing it, open a deployed preview with DevTools open, sign in with Google, load a dashboard
+`client/vercel.json` sets the response headers on every route. A small enforced
+`Content-Security-Policy` (`frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'`)
+blocks framing, injected `<base>` tags, plugins and form hijacking; it touches no script, style, font or
+network source, so it cannot break Firebase or Google sign-in. The full source-list policy (scripts, styles,
+fonts, connections, frames) is still `Content-Security-Policy-Report-Only`, so it logs violations in the
+browser console without blocking anything.
+Before enforcing the full policy, open a deployed preview with DevTools open, sign in with Google, load a dashboard
 and book a slot. If no `[Report Only]` messages appear, rename the header to `Content-Security-Policy`.
 If some do, add only the origin the message names. See `SECURITY_AUDIT.md` F-05 and section 12.
 

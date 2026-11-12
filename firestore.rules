@@ -22,6 +22,22 @@ service cloud.firestore {
         || (d.followUpDate is string && d.followUpDate.matches('^(|[0-9]{4}-[0-9]{2}-[0-9]{2})$'));
     }
 
+    function shortText(v, max) { return v is string && v.size() <= max; }
+
+    // A timestamp string as the app writes it (new Date().toISOString()) that is not more than a day ahead of the server
+    // clock. A date far in the future would otherwise pin a record as the newest one. Only the future is bounded:
+    // a write made offline and synced later legitimately carries an older time.
+    function plausibleTime(s) {
+      return s is string
+        && s.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([.][0-9]{1,3})?Z')
+        && timestamp.date(int(s.split('-')[0]), int(s.split('-')[1]), int(s.split('T')[0].split('-')[2]))
+           <= request.time + duration.value(1, 'd');
+    }
+
+    // The questionSummary items are not checked one by one: the rules cannot loop, a rule may evaluate at most 1000
+    // expressions, and checking 16 items by position (the full PHQ-9 + GAD-7 check-in) went over that limit in CI.
+    // The list is capped at 20 items and the whole document at 1 MiB; the staff views show the text as plain text.
+
     // A check-in as the app writes it: only these fields, sane types and sizes, nothing pre-filled by the student,
     // and a risk level that is not lower than the score allows (high from 60% of the maximum, medium from 30%).
     // The rules cannot add up the answers or read the crisis item, so the safety flag is still taken on trust here;
@@ -31,8 +47,9 @@ service cloud.firestore {
                                'maxScore', 'riskLevel', 'flaggedForImmediateReview', 'status', 'counselorNotes', 'createdAt'])
         && d.studentName is string && d.studentName.size() <= 200
         && d.studentEmail is string && d.studentEmail.size() <= 200
-        && d.createdAt is string
+        && plausibleTime(d.createdAt)
         && d.answers is list && d.answers.size() <= 20
+        && d.answers.hasOnly([0, 1, 2, 3, null])
         && d.questionSummary is list && d.questionSummary.size() <= 20
         && d.total is int && d.maxScore is int
         && d.maxScore > 0 && d.maxScore <= 60 && d.total >= 0 && d.total <= d.maxScore
@@ -47,7 +64,7 @@ service cloud.firestore {
     // the answers added up and multiplied by 4 (0 to 100). It is informational and never changes a check-in's risk.
     function validNewWellbeing(d) {
       return d.keys().hasOnly(['studentId', 'answers', 'score', 'createdAt'])
-        && d.createdAt is string
+        && plausibleTime(d.createdAt)
         && d.answers is list && d.answers.size() == 5
         && d.answers[0] is int && d.answers[0] >= 0 && d.answers[0] <= 5
         && d.answers[1] is int && d.answers[1] >= 0 && d.answers[1] <= 5
@@ -56,6 +73,31 @@ service cloud.firestore {
         && d.answers[4] is int && d.answers[4] >= 0 && d.answers[4] <= 5
         && d.score is int
         && d.score == (d.answers[0] + d.answers[1] + d.answers[2] + d.answers[3] + d.answers[4]) * 4;
+    }
+
+    function textOk(v, max) { return v is string && v.size() <= max; }
+    function goalOk(g, i) { return g.size() <= i || textOk(g[i], 120); }
+    // What the Settings page can save, with the same kinds of limits it applies: strings of sane length, a bool,
+    // a small emergency-contact map and at most five goals. A field that is absent passes (the defaults are valid).
+    function validProfileFields(d) {
+      return textOk(d.get('name', ''), 200)
+        && textOk(d.get('phone', ''), 40)
+        && textOk(d.get('bio', ''), 1000)
+        && textOk(d.get('avatarGradient', ''), 40)
+        && textOk(d.get('updatedAt', ''), 40)
+        && d.get('useGoogleAvatar', false) is bool
+        && d.get('emergencyContact', {}) is map
+        && d.get('emergencyContact', {}).keys().size() <= 10
+        && textOk(d.get('emergencyContact', {}).get('name', ''), 200)
+        && textOk(d.get('emergencyContact', {}).get('relationship', ''), 80)
+        && textOk(d.get('emergencyContact', {}).get('phone', ''), 40)
+        && textOk(d.get('emergencyContact', {}).get('alternatePhone', ''), 40)
+        && textOk(d.get('emergencyContact', {}).get('notes', ''), 1000)
+        && d.get('wellnessGoals', []) is list
+        && d.get('wellnessGoals', []).size() <= 5
+        && goalOk(d.get('wellnessGoals', []), 0) && goalOk(d.get('wellnessGoals', []), 1)
+        && goalOk(d.get('wellnessGoals', []), 2) && goalOk(d.get('wellnessGoals', []), 3)
+        && goalOk(d.get('wellnessGoals', []), 4);
     }
 
     match /users/{uid} {
@@ -71,12 +113,19 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'emailVerified', 'approved', 'active', 'createdAt'])
         && request.resource.data.name is string && request.resource.data.name.size() <= 200
         && request.resource.data.email is string && request.resource.data.email.size() <= 200
-        && request.resource.data.emailVerified is bool;
+        && request.resource.data.emailVerified is bool
+        // New profiles need a school sign-in: the Auth token's email is an @usa.edu.ph address and the profile
+        // carries that same email. This is not proof of ownership (password sign-up does not verify the address
+        // before the profile is written), but it stops outside addresses from getting a profile at all.
+        && request.auth.token.email is string
+        && request.auth.token.email.lower().matches('.*@usa[.]edu[.]ph')
+        && request.resource.data.email.lower() == request.auth.token.email.lower();
 
       // Users edit only the settings fields the Settings page saves (an allowlist, so a new field is not writable by accident).
       allow update: if signedIn() && (
         (request.auth.uid == uid
-          && touchesOnly(['name', 'phone', 'bio', 'avatarGradient', 'useGoogleAvatar', 'emergencyContact', 'wellnessGoals', 'updatedAt']))
+          && touchesOnly(['name', 'phone', 'bio', 'avatarGradient', 'useGoogleAvatar', 'emergencyContact', 'wellnessGoals', 'updatedAt'])
+          && validProfileFields(request.resource.data))
         || isAdmin()
         || (isStaff() && touchesOnly(['assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
       );
@@ -113,7 +162,15 @@ service cloud.firestore {
                                                  'counselorName', 'title', 'start', 'end', 'date', 'status', 'createdAt'])
         && request.resource.data.studentName is string && request.resource.data.studentName.size() <= 200
         && request.resource.data.studentEmail is string && request.resource.data.studentEmail.size() <= 200
-        && request.resource.data.title is string && request.resource.data.title.size() <= 200;
+        && request.resource.data.title is string && request.resource.data.title.size() <= 200
+        // Names and email are the student's own profile values (same idea as chat names), the booking time is a short
+        // string, and createdAt is a real timestamp string.
+        && (request.resource.data.studentName == me().get('name', '') || request.resource.data.studentName == 'Student')
+        && (request.resource.data.studentEmail == me().get('email', '') || request.resource.data.studentEmail == request.auth.token.get('email', ''))
+        && plausibleTime(request.resource.data.createdAt)
+        && (!('start' in request.resource.data) || shortText(request.resource.data.start, 40))
+        && (!('end' in request.resource.data) || shortText(request.resource.data.end, 40))
+        && (!('date' in request.resource.data) || shortText(request.resource.data.date, 40));
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       // Staff change the status and the details the dashboard saves with it; the student, owner and booking details stay put.
       allow update: if (isStaff()
@@ -129,7 +186,8 @@ service cloud.firestore {
       allow read: if isActive();
       allow create: if isStaff() && request.resource.data.counselorId == request.auth.uid
         && request.resource.data.keys().hasOnly(['counselorId', 'counselorName', 'start', 'end', 'isBooked', 'createdAt'])
-        && request.resource.data.isBooked == false;
+        && request.resource.data.isBooked == false
+        && shortText(request.resource.data.start, 40) && shortText(request.resource.data.end, 40);
       // Students may only flip isBooked, and cannot book a slot that is already taken (no double booking).
       // They can still set it back to false, because they free their own slot when they cancel.
       allow update: if isStaff()
