@@ -58,6 +58,31 @@ service cloud.firestore {
         && d.score == (d.answers[0] + d.answers[1] + d.answers[2] + d.answers[3] + d.answers[4]) * 4;
     }
 
+    function textOk(v, max) { return v is string && v.size() <= max; }
+    function goalOk(g, i) { return g.size() <= i || textOk(g[i], 120); }
+    // What the Settings page can save, with the same kinds of limits it applies: strings of sane length, a bool,
+    // a small emergency-contact map and at most five goals. A field that is absent passes (the defaults are valid).
+    function validProfileFields(d) {
+      return textOk(d.get('name', ''), 200)
+        && textOk(d.get('phone', ''), 40)
+        && textOk(d.get('bio', ''), 1000)
+        && textOk(d.get('avatarGradient', ''), 40)
+        && textOk(d.get('updatedAt', ''), 40)
+        && d.get('useGoogleAvatar', false) is bool
+        && d.get('emergencyContact', {}) is map
+        && d.get('emergencyContact', {}).keys().size() <= 10
+        && textOk(d.get('emergencyContact', {}).get('name', ''), 200)
+        && textOk(d.get('emergencyContact', {}).get('relationship', ''), 80)
+        && textOk(d.get('emergencyContact', {}).get('phone', ''), 40)
+        && textOk(d.get('emergencyContact', {}).get('alternatePhone', ''), 40)
+        && textOk(d.get('emergencyContact', {}).get('notes', ''), 1000)
+        && d.get('wellnessGoals', []) is list
+        && d.get('wellnessGoals', []).size() <= 5
+        && goalOk(d.get('wellnessGoals', []), 0) && goalOk(d.get('wellnessGoals', []), 1)
+        && goalOk(d.get('wellnessGoals', []), 2) && goalOk(d.get('wellnessGoals', []), 3)
+        && goalOk(d.get('wellnessGoals', []), 4);
+    }
+
     match /users/{uid} {
       // Staff need to read student profiles (names, emails, assignments).
       allow read: if signedIn() && (request.auth.uid == uid || isStaff());
@@ -76,7 +101,8 @@ service cloud.firestore {
       // Users edit only the settings fields the Settings page saves (an allowlist, so a new field is not writable by accident).
       allow update: if signedIn() && (
         (request.auth.uid == uid
-          && touchesOnly(['name', 'phone', 'bio', 'avatarGradient', 'useGoogleAvatar', 'emergencyContact', 'wellnessGoals', 'updatedAt']))
+          && touchesOnly(['name', 'phone', 'bio', 'avatarGradient', 'useGoogleAvatar', 'emergencyContact', 'wellnessGoals', 'updatedAt'])
+          && validProfileFields(request.resource.data))
         || isAdmin()
         || (isStaff() && touchesOnly(['assignedCounselorId', 'assignedCounselorName', 'assignedAt']))
       );
