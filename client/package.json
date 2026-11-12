@@ -17,7 +17,8 @@
     "test:all:e2e": "node scripts/test-all.mjs --e2e",
     "test:contrast": "node scripts/check-contrast.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint": "node --require ./scripts/eslint-ts6.cjs node_modules/eslint/bin/eslint.js ."
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
@@ -29,11 +30,13 @@
     "nodemailer": "^10.0.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-is": "^18.3.1",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.63.0",
     "@storybook/addon-a11y": "^10.6.1",
     "@storybook/addon-docs": "^10.6.1",
@@ -42,14 +45,20 @@
     "@types/nodemailer": "^8.0.2",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
+    "@typescript/typescript6": "^6.0.2",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
     "axe-core": "^4.13.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.14.0",
     "postcss": "^8.4.38",
     "prettier": "^3.9.9",
     "storybook": "^10.6.1",
     "tailwindcss": "^3.4.4",
     "typescript": "^7.0.2",
+    "typescript-eslint": "^8.72.2",
     "vite": "^5.3.1",
     "vitest": "^2.1.9"
   },
