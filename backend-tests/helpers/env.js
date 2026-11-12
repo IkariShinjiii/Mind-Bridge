@@ -38,7 +38,8 @@ export async function seed(env, path, data) {
 export const as = (env, key) => env.authenticatedContext(USERS[key].uid).firestore();
 export const anon = (env) => env.unauthenticatedContext().firestore();
 // Signed in with Firebase Auth but has no users/{uid} profile document.
-export const noProfile = (env) => env.authenticatedContext("ghost").firestore();
+// Its token carries the school email the sign-up form would have used; pass another address to test the domain rule.
+export const noProfile = (env, email = "new@usa.edu.ph") => env.authenticatedContext("ghost", { email }).firestore();
 
 export const slot = (over = {}) => ({
   counselorId: "cou1", counselorName: "Dr. Cruz",
