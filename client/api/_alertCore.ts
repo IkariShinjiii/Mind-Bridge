@@ -34,6 +34,8 @@ export interface AlertDeps {
   /** Undoes `claimAlert` after a failed send so the client can retry. */
   releaseAlert(id: string): Promise<void>;
   getStaff(): Promise<StaffUser[]>;
+  /** The student's own profile name (users/{uid}.name), or null. The name typed on the check-in is never trusted. */
+  getStudentName(uid: string): Promise<string | null>;
   sendMail(mail: Mail): Promise<void>;
   appUrl: string;
 }
@@ -86,14 +88,25 @@ export function staffEmails(users: StaffUser[]): string[] {
   return [...set];
 }
 
+/** A name that is safe to show in a subject line: one line, no control characters, at most 80 characters. */
+export function cleanName(raw: unknown): string {
+  // Drop control characters (newlines, tabs, NUL...) by code point; no control characters in a regex.
+  const flat = [...String(raw ?? "")]
+    .map((ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? " " : ch))
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim();
+  return flat.slice(0, 80);
+}
+
 /** No answers in the email: sensitive detail stays inside the app. */
 export function buildMail(a: AssessmentDoc, to: string[], appUrl: string): Mail {
   const { total, maxScore, crisis } = assess(a);
   const link = `${appUrl.replace(/\/$/, "")}/admin/dashboard`;
-  const name = a.studentName || "Unknown";
+  const name = cleanName(a.studentName) || "Unknown";
   return {
     to,
-    subject: `High-risk wellness alert: ${a.studentName || "student"}`,
+    subject: `High-risk wellness alert: ${cleanName(a.studentName) || "student"}`,
     text: [
       "A wellness assessment has been flagged as high risk.",
       "",
@@ -152,7 +165,9 @@ async function deliverAlert(id: string, assessment: AssessmentDoc, deps: AlertDe
       await deps.releaseAlert(id);
       return respond(200, { sent: false, reason: "no-staff-emails" });
     }
-    await deps.sendMail(buildMail(assessment, to, deps.appUrl));
+    // The name comes from the student's profile on the server, not from the check-in, which the student can edit freely.
+    const studentName = assessment.studentId ? await deps.getStudentName(assessment.studentId) : null;
+    await deps.sendMail(buildMail({ ...assessment, studentName: studentName ?? undefined }, to, deps.appUrl));
     return respond(200, { sent: true });
   } catch {
     await deps.releaseAlert(id).catch(() => undefined);
