@@ -37,12 +37,14 @@ let claimed: Set<string>;
 let released: string[];
 let docs: Record<string, AssessmentDoc>;
 let deps: AlertDeps;
+let windows: Set<string>;
 
 beforeEach(() => {
   sent = [];
   claimed = new Set();
   released = [];
   docs = { a1: high() };
+  windows = new Set();
   deps = {
     verifyIdToken: async (t) => {
       if (t !== "good") throw new Error("bad token");
@@ -59,6 +61,12 @@ beforeEach(() => {
       released.push(id);
     },
     getStaff: async () => staff,
+    claimStudentWindow: async (uid) => {
+      if (windows.has(uid)) return false;
+      windows.add(uid);
+      return true;
+    },
+    releaseStudentWindow: async (uid) => void windows.delete(uid),
     sendMail: async (m) => void sent.push(m),
     appUrl: "https://app.example/",
   };
@@ -118,6 +126,39 @@ describe("buildMail", () => {
     const flagged = buildMail(high({ questionSummary: [{ isCrisisItem: true, score: 2 }] }), [], "https://x");
     expect(flagged.text).toContain("Immediate review flag: YES");
     expect(buildMail(high(), [], "https://x").text).toContain("Immediate review flag: No");
+  });
+});
+
+describe("handleAlert cooldown", () => {
+  it("sends one email per student per window, however many high-risk check-ins they file", async () => {
+    docs = { a1: high(), a2: high(), a3: high() };
+    const results = [];
+    for (const id of ["a1", "a2", "a3"]) results.push(await handleAlert(post({ body: { assessmentId: id } }), deps));
+    expect(results[0]).toEqual({ status: 200, body: { sent: true } });
+    expect(results[1]).toEqual({ status: 200, body: { sent: false, reason: "rate-limited" } });
+    expect(results[2]).toEqual({ status: 200, body: { sent: false, reason: "rate-limited" } });
+    expect(sent).toHaveLength(1);
+  });
+
+  it("leaves a rate-limited check-in unclaimed so the sweep can alert it later", async () => {
+    docs = { a1: high(), a2: high() };
+    await handleAlert(post(), deps);
+    await handleAlert(post({ body: { assessmentId: "a2" } }), deps);
+    expect(claimed.has("a2")).toBe(false);
+  });
+
+  it("gives the window back when the email fails, so a retry can still alert", async () => {
+    deps.sendMail = async () => {
+      throw new Error("smtp down");
+    };
+    expect((await handleAlert(post(), deps)).status).toBe(502);
+    expect(windows.has("stu1")).toBe(false);
+  });
+
+  it("gives the window back when no staff address exists", async () => {
+    deps.getStaff = async () => [];
+    await handleAlert(post(), deps);
+    expect(windows.has("stu1")).toBe(false);
   });
 });
 
@@ -189,6 +230,7 @@ describe("sweepAlerts", () => {
   const high = { studentId: "s", studentName: "Ana", total: 14, maxScore: 21, questionSummary: [] };
   const mk = (rows: Array<{ id: string; data: AssessmentDoc }>, over: Partial<SweepDeps> = {}) => {
     const sent: string[] = [];
+    const windowed = new Set<string>();
     const claimed = new Set<string>(rows.filter((r) => r.data.alertSentAt).map((r) => r.id));
     const deps: SweepDeps = {
       verifyIdToken: async () => ({ uid: "s" }),
@@ -196,6 +238,8 @@ describe("sweepAlerts", () => {
       claimAlert: async (id) => (claimed.has(id) ? false : (claimed.add(id), true)),
       releaseAlert: async (id) => void claimed.delete(id),
       getStaff: async () => [{ role: "admin", email: "a@usa.edu.ph" }],
+      claimStudentWindow: async (id) => (windowed.has(id) ? false : (windowed.add(id), true)),
+      releaseStudentWindow: async (id) => void windowed.delete(id),
       sendMail: async (m) => void sent.push(m.subject),
       listRecentAssessments: async () => rows,
       appUrl: "https://x.test",
@@ -203,6 +247,16 @@ describe("sweepAlerts", () => {
     };
     return { deps, sent };
   };
+
+  it("sends one email per student per window even when the student has many unalerted check-ins", async () => {
+    const { deps, sent } = mk([
+      { id: "a", data: high },
+      { id: "b", data: high },
+      { id: "c", data: high },
+    ]);
+    expect(await sweepAlerts(deps)).toEqual({ checked: 3, sent: 1, failed: 0 });
+    expect(sent).toHaveLength(1);
+  });
 
   it("alerts high-risk check-ins that were never alerted, and skips the rest", async () => {
     const { deps, sent } = mk([
