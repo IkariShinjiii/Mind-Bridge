@@ -6,6 +6,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  writeBatch,
   query,
   where,
   onSnapshot,
@@ -259,11 +260,8 @@ export const updateAssessmentStatus = (
 export type BookingSlot = Partial<Pick<AvailabilitySlot, "id" | "counselorId" | "counselorName" | "start" | "end">>;
 
 /**
- * Books an availability slot for the signed-in student and marks the slot as taken.
- * If creating the appointment fails after the slot was marked, the slot is released again (best effort).
- *
- * Known limit: two students holding the same stale slot list can still both book it, because the check and
- * the write are not one transaction. Closing that needs a Firestore transaction plus a rule on `isBooked`.
+ * Books an availability slot for the signed-in student and marks the slot as taken, in one batched write.
+ * If the slot was taken in the meantime, the whole write is rejected and nothing is created.
  */
 export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<DocumentData>> =>
   guard(async () => {
@@ -304,39 +302,31 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
       });
     }
 
-    let slotMarked = false;
-    if (slot.id) {
-      try {
-        await updateDoc(doc(db, "availability", slot.id), { isBooked: true });
-        slotMarked = true;
-      } catch (err) {
-        console.warn("Notice: availability slot status not updated", err);
-      }
-    }
+    const appointmentData = {
+      studentId: uid,
+      studentName,
+      studentEmail,
+      slotId: slot.id || null,
+      counselorId: slot.counselorId,
+      counselorName: slot.counselorName || "Assigned Counselor",
+      title: `Session with ${slot.counselorName || "Counselor"}`,
+      start: slot.start,
+      end: slot.end,
+      status: "Pending Review",
+      createdAt,
+    };
 
-    try {
-      return await addDoc(collection(db, "appointments"), {
-        studentId: uid,
-        studentName,
-        studentEmail,
-        slotId: slot.id || null,
-        counselorId: slot.counselorId,
-        counselorName: slot.counselorName || "Assigned Counselor",
-        title: `Session with ${slot.counselorName || "Counselor"}`,
-        start: slot.start,
-        end: slot.end,
-        status: "Pending Review",
-        createdAt,
-      });
-    } catch (error) {
-      if (slotMarked && slot.id) {
-        // Do not leave the slot booked with no appointment behind it
-        await updateDoc(doc(db, "availability", slot.id), { isBooked: false }).catch((e: unknown) =>
-          console.warn("Could not release slot after failed booking", e),
-        );
-      }
-      throw error;
-    }
+    if (!slot.id) return addDoc(collection(db, "appointments"), appointmentData);
+
+    // One atomic write: the appointment and the claim on the slot succeed or fail together. The rules only accept
+    // the slot update when this very batch also creates the appointment, and only accept the appointment when it
+    // claims the slot, so a taken slot cannot be booked again and a slot cannot be flipped on its own.
+    const appointmentRef = doc(collection(db, "appointments"));
+    const batch = writeBatch(db);
+    batch.set(appointmentRef, appointmentData);
+    batch.update(doc(db, "availability", slot.id), { isBooked: true, bookedBy: uid, bookedAppointmentId: appointmentRef.id });
+    await batch.commit();
+    return appointmentRef;
   });
 
 /** Lists the signed-in student's appointments. Empty when nobody is signed in. */
@@ -409,10 +399,18 @@ export const updateAppointmentStatus = (
     }
 
     if (releasesSlot(status) && extraData.slotId) {
+      // Freeing the slot and closing the appointment are one batch; the rules let a student free a slot only
+      // together with cancelling their own appointment for it.
+      const batch = writeBatch(db);
+      batch.update(doc(db, "availability", extraData.slotId), { isBooked: false, bookedBy: null, bookedAppointmentId: null });
+      batch.update(doc(db, "appointments", id), updates);
       try {
-        await updateDoc(doc(db, "availability", extraData.slotId), { isBooked: false });
+        await batch.commit();
+        return;
       } catch (err) {
-        console.warn("Could not unbook slot", err);
+        // A slot booked before bookedBy existed cannot be freed by a student; still close the appointment,
+        // staff can free the slot. Anything else that failed will fail again below and surface.
+        console.warn("Could not free the slot together with the appointment", err);
       }
     }
 

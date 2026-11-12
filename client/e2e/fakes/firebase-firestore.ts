@@ -57,7 +57,31 @@ export function getFirestore(): Record<string, never> {
 }
 
 export const collection = (_db: unknown, name: string): CollectionRef => ({ kind: "collection", name });
-export const doc = (_db: unknown, name: string, id: string): DocRef => ({ kind: "doc", name, id });
+export function doc(ref: CollectionRef): DocRef;
+export function doc(_db: unknown, name: string, id: string): DocRef;
+export function doc(a: unknown, name?: string, id?: string): DocRef {
+  // doc(collectionRef) mints a fresh id, like the real SDK.
+  if (name === undefined) {
+    const state = load();
+    const fresh = nextId(state, "doc-");
+    save(state);
+    return { kind: "doc", name: (a as CollectionRef).name, id: fresh };
+  }
+  return { kind: "doc", name, id: id as string };
+}
+
+/** Collects writes and applies them together on commit, like the real SDK's writeBatch. */
+export function writeBatch(_db?: unknown) {
+  const ops: Array<() => Promise<void>> = [];
+  const batch = {
+    set: (ref: DocRef, data: FakeDoc) => (ops.push(() => setDoc(ref, data)), batch),
+    update: (ref: DocRef, patch: FakeDoc) => (ops.push(() => updateDoc(ref, patch)), batch),
+    commit: async () => {
+      for (const op of ops) await op();
+    },
+  };
+  return batch;
+}
 export const where = (field: string, op: string, value: unknown): WhereClause => {
   if (op !== "==") throw new Error(`E2E Firestore fake only supports "==", got "${op}"`);
   return { field, value };
