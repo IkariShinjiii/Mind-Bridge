@@ -12,7 +12,8 @@
  */
 import type { AppointmentStatus } from "../types";
 
-export type AppointmentPhase = "pending" | "confirmed" | "rescheduled" | "completed" | "declined" | "cancelled" | "other";
+export type AppointmentPhase =
+  "pending" | "confirmed" | "rescheduled" | "completed" | "declined" | "cancelled" | "other";
 export type AppointmentAction = "confirm" | "reschedule" | "decline" | "complete" | "cancel";
 export type AppointmentActor = "student" | "counselor";
 
@@ -35,7 +36,9 @@ const PHASE_AFTER: Readonly<Record<AppointmentAction, AppointmentPhase>> = {
 };
 
 /** Which actions each role can take from each phase, in the order the buttons are shown. */
-const ACTIONS: Readonly<Record<AppointmentActor, Readonly<Partial<Record<AppointmentPhase, readonly AppointmentAction[]>>>>> = {
+const ACTIONS: Readonly<
+  Record<AppointmentActor, Readonly<Partial<Record<AppointmentPhase, readonly AppointmentAction[]>>>>
+> = {
   counselor: {
     pending: ["confirm", "reschedule", "decline"],
     confirmed: ["complete", "reschedule", "cancel"],

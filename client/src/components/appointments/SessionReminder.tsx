@@ -34,7 +34,10 @@ export default function SessionReminder({ appointments, role }: SessionReminderP
         <Bell className="h-5 w-5 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
         {text}
       </span>
-      <Link to="/appointments" className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline">
+      <Link
+        to="/appointments"
+        className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+      >
         View details
       </Link>
     </div>

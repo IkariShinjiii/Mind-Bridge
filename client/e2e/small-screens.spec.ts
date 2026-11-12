@@ -37,7 +37,10 @@ async function smallTargets(page: Page): Promise<string[]> {
       .map((el) => ({ el, box: el.getBoundingClientRect() }))
       .filter(({ el, box }) => box.width > 0 && box.height > 0 && getComputedStyle(el).visibility !== "hidden")
       .filter(({ box }) => box.width < 43.5 || box.height < 43.5)
-      .map(({ el, box }) => `${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)} ${Math.round(box.width)}x${Math.round(box.height)}`),
+      .map(
+        ({ el, box }) =>
+          `${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 30)} ${Math.round(box.width)}x${Math.round(box.height)}`,
+      ),
   );
 }
 

@@ -12,7 +12,15 @@ import {
   type AppointmentPhase,
 } from "./appointmentLifecycle";
 
-const PHASES: AppointmentPhase[] = ["pending", "confirmed", "rescheduled", "completed", "declined", "cancelled", "other"];
+const PHASES: AppointmentPhase[] = [
+  "pending",
+  "confirmed",
+  "rescheduled",
+  "completed",
+  "declined",
+  "cancelled",
+  "other",
+];
 
 describe("appointmentPhase", () => {
   it.each([

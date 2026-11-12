@@ -1,4 +1,18 @@
-const HONORIFICS = new Set(["dr", "mr", "mrs", "ms", "mx", "prof", "engr", "atty", "sir", "ma'am", "maam", "fr", "rev"]);
+const HONORIFICS = new Set([
+  "dr",
+  "mr",
+  "mrs",
+  "ms",
+  "mx",
+  "prof",
+  "engr",
+  "atty",
+  "sir",
+  "ma'am",
+  "maam",
+  "fr",
+  "rev",
+]);
 
 /**
  * The name to greet someone by: the first word, skipping a leading title ("Dr. Reyes" gives "Reyes", not "Dr.").

@@ -58,7 +58,12 @@ test.describe("WHO-5 wellbeing", () => {
             studentName: STUDENT.name,
             studentEmail: STUDENT.email,
             answers: [1, 1, 1, 1, 1, 1, 2],
-            questionSummary: [1, 1, 1, 1, 1, 1, 2].map((score, i) => ({ id: `q${i + 1}`, text: `Q${i + 1}`, score, isCrisisItem: i === 6 })),
+            questionSummary: [1, 1, 1, 1, 1, 1, 2].map((score, i) => ({
+              id: `q${i + 1}`,
+              text: `Q${i + 1}`,
+              score,
+              isCrisisItem: i === 6,
+            })),
             total: 8,
             maxScore: 21,
             riskLevel: "high",

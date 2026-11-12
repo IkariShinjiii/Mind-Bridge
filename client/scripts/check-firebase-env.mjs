@@ -8,6 +8,8 @@ const missing = REQUIRED.filter((name) => !env[name]);
 
 if (missing.length > 0) {
   console.error(`Build stopped: missing ${missing.join(", ")}.`);
-  console.error("Set them as environment variables (Vercel: Project Settings > Environment Variables) or in client/.env.local.");
+  console.error(
+    "Set them as environment variables (Vercel: Project Settings > Environment Variables) or in client/.env.local.",
+  );
   process.exit(1);
 }

@@ -403,9 +403,13 @@ export const updateAppointmentStatus = (
     // counselor confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
     const current = await getDoc(doc(db, "appointments", id)).catch(() => null);
     if (current?.exists() && !canMove(appointmentPhase(current.data()?.["status"]), status)) {
-      throw new AppError("conflict", "This appointment was just changed by someone else. Refresh to see where it stands.", {
-        message: `Cannot move an appointment from ${String(current.data()?.["status"])} to ${status}`,
-      });
+      throw new AppError(
+        "conflict",
+        "This appointment was just changed by someone else. Refresh to see where it stands.",
+        {
+          message: `Cannot move an appointment from ${String(current.data()?.["status"])} to ${status}`,
+        },
+      );
     }
 
     if (releasesSlot(status) && extraData.slotId) {

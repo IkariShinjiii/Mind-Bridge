@@ -13,7 +13,9 @@ const blank = (): Array<number | null> => WHO5_QUESTIONS.map(() => null);
 
 const when = (iso: string) => {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 };
 
 /**
@@ -100,11 +102,17 @@ export default function WellbeingCheck() {
               </Link>
             </p>
           ) : (
-            <p className="mt-2 text-[color:var(--mb-ink)]">A score of 50 or more suggests your wellbeing has been fairly good.</p>
+            <p className="mt-2 text-[color:var(--mb-ink)]">
+              A score of 50 or more suggests your wellbeing has been fairly good.
+            </p>
           )}
           {entries.length > 1 && (
             <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
-              Earlier scores: {entries.slice(1, 6).map((e) => e.score).join(", ")}
+              Earlier scores:{" "}
+              {entries
+                .slice(1, 6)
+                .map((e) => e.score)
+                .join(", ")}
             </p>
           )}
         </div>
@@ -172,8 +180,8 @@ export default function WellbeingCheck() {
       )}
 
       <p className="mt-4 text-sm text-[color:var(--mb-muted)]">
-        WHO-5 Well-Being Index, Psychiatric Research Unit, WHO Collaborating Centre for Mental Health, Frederiksborg General
-        Hospital, Hillerød, Denmark.
+        WHO-5 Well-Being Index, Psychiatric Research Unit, WHO Collaborating Centre for Mental Health, Frederiksborg
+        General Hospital, Hillerød, Denmark.
       </p>
     </section>
   );
