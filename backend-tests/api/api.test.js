@@ -345,7 +345,7 @@ describe("confidential messages", () => {
   it("sendStudentMessage defaults senderId to the signed-in user and name by role", async () => {
     login("counselor");
     const m = await api.sendStudentMessage({ studentId: "stu1", senderRole: "counselor", text: "hello" });
-    expect(m).toMatchObject({ senderId: "cou1", senderName: "Counselor", senderRole: "counselor" });
+    expect(m).toMatchObject({ senderId: "cou1", senderName: "Peer facilitator", senderRole: "counselor" });
   });
 
   it("sendStudentMessage into another student's thread -> permission-denied", async () => {
