@@ -65,6 +65,7 @@ export default function RelaxationLibrary() {
       <div className="mt-4">
         <BreathingPacer
           as="h3"
+          label="Relaxation breathing exercise"
           title="Guided breathing"
           intro="Pick a pattern and follow the circle. Even one minute helps settle a racing mind."
         />
