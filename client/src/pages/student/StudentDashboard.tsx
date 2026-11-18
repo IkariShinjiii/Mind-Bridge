@@ -40,6 +40,7 @@ import { checkInSchema, fullCheckInSchema } from "../../lib/schemas";
 import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
+import ReferralCard from "../../components/student/ReferralCard";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { goingWell } from "../../utils/goingWell";
 import { appointmentPhase, isClosed } from "../../utils/appointmentLifecycle";
@@ -678,6 +679,17 @@ export default function StudentDashboard() {
                               Office.
                             </li>
                           </ul>
+                        </m.div>
+                      )}
+
+                      {(high || medium) && (
+                        <m.div {...itemMotion}>
+                          <ReferralCard
+                            level={high ? "high" : "medium"}
+                            context={`${fullResult ? "Full" : "Quick"} check-in on ${formatDateTime(
+                              lastSubmission?.submittedAt ?? lastSubmission?.createdAt,
+                            )}`}
+                          />
                         </m.div>
                       )}
 
