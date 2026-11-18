@@ -567,7 +567,7 @@ export const sendStudentMessage = ({
     const payload: Omit<ChatMessage, "id"> = {
       studentId,
       senderId: senderId || getCurrentUserId(),
-      senderName: senderName || (senderRole === "counselor" ? "Peer facilitator" : "Student"),
+      senderName: senderName || (senderRole === "counselor" ? "Counselor" : "Student"),
       senderRole: senderRole || "student",
       text: text.trim(),
       timestamp: new Date().toISOString(),

@@ -706,7 +706,7 @@ describe("messages", () => {
         senderRole: "counselor",
         text: "hi",
       });
-      expect(m).toMatchObject({ senderId: "cou1", senderRole: "counselor", senderName: "Peer facilitator" });
+      expect(m).toMatchObject({ senderId: "cou1", senderRole: "counselor", senderName: "Counselor" });
     });
 
     it.each([
