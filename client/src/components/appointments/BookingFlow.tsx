@@ -225,8 +225,8 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                 {end ? ` to ${timeLabel(end)}` : ""}
               </p>
               <p className="mt-3 text-[color:var(--mb-panel-soft)]">
-                Your peer facilitator will confirm the request. By booking, you consent to your appointment details being used
-                for peer support purposes.
+                Your peer facilitator will confirm the request. By booking, you consent to your appointment details
+                being used for peer support purposes.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

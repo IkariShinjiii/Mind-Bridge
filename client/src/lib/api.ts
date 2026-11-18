@@ -448,7 +448,7 @@ export const addAvailability = (start: string, end: string): Promise<DocumentRef
     const authUser = getAuth().currentUser;
     return addDoc(collection(db, "availability"), {
       counselorId: getCurrentUserId(),
-      counselorName: authUser?.displayName || "Counselor",
+      counselorName: authUser?.displayName || "Peer facilitator",
       start,
       end,
       isBooked: false,
@@ -567,7 +567,7 @@ export const sendStudentMessage = ({
     const payload: Omit<ChatMessage, "id"> = {
       studentId,
       senderId: senderId || getCurrentUserId(),
-      senderName: senderName || (senderRole === "counselor" ? "Counselor" : "Student"),
+      senderName: senderName || (senderRole === "counselor" ? "Peer facilitator" : "Student"),
       senderRole: senderRole || "student",
       text: text.trim(),
       timestamp: new Date().toISOString(),

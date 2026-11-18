@@ -19,7 +19,8 @@ export default function SessionReminder({ appointments, role }: SessionReminderP
   if (!next || !start) return null;
 
   const when = whenText(start, now);
-  const who = role === "student" ? next.counselorName || "your peer facilitator" : firstName(next.studentName, "a student");
+  const who =
+    role === "student" ? next.counselorName || "your peer facilitator" : firstName(next.studentName, "a student");
   const text =
     soon.length > 1
       ? `Reminder: you have ${soon.length} sessions in the next 24 hours. The first, with ${who}, is ${when}.`

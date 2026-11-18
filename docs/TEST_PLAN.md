@@ -21,7 +21,7 @@ fakes (`client/e2e/fakes`), so they are safe by construction.
 | Role | How it is stored | What they can do |
 |---|---|---|
 | Student | `users/{uid}.role = "student"`, `@usa.edu.ph` email | Check-in (quick or full), WHO-5, book and cancel appointments, resources, settings, data download |
-| Counselor | `role = "counselor"`, needs `approved: true` | Case dashboard, notes, follow-up dates, availability, confirm/reschedule/decline/complete appointments |
+| Peer Facilitator (stored as `counselor`) | `role = "counselor"`, needs `approved: true` | Case dashboard, notes, follow-up dates, availability, confirm/reschedule/decline/complete appointments |
 | Admin | `role = "admin"` | Same app role as counselor (`normalizeRole` maps counselor to admin), plus account approval and export |
 | Visitor | no session | Home, login, signup, legal pages only |
 

@@ -42,14 +42,14 @@ export default function PrivacyPolicy() {
                   any notes for responders.
                 </li>
                 <li>
-                  <strong>Appointments and messages:</strong> The sessions you book with a peer facilitator and the messages
-                  you exchange with them in the confidential chat.
+                  <strong>Appointments and messages:</strong> The sessions you book with a peer facilitator and the
+                  messages you exchange with them in the confidential chat.
                 </li>
                 <li>
                   <strong>Sensitive Health Information:</strong> Your answers to the wellness check-in (a short
                   screening of seven questions about the last two weeks, adapted from the PHQ-9 and GAD-7
-                  questionnaires, which is a guide and not a diagnosis), and peer facilitator notes, to facilitate support and
-                  triage in accordance with the Mental Health Act (RA 11036).
+                  questionnaires, which is a guide and not a diagnosis), and peer facilitator notes, to facilitate
+                  support and triage in accordance with the Mental Health Act (RA 11036).
                 </li>
                 <li>
                   <strong>Usage Data:</strong> Essential cookies and system logs necessary for the secure operation of
@@ -73,8 +73,8 @@ export default function PrivacyPolicy() {
               <h2 className="mb-sign mb-2 text-2xl font-bold">4. Data Sharing and Disclosure</h2>
               <p>
                 Your sensitive personal information is strictly confidential. We do not sell or rent your data. Your
-                data is only accessible to authorized personnel (i.e., designated peer facilitators and administrators) within
-                the University of San Agustin. We may disclose your information only when required by law or in
+                data is only accessible to authorized personnel (i.e., designated peer facilitators and administrators)
+                within the University of San Agustin. We may disclose your information only when required by law or in
                 emergency situations to protect your life and safety.
               </p>
               <p className="mt-2">

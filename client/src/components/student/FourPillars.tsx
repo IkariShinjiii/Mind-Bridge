@@ -71,7 +71,10 @@ export default function FourPillars() {
             <ul className="mt-2 space-y-1 text-sm text-[color:var(--mb-ink)]">
               {tips.map((tip) => (
                 <li key={tip} className="flex items-start gap-2">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--mb-brand)]" aria-hidden="true" />
+                  <span
+                    className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--mb-brand)]"
+                    aria-hidden="true"
+                  />
                   {tip}
                 </li>
               ))}

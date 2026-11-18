@@ -591,7 +591,7 @@ describe("availability", () => {
   it("addAvailability labels a nameless counselor 'Counselor'", async () => {
     signIn({ uid: "cou1" });
     await api.addAvailability("S", "E");
-    expect(lastWrite(fs.addDoc)[1].counselorName).toBe("Counselor");
+    expect(lastWrite(fs.addDoc)[1].counselorName).toBe("Peer facilitator");
   });
 
   it("removeAvailability deletes availability/{id}", async () => {
@@ -706,7 +706,7 @@ describe("messages", () => {
         senderRole: "counselor",
         text: "hi",
       });
-      expect(m).toMatchObject({ senderId: "cou1", senderRole: "counselor", senderName: "Counselor" });
+      expect(m).toMatchObject({ senderId: "cou1", senderRole: "counselor", senderName: "Peer facilitator" });
     });
 
     it.each([

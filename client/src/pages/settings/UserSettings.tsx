@@ -1010,7 +1010,8 @@ export default function UserSettings() {
                               {appointmentTitle(apt.title)}
                             </p>
                             <p className="text-[color:var(--mb-muted)]">
-                              {apt.counselorName || "Assigned peer facilitator"} · {formatDateTime(apt.start || apt.date)}
+                              {apt.counselorName || "Assigned peer facilitator"} ·{" "}
+                              {formatDateTime(apt.start || apt.date)}
                             </p>
                           </div>
                           <span
