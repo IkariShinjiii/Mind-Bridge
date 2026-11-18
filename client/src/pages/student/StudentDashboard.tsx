@@ -41,6 +41,7 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import ReferralCard from "../../components/student/ReferralCard";
+import FourPillars from "../../components/student/FourPillars";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
 import { goingWell } from "../../utils/goingWell";
 import { appointmentPhase, isClosed } from "../../utils/appointmentLifecycle";
@@ -1149,6 +1150,8 @@ export default function StudentDashboard() {
           </div>
 
           <WellbeingCheck />
+
+          <FourPillars />
         </section>
 
         {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
