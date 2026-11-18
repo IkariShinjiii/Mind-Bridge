@@ -139,7 +139,7 @@ const DECLINE_PRESETS = [
 
 const CANCELLATION_PRESETS = [
   "Student requested cancellation",
-  "Counselor on urgent administrative duty",
+  "Peer facilitator on urgent administrative duty",
   "Emergency campus wellness response",
   "Unable to attend scheduled session",
 ];
@@ -309,7 +309,7 @@ export default function Appointments() {
       if (type === "decline") {
         await updateAppointmentStatus(apt.id, "Declined", {
           slotId: apt.slotId,
-          declineReason: reason || "Declined by guidance counselor",
+          declineReason: reason || "Declined by peer facilitator",
           counselorNote: reason,
         });
         showFeedback("success", "Appointment declined and student notified.");
@@ -324,7 +324,7 @@ export default function Appointments() {
         await updateAppointmentStatus(apt.id, "Rescheduled", {
           start: new Date(rescheduleStart).toISOString(),
           end: rescheduleEnd ? new Date(rescheduleEnd).toISOString() : null,
-          rescheduleReason: reason || "Rescheduled by counselor",
+          rescheduleReason: reason || "Rescheduled by peer facilitator",
           counselorNote: reason,
         });
         showFeedback("success", "Appointment rescheduled and updated.");
@@ -364,14 +364,14 @@ export default function Appointments() {
             <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
               {isCounselor
                 ? "Confirm, reschedule or close confidential sessions with students."
-                : "Your confidential sessions with university guidance counselors."}
+                : "Your confidential sessions with university peer facilitators."}
             </p>
           </div>
 
           {!isCounselor && (
             <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
               <Plus className="h-5 w-5" aria-hidden="true" />
-              Book a counselor
+              Book a peer facilitator
             </button>
           )}
         </div>
@@ -430,12 +430,12 @@ export default function Appointments() {
                 {isCounselor
                   ? "No appointment requests match this filter."
                   : filter === "all"
-                    ? "You have no appointments. Pick a counselor and a time that works for you."
+                    ? "You have no appointments. Pick a peer facilitator and a time that works for you."
                     : "You have no appointments in this category."}
               </p>
               {!isCounselor && filter === "all" && (
                 <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-6">
-                  Book a counselor
+                  Book a peer facilitator
                 </button>
               )}
             </m.div>
@@ -479,7 +479,7 @@ export default function Appointments() {
                       <div className="min-w-0 flex-1 p-4 sm:p-6">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                           <h2 className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                            {apt.title || "Counseling session"}
+                            {apt.title || "Peer support session"}
                           </h2>
                           <span
                             className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
@@ -490,9 +490,9 @@ export default function Appointments() {
 
                         <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                           <div className="flex gap-2">
-                            <dt className="text-[color:var(--mb-muted)]">{isCounselor ? "Student" : "Counselor"}</dt>
+                            <dt className="text-[color:var(--mb-muted)]">{isCounselor ? "Student" : "Peer Facilitator"}</dt>
                             <dd className="font-semibold text-[color:var(--mb-ink)]">
-                              {isCounselor ? apt.studentName || "Student" : apt.counselorName || "Assigned counselor"}
+                              {isCounselor ? apt.studentName || "Student" : apt.counselorName || "Assigned peer facilitator"}
                             </dd>
                           </div>
                           <div className="flex gap-2">
@@ -528,7 +528,7 @@ export default function Appointments() {
                             </Note>
                           )}
                           {apt.counselorNote && !apt.declineReason && !apt.rescheduleReason && (
-                            <Note tone="brand" label="Counselor note">
+                            <Note tone="brand" label="Peer facilitator note">
                               {apt.counselorNote}
                             </Note>
                           )}
@@ -586,8 +586,8 @@ export default function Appointments() {
         <Modal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
-          title="Book a counselor"
-          description="A confidential one-to-one session with university guidance counselors."
+          title="Book a peer facilitator"
+          description="A confidential one-to-one session with university peer facilitators."
           maxWidth="max-w-xl"
         >
           {bookingError && (
@@ -617,7 +617,7 @@ export default function Appointments() {
           }
           description={
             actionModal?.apt
-              ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your counselor"}, ${formatDateTime(
+              ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your peer facilitator"}, ${formatDateTime(
                   actionModal.apt.start || actionModal.apt.date,
                 )}`
               : undefined

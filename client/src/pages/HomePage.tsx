@@ -29,14 +29,14 @@ const STOPS = [
   {
     n: 3,
     icon: CalendarCheck,
-    title: "Book a counselor",
-    body: "Pick an open time from the campus counselors' calendars.",
+    title: "Book a peer facilitator",
+    body: "Pick an open time from the campus peer facilitators' calendars.",
   },
   {
     n: 4,
     icon: MessageCircle,
     title: "Talk it through",
-    body: "Meet your counselor and follow up in confidential chat.",
+    body: "Meet your peer facilitator and follow up in confidential chat.",
   },
 ];
 
@@ -44,13 +44,13 @@ const DOORS = [
   {
     icon: GraduationCap,
     who: "Students",
-    what: "Check in, book a time, message your counselor.",
+    what: "Check in, book a time, message your peer facilitator.",
     to: "/signup",
     cta: "Create student account",
   },
   {
     icon: Stethoscope,
-    who: "Counselors",
+    who: "Peer Facilitators",
     what: "Review flagged check-ins and set your availability.",
     to: "/login",
     cta: "Log in",
@@ -58,7 +58,7 @@ const DOORS = [
   {
     icon: ShieldCheck,
     who: "Administrators",
-    what: "Approve counselor accounts and review activity.",
+    what: "Approve peer facilitator accounts and review activity.",
     to: "/login",
     cta: "Log in",
   },
@@ -70,17 +70,17 @@ export default function HomePage() {
     <PublicShell>
       {/* THESIS: a first-time visitor sees the route to help as a signposted path, not a pitch.
           OWN-WORLD: hospital-style wayfinding; teal signage plates, amber for urgent exits only, Barlow numerals.
-          STORY: you are here, four stops to a counselor, and the crisis line is always one tap away.
+          STORY: you are here, four stops to a peer facilitator, and the crisis line is always one tap away.
           FIRST VIEWPORT: amber crisis strip, headline and two actions left, four-stop route board right.
           FORM: calm wayfinding (assigned roll, seed ea2f1600). */}
       <section className="grid w-full gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-16">
         <div>
           <h1 className="mb-sign text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl [text-wrap:balance]">
-            Ask for help quietly. Reach a counselor sooner.
+            Ask for help quietly. Reach a peer facilitator sooner.
           </h1>
           <p className="mt-6 max-w-[60ch] text-lg text-[color:var(--mb-muted)]">
             Mind Bridge is the University of San Agustin check-in for student wellbeing. Answer a short private
-            screening, see what it suggests, and book a time with a campus counselor.
+            screening, see what it suggests, and book a time with a campus peer facilitator.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link to="/login" className="mb-btn mb-btn-line">

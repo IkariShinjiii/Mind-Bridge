@@ -589,14 +589,14 @@ export default function UserSettings() {
                     </div>
                   </div>
 
-                  <Field id="set-bio" label="About you" hint="optional, shown to your counselors">
+                  <Field id="set-bio" label="About you" hint="optional, shown to your peer facilitators">
                     <textarea
                       id="set-bio"
                       rows={3}
                       value={bio}
                       maxLength={500}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Your program, year level, or anything you'd like counselors to know"
+                      placeholder="Your program, year level, or anything you'd like peer facilitators to know"
                       className="mb-field"
                     />
                   </Field>
@@ -752,7 +752,7 @@ export default function UserSettings() {
                       {[
                         [
                           "Check-in answers and scores",
-                          "You and approved guidance staff (counselors and admins). Other students never see them.",
+                          "You and approved guidance staff (peer facilitators and admins). Other students never see them.",
                         ],
                         ["Appointments and chat messages", "You and approved guidance staff."],
                         ["Your emergency contact", "Approved guidance staff, when they open one of your cases."],
@@ -971,7 +971,7 @@ export default function UserSettings() {
               {/* SESSION HISTORY (students) */}
               {activeTab === "sessions" && (
                 <m.div key="sessions" {...panelMotion} className="space-y-6">
-                  <PanelHead title="Session history">Your appointments with guidance counselors.</PanelHead>
+                  <PanelHead title="Session history">Your appointments with peer facilitators.</PanelHead>
 
                   {loadingApts ? (
                     <div className="flex items-center justify-center gap-2 py-12 text-[color:var(--mb-muted)]">
@@ -994,7 +994,7 @@ export default function UserSettings() {
                         onClick={() => navigate("/appointments")}
                         className="mb-btn mb-btn-solid mt-4"
                       >
-                        Book a counselor
+                        Book a peer facilitator
                       </button>
                     </div>
                   ) : (
@@ -1006,10 +1006,10 @@ export default function UserSettings() {
                         >
                           <div>
                             <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                              {apt.title || "Counseling session"}
+                              {apt.title || "Peer support session"}
                             </p>
                             <p className="text-[color:var(--mb-muted)]">
-                              {apt.counselorName || "Assigned counselor"} · {formatDateTime(apt.start || apt.date)}
+                              {apt.counselorName || "Assigned peer facilitator"} · {formatDateTime(apt.start || apt.date)}
                             </p>
                           </div>
                           <span

@@ -92,7 +92,7 @@ export default function ConfidentialChatModal({
 
   const currentUserId = currentUser?.uid;
   const currentUserName =
-    userData?.name || currentUser?.displayName || (userRole === "student" ? "Student" : "Staff Counselor");
+    userData?.name || currentUser?.displayName || (userRole === "student" ? "Student" : "Peer Facilitator");
 
   // The student IS the thread anchor — works for both sides
   const threadStudentId = studentId || (userRole === "student" ? currentUserId : null);
@@ -181,7 +181,7 @@ export default function ConfidentialChatModal({
   const quickRepliesCounselor = [
     "I've reviewed your check-in. How are you feeling today?",
     "Feel free to drop by the Guidance Office anytime.",
-    "Please book a follow-up counseling slot.",
+    "Please book a follow-up peer support slot.",
     "You're doing great — keep up the daily check-ins!",
   ];
 
@@ -203,7 +203,7 @@ export default function ConfidentialChatModal({
               ref={dialogRef}
               role="dialog"
               aria-modal="true"
-              aria-label={`Confidential chat with ${recipientName || (isCounselorView ? "student" : "your counselor")}`}
+              aria-label={`Confidential chat with ${recipientName || (isCounselorView ? "student" : "your peer facilitator")}`}
               {...dialogMotion}
               className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
             >
@@ -220,7 +220,7 @@ export default function ConfidentialChatModal({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-[color:var(--mb-ink)] truncate">
-                      {recipientName || (isCounselorView ? "Student" : "Your Counselor")}
+                      {recipientName || (isCounselorView ? "Student" : "Your Peer Facilitator")}
                     </span>
                     <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-1 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
                       {recipientRole}
@@ -268,11 +268,11 @@ export default function ConfidentialChatModal({
                       <Lock className="h-6 w-6 text-[color:var(--mb-brand)]" aria-hidden="true" />
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-[color:var(--mb-ink)]">Confidential counseling thread</p>
+                      <p className="text-lg font-bold text-[color:var(--mb-ink)]">Confidential support thread</p>
                       <p className="text-[color:var(--mb-muted)] mt-1 max-w-xs">
                         {isCounselorView
                           ? "Send a private message to this student. Only you and the student have access to this conversation."
-                          : "Send a secure message to your guidance counselor. This conversation is completely confidential."}
+                          : "Send a secure message to your peer facilitator. This conversation is completely confidential."}
                       </p>
                     </div>
                   </div>
@@ -310,7 +310,7 @@ export default function ConfidentialChatModal({
                             <div className="flex flex-col max-w-[78%]">
                               {!isMe && isFirst && (
                                 <span className="text-sm text-[color:var(--mb-muted)] ml-1 mb-1 font-medium">
-                                  {msg.senderName || "Counselor"}
+                                  {msg.senderName || "Peer Facilitator"}
                                 </span>
                               )}
 

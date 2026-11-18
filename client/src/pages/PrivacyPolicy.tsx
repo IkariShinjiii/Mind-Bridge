@@ -42,13 +42,13 @@ export default function PrivacyPolicy() {
                   any notes for responders.
                 </li>
                 <li>
-                  <strong>Appointments and messages:</strong> The sessions you book with a counselor and the messages
+                  <strong>Appointments and messages:</strong> The sessions you book with a peer facilitator and the messages
                   you exchange with them in the confidential chat.
                 </li>
                 <li>
                   <strong>Sensitive Health Information:</strong> Your answers to the wellness check-in (a short
                   screening of seven questions about the last two weeks, adapted from the PHQ-9 and GAD-7
-                  questionnaires, which is a guide and not a diagnosis), and counselor notes, to facilitate support and
+                  questionnaires, which is a guide and not a diagnosis), and peer facilitator notes, to facilitate support and
                   triage in accordance with the Mental Health Act (RA 11036).
                 </li>
                 <li>
@@ -63,7 +63,7 @@ export default function PrivacyPolicy() {
               <p>We use your information exclusively to:</p>
               <ul className="list-disc pl-6 mt-2 space-y-1">
                 <li>Provide and maintain the Mind Bridge platform.</li>
-                <li>Assess emotional distress and prioritize counseling services.</li>
+                <li>Assess emotional distress and prioritize peer support services.</li>
                 <li>Facilitate scheduling of appointments with the Guidance Services and Testing Center.</li>
                 <li>Protect the vital interests of the user in emergency or crisis situations.</li>
               </ul>
@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
               <h2 className="mb-sign mb-2 text-2xl font-bold">4. Data Sharing and Disclosure</h2>
               <p>
                 Your sensitive personal information is strictly confidential. We do not sell or rent your data. Your
-                data is only accessible to authorized personnel (i.e., designated counselors and administrators) within
+                data is only accessible to authorized personnel (i.e., designated peer facilitators and administrators) within
                 the University of San Agustin. We may disclose your information only when required by law or in
                 emergency situations to protect your life and safety.
               </p>

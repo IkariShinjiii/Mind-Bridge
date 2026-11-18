@@ -393,7 +393,7 @@ export default function StudentDashboard() {
 
   // Assigned Counselor info
   const assignedCounselorName =
-    userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Guidance Counselor";
+    userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Peer Facilitator";
 
   const page = useMotionPreset(pagePreset);
   const fade = useMotionPreset(fadePreset);
@@ -502,7 +502,7 @@ export default function StudentDashboard() {
             <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
-                  <span>Guidance Counselor</span>
+                  <span>Peer Facilitator</span>
                   <span className="mb-badge mb-badge-brand uppercase">Assigned</span>
                 </div>
                 <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">{assignedCounselorName}</div>
@@ -514,7 +514,7 @@ export default function StudentDashboard() {
                 className="mb-btn mb-btn-line mt-3 w-full !min-h-[44px] !px-4 text-sm"
               >
                 <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                Message counselor
+                Message peer facilitator
               </button>
             </div>
           </div>
@@ -608,7 +608,7 @@ export default function StudentDashboard() {
                               {high
                                 ? "Your answers suggest you may be going through heavy stress or distress. Your check-in is marked for priority review by guidance staff, in confidence."
                                 : medium
-                                  ? "Your answers suggest elevated stress. Self-care routines, or talking with a campus counselor, can help with academic pressure."
+                                  ? "Your answers suggest elevated stress. Self-care routines, or talking with a campus peer facilitator, can help with academic pressure."
                                   : "Your answers show a steady baseline. Keep up your routines, and remember support is here if things change."}
                             </p>
                           </div>
@@ -627,7 +627,7 @@ export default function StudentDashboard() {
                             </li>
                           </ul>
                           <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
-                            These are screening scores, not a diagnosis. A counselor can talk them through with you.
+                            These are screening scores, not a diagnosis. A peer facilitator can talk them through with you.
                           </p>
                         </m.div>
                       )}
@@ -693,7 +693,7 @@ export default function StudentDashboard() {
 
                       <m.div {...itemMotion} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid">
-                          <Calendar className="h-5 w-5" aria-hidden="true" /> Book a counselor session
+                          <Calendar className="h-5 w-5" aria-hidden="true" /> Book a peer facilitator session
                         </button>
                         <button
                           type="button"
@@ -1192,7 +1192,7 @@ export default function StudentDashboard() {
                   {appointments.slice(0, 3).map((apt) => (
                     <m.div key={apt.id} {...itemMotion} className="mb-tile mb-tile-sm">
                       <div className="flex justify-between items-start gap-2">
-                        <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Counseling Session"}</div>
+                        <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Peer support session"}</div>
                         <span
                           className={`mb-badge shrink-0 capitalize ${
                             appointmentPhase(apt.status) === "confirmed"
@@ -1271,8 +1271,8 @@ export default function StudentDashboard() {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Book a counselor"
-        description="A confidential one-to-one session with university guidance counselors."
+        title="Book a peer facilitator"
+        description="A confidential one-to-one session with university peer facilitators."
         maxWidth="max-w-xl"
       >
         {bookingError && (
