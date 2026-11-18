@@ -28,12 +28,12 @@ test.describe("WHO-5 wellbeing", () => {
     expect(await readCollection(page, "assessments")).toHaveLength(0);
   });
 
-  test("a low score says so gently and offers a counselor, without calling it a diagnosis", async ({ page }) => {
+  test("a low score says so gently and offers a peer facilitator, without calling it a diagnosis", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
     const card = await answerAll(page, "Some of the time"); // 1 each: score 20
     await expect(card.getByText(/under 50 suggests things have felt low/)).toBeVisible();
-    await expect(card.getByRole("link", { name: "Book a counselor" })).toBeVisible();
+    await expect(card.getByRole("link", { name: "Book a peer facilitator" })).toBeVisible();
   });
 
   test("it will not save until every statement is answered", async ({ page }) => {

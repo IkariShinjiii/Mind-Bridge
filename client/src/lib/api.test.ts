@@ -421,7 +421,7 @@ describe("bookAppointment", () => {
     expect(fs.updateDoc).not.toHaveBeenCalled();
     expect(lastWrite(fs.addDoc)[1]).toMatchObject({
       slotId: null,
-      title: "Counseling Session",
+      title: "Peer support session",
       status: "Pending Review",
       date: new Date(NOW.getTime() + 86400000).toISOString(),
     });

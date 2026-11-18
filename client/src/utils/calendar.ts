@@ -75,7 +75,7 @@ export function buildIcs(apt: Appointment, now: Date = new Date()): string | nul
     `DTSTAMP:${utcStamp(now)}`,
     `DTSTART:${start}`,
     `DTEND:${end}`,
-    `SUMMARY:${escapeText(apt.title || "Counseling session")}`,
+    `SUMMARY:${escapeText(apt.title || "Peer support session")}`,
     `LOCATION:${escapeText(LOCATION)}`,
     `DESCRIPTION:${escapeText(
       `Confidential session with ${apt.counselorName || "your counselor"} through Mind Bridge. If you need to change it, use the Appointments page.`,
@@ -83,7 +83,7 @@ export function buildIcs(apt: Appointment, now: Date = new Date()): string | nul
     "STATUS:CONFIRMED",
     "BEGIN:VALARM",
     "ACTION:DISPLAY",
-    "DESCRIPTION:Counseling session in 1 hour",
+    "DESCRIPTION:Peer support session in 1 hour",
     "TRIGGER:-PT1H",
     "END:VALARM",
     "END:VEVENT",

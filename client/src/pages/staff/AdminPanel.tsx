@@ -79,7 +79,7 @@ const cardEntrance = (i: number, enabled: boolean) =>
     : { initial: false as const };
 
 const roleLabel = (role?: StoredRole | string) =>
-  role === "admin" ? "Admin" : role === "counselor" ? "Counselor" : "Student";
+  role === "admin" ? "Admin" : role === "counselor" ? "Peer Facilitator" : "Student";
 
 function Stat({
   label,
@@ -511,10 +511,10 @@ export default function AdminPanel() {
     try {
       await assignCounselorToStudent(studentId, counselorId || null, counselorName);
       await loadData();
-      showNotice("success", counselorId ? `Assigned to ${counselorName}.` : "Counselor assignment removed.");
+      showNotice("success", counselorId ? `Assigned to ${counselorName}.` : "Peer facilitator assignment removed.");
     } catch (err) {
       console.error("Failed to assign counselor", err);
-      showNotice("error", "Could not change the counselor assignment. Try again.");
+      showNotice("error", "Could not change the peer facilitator assignment. Try again.");
     } finally {
       setActionLoadingId(null);
     }
@@ -1012,7 +1012,7 @@ export default function AdminPanel() {
             <div>
               <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">Accounts</h2>
               <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-                Approve staff, deactivate accounts, and assign each student a counselor.
+                Approve staff, deactivate accounts, and assign each student a peer facilitator.
               </p>
             </div>
 
@@ -1020,7 +1020,7 @@ export default function AdminPanel() {
               {(
                 [
                   ["staff", `Staff (${approvedStaff.length + pendingStaff.length})`],
-                  ["students", "Students and counselor assignments"],
+                  ["students", "Students and peer facilitator assignments"],
                 ] as const
               ).map(([val, label]) => (
                 <button
@@ -1127,7 +1127,7 @@ export default function AdminPanel() {
                         <div className="flex flex-wrap items-center gap-3">
                           {accountSubTab === "students" && (
                             <label className="flex items-center gap-2 text-sm">
-                              <span className="font-bold text-[color:var(--mb-ink)]">Counselor</span>
+                              <span className="font-bold text-[color:var(--mb-ink)]">Peer Facilitator</span>
                               <select
                                 value={u.assignedCounselorId || ""}
                                 onChange={(e) => handleAssignCounselor(u.id, e.target.value)}

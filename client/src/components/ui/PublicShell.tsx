@@ -142,7 +142,7 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
           </nav>
         </div>
         <p className="w-full px-4 pb-8 text-sm text-[color:var(--mb-muted)] sm:px-6">
-          © {new Date().getFullYear()} Mind Bridge. Screening results are a guide for counselors and students, not a
+          © {new Date().getFullYear()} Mind Bridge. Screening results are a guide for peer facilitators and students, not a
           medical diagnosis.
         </p>
       </footer>

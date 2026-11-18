@@ -297,7 +297,7 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
         studentName,
         studentEmail,
         slotId: null,
-        title: "Counseling Session",
+        title: "Peer support session",
         status: "Pending Review",
         date: new Date(Date.now() + 86400000).toISOString(),
         createdAt,

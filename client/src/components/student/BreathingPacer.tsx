@@ -28,6 +28,8 @@ export interface BreathingPacerProps {
   title?: string;
   intro?: string;
   as?: "h2" | "h3";
+  /** Accessible region name; override when a second pacer shares the page. */
+  label?: string;
 }
 
 /** A guided breathing circle with two patterns. No sound and nothing stored; the circle stops scaling under reduced motion. */
@@ -35,6 +37,7 @@ export default function BreathingPacer({
   title = "Guided breathing",
   intro = "Breathe in, hold, and breathe out with the circle. A minute of this can settle a racing mind.",
   as,
+  label = "Breathing exercise",
 }: BreathingPacerProps) {
   const [pattern, setPattern] = useState<Pattern>("box");
   const [phase, setPhase] = useState<BreathingPhase>("idle");
@@ -52,7 +55,7 @@ export default function BreathingPacer({
   };
 
   return (
-    <section aria-label="Breathing exercise" className="mb-card">
+    <section aria-label={label} className="mb-card">
       <PanelHead title={title} as={as}>
         {intro}
       </PanelHead>

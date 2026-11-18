@@ -28,7 +28,7 @@ export interface BookingFlowProps {
   onCancel: () => void;
 }
 
-const STEPS = ["Counselor", "Time", "Confirm"];
+const STEPS = ["Peer Facilitator", "Time", "Confirm"];
 
 // Three stops: pick a counselor, pick a time, confirm. Skips the first stop when only one counselor has open times.
 export default function BookingFlow({ slots, loading, bookingId, onBook, onCancel }: BookingFlowProps) {
@@ -36,7 +36,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
     const map = new Map<string, CounselorGroup>();
     slots.forEach((slot) => {
       const key = slot.counselorId || slot.counselorName || "unassigned";
-      if (!map.has(key)) map.set(key, { key, name: slot.counselorName || "Assigned counselor", slots: [] });
+      if (!map.has(key)) map.set(key, { key, name: slot.counselorName || "Assigned peer facilitator", slots: [] });
       map.get(key)?.slots.push(slot);
     });
     return [...map.values()].map((c) => ({
@@ -95,7 +95,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
     return view(
       "empty",
       <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-6 text-[color:var(--mb-muted)]">
-        No counselor times are open right now. Please check back soon, or visit the Guidance Office in person.
+        No peer facilitator times are open right now. Please check back soon, or visit the Guidance Office in person.
       </div>,
     );
   }
@@ -209,7 +209,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
             </m.div>
             {!single && (
               <button type="button" onClick={() => goTo(1)} className="mb-btn mb-btn-line">
-                <ArrowLeft className="h-5 w-5" aria-hidden="true" /> Choose a different counselor
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" /> Choose a different peer facilitator
               </button>
             )}
           </m.div>
@@ -225,8 +225,8 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
                 {end ? ` to ${timeLabel(end)}` : ""}
               </p>
               <p className="mt-3 text-[color:var(--mb-panel-soft)]">
-                Your counselor will confirm the request. By booking, you consent to your appointment details being used
-                for counseling purposes.
+                Your peer facilitator will confirm the request. By booking, you consent to your appointment details being used
+                for peer support purposes.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

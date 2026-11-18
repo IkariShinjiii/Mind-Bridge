@@ -177,7 +177,7 @@ describe("appointments and availability", () => {
     login("student");
     const ref = await api.bookAppointment();
     const a = await raw(`appointments/${ref.id}`);
-    expect(a).toMatchObject({ studentId: "stu1", slotId: null, title: "Counseling Session", status: "Pending Review" });
+    expect(a).toMatchObject({ studentId: "stu1", slotId: null, title: "Peer support session", status: "Pending Review" });
     expect(Date.parse(a.date)).toBeGreaterThan(Date.now());
   });
 

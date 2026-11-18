@@ -96,9 +96,9 @@ export default function WellbeingCheck() {
           <p className="text-[color:var(--mb-muted)]">Saved {when(latest.createdAt)}. Higher means better wellbeing.</p>
           {low ? (
             <p className="mt-2 text-[color:var(--mb-ink)]">
-              A score under 50 suggests things have felt low lately. That is not a diagnosis, and a counselor can help.{" "}
+              A score under 50 suggests things have felt low lately. That is not a diagnosis, and a peer facilitator can help.{" "}
               <Link to="/appointments" className="font-bold underline">
-                Book a counselor
+                Book a peer facilitator
               </Link>
             </p>
           ) : (
