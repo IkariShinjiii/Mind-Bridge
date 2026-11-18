@@ -448,7 +448,7 @@ export const addAvailability = (start: string, end: string): Promise<DocumentRef
     const authUser = getAuth().currentUser;
     return addDoc(collection(db, "availability"), {
       counselorId: getCurrentUserId(),
-      counselorName: authUser?.displayName || "Counselor",
+      counselorName: authUser?.displayName || "Peer facilitator",
       start,
       end,
       isBooked: false,

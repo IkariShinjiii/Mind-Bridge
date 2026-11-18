@@ -491,9 +491,13 @@ export default function Appointments() {
 
                         <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                           <div className="flex gap-2">
-                            <dt className="text-[color:var(--mb-muted)]">{isCounselor ? "Student" : "Peer Facilitator"}</dt>
+                            <dt className="text-[color:var(--mb-muted)]">
+                              {isCounselor ? "Student" : "Peer Facilitator"}
+                            </dt>
                             <dd className="font-semibold text-[color:var(--mb-ink)]">
-                              {isCounselor ? apt.studentName || "Student" : apt.counselorName || "Assigned peer facilitator"}
+                              {isCounselor
+                                ? apt.studentName || "Student"
+                                : apt.counselorName || "Assigned peer facilitator"}
                             </dd>
                           </div>
                           <div className="flex gap-2">

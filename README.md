@@ -1,7 +1,7 @@
 # Mind Bridge
 
 A student wellness platform for the University of San Agustin. Students complete a private
-screening check-in, the app flags risk, and counselors review flagged cases and manage
+screening check-in, the app flags risk, and peer facilitators (under licensed guidance counselors) review flagged cases and manage
 appointments.
 
 > Live app: <https://mind-bridge-omega.vercel.app>
@@ -28,16 +28,18 @@ Mind Bridge shortens the path between a student in distress and campus psycholog
 
 | User | What they do |
 |---|---|
-| **Student** | Takes a wellness check-in (mood, stress, sleep, focus, safety), sees guidance for their risk level, books counselor appointments, uses a confidential chat, and can open the 24/7 crisis resource directory. |
-| **Counselor** | Reviews flagged check-ins, manages availability, and handles appointments. Has no staff access until an admin approves the account. |
-| **Admin** | Approves counselors, manages users, and sees aggregate wellness metrics. |
+| **Student** | Takes a wellness check-in (mood, stress, sleep, focus, safety), sees guidance for their risk level, books peer facilitator appointments, uses a confidential chat, builds healthy habits with the four pillars and a relaxation library, and can open the 24/7 crisis resource directory. Elevated check-ins show a referral to formal counseling at the GSTC (PATNUBAY). |
+| **Peer Facilitator** (stored as `counselor`) | Gives first-line support under licensed guidance counselors. Reviews flagged check-ins, manages availability, and handles appointments. Has no staff access until an admin approves the account. |
+| **Admin** | Approves staff accounts, manages users, and sees aggregate wellness metrics. |
 
 Key features:
 
 - Rule-based risk scoring (low / moderate / high). A self-harm item forces an immediate-review flag.
-- Role-based access (student, counselor, admin) enforced by Firestore security rules.
-- Appointment booking and counselor availability management.
-- Confidential student-counselor chat.
+- Role-based access (student, peer facilitator, admin; the peer facilitator role is stored as `counselor`) enforced by Firestore security rules.
+- Appointment booking and peer facilitator availability management.
+- Confidential student-peer facilitator chat, with a notice that peer support is not professional counseling.
+- Smart referral: medium and high check-ins link to formal counseling booking at the GSTC (PATNUBAY).
+- Self-help: a Four Pillars section and a relaxation and sleep library with a guided breathing pacer.
 - Email alert to staff when a high-risk assessment is submitted. It runs on free tiers only (a Vercel route plus a scheduled GitHub Actions sweep that catches any missed alert); a Cloud Function version also exists but needs the paid Blaze plan and is not used.
 - A short once-per-session intro screen (skipped for reduced motion).
 - Accessibility target of WCAG 2.2 AA, with keyboard-safe dialogs and 44px tap targets.
@@ -190,7 +192,7 @@ Firestore collections used: `users`, `assessments`, `appointments`, `availabilit
 ## Roles and access control
 
 - **student**: created by self-signup with an `@usa.edu.ph` account (email/password or Google).
-- **counselor**: has no staff access until `approved: true` is set on their user document.
+- **counselor** (shown as Peer Facilitator in the app): has no staff access until `approved: true` is set on their user document.
 - **admin**: set `role: "admin"` on the user document by hand in the Firebase console.
 - **deactivated** (`active: false`): treated as signed out.
 

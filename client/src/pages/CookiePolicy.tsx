@@ -42,8 +42,8 @@ export default function CookiePolicy() {
               <ul className="list-disc pl-6 mt-2 space-y-2">
                 <li>
                   <strong>Strictly Necessary Cookies:</strong> These cookies are essential for you to browse the website
-                  and use its features, such as logging into your student or peer facilitator dashboard. Without these cookies,
-                  services like secure session management cannot be provided.
+                  and use its features, such as logging into your student or peer facilitator dashboard. Without these
+                  cookies, services like secure session management cannot be provided.
                 </li>
                 <li>
                   <strong>Functionality Cookies:</strong> We may use these to remember choices you make (such as your

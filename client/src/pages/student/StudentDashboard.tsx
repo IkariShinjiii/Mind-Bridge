@@ -631,7 +631,8 @@ export default function StudentDashboard() {
                             </li>
                           </ul>
                           <p className="mt-2 text-sm text-[color:var(--mb-muted)]">
-                            These are screening scores, not a diagnosis. A peer facilitator can talk them through with you.
+                            These are screening scores, not a diagnosis. A peer facilitator can talk them through with
+                            you.
                           </p>
                         </m.div>
                       )}
