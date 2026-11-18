@@ -1,3 +1,4 @@
+import { appointmentTitle } from "../../utils/appointmentTitle";
 import {
   useState,
   useEffect,
@@ -1006,7 +1007,7 @@ export default function UserSettings() {
                         >
                           <div>
                             <p className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                              {apt.title || "Peer support session"}
+                              {appointmentTitle(apt.title)}
                             </p>
                             <p className="text-[color:var(--mb-muted)]">
                               {apt.counselorName || "Assigned peer facilitator"} · {formatDateTime(apt.start || apt.date)}

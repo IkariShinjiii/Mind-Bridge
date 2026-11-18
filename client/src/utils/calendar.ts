@@ -1,3 +1,4 @@
+import { appointmentTitle } from "./appointmentTitle";
 import type { Appointment } from "../types";
 import { parseDate } from "./dates";
 
@@ -75,7 +76,7 @@ export function buildIcs(apt: Appointment, now: Date = new Date()): string | nul
     `DTSTAMP:${utcStamp(now)}`,
     `DTSTART:${start}`,
     `DTEND:${end}`,
-    `SUMMARY:${escapeText(apt.title || "Peer support session")}`,
+    `SUMMARY:${escapeText(appointmentTitle(apt.title))}`,
     `LOCATION:${escapeText(LOCATION)}`,
     `DESCRIPTION:${escapeText(
       `Confidential session with ${apt.counselorName || "your counselor"} through Mind Bridge. If you need to change it, use the Appointments page.`,
