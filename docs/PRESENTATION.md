@@ -35,28 +35,36 @@ Say early: **it is a screening aid, not a diagnosis, and it supports counselors,
 3. **Result.** Read the plain-language result. Show "What's going well" (it only ever praises answers of 0, never the
    safety question), the **Save or print my summary** button, and the 4-7-8 **breathing reset**. Start the breathing
    for a few seconds.
-4. **Crisis resources** from the sidebar: hotlines, the breathing exercise, and the grounding steps.
+4. **Self-help.** Scroll down the dashboard: the **Four Pillars** of wellbeing and the **Relaxation & sleep library**
+   (guided breathing plus short exercises). _Say:_ students get support even on a good day, not only when flagged.
+5. **Crisis resources** from the sidebar: hotlines, the breathing exercise, and the grounding steps.
 
-### 2. A high-risk check-in reaches a counselor (3 min), as Jon, then the counselor
+### 2. A high-risk check-in reaches a peer facilitator (3 min), as Jon, then the peer facilitator
+
+_Terminology:_ the staff account (`villanueva@…`) appears in the app as a **Peer Facilitator**. Peer facilitators give
+first-line support under the GSTC's licensed counselors; formal counseling goes through PATNUBAY.
 
 Use this to show the safety net. Pick one of two ways:
 
 - **Safe and instant:** the counselor window already shows **Jon Reyes** at the top of the triage queue with a _Safety
   question flagged_ badge. Skip to step 3.
 - **Live proof:** sign in as `jon@…` in a private window, answer the check-in with a 1 or more on question 7,
-  submit. **Check your inbox** and read the alert aloud. (It says who and the score, never the answers.) The email goes to your real staff addresses, so this also proves the alert works.
+  submit. On Jon's result, point at the **"Want to talk to a professional counselor?"** card: medium and high results
+  link to the GSTC's **PATNUBAY** booking page. _Say:_ this is the bridge; we don't replace PATNUBAY, we feed into it.
+  **Check your inbox** and read the alert aloud. (It says who and the score, never the answers.) The email goes to your real staff addresses, so this also proves the alert works.
 
 3. **Counselor window.** The queue is sorted by urgency, high risk and safety flags first. Click **Inspect case**:
    the answers, the PHQ-2 / GAD-2 screens, WHO-5 wellbeing, the student's earlier check-ins. Add a note, set a
    **follow-up date**, set the status to **Escalated** or **Reviewed**, save. Point at the badges in the queue
    (_Follow up today_ on Jon, _Follow-up overdue_ on Angela) and the **Follow-up due** filter: nothing slips through.
 4. **Chat.** In the case view, open the confidential chat and send a message; show it appears live in the student's
-   window (Maria's **Message counselor** button, for a student who has a counselor assigned).
+   window (the student's message button, for a student who has a peer facilitator assigned). Point at the banner in the
+   student's chat: peer support is not professional counseling, with links to PATNUBAY and Crisis 1553.
 
 ### 3. Booking a session (2 min)
 
 1. As the **counselor**: _My availability_ tab shows open slots; add one to show it takes seconds.
-2. As **Bea or Maria**: **Appointments > Book a counselor**, pick a slot. It arrives as **Pending Review**; a student
+2. As **Bea or Maria**: **Appointments**, book a peer facilitator slot. It arrives as **Pending Review**; a student
    can never confirm their own booking (the database rules forbid it).
 3. As the **counselor**: **Appointment requests** panel, **Confirm**. Switch back to the student, the status changed live.
 4. Click **Add to calendar** on a confirmed session: it downloads a file that opens in Google, Outlook or Apple Calendar.
