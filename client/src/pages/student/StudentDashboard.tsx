@@ -1,3 +1,4 @@
+import { appointmentTitle } from "../../utils/appointmentTitle";
 import { lazy, Suspense, useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -1210,7 +1211,7 @@ export default function StudentDashboard() {
                   {appointments.slice(0, 3).map((apt) => (
                     <m.div key={apt.id} {...itemMotion} className="mb-tile mb-tile-sm">
                       <div className="flex justify-between items-start gap-2">
-                        <div className="font-bold text-[color:var(--mb-ink)]">{apt.title || "Peer support session"}</div>
+                        <div className="font-bold text-[color:var(--mb-ink)]">{appointmentTitle(apt.title)}</div>
                         <span
                           className={`mb-badge shrink-0 capitalize ${
                             appointmentPhase(apt.status) === "confirmed"

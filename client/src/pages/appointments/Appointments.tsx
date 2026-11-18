@@ -1,3 +1,4 @@
+import { appointmentTitle } from "../../utils/appointmentTitle";
 import { useEffect, useState, useMemo, type FormEvent, type ReactNode } from "react";
 import { Calendar, CalendarPlus, Plus } from "lucide-react";
 import { m, AnimatePresence, LazyMotion, type Variants } from "framer-motion";
@@ -479,7 +480,7 @@ export default function Appointments() {
                       <div className="min-w-0 flex-1 p-4 sm:p-6">
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                           <h2 className="font-display text-xl font-bold text-[color:var(--mb-ink)]">
-                            {apt.title || "Peer support session"}
+                            {appointmentTitle(apt.title)}
                           </h2>
                           <span
                             className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-wider ${STATUS_TONE[kind]}`}
