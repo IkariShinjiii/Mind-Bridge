@@ -8,6 +8,7 @@ import Spinner from "../ui/Spinner";
 import { validate } from "../../lib/validate";
 import { chatMessageSchema } from "../../lib/schemas";
 import { friendlyError } from "../../utils/errors";
+import { PATNUBAY_BOOKING_URL } from "../../utils/referral";
 import type { ChatMessage, StoredDate } from "../../types";
 import useFocusTrap from "../../hooks/useFocusTrap";
 import { parseDate } from "../../utils/dates";
@@ -223,7 +224,7 @@ export default function ConfidentialChatModal({
                       {recipientName || (isCounselorView ? "Student" : "Your Peer Facilitator")}
                     </span>
                     <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-1 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
-                      {recipientRole}
+                      {recipientRole === "counselor" ? "Peer Facilitator" : recipientRole === "student" ? "Student" : recipientRole}
                     </span>
                   </div>
                   <p className="text-sm text-[color:var(--mb-muted)] flex items-center gap-2 truncate">
@@ -242,6 +243,16 @@ export default function ConfidentialChatModal({
                   <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
+
+              {!isCounselorView && (
+                <div className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] px-4 py-2 text-xs text-[color:var(--mb-ink)]">
+                  Peer facilitators offer support, not professional counseling. For formal counseling, book with the{" "}
+                  <a href={PATNUBAY_BOOKING_URL} target="_blank" rel="noopener noreferrer" className="font-bold underline">
+                    USA Guidance Center (PATNUBAY)
+                  </a>
+                  . In a crisis, use the Crisis 1553 button.
+                </div>
+              )}
 
               {/* ── Message Body ── */}
               <div
