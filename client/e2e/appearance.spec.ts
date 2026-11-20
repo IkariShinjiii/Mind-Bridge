@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 test.describe("Appearance setting", () => {
   test("the nav bar has no theme toggle", async ({ page }) => {
@@ -10,7 +10,7 @@ test.describe("Appearance setting", () => {
     await expect(page.getByRole("button", { name: /Switch to (dark|light) mode/ })).toHaveCount(0);
   });
 
-  for (const person of [STUDENT, COUNSELOR]) {
+  for (const person of [STUDENT, PEER_FACILITATOR]) {
     test(`${person.email} can switch to dark in Settings and it is remembered`, async ({ page }) => {
       await seed(page);
       await logIn(page, person);

@@ -61,7 +61,7 @@ If unsure, deploy rules to the emulator and run `backend-tests` first.
 7. **Deploy the rules** (see section 4.2).
 8. **Create the first admin.** Sign up in the app, then in the Firestore console open
    `users/<your uid>` and set `role` to `admin`. The rules intentionally block this from the app.
-9. **Approve counselors**: once a counselor signs up, an admin approves them in the admin panel
+9. **Approve peer facilitators**: once a peer facilitator signs up, an admin approves them in the admin panel
    (sets `approved: true`). Until then they have no staff access.
 
 ## 4. Deploying each component
@@ -227,8 +227,8 @@ Run through this after every production deploy (about five minutes):
 - [ ] Sign up with a test `@usa.edu.ph` account and sign in
 - [ ] Student can submit a check-in and sees results
 - [ ] Student can see available slots and book one
-- [ ] Counselor (approved) can sign in and see the flagged check-in
-- [ ] Unapproved counselor sees no staff data
+- [ ] Peer Facilitator (approved) can sign in and see the flagged check-in
+- [ ] Unapproved peer facilitator sees no staff data
 - [ ] (If deployed) a high-risk check-in produces an alert email
 
 ## 7. Rollback procedures
@@ -277,7 +277,7 @@ firebase deploy --only functions
 
 To stop alerts immediately without a deploy, delete the function:
 `firebase functions:delete alertOnHighRisk`. Restoring it is a redeploy. During any period without
-alerts, counselors must check the dashboard manually, because high-risk cases will not be emailed.
+alerts, peer facilitators must check the dashboard manually, because high-risk cases will not be emailed.
 
 ### 7.4 Data
 
@@ -320,7 +320,7 @@ Rolling back code does not undo bad writes. For data protection:
 | Google sign-in rejected with "only available for @usa.edu.ph accounts" | By design | Use a school account |
 | `auth/operation-not-allowed` | Provider disabled | Enable Email/Password and Google in Authentication > Sign-in method |
 | Signed in but immediately sent back to login | Profile document missing or `active: false` | Check `users/<uid>`; reactivate in the admin panel or console |
-| Counselor sees an empty dashboard or access errors | Not approved | An admin must approve them (`approved: true`) |
+| Peer Facilitator sees an empty dashboard or access errors | Not approved | An admin must approve them (`approved: true`) |
 | Cannot become admin from the app | Intentional | Set `role: "admin"` in the Firestore console |
 
 ### Firestore
@@ -340,7 +340,7 @@ Rolling back code does not undo bad writes. For data protection:
 |---|---|---|
 | Function never fires | Not deployed, or project not on Blaze | `firebase deploy --only functions`; upgrade the plan |
 | Deploy fails on secret | `SMTP_URL` not set | `firebase functions:secrets:set SMTP_URL` |
-| Log: "no staff emails found" | No active, approved counselors or admins with an `email` field | Approve staff and check `users` documents |
+| Log: "no staff emails found" | No active, approved peer facilitators or admins with an `email` field | Approve staff and check `users` documents |
 | `Invalid login` / `ECONNREFUSED` in logs | Wrong SMTP credentials or port | Re-set the secret and redeploy |
 | Emails land in spam or are rejected | Sender not allowed by provider | Set `SMTP_FROM` to a verified sender; configure SPF/DKIM |
 | Email links to the wrong site | `APP_URL` default in use | Set `APP_URL` and redeploy the function |

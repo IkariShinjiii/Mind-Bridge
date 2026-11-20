@@ -147,7 +147,7 @@ const CANCELLATION_PRESETS = [
 
 export default function Appointments() {
   const { userRole } = useAuth();
-  const isCounselor = userRole === "admin";
+  const isPeerFacilitator = userRole === "admin";
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -191,7 +191,7 @@ export default function Appointments() {
   async function loadData() {
     setLoading(true);
     try {
-      const data = isCounselor ? await getAllAppointments() : await getAppointments();
+      const data = isPeerFacilitator ? await getAllAppointments() : await getAppointments();
       setAppointments(data);
       setLoadError("");
     } catch (err) {
@@ -318,7 +318,7 @@ export default function Appointments() {
         await updateAppointmentStatus(apt.id, "Cancelled", {
           slotId: apt.slotId,
           cancellationReason: reason || "Cancelled",
-          cancelledBy: isCounselor ? "counselor" : "student",
+          cancelledBy: isPeerFacilitator ? "counselor" : "student",
         });
         showFeedback("success", "Appointment cancelled successfully.");
       } else if (type === "reschedule") {
@@ -360,16 +360,16 @@ export default function Appointments() {
         <div className="mb-6 flex flex-col gap-4 border-b border-[color:var(--mb-line)] pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-[color:var(--mb-ink)] sm:text-4xl">
-              {isCounselor ? "Appointment requests" : "My appointments"}
+              {isPeerFacilitator ? "Appointment requests" : "My appointments"}
             </h1>
             <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-              {isCounselor
+              {isPeerFacilitator
                 ? "Confirm, reschedule or close confidential sessions with students."
                 : "Your confidential sessions with university peer facilitators."}
             </p>
           </div>
 
-          {!isCounselor && (
+          {!isPeerFacilitator && (
             <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid self-start sm:self-auto">
               <Plus className="h-5 w-5" aria-hidden="true" />
               Book a peer facilitator
@@ -428,13 +428,13 @@ export default function Appointments() {
               </div>
               <h2 className="font-display text-2xl font-bold text-[color:var(--mb-ink)]">Nothing here yet</h2>
               <p className="mx-auto mt-1 max-w-[50ch] text-[color:var(--mb-muted)]">
-                {isCounselor
+                {isPeerFacilitator
                   ? "No appointment requests match this filter."
                   : filter === "all"
                     ? "You have no appointments. Pick a peer facilitator and a time that works for you."
                     : "You have no appointments in this category."}
               </p>
-              {!isCounselor && filter === "all" && (
+              {!isPeerFacilitator && filter === "all" && (
                 <button type="button" onClick={openBookingModal} className="mb-btn mb-btn-solid mt-6">
                   Book a peer facilitator
                 </button>
@@ -451,7 +451,7 @@ export default function Appointments() {
                 {filteredAppointments.map((apt, index) => {
                   const kind = appointmentPhase(apt.status);
                   const status = apt.status || "Pending Review";
-                  const actions = actionsFor(kind, isCounselor ? "counselor" : "student");
+                  const actions = actionsFor(kind, isPeerFacilitator ? "counselor" : "student");
                   const plate = plateParts(apt.start || apt.date);
                   const busy = updatingId === apt.id;
 
@@ -492,10 +492,10 @@ export default function Appointments() {
                         <dl className="mt-2 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                           <div className="flex gap-2">
                             <dt className="text-[color:var(--mb-muted)]">
-                              {isCounselor ? "Student" : "Peer Facilitator"}
+                              {isPeerFacilitator ? "Student" : "Peer Facilitator"}
                             </dt>
                             <dd className="font-semibold text-[color:var(--mb-ink)]">
-                              {isCounselor
+                              {isPeerFacilitator
                                 ? apt.studentName || "Student"
                                 : apt.counselorName || "Assigned peer facilitator"}
                             </dd>
@@ -507,7 +507,7 @@ export default function Appointments() {
                               {apt.end ? ` to ${formatDateTime(apt.end)}` : ""}
                             </dd>
                           </div>
-                          {isCounselor && apt.studentEmail && (
+                          {isPeerFacilitator && apt.studentEmail && (
                             <div className="flex gap-2 sm:col-span-2">
                               <dt className="text-[color:var(--mb-muted)]">Email</dt>
                               <dd className="break-all font-mono text-[color:var(--mb-ink)]">{apt.studentEmail}</dd>
@@ -570,11 +570,11 @@ export default function Appointments() {
                                 className={`mb-btn ${ui.solid ? "mb-btn-solid" : "mb-btn-line"} !px-4 text-sm ${ui.danger ? DANGER_LINE : ""}`}
                               >
                                 {quick && busy && <Spinner size={16} />}
-                                {quick && busy ? ui.busy : isCounselor ? ui.label : (ui.studentLabel ?? ui.label)}
+                                {quick && busy ? ui.busy : isPeerFacilitator ? ui.label : (ui.studentLabel ?? ui.label)}
                               </button>
                             );
                           })}
-                          {isCounselor && actions.length === 0 && (
+                          {isPeerFacilitator && actions.length === 0 && (
                             <span className="text-sm text-[color:var(--mb-muted)]">Closed. No further actions.</span>
                           )}
                         </div>
@@ -587,7 +587,7 @@ export default function Appointments() {
           )}
         </AnimatePresence>
 
-        {/* STUDENT BOOKING: counselor, time, confirm */}
+        {/* STUDENT BOOKING: peer facilitator, time, confirm */}
         <Modal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
@@ -622,7 +622,7 @@ export default function Appointments() {
           }
           description={
             actionModal?.apt
-              ? `${isCounselor ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your peer facilitator"}, ${formatDateTime(
+              ? `${isPeerFacilitator ? actionModal.apt.studentName || "Student" : actionModal.apt.counselorName || "Your peer facilitator"}, ${formatDateTime(
                   actionModal.apt.start || actionModal.apt.date,
                 )}`
               : undefined
@@ -667,7 +667,7 @@ export default function Appointments() {
                 </div>
               )}
 
-              {(actionModal.type === "decline" || (actionModal.type === "cancel" && isCounselor)) && (
+              {(actionModal.type === "decline" || (actionModal.type === "cancel" && isPeerFacilitator)) && (
                 <div>
                   <p className="mb-2 font-bold text-[color:var(--mb-ink)]">Quick reasons</p>
                   <div className="flex flex-wrap gap-2">

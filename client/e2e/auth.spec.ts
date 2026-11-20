@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { seed, readCollection, logIn, signOut, STUDENT, COUNSELOR } from "./helpers";
+import { seed, readCollection, logIn, signOut, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 async function fillSignup(
   page: Page,
@@ -97,8 +97,8 @@ test.describe("Login and logout", () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
-  test("a counselor logs in and is sent to the staff dashboard", async ({ page }) => {
-    await logIn(page, COUNSELOR);
+  test("a peer facilitator logs in and is sent to the staff dashboard", async ({ page }) => {
+    await logIn(page, PEER_FACILITATOR);
 
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
     await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();

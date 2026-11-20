@@ -395,7 +395,7 @@ export default function StudentDashboard() {
     })
     .sort((a, b) => new Date(a.start || a.date || 0).getTime() - new Date(b.start || b.date || 0).getTime())[0];
 
-  // Assigned Counselor info
+  // Assigned Peer Facilitator info
   const assignedCounselorName =
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Peer Facilitator";
 
@@ -502,7 +502,7 @@ export default function StudentDashboard() {
               )}
             </div>
 
-            {/* Wellness takes a full row (the ring needs room); appointment and counselor share the next one from sm up. */}
+            {/* Wellness takes a full row (the ring needs room); appointment and peer facilitator share the next one from sm up. */}
             <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
@@ -1287,7 +1287,7 @@ export default function StudentDashboard() {
         </aside>
       </div>
 
-      {/* BOOKING: counselor, time, confirm */}
+      {/* BOOKING: peer facilitator, time, confirm */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -1309,7 +1309,7 @@ export default function StudentDashboard() {
         />
       </Modal>
 
-      {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED COUNSELOR) */}
+      {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED PEER FACILITATOR) */}
       {chatOpen && (
         <Suspense fallback={null}>
           <ConfidentialChatModal

@@ -17,7 +17,7 @@ export const USERS = {
   student: { uid: "stu1", data: { name: "Ana Student", email: "ana@usa.edu.ph", role: "student", approved: true, active: true } },
   otherStudent: { uid: "stu2", data: { name: "Ben Student", email: "ben@usa.edu.ph", role: "student", approved: true, active: true } },
   counselor: { uid: "cou1", data: { name: "Dr. Cruz", email: "cruz@usa.edu.ph", role: "counselor", approved: true, active: true } },
-  pendingCounselor: { uid: "cou2", data: { name: "Dr. Pending", email: "pending@usa.edu.ph", role: "counselor", approved: false, active: true } },
+  pendingPeerFacilitator: { uid: "cou2", data: { name: "Dr. Pending", email: "pending@usa.edu.ph", role: "counselor", approved: false, active: true } },
   admin: { uid: "adm1", data: { name: "Admin", email: "admin@usa.edu.ph", role: "admin", approved: true, active: true } },
   deactivated: { uid: "stu3", data: { name: "Gone Student", email: "gone@usa.edu.ph", role: "student", approved: true, active: false } },
 };

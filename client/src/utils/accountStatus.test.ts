@@ -17,7 +17,7 @@ describe("accountStatus", () => {
     expect(accountStatus({ role: "counselor", approved: false, active: false })).toBe("deactivated");
   });
 
-  it("holds a counselor until approved is exactly true", () => {
+  it("holds a peer facilitator until approved is exactly true", () => {
     expect(accountStatus({ role: "counselor", approved: false })).toBe("pending-approval");
     expect(accountStatus({ role: "counselor" })).toBe("pending-approval");
     expect(accountStatus({ role: "Counselor", approved: false })).toBe("pending-approval");

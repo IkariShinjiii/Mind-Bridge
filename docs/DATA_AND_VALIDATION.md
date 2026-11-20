@@ -1,5 +1,7 @@
 # Data types and validation
 
+> **Terminology (2026-11-20).** Licensed guidance counselors are not users of Mind Bridge; students reach them only through a peer-facilitator referral to PATNUBAY. The staff role is called **Peer Facilitator** in the product, the docs and the code (functions, components, tests). Only the data already stored in Firebase keeps the old name, so no migration is needed: the role value `counselor`, and the fields `counselorId`, `counselorName`, `counselorNote(s)` and `assignedCounselorId/Name`. Where this file says `counselor` in data, read it as the Peer Facilitator role.
+
 Mind Bridge is a **strict TypeScript** project and validates every form with **Zod**
 (see [ADR 0001](adr/0001-typescript-and-zod.md)). This page says where each thing lives and what
 the rules are, so you do not have to read the schemas to know them.
@@ -56,7 +58,7 @@ valid), and `toFieldErrors(zodError)` does the conversion. Nested paths are join
 | `timeWindowSchema(now)` | Availability, reschedule | Both times parse; start not in the past; end strictly after start. `now` is injectable so tests do not depend on the clock. |
 | `appointmentActionSchema` | Decline, cancel, reschedule dialog | Decline needs a reason (max 500). Cancel's reason is optional. Reschedule needs a start time. |
 | `caseReviewSchema` | Case inspector | Case id; status `open`, `reviewed` or `escalated`; notes up to 2000. |
-| `counselorAssignmentSchema`, `accountActionSchema` | Accounts tab | Ids must be present. |
+| `peerFacilitatorAssignmentSchema`, `accountActionSchema` | Accounts tab | Ids must be present. |
 | `chatMessageSchema` | Chat | Text trimmed, 1 to 2000 characters. |
 
 The messages are written for students and are part of the UI contract: the e2e suite asserts several

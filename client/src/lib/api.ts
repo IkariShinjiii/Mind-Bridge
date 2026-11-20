@@ -76,10 +76,10 @@ export const getAdminUsers = (): Promise<Array<UserProfile & { id: string }>> =>
   guard(async () => mapDocs<UserProfile & { id: string }>(await getDocs(collection(db, "users"))));
 
 /** Marks a staff account as approved. */
-export const approveCounselor = (id: string): Promise<void> =>
+export const approvePeerFacilitator = (id: string): Promise<void> =>
   guard(() => updateDoc(doc(db, "users", id), { approved: true }));
 /** Marks a staff account as not approved. */
-export const rejectCounselor = (id: string): Promise<void> =>
+export const rejectPeerFacilitator = (id: string): Promise<void> =>
   guard(() => updateDoc(doc(db, "users", id), { approved: false }));
 /** Blocks an account from logging in. */
 export const deactivateUser = (id: string): Promise<void> =>
@@ -236,7 +236,7 @@ export const getMyAssessments = (): Promise<Assessment[]> =>
   });
 
 /**
- * Updates a case status and, optionally, the counselor notes and the follow-up date.
+ * Updates a case status and, optionally, the peer facilitator notes and the follow-up date.
  * @param counselorNotes - left unchanged when undefined; an empty string clears the notes
  * @param followUpDate - "YYYY-MM-DD"; left unchanged when undefined; an empty string clears it
  */
@@ -321,7 +321,7 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
         studentEmail,
         slotId: slot.id || null,
         counselorId: slot.counselorId,
-        counselorName: slot.counselorName || "Assigned Counselor",
+        counselorName: slot.counselorName || "Assigned Peer Facilitator",
         title: `Session with ${slot.counselorName || "Counselor"}`,
         start: slot.start,
         end: slot.end,
@@ -400,7 +400,7 @@ export const updateAppointmentStatus = (
     const updates = { status, updatedAt: new Date().toISOString(), ...extraData };
 
     // Refuse a stale click: the screen may be showing a session someone else has already closed, such as a
-    // counselor confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
+    // peer facilitator confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
     const current = await getDoc(doc(db, "appointments", id)).catch(() => null);
     if (current?.exists() && !canMove(appointmentPhase(current.data()?.["status"]), status)) {
       throw new AppError(
@@ -423,13 +423,13 @@ export const updateAppointmentStatus = (
     await updateDoc(doc(db, "appointments", id), updates);
   });
 
-// --- COUNSELOR AVAILABILITY ---
+// --- PEER FACILITATOR AVAILABILITY ---
 
-/** Lists every published counselor slot, booked or not. */
+/** Lists every published peer facilitator slot, booked or not. */
 export const getAvailability = (): Promise<AvailabilitySlot[]> =>
   guard(async () => mapDocs<AvailabilitySlot>(await getDocs(collection(db, "availability"))));
 
-/** Lists the signed-in counselor's own slots. */
+/** Lists the signed-in peer facilitator's own slots. */
 export const getMyAvailability = (): Promise<AvailabilitySlot[]> =>
   guard(async () => {
     const uid = getCurrentUserId();
@@ -439,7 +439,7 @@ export const getMyAvailability = (): Promise<AvailabilitySlot[]> =>
   });
 
 /**
- * Publishes an open slot for the signed-in counselor.
+ * Publishes an open slot for the signed-in peer facilitator.
  * @param start - ISO or datetime-local string
  * @param end - ISO or datetime-local string
  */
@@ -486,10 +486,10 @@ export const saveUserSettings = (uid: string | undefined, data: Partial<UserProf
     await updateDoc(doc(db, "users", targetUid), { ...data });
   });
 
-// --- COUNSELOR-STUDENT ASSIGNMENT ---
+// --- PEER-FACILITATOR-STUDENT ASSIGNMENT ---
 
-/** Assigns (or, with a falsy counselorId, clears) the counselor for a student. */
-export const assignCounselorToStudent = (
+/** Assigns (or, with a falsy counselorId, clears) the peer facilitator for a student. */
+export const assignPeerFacilitatorToStudent = (
   studentId: string,
   counselorId: string | null | undefined,
   counselorName: string | null | undefined,

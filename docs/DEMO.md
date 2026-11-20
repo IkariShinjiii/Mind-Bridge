@@ -34,14 +34,14 @@ All use the password you set in `DEMO_PASSWORD`.
 
 | Role                             | Email                             | What it shows                                                                                      |
 | -------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Student (main demo)              | `maria@demo.mindbridge.test`      | 8 weeks of improving check-ins, WHO-5 trend, goals, a confirmed session, a chat with her counselor |
+| Student (main demo)              | `maria@demo.mindbridge.test`      | 8 weeks of improving check-ins, WHO-5 trend, goals, a confirmed session, a chat with her peer facilitator |
 | Student (high risk)              | `jon@demo.mindbridge.test`        | A fresh high-risk check-in with the safety question flagged, waiting in the triage queue           |
-| Student (escalated, followed up) | `angela@demo.mindbridge.test`     | An escalated case with counselor notes and a completed session                                     |
+| Student (escalated, followed up) | `angela@demo.mindbridge.test`     | An escalated case with peer facilitator notes and a completed session                                     |
 | Student (full check-in)          | `paolo@demo.mindbridge.test`      | The 16-question PHQ-9 + GAD-7 check-in, moderate result                                            |
 | Student (getting worse)          | `bea@demo.mindbridge.test`        | A rising trend and a pending appointment request                                                   |
 | Student (steady)                 | `carlo@demo.mindbridge.test`      | Low risk and a cancelled appointment                                                               |
-| Counselor                        | `villanueva@demo.mindbridge.test` | The staff dashboard: triage, schedule, analytics                                                   |
-| Counselor awaiting approval      | `gomez@demo.mindbridge.test`      | Shows in the admin's approval list                                                                 |
+| Peer Facilitator                        | `villanueva@demo.mindbridge.test` | The staff dashboard: triage, schedule, analytics                                                   |
+| Peer Facilitator awaiting approval      | `gomez@demo.mindbridge.test`      | Shows in the admin's approval list                                                                 |
 | Admin                            | `admin@demo.mindbridge.test`      | Everything, including account approval and assignments                                             |
 
 ## Things to know

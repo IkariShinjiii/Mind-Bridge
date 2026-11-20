@@ -122,6 +122,7 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/peer-facilitator/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/counselor/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route
                   path="/admin/dashboard"

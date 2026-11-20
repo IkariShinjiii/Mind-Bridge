@@ -23,11 +23,11 @@ import {
   getAssessments,
   updateAssessmentStatus,
   getAllAppointments,
-  approveCounselor,
-  rejectCounselor,
+  approvePeerFacilitator,
+  rejectPeerFacilitator,
   deactivateUser,
   reactivateUser,
-  assignCounselorToStudent,
+  assignPeerFacilitatorToStudent,
   getUserSettings,
   getWellbeingFor,
 } from "../../lib/api";
@@ -364,7 +364,7 @@ export default function AdminPanel() {
   /** The open case's student's most recent WHO-5 wellbeing score (0 to 100), if they have answered it. */
   const [wellbeingScore, setWellbeingScore] = useState<{ score: number; date: string } | null>(null);
   const [loadingContact, setLoadingContact] = useState(false);
-  const [counselorNoteInput, setCounselorNoteInput] = useState("");
+  const [peerFacilitatorNoteInput, setPeerFacilitatorNoteInput] = useState("");
   const [followUpInput, setFollowUpInput] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [chatStudent, setChatStudent] = useState<{ id: string; name: string } | null>(null);
@@ -431,7 +431,7 @@ export default function AdminPanel() {
 
   async function openCaseInspector(item: Assessment) {
     setActiveCase(item);
-    setCounselorNoteInput(item.counselorNotes || "");
+    setPeerFacilitatorNoteInput(item.counselorNotes || "");
     setFollowUpInput(item.followUpDate || "");
     setStudentContact(null);
     setWellbeingScore(null);
@@ -458,7 +458,7 @@ export default function AdminPanel() {
     const review = validate(caseReviewSchema, {
       id: activeCase.id,
       status: activeCase.status || "open",
-      counselorNotes: counselorNoteInput,
+      counselorNotes: peerFacilitatorNoteInput,
       ...(followUpChanged ? { followUpDate: followUpInput } : {}),
     });
     if (!review.ok) {
@@ -485,7 +485,7 @@ export default function AdminPanel() {
       await loadData();
       showNotice("success", "Case notes saved.");
     } catch (err) {
-      console.error("Error saving counselor notes", err);
+      console.error("Error saving peer facilitator notes", err);
       showNotice(
         "error",
         friendlyError(err, "Could not save the case notes. Your text is still in the box. Try again."),
@@ -504,16 +504,16 @@ export default function AdminPanel() {
     return users.filter((u) => (u.role === "counselor" || u.role === "admin") && u.approved && u.active !== false);
   }, [users]);
 
-  async function handleAssignCounselor(studentId: string, counselorId: string) {
-    const counselor = approvedStaff.find((c) => c.id === counselorId);
-    const counselorName = counselor ? counselor.name || counselor.email || null : null;
+  async function handleAssignPeerFacilitator(studentId: string, counselorId: string) {
+    const peerFacilitator = approvedStaff.find((c) => c.id === counselorId);
+    const counselorName = peerFacilitator ? peerFacilitator.name || peerFacilitator.email || null : null;
     setActionLoadingId(studentId);
     try {
-      await assignCounselorToStudent(studentId, counselorId || null, counselorName);
+      await assignPeerFacilitatorToStudent(studentId, counselorId || null, counselorName);
       await loadData();
       showNotice("success", counselorId ? `Assigned to ${counselorName}.` : "Peer facilitator assignment removed.");
     } catch (err) {
-      console.error("Failed to assign counselor", err);
+      console.error("Failed to assign peer facilitator", err);
       showNotice("error", "Could not change the peer facilitator assignment. Try again.");
     } finally {
       setActionLoadingId(null);
@@ -1058,7 +1058,7 @@ export default function AdminPanel() {
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => handleAccountAction(approveCounselor, u.id, "Staff account approved.")}
+                          onClick={() => handleAccountAction(approvePeerFacilitator, u.id, "Staff account approved.")}
                           disabled={actionLoadingId === u.id}
                           className="mb-btn mb-btn-solid !px-4 text-sm"
                         >
@@ -1067,7 +1067,7 @@ export default function AdminPanel() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleAccountAction(rejectCounselor, u.id, "Staff request rejected.")}
+                          onClick={() => handleAccountAction(rejectPeerFacilitator, u.id, "Staff request rejected.")}
                           disabled={actionLoadingId === u.id}
                           className={`mb-btn mb-btn-line !px-4 text-sm ${DANGER_LINE}`}
                         >
@@ -1130,7 +1130,7 @@ export default function AdminPanel() {
                               <span className="font-bold text-[color:var(--mb-ink)]">Peer Facilitator</span>
                               <select
                                 value={u.assignedCounselorId || ""}
-                                onChange={(e) => handleAssignCounselor(u.id, e.target.value)}
+                                onChange={(e) => handleAssignPeerFacilitator(u.id, e.target.value)}
                                 disabled={busy}
                                 className="mb-field !w-auto min-w-[10rem]"
                               >
@@ -1339,8 +1339,8 @@ export default function AdminPanel() {
               <textarea
                 id="case-notes"
                 rows={4}
-                value={counselorNoteInput}
-                onChange={(e) => setCounselorNoteInput(e.target.value)}
+                value={peerFacilitatorNoteInput}
+                onChange={(e) => setPeerFacilitatorNoteInput(e.target.value)}
                 placeholder="Assessment, outreach taken, sessions scheduled…"
                 className="mb-field"
               />

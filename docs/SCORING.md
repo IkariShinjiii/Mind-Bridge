@@ -79,7 +79,7 @@ enforce can only be met or exceeded.
 
 An optional card on the student dashboard, kept apart from the check-in. Five positive statements about the last two
 weeks, each 0 (at no time) to 5 (all of the time). Raw 0 to 25, times 4, so 0 to 100. Below 50 is the published prompt to
-look further, and the card says so gently and offers a counselor. It is stored in its own `wellbeing` collection, staff
+look further, and the card says so gently and offers a peer facilitator. It is stored in its own `wellbeing` collection, staff
 see the latest score in the case view, and it **never changes a check-in's risk level** and never sends an alert. The
 Firestore rules check that the score is exactly the answers added up times 4.
 

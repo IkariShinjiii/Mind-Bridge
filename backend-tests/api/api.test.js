@@ -92,7 +92,7 @@ describe("assessments", () => {
     expect(await api.getMyAssessments()).toEqual([]);
   });
 
-  it("getAssessments (counselor) returns all docs and fills placeholder names from profiles", async () => {
+  it("getAssessments (peer facilitator) returns all docs and fills placeholder names from profiles", async () => {
     await seed(env, "assessments/a1", assessment({ studentName: "Student", studentEmail: "No email" }));
     await seed(env, "assessments/a2", assessment({ studentId: "stu2", studentName: "Ben Real", studentEmail: "ben@x.ph" }));
     login("counselor");
@@ -108,7 +108,7 @@ describe("assessments", () => {
     await denied(api.getAssessments());
   });
 
-  it("updateAssessmentStatus (counselor) persists status, notes and reviewedAt", async () => {
+  it("updateAssessmentStatus (peer facilitator) persists status, notes and reviewedAt", async () => {
     await seed(env, "assessments/a1", assessment());
     login("counselor");
     await api.updateAssessmentStatus("a1", "reviewed", "called student");
@@ -130,7 +130,7 @@ describe("assessments", () => {
 });
 
 describe("appointments and availability", () => {
-  it("addAvailability (counselor) creates an unbooked slot with the expected shape", async () => {
+  it("addAvailability (peer facilitator) creates an unbooked slot with the expected shape", async () => {
     login("counselor");
     const ref = await api.addAvailability("2026-10-05T09:00:00.000Z", "2026-10-05T10:00:00.000Z");
     expect(await raw(`availability/${ref.id}`)).toMatchObject({
@@ -144,7 +144,7 @@ describe("appointments and availability", () => {
     await denied(api.addAvailability("a", "b"));
   });
 
-  it("getAvailability (student) lists all slots with ids; getMyAvailability filters to the counselor", async () => {
+  it("getAvailability (student) lists all slots with ids; getMyAvailability filters to the peer facilitator", async () => {
     await seed(env, "availability/s1", slot());
     await seed(env, "availability/s2", slot({ counselorId: "adm1" }));
     login("student");
@@ -153,7 +153,7 @@ describe("appointments and availability", () => {
     expect((await api.getMyAvailability()).map((s) => s.id)).toEqual(["s1"]);
   });
 
-  it("removeAvailability: owner ok, other counselor denied", async () => {
+  it("removeAvailability: owner ok, other peer facilitator denied", async () => {
     await seed(env, "availability/s1", slot());
     login("admin");
     await denied(api.removeAvailability("s1"));
@@ -195,7 +195,7 @@ describe("appointments and availability", () => {
     expect(await api.getAppointments()).toEqual([]);
   });
 
-  it("getAllAppointments (counselor) returns everything with names filled in; student denied", async () => {
+  it("getAllAppointments (peer facilitator) returns everything with names filled in; student denied", async () => {
     await seed(env, "appointments/ap1", appointment({ studentName: "Student", studentEmail: "" }));
     await seed(env, "appointments/ap2", appointment({ studentId: "stu2", studentName: "Ben Student", studentEmail: "ben@usa.edu.ph" }));
     login("counselor");
@@ -206,7 +206,7 @@ describe("appointments and availability", () => {
     await denied(api.getAllAppointments());
   });
 
-  it("updateAppointmentStatus Confirmed (counselor) stamps updatedAt", async () => {
+  it("updateAppointmentStatus Confirmed (peer facilitator) stamps updatedAt", async () => {
     await seed(env, "appointments/ap1", appointment());
     login("counselor");
     await api.updateAppointmentStatus("ap1", "Confirmed");
@@ -279,9 +279,9 @@ describe("user profiles, admin and assignment", () => {
 
   it("approve / reject / deactivate / reactivate (admin) persist", async () => {
     login("admin");
-    await api.approveCounselor("cou2");
+    await api.approvePeerFacilitator("cou2");
     expect((await raw("users/cou2")).approved).toBe(true);
-    await api.rejectCounselor("cou2");
+    await api.rejectPeerFacilitator("cou2");
     expect((await raw("users/cou2")).approved).toBe(false);
     await api.deactivateUser("stu1");
     expect((await raw("users/stu1")).active).toBe(false);
@@ -289,22 +289,22 @@ describe("user profiles, admin and assignment", () => {
     expect((await raw("users/stu1")).active).toBe(true);
   });
 
-  it("counselor cannot approve counselors", async () => {
+  it("peer facilitator cannot approve peer facilitators", async () => {
     login("counselor");
-    await denied(api.approveCounselor("cou2"));
+    await denied(api.approvePeerFacilitator("cou2"));
   });
 
-  it("assignCounselorToStudent assigns and clears", async () => {
+  it("assignPeerFacilitatorToStudent assigns and clears", async () => {
     login("counselor");
-    await api.assignCounselorToStudent("stu1", "cou1", "Dr. Cruz");
+    await api.assignPeerFacilitatorToStudent("stu1", "cou1", "Dr. Cruz");
     expect(await raw("users/stu1")).toMatchObject({ assignedCounselorId: "cou1", assignedCounselorName: "Dr. Cruz", assignedAt: expect.any(String) });
-    await api.assignCounselorToStudent("stu1", null);
+    await api.assignPeerFacilitatorToStudent("stu1", null);
     expect(await raw("users/stu1")).toMatchObject({ assignedCounselorId: null, assignedCounselorName: null, assignedAt: null });
   });
 
-  it("assignCounselorToStudent as a student -> permission-denied", async () => {
+  it("assignPeerFacilitatorToStudent as a student -> permission-denied", async () => {
     login("student");
-    await denied(api.assignCounselorToStudent("stu1", "stu1", "me"));
+    await denied(api.assignPeerFacilitatorToStudent("stu1", "stu1", "me"));
   });
 });
 
@@ -321,7 +321,7 @@ describe("getMyMessages (data download)", () => {
     logout();
     expect(await api.getMyMessages()).toEqual([]);
   });
-  it("a counselor with no thread of their own gets an empty list, not an error", async () => {
+  it("a peer facilitator with no thread of their own gets an empty list, not an error", async () => {
     await seed(env, "messages/m1", message());
     login("counselor");
     expect(await api.getMyMessages()).toEqual([]);

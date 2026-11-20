@@ -51,7 +51,7 @@ describe("appointmentPhase", () => {
 });
 
 describe("actionsFor", () => {
-  it("lets a counselor answer a request, and manage a scheduled session", () => {
+  it("lets a peer facilitator answer a request, and manage a scheduled session", () => {
     expect(actionsFor("pending", "counselor")).toEqual(["confirm", "reschedule", "decline"]);
     expect(actionsFor("confirmed", "counselor")).toEqual(["complete", "reschedule", "cancel"]);
     expect(actionsFor("rescheduled", "counselor")).toEqual(["complete", "reschedule", "cancel"]);

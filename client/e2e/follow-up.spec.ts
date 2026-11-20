@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, readCollection, logIn, COUNSELOR } from "./helpers";
+import { seed, readCollection, logIn, PEER_FACILITATOR } from "./helpers";
 
 const questionSummary = [
   "Little interest or pleasure in doing academic or daily activities",
@@ -47,7 +47,7 @@ const cases = {
 test.describe("case follow-up dates", () => {
   test.beforeEach(async ({ page }) => {
     await seed(page, { docs: { assessments: cases } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
     await page.getByRole("group", { name: "Filter cases" }).getByRole("button", { name: "All", exact: true }).click();
   });
@@ -77,7 +77,7 @@ test.describe("case follow-up dates", () => {
     await expect(card(page, "Lena")).toHaveCount(0);
   });
 
-  test("a counselor sets a follow-up date in the case view, and can clear it again", async ({ page }) => {
+  test("a peer facilitator sets a follow-up date in the case view, and can clear it again", async ({ page }) => {
     await card(page, "Nora").getByRole("button", { name: "Inspect case" }).click();
     const dialog = page.getByRole("dialog", { name: "Nora" });
 

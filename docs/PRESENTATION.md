@@ -7,16 +7,16 @@ the questions a panel is likely to ask. Uses the fake accounts from [`DEMO.md`](
 
 > Students who are struggling often do not walk into the guidance office. Mind Bridge gives them a private,
 > one-minute check-in at any hour, tells them in plain words what their answers suggest, shows free crisis support
-> straight away, and lets them book a counselor. Counselors see who needs help first, and a high-risk check-in emails
+> straight away, and lets them book a peer facilitator. Peer Facilitators see who needs help first, and a high-risk check-in emails
 > staff within a minute. The whole thing runs on free tiers.
 
-Say early: **it is a screening aid, not a diagnosis, and it supports counselors, it does not replace them.**
+Say early: **it is a screening aid, not a diagnosis, and it supports peer facilitators, it does not replace them.**
 
 ## Morning of
 
 - [ ] Re-run the seed so the dates are fresh: `node scripts/seed-demo.mjs --apply` (see `DEMO.md`).
 - [ ] Open the live site once, signed out, to wake it up. Accept the cookie banner so it does not cover anything.
-- [ ] Sign in to **three** browser windows now so the demo has no typing: student `maria@…`, counselor
+- [ ] Sign in to **three** browser windows now so the demo has no typing: student `maria@…`, peer facilitator
       `villanueva@…`, admin `admin@…` (all `@demo.mindbridge.test`). A normal window plus two profiles or private windows works.
 - [ ] Open your own email inbox on a second screen or phone (this is where the live alert lands).
 - [ ] Phone: open the site once and use Add to Home Screen, so you can show it installed.
@@ -28,7 +28,7 @@ Say early: **it is a screening aid, not a diagnosis, and it supports counselors,
 ### 1. A student checks in (3 min), as Maria
 
 1. **Dashboard.** Point out: welcome message, "Your latest check-in", the trend line ("2 pts lower than last time,
-   Improving"), her counselor, her next appointment, and the amber **Call 1553** card. _Say:_ crisis support is on every
+   Improving"), her peer facilitator, her next appointment, and the amber **Call 1553** card. _Say:_ crisis support is on every
    screen and is the only thing that never moves.
 2. **Check-in.** Seven questions, about a minute. Mention they are adapted from the PHQ-9 and GAD-7 and that there is
    an optional full 16-question version. Answer quickly with mostly 0s and 1s, then submit.
@@ -42,18 +42,18 @@ Say early: **it is a screening aid, not a diagnosis, and it supports counselors,
 ### 2. A high-risk check-in reaches a peer facilitator (3 min), as Jon, then the peer facilitator
 
 _Terminology:_ the staff account (`villanueva@…`) appears in the app as a **Peer Facilitator**. Peer facilitators give
-first-line support under the GSTC's licensed counselors; formal counseling goes through PATNUBAY.
+first-line support; licensed counselors are not users of the app, and formal counseling is reached only by a peer-facilitator referral to PATNUBAY.
 
 Use this to show the safety net. Pick one of two ways:
 
-- **Safe and instant:** the counselor window already shows **Jon Reyes** at the top of the triage queue with a _Safety
+- **Safe and instant:** the peer facilitator window already shows **Jon Reyes** at the top of the triage queue with a _Safety
   question flagged_ badge. Skip to step 3.
 - **Live proof:** sign in as `jon@…` in a private window, answer the check-in with a 1 or more on question 7,
   submit. On Jon's result, point at the **"Want to talk to a professional counselor?"** card: medium and high results
   link to the GSTC's **PATNUBAY** booking page. _Say:_ this is the bridge; we don't replace PATNUBAY, we feed into it.
   **Check your inbox** and read the alert aloud. (It says who and the score, never the answers.) The email goes to your real staff addresses, so this also proves the alert works.
 
-3. **Counselor window.** The queue is sorted by urgency, high risk and safety flags first. Click **Inspect case**:
+3. **Peer Facilitator window.** The queue is sorted by urgency, high risk and safety flags first. Click **Inspect case**:
    the answers, the PHQ-2 / GAD-2 screens, WHO-5 wellbeing, the student's earlier check-ins. Add a note, set a
    **follow-up date**, set the status to **Escalated** or **Reviewed**, save. Point at the badges in the queue
    (_Follow up today_ on Jon, _Follow-up overdue_ on Angela) and the **Follow-up due** filter: nothing slips through.
@@ -63,17 +63,17 @@ Use this to show the safety net. Pick one of two ways:
 
 ### 3. Booking a session (2 min)
 
-1. As the **counselor**: _My availability_ tab shows open slots; add one to show it takes seconds.
+1. As the **peer facilitator**: _My availability_ tab shows open slots; add one to show it takes seconds.
 2. As **Bea or Maria**: **Appointments**, book a peer facilitator slot. It arrives as **Pending Review**; a student
    can never confirm their own booking (the database rules forbid it).
-3. As the **counselor**: **Appointment requests** panel, **Confirm**. Switch back to the student, the status changed live.
+3. As the **peer facilitator**: **Appointment requests** panel, **Confirm**. Switch back to the student, the status changed live.
 4. Click **Add to calendar** on a confirmed session: it downloads a file that opens in Google, Outlook or Apple Calendar.
 
 ### 4. The admin and the big picture (2 min), as the admin
 
 - **Analytics** tab: how many check-ins are low, medium and high risk (counts, percentages and a bar chart).
-- **Accounts and assignments**: approve the pending counselor _Liza Gomez_, assign Maria to a counselor. Anyone who
-  signs up as a counselor has no staff access until an admin approves them.
+- **Accounts and assignments**: approve the pending peer facilitator _Liza Gomez_, assign Maria to a peer facilitator. Anyone who
+  signs up as a peer facilitator has no staff access until an admin approves them.
 - Mention **Download my data** in Settings (a student can export everything the app holds about them).
 
 ### 5. Phone and polish (1 min)
@@ -105,8 +105,8 @@ is shown the crisis line immediately and staff get an email. The staff dashboard
 ever raises, never lowers, the risk level.
 
 **Who can see a student's answers?**
-The student, and approved counselors and admins. This is enforced by Firestore security rules on the server, not just in
-the interface. A counselor who has not been approved sees nothing. The alert email contains a name and a score, never the answers.
+The student, and approved peer facilitators and admins. This is enforced by Firestore security rules on the server, not just in
+the interface. A peer facilitator who has not been approved sees nothing. The alert email contains a name and a score, never the answers.
 
 **How is data protected? What are the known gaps?**
 Firebase Auth with email verification for students, role-based Firestore rules (published and tested with an

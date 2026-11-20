@@ -38,7 +38,7 @@ export const Triggers: Story = {
           <button
             type="button"
             className="mb-btn mb-btn-solid"
-            onClick={() => toast.success("Appointment requested. Your counselor will confirm.")}
+            onClick={() => toast.success("Appointment requested. Your peer facilitator will confirm.")}
           >
             Show success
           </button>

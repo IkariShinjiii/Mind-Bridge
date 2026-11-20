@@ -1,7 +1,7 @@
 # Mind Bridge
 
 A student wellness platform for the University of San Agustin. Students complete a private
-screening check-in, the app flags risk, and peer facilitators (under licensed guidance counselors) review flagged cases and manage
+screening check-in, the app flags risk, and peer facilitators review flagged cases and manage
 appointments.
 
 > Live app: <https://mind-bridge-omega.vercel.app>
@@ -29,7 +29,7 @@ Mind Bridge shortens the path between a student in distress and campus psycholog
 | User | What they do |
 |---|---|
 | **Student** | Takes a wellness check-in (mood, stress, sleep, focus, safety), sees guidance for their risk level, books peer facilitator appointments, uses a confidential chat, builds healthy habits with the four pillars and a relaxation library, and can open the 24/7 crisis resource directory. Elevated check-ins show a referral to formal counseling at the GSTC (PATNUBAY). |
-| **Peer Facilitator** (stored as `counselor`) | Gives first-line support under licensed guidance counselors. Reviews flagged check-ins, manages availability, and handles appointments. Has no staff access until an admin approves the account. |
+| **Peer Facilitator** (stored as `counselor`) | Gives first-line support and refers students who need formal counseling to PATNUBAY. Licensed counselors are not users of the app. Reviews flagged check-ins, manages availability, and handles appointments. Has no staff access until an admin approves the account. |
 | **Admin** | Approves staff accounts, manages users, and sees aggregate wellness metrics. |
 
 Key features:
@@ -192,7 +192,7 @@ Firestore collections used: `users`, `assessments`, `appointments`, `availabilit
 ## Roles and access control
 
 - **student**: created by self-signup with an `@usa.edu.ph` account (email/password or Google).
-- **counselor** (shown as Peer Facilitator in the app): has no staff access until `approved: true` is set on their user document.
+- **peer facilitator** (shown as Peer Facilitator in the app): has no staff access until `approved: true` is set on their user document.
 - **admin**: set `role: "admin"` on the user document by hand in the Firebase console.
 - **deactivated** (`active: false`): treated as signed out.
 

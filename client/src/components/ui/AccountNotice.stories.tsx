@@ -16,7 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A counselor who has signed up but has not been approved by an administrator yet. */
+/** A peer facilitator who has signed up but has not been approved by an administrator yet. */
 export const PendingApproval: Story = {};
 
 /** An account an administrator has switched off. There is nothing to retry, only Log out. */

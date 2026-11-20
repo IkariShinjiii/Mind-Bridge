@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, readCollection, logIn, signOut, completeCheckIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, readCollection, logIn, signOut, completeCheckIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 const questionSummary = [
   "Little interest or pleasure in doing academic or daily activities",
@@ -40,8 +40,8 @@ const lowCase = {
   createdAt: "2026-09-19T10:00:00.000Z",
 };
 
-test.describe("Counselor accessing student data", () => {
-  test("a check-in submitted by a student shows up for the counselor with the student's details", async ({ page }) => {
+test.describe("Peer Facilitator accessing student data", () => {
+  test("a check-in submitted by a student shows up for the peer facilitator with the student's details", async ({ page }) => {
     await seed(page);
 
     await logIn(page, STUDENT);
@@ -49,7 +49,7 @@ test.describe("Counselor accessing student data", () => {
     await expect(page.getByText("Priority support suggested")).toBeVisible();
     await signOut(page);
 
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
 
     const cases = page.getByRole("listitem").filter({ hasText: STUDENT.email });
@@ -82,7 +82,7 @@ test.describe("Counselor accessing student data", () => {
           },
         },
       });
-      await logIn(page, COUNSELOR);
+      await logIn(page, PEER_FACILITATOR);
       await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
     });
 
@@ -115,7 +115,7 @@ test.describe("Counselor accessing student data", () => {
       await expect(dialog.getByText("Call after 5pm")).toBeVisible();
     });
 
-    test("a counselor can save confidential case notes and change the case status", async ({ page }) => {
+    test("a peer facilitator can save confidential case notes and change the case status", async ({ page }) => {
       await page.getByRole("button", { name: "Inspect case" }).click();
       const dialog = page.getByRole("dialog", { name: STUDENT.name });
 
@@ -166,9 +166,9 @@ test.describe("Counselor accessing student data", () => {
       await expect(page.getByRole("heading", { name: "Staff dashboard" })).toHaveCount(0);
     });
 
-    test("a counselor who opens the student dashboard is sent to the staff dashboard", async ({ page }) => {
+    test("a peer facilitator who opens the student dashboard is sent to the staff dashboard", async ({ page }) => {
       await seed(page);
-      await logIn(page, COUNSELOR);
+      await logIn(page, PEER_FACILITATOR);
       await expect(page).toHaveURL(/\/admin\/dashboard$/);
 
       await page.goto("/student/dashboard");
@@ -180,7 +180,7 @@ test.describe("Counselor accessing student data", () => {
 
 test("case times read as a short date and time, and the sidebar link says Schedule", async ({ page }) => {
   await seed(page, { docs: { assessments: { c1: flaggedCase } } });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
   await expect(flagged).toContainText(/Sep (19|20|21), 2026/);
   await expect(flagged).not.toContainText(/\d:\d\d:\d\d/);
@@ -192,7 +192,7 @@ test("case times read as a short date and time, and the sidebar link says Schedu
 test("on a phone the flagged case is on the first screen, under a compact summary", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await seed(page, { docs: { assessments: { c1: flaggedCase } } });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   const flagged = page.getByRole("listitem").filter({ hasText: "Ana Student" });
   await expect(flagged).toBeVisible();
   const box = await flagged.boundingBox();
@@ -225,7 +225,7 @@ test("a low check-in with a positive depression and anxiety screen is shown as m
       },
     },
   });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   await page
     .getByRole("group", { name: "Filter cases" })
     .getByRole("button", { name: "Medium risk", exact: true })
@@ -238,7 +238,7 @@ test("a low check-in with a positive depression and anxiety screen is shown as m
   await expect(dialog).toContainText("Raised to medium because a screen is positive");
 });
 
-test("a counselor sees the PHQ-9 and GAD-7 bands for a full check-in", async ({ page }) => {
+test("a peer facilitator sees the PHQ-9 and GAD-7 bands for a full check-in", async ({ page }) => {
   const answers = [2, 2, 2, 2, 2, 2, 3, 0, 0, 1, 1, 0, 0, 0, 0, 0]; // PHQ-9 15, GAD-7 2
   await seed(page, {
     docs: {
@@ -260,7 +260,7 @@ test("a counselor sees the PHQ-9 and GAD-7 bands for a full check-in", async ({ 
       },
     },
   });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   await page.getByRole("button", { name: "Inspect case" }).click();
   const dialog = page.getByRole("dialog", { name: STUDENT.name });
   await expect(dialog).toContainText("Depression (PHQ-9) 15 of 27, moderately severe");

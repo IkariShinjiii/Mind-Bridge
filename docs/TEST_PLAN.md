@@ -1,5 +1,7 @@
 # MindBridge test plan
 
+> **Terminology (2026-11-20).** Licensed guidance counselors are not users of Mind Bridge; students reach them only through a peer-facilitator referral to PATNUBAY. The staff role is called **Peer Facilitator** in the product, the docs and the code (functions, components, tests). Only the data already stored in Firebase keeps the old name, so no migration is needed: the role value `counselor`, and the fields `counselorId`, `counselorName`, `counselorNote(s)` and `assignedCounselorId/Name`. Where this file says `counselor` in data, read it as the Peer Facilitator role.
+
 Last updated 2026-11-13. Everything below runs locally for free; nothing touches the real Firebase project, Vercel, or
 email.
 
@@ -33,15 +35,15 @@ Legend: U = vitest unit, E = Playwright e2e, R = rules/backend tests (`backend-t
 |---|---|---|
 | Sign-up validation (`@usa.edu.ph`, password length, consent) | U `validation*.test`, `schemas.test`; E `auth.spec` | Real verification email link is manual (M) |
 | Login, logout, deactivated account, unapproved counselor | E `auth.spec`, `account-status.spec`, `account-menu.spec` | Real Firebase Auth errors (M) |
-| Route guards and redirects | E `auth.spec`, `counselor.spec`, `routing.spec` (new) | none known |
+| Route guards and redirects | E `auth.spec`, `peerFacilitator.spec`, `routing.spec` (new) | none known |
 | Quick check-in scoring and risk (low 0-6, medium 7-12, high 13+ or Q7 above 0) | U `scoring*.test`, `risk.test`, `riskInvariants.test` (new, seeded random sweep); E `assessment.spec`, `risk-check.spec` | |
 | PHQ-9 / GAD-7 full check-in and bands | U `clinical.test`, `riskInvariants.test`; E `assessment.spec`, `results.spec` | |
 | WHO-5 | U `clinical.test`, `riskInvariants.test`; E `wellbeing.spec` | |
 | Tamper resistance (stored risk lowered) | U `risk.test`, `riskInvariants.test`; R rules tests | |
 | Crisis resources | E `crisis-resources.spec`, `small-screens.spec` | Hotline numbers must be re-verified by a human before the defense (M) |
 | Appointment lifecycle | U `appointmentLifecycle.test`, `booking.test`; E `appointment-lifecycle.spec`, `calendar.spec` | Concurrent double-booking of one slot needs the emulator (R) |
-| Counselor case dashboard, notes, follow-up | U `followUp.test`, `summary.test`, `trend.test`; E `counselor.spec`, `follow-up.spec`, `trend.spec` | |
-| Availability windows | U `validation.test`; E `counselor.spec` | A window of two months is accepted; needs a product decision |
+| Counselor case dashboard, notes, follow-up | U `followUp.test`, `summary.test`, `trend.test`; E `peerFacilitator.spec`, `follow-up.spec`, `trend.spec` | |
+| Availability windows | U `validation.test`; E `peerFacilitator.spec` | A window of two months is accepted; needs a product decision |
 | Settings, theme, data download | E `appearance.spec`, `data-download.spec`; U `dataExport.test` | |
 | Accessibility (axe WCAG 2.1 AA, light and dark) | E `accessibility.spec`, `site-audit.spec`, `small-screens.spec`; `scripts/check-contrast.mjs` | Screen-reader pass is manual (M) |
 | Offline, load errors, toasts | E `offline.spec`, `load-errors.spec`, `toasts.spec` | |

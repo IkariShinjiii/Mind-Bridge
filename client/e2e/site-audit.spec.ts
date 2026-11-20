@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 // Launch checklist: every page on a small phone has no sideways scroll, no dead internal links, no unnamed
 // buttons or links, no images without alt, and no console errors.
@@ -65,7 +65,7 @@ test("staff pages are clean and their links resolve", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await seed(page);
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   const links = new Set<string>();
   for (const path of STAFF_PAGES) (await audit(page, path)).forEach((h) => links.add(h));
   await checkLinks(page, links);

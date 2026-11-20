@@ -6,11 +6,11 @@ export const STUDENT: TestPerson = {
   email: "ana@usa.edu.ph",
   password: "Student#123",
 };
-export const COUNSELOR: TestPerson = {
-  uid: "uid-counselor",
+export const PEER_FACILITATOR: TestPerson = {
+  uid: "uid-peer-facilitator",
   name: "Dr. Reyes",
   email: "reyes@usa.edu.ph",
-  password: "Counselor#123",
+  password: "Peer Facilitator#123",
 };
 
 const STORAGE_KEY = "mb_e2e_state";
@@ -29,7 +29,7 @@ type Docs = Record<string, Record<string, Record<string, unknown>>>;
 export type StoredDoc = { id: string } & Record<string, unknown>;
 
 /**
- * Pre-loads the fake Firebase backend with a student and an approved counselor, plus any extra
+ * Pre-loads the fake Firebase backend with a student and an approved peer facilitator, plus any extra
  * Firestore documents. Runs before the app boots; it only seeds an empty browser context, so
  * data written during the test survives reloads and navigations.
  */
@@ -42,7 +42,7 @@ export async function seed(
     seq: 100,
     session: null,
     accounts: Object.fromEntries(
-      [STUDENT, COUNSELOR, ...accounts].map((u) => [
+      [STUDENT, PEER_FACILITATOR, ...accounts].map((u) => [
         u.email,
         { uid: u.uid, email: u.email, password: u.password, displayName: u.name },
       ]),
@@ -57,9 +57,9 @@ export async function seed(
           active: true,
           emailVerified: true,
         },
-        [COUNSELOR.uid]: {
-          name: COUNSELOR.name,
-          email: COUNSELOR.email,
+        [PEER_FACILITATOR.uid]: {
+          name: PEER_FACILITATOR.name,
+          email: PEER_FACILITATOR.email,
           role: "counselor",
           approved: true,
           active: true,

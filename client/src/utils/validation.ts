@@ -43,7 +43,7 @@ export function validatePasswordChange(
 }
 
 /**
- * Validates a counselor availability window (start in the future, end after start).
+ * Validates a peer facilitator availability window (start in the future, end after start).
  * @param start - datetime-local value
  * @param end - datetime-local value
  * @param now - current time, injectable for tests

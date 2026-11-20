@@ -5,7 +5,7 @@ import {
   caseReviewSchema,
   chatMessageSchema,
   checkInSchema,
-  counselorAssignmentSchema,
+  peerFacilitatorAssignmentSchema,
   goalsSchema,
   loginSchema,
   profileSchema,
@@ -63,7 +63,7 @@ describe("bookingSlotSchema", () => {
   it("accepts a complete slot", () => {
     expect(validate(bookingSlotSchema, slot).ok).toBe(true);
   });
-  it("needs an id, a counselor, readable times and an end after the start", () => {
+  it("needs an id, a peer facilitator, readable times and an end after the start", () => {
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, id: "" })).toHaveProperty("id");
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, counselorId: undefined })).toHaveProperty("counselorId");
     expect(fieldErrorsOf(bookingSlotSchema, { ...slot, start: "nope" })).toHaveProperty("start");
@@ -111,7 +111,7 @@ describe("appointmentActionSchema", () => {
   });
 });
 
-describe("counselor forms", () => {
+describe("peer facilitator forms", () => {
   it("case review needs an id and a known status, and caps notes at 2000 characters", () => {
     expect(validate(caseReviewSchema, { id: "c1", status: "reviewed", counselorNotes: "Called." }).ok).toBe(true);
     expect(fieldErrorsOf(caseReviewSchema, { id: "", status: "open" })).toHaveProperty("id");
@@ -130,11 +130,11 @@ describe("counselor forms", () => {
       "followUpDate",
     );
   });
-  it("assignment allows clearing the counselor with null", () => {
-    expect(validate(counselorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(
+  it("assignment allows clearing the peer facilitator with null", () => {
+    expect(validate(peerFacilitatorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(
       true,
     );
-    expect(validate(counselorAssignmentSchema, { studentId: "", counselorId: "c1", counselorName: "A" }).ok).toBe(
+    expect(validate(peerFacilitatorAssignmentSchema, { studentId: "", counselorId: "c1", counselorName: "A" }).ok).toBe(
       false,
     );
   });

@@ -57,9 +57,9 @@ describe("wellbeing - READ", () => {
   it("a student can list their own entries by studentId", () =>
     assertSucceeds(getDocs(query(collection(as(env, "student"), "wellbeing"), where("studentId", "==", "stu1")))));
   it("a student cannot list everyone's entries", () => assertFails(getDocs(collection(as(env, "student"), "wellbeing"))));
-  it("approved staff read any student's entries; unapproved counselors do not", async () => {
+  it("approved staff read any student's entries; unapproved peer facilitators do not", async () => {
     await assertSucceeds(getDoc(doc(as(env, "counselor"), "wellbeing/w2")));
-    await assertFails(getDoc(doc(as(env, "pendingCounselor"), "wellbeing/w2")));
+    await assertFails(getDoc(doc(as(env, "pendingPeerFacilitator"), "wellbeing/w2")));
   });
   it("anonymous users read nothing", () => assertFails(getDoc(doc(anon(env), "wellbeing/w1"))));
 });

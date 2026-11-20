@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, readCollection, logIn, COUNSELOR, STUDENT } from "./helpers";
+import { seed, readCollection, logIn, PEER_FACILITATOR, STUDENT } from "./helpers";
 
 const session = (status: string) => ({
   studentId: STUDENT.uid,
@@ -27,11 +27,11 @@ const changeElsewhere = (page: import("@playwright/test").Page, id: string, stat
   );
 
 test.describe("appointment lifecycle", () => {
-  test("a counselor is told when a request was cancelled before they confirmed it, and nothing is overwritten", async ({
+  test("a peer facilitator is told when a request was cancelled before they confirmed it, and nothing is overwritten", async ({
     page,
   }) => {
     await seed(page, { docs: { appointments: { a1: session("Pending Review") } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await page.goto("/appointments");
     const confirm = page.getByRole("listitem").getByRole("button", { name: "Confirm", exact: true });
     await expect(confirm).toBeVisible();
@@ -44,7 +44,7 @@ test.describe("appointment lifecycle", () => {
     expect(stored?.status).toBe("Cancelled");
   });
 
-  test("each status offers the right actions to a counselor", async ({ page }) => {
+  test("each status offers the right actions to a peer facilitator", async ({ page }) => {
     await seed(page, {
       docs: {
         appointments: {
@@ -54,7 +54,7 @@ test.describe("appointment lifecycle", () => {
         },
       },
     });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await page.goto("/appointments");
 
     const pending = page.getByRole("listitem").filter({ hasText: "Pending Review" }).first();

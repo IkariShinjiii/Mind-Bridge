@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 // The app clips horizontal overflow (overflow-x: hidden), so a too-wide element is cut off silently
 // instead of scrolling. These tests fail when anything sits past the right edge of a small phone.
@@ -56,7 +56,7 @@ test.describe("dashboard touch targets on a phone", () => {
 
   test("staff dashboard", async ({ page }) => {
     await seed(page);
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
     expect(await smallTargets(page)).toEqual([]);
   });
@@ -104,14 +104,14 @@ for (const width of WIDTHS) {
       expect(box!.height).toBeGreaterThanOrEqual(44);
       await page.getByRole("button", { name: /Account menu/ }).click();
       await page.getByRole("menuitem", { name: "Sign out" }).click();
-      await logIn(page, COUNSELOR);
+      await logIn(page, PEER_FACILITATOR);
       await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
       await expect(page.getByRole("banner").getByRole("link", { name: /1553/ })).toHaveCount(0);
     });
 
     test("staff dashboard fits", async ({ page }) => {
       await seed(page);
-      await logIn(page, COUNSELOR);
+      await logIn(page, PEER_FACILITATOR);
       await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
       expect(await elementsPastEdge(page), "staff dashboard").toEqual([]);
     });

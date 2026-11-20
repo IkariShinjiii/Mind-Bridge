@@ -10,7 +10,7 @@ service cloud.firestore {
     function hasProfile() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function isActive() { return signedIn() && hasProfile() && me().get('active', true) != false; }
     function isAdmin() { return isActive() && me().get('role', 'student') == 'admin'; }
-    // counselors must be approved by an admin before they get staff access
+    // peer facilitators must be approved by an admin before they get staff access
     function isStaff() {
       return isActive() && (me().get('role', 'student') == 'admin' || (me().get('role', 'student') == 'counselor' && me().get('approved', false) == true));
     }

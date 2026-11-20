@@ -87,7 +87,7 @@ export const uidOf = (kind, key) => `${DEMO_PREFIX}${kind}-${key}`;
 /** Everything the seed script writes, with dates relative to `now`. Same `now` gives the same output. */
 export function buildDemoData(now = new Date()) {
   const ago = (days, hours = 0) => new Date(now.getTime() - days * DAY - hours * HOUR).toISOString();
-  const counselor = { id: uidOf("staff", "villanueva"), name: "Dr. Ramon Villanueva" };
+  const peerFacilitator = { id: uidOf("staff", "villanueva"), name: "Dr. Ramon Villanueva" };
 
   const users = [
     ...STAFF.map((s) => ({
@@ -126,8 +126,8 @@ export function buildDemoData(now = new Date()) {
   });
   for (const key of ["maria", "angela"]) {
     Object.assign(user(key), {
-      assignedCounselorId: counselor.id,
-      assignedCounselorName: counselor.name,
+      assignedCounselorId: peerFacilitator.id,
+      assignedCounselorName: peerFacilitator.name,
       assignedAt: ago(30),
     });
   }
@@ -205,7 +205,7 @@ export function buildDemoData(now = new Date()) {
   addCheckIn("carlo", 1, 9, 4, [0, 0, 1, 0, 0, 1, 0]);
   addCheckIn("carlo", 2, 2, 5, [0, 1, 0, 0, 0, 0, 0]);
 
-  // Only each student's latest check-in is still waiting; a counselor has already looked at the older ones
+  // Only each student's latest check-in is still waiting; a peer facilitator has already looked at the older ones
   for (const a of assessments) {
     const latest = assessments
       .filter((x) => x.studentId === a.studentId)
@@ -240,8 +240,8 @@ export function buildDemoData(now = new Date()) {
     for (const hour of [9, 10, 14, 15]) {
       availability.push({
         id: `${DEMO_PREFIX}slot-${d}-${hour}`,
-        counselorId: counselor.id,
-        counselorName: counselor.name,
+        counselorId: peerFacilitator.id,
+        counselorName: peerFacilitator.name,
         start: slotTime(now, d, hour),
         end: slotTime(now, d, hour + 1),
         isBooked: false,
@@ -260,9 +260,9 @@ export function buildDemoData(now = new Date()) {
       studentId: u.id,
       studentName: u.name,
       studentEmail: u.email,
-      counselorId: counselor.id,
-      counselorName: counselor.name,
-      title: `Session with ${counselor.name}`,
+      counselorId: peerFacilitator.id,
+      counselorName: peerFacilitator.name,
+      title: `Session with ${peerFacilitator.name}`,
       slotId: null,
       createdAt: ago(2),
       ...fields,
@@ -299,8 +299,8 @@ export function buildDemoData(now = new Date()) {
     messages.push({
       id: `${DEMO_PREFIX}msg-${key}-${n}`,
       studentId: student.id,
-      senderId: fromStudent ? student.id : counselor.id,
-      senderName: fromStudent ? student.name : counselor.name,
+      senderId: fromStudent ? student.id : peerFacilitator.id,
+      senderName: fromStudent ? student.name : peerFacilitator.name,
       senderRole: fromStudent ? "student" : "admin",
       text,
       timestamp: ago(daysAgo, hoursAgo),

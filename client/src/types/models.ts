@@ -123,7 +123,7 @@ export interface Appointment {
   counselorNote?: string;
 }
 
-/** Document in `availability/{id}`: a slot a counselor has published. */
+/** Document in `availability/{id}`: a slot a peer facilitator has published. */
 export interface AvailabilitySlot {
   id: string;
   counselorId: string | undefined;

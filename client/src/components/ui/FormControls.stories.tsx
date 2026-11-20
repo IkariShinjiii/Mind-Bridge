@@ -75,7 +75,7 @@ export const Textarea: Story = {
             id={id}
             rows={3}
             className="mb-field"
-            placeholder="Anything you want your counselor to know"
+            placeholder="Anything you want your peer facilitator to know"
             {...props}
           />
         </Labelled>

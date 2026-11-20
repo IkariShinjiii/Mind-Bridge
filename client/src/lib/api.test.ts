@@ -88,8 +88,8 @@ describe("admin user management", () => {
   });
 
   it.each([
-    ["approveCounselor", { approved: true }],
-    ["rejectCounselor", { approved: false }],
+    ["approvePeerFacilitator", { approved: true }],
+    ["rejectPeerFacilitator", { approved: false }],
     ["deactivateUser", { active: false }],
     ["reactivateUser", { active: true }],
   ])("%s writes %j to users/{id} and nothing else", async (fn, patch) => {
@@ -100,7 +100,7 @@ describe("admin user management", () => {
 
   it("status changes surface write errors to the caller", async () => {
     fs.updateDoc.mockRejectedValue(new Error("offline"));
-    await expect(api.approveCounselor("u9")).rejects.toThrow("offline");
+    await expect(api.approvePeerFacilitator("u9")).rejects.toThrow("offline");
   });
 });
 
@@ -406,12 +406,12 @@ describe("bookAppointment", () => {
     expect(fs.addDoc).toHaveBeenCalledTimes(1);
   });
 
-  it("skips the slot update for a slot without an id and uses default counselor labels", async () => {
+  it("skips the slot update for a slot without an id and uses default peer facilitator labels", async () => {
     await api.bookAppointment({ counselorId: "cou1", start: "S", end: "E" });
     expect(fs.updateDoc).not.toHaveBeenCalled();
     expect(lastWrite(fs.addDoc)[1]).toMatchObject({
       slotId: null,
-      counselorName: "Assigned Counselor",
+      counselorName: "Assigned Peer Facilitator",
       title: "Session with Counselor",
     });
   });
@@ -572,7 +572,7 @@ describe("availability", () => {
     ]);
   });
 
-  it("addAvailability stores an unbooked slot for the signed-in counselor", async () => {
+  it("addAvailability stores an unbooked slot for the signed-in peer facilitator", async () => {
     signIn({ uid: "cou1", displayName: "Dr. Cruz" });
     await api.addAvailability("S", "E");
     expect(lastWrite(fs.addDoc)).toEqual([
@@ -588,7 +588,7 @@ describe("availability", () => {
     ]);
   });
 
-  it("addAvailability labels a nameless counselor 'Counselor'", async () => {
+  it("addAvailability labels a nameless peer facilitator 'Counselor'", async () => {
     signIn({ uid: "cou1" });
     await api.addAvailability("S", "E");
     expect(lastWrite(fs.addDoc)[1].counselorName).toBe("Peer facilitator");
@@ -636,16 +636,16 @@ describe("user settings and assignment", () => {
     expect(fs.updateDoc).not.toHaveBeenCalled();
   });
 
-  it("assignCounselorToStudent sets the three assignment fields", async () => {
-    await api.assignCounselorToStudent("stu1", "cou1", "Dr. Cruz");
+  it("assignPeerFacilitatorToStudent sets the three assignment fields", async () => {
+    await api.assignPeerFacilitatorToStudent("stu1", "cou1", "Dr. Cruz");
     expect(lastWrite(fs.updateDoc)).toEqual([
       { kind: "doc", col: "users", id: "stu1" },
       { assignedCounselorId: "cou1", assignedCounselorName: "Dr. Cruz", assignedAt: NOW.toISOString() },
     ]);
   });
 
-  it.each([[null], [undefined], [""]])("assignCounselorToStudent clears everything for counselorId %j", async (id) => {
-    await api.assignCounselorToStudent("stu1", id, "ignored name");
+  it.each([[null], [undefined], [""]])("assignPeerFacilitatorToStudent clears everything for counselorId %j", async (id) => {
+    await api.assignPeerFacilitatorToStudent("stu1", id, "ignored name");
     expect(lastWrite(fs.updateDoc)[1]).toEqual({
       assignedCounselorId: null,
       assignedCounselorName: "ignored name",
@@ -699,7 +699,7 @@ describe("messages", () => {
       expect(lastWrite(fs.addDoc)[0]).toEqual({ kind: "collection", name: "messages" });
     });
 
-    it("uses an explicit sender and a role-based default name for counselors", async () => {
+    it("uses an explicit sender and a role-based default name for peer facilitators", async () => {
       const m = await api.sendStudentMessage({
         studentId: "stu1",
         senderId: "cou1",
