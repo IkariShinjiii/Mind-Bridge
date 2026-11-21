@@ -150,3 +150,17 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
 }
+
+export type AuditAction = "case_viewed" | "case_updated" | "assignment_changed";
+
+/** Document in `auditLog/{id}`: one staff action on a case or a student assignment. */
+export interface AuditEntry {
+  id: string;
+  actorId: string;
+  actorName: string;
+  action: AuditAction;
+  /** The check-in or student the action was about. */
+  targetId: string;
+  detail: string;
+  at: string;
+}

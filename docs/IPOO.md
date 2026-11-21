@@ -224,7 +224,7 @@ in `scoring.test.ts` and `scoring.edge.test.ts` would then need new boundary cas
 | The assessment stores `studentEmail` and `studentName` next to the answers | More identifying data than reporting needs | Keep identity in `users` and join on read |
 | A student can create an appointment already marked `Confirmed`, free another student's slot, or post a message labelled `senderRole: "counselor"` | Students can write fields that should be server-controlled (asserted in `known-gaps.test.js`) | Constrain these fields in the create and update rules, or move booking into a callable function |
 | `firestore.rules` is marked DRAFT | Needs a review against production data | Review, then remove the DRAFT header |
-| No audit log of who viewed a case | Cannot answer "who accessed this record" | Cloud Function or Firestore audit logging |
+| Audit log is best-effort and client-written | A hand-built request could skip it; a failed write is only logged to the console | Write entries from a Cloud Function or callable so they cannot be skipped |
 | No data-retention schedule | Records are kept indefinitely | Define retention and scheduled deletion with the counseling office |
 | The privacy policy says "encrypted at rest" | True of the platform defaults, but this app adds no field-level encryption | Keep the wording tied to the platform, or add field-level encryption for notes |
 | `PRODUCT.md` mentions "bcrypt session security" | Firebase uses its own hashing and tokens, not bcrypt | Update the wording to "Firebase Authentication" |

@@ -1,3 +1,4 @@
+import AuditLogCard from "../../components/staff/AuditLogCard";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { m, AnimatePresence } from "framer-motion";
@@ -28,6 +29,7 @@ import {
   deactivateUser,
   reactivateUser,
   assignPeerFacilitatorToStudent,
+  logAudit,
   getUserSettings,
   getWellbeingFor,
 } from "../../lib/api";
@@ -431,6 +433,7 @@ export default function AdminPanel() {
 
   async function openCaseInspector(item: Assessment) {
     setActiveCase(item);
+    void logAudit("case_viewed", item.id, item.studentName || "Student");
     setPeerFacilitatorNoteInput(item.counselorNotes || "");
     setFollowUpInput(item.followUpDate || "");
     setStudentContact(null);
@@ -992,6 +995,9 @@ export default function AdminPanel() {
                 </button>
               </div>
             </section>
+
+            {/* useAuth folds peer facilitators into "admin", so read the stored role from the user list. */}
+            {users.find((u) => u.id === currentUser?.uid)?.role === "admin" && <AuditLogCard />}
           </m.div>
         )}
 

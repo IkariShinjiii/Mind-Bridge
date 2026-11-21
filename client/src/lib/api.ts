@@ -25,6 +25,8 @@ import type {
   Assessment,
   AvailabilitySlot,
   CaseStatus,
+  AuditAction,
+  AuditEntry,
   ChatMessage,
   MessageSenderRole,
   UserProfile,
@@ -68,6 +70,33 @@ async function loadUsersById(): Promise<Record<string, UserProfile>> {
   });
   return byId;
 }
+
+// --- AUDIT LOG ---
+
+/**
+ * Records that the signed-in staff member looked at or changed a case. Best effort: a failure is only logged to the
+ * console, so a logging problem never blocks someone from doing their work.
+ */
+export const logAudit = (action: AuditAction, targetId: string, detail: string): Promise<void> => {
+  const user = getAuth().currentUser;
+  if (!user) return Promise.resolve();
+  return addDoc(collection(db, "auditLog"), {
+    actorId: user.uid,
+    actorName: (user.displayName || user.email || "Staff").slice(0, 200),
+    action,
+    targetId,
+    detail: detail.slice(0, 300),
+    at: new Date().toISOString(),
+  }).then(
+    () => undefined,
+    (err: unknown) => console.warn("Could not write the audit log", err),
+  );
+};
+
+/** Newest audit entries first (admin only; the rules enforce it). */
+// shortcut: reads the whole collection and trims to 200 here; add an orderBy/limit query and an index once the log is large.
+export const getAuditLog = (): Promise<AuditEntry[]> =>
+  guard(async () => newestFirstBy(mapDocs<AuditEntry>(await getDocs(collection(db, "auditLog"))), "at").slice(0, 200));
 
 // --- USERS (ADMIN PANEL) ---
 
@@ -184,6 +213,9 @@ export const getAssessments = (): Promise<Assessment[]> =>
     }
   });
 
+const newestFirstBy = <T extends object>(items: T[], key: keyof T): T[] =>
+  items.sort((x, y) => new Date(String(y[key] || 0)).getTime() - new Date(String(x[key] || 0)).getTime());
+
 const newestFirst = <T extends { createdAt?: string }>(items: T[]): T[] =>
   items.sort((x, y) => new Date(y.createdAt || 0).getTime() - new Date(x.createdAt || 0).getTime());
 
@@ -250,7 +282,15 @@ export const updateAssessmentStatus = (
     const updates: Record<string, string> = { status, reviewedAt: new Date().toISOString() };
     if (counselorNotes !== undefined) updates["counselorNotes"] = counselorNotes;
     if (followUpDate !== undefined) updates["followUpDate"] = followUpDate;
-    return updateDoc(doc(db, "assessments", id), updates);
+    return updateDoc(doc(db, "assessments", id), updates).then(() =>
+      logAudit(
+        "case_updated",
+        id,
+        [`status ${status}`, counselorNotes !== undefined && "notes saved", followUpDate !== undefined && "follow-up set"]
+          .filter(Boolean)
+          .join(", "),
+      ),
+    );
   });
 
 // --- APPOINTMENTS ---
@@ -499,7 +539,9 @@ export const assignPeerFacilitatorToStudent = (
       assignedCounselorId: counselorId || null,
       assignedCounselorName: counselorName || null,
       assignedAt: counselorId ? new Date().toISOString() : null,
-    }),
+    }).then(() =>
+      logAudit("assignment_changed", studentId, counselorId ? `assigned to ${counselorName ?? counselorId}` : "assignment removed"),
+    ),
   );
 
 // --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---
