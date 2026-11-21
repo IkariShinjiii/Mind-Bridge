@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 // Route-level behaviour that the role specs only touch in passing: legacy URL, 404, and signed-in visitors on public-only pages.
 test.describe("Routing", () => {
@@ -11,11 +11,11 @@ test.describe("Routing", () => {
     await expect(page.getByText(/not found|404|can.t find/i).first()).toBeVisible();
   });
 
-  test("the old /counselor/dashboard address lands counselors on the staff dashboard", async ({ page }) => {
+  test("the old /peer-facilitator/dashboard address lands peer facilitators on the staff dashboard", async ({ page }) => {
     await seed(page);
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
-    await page.goto("/counselor/dashboard");
+    await page.goto("/peer-facilitator/dashboard");
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
   });
 
@@ -29,9 +29,9 @@ test.describe("Routing", () => {
     }
   });
 
-  test("a signed-in counselor visiting /login is sent to the staff dashboard", async ({ page }) => {
+  test("a signed-in peer facilitator visiting /login is sent to the staff dashboard", async ({ page }) => {
     await seed(page);
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
     await page.goto("/login");
     await expect(page).toHaveURL(/\/admin\/dashboard$/);

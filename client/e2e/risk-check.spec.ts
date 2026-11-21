@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 // A check-in as the student's browser could have written it: crisis answer above zero and a high score,
 // but filed as low risk with no safety flag.
@@ -24,7 +24,7 @@ const understated = {
 test.describe("Staff dashboard does not trust the saved risk level", () => {
   test.beforeEach(async ({ page }) => {
     await seed(page, { docs: { assessments: { c1: understated } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
   });
 
   test("a check-in saved as low but answered at crisis level is shown as high risk, flagged and explained", async ({
@@ -70,7 +70,7 @@ test("an honest check-in shows no correction note", async ({ page }) => {
   await seed(page, {
     docs: { assessments: { c1: { ...understated, riskLevel: "high", flaggedForImmediateReview: true } } },
   });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   await expect(page.getByRole("listitem").filter({ hasText: STUDENT.name })).toBeVisible();
   await expect(page.getByText("Raised from the answers")).toHaveCount(0);
 });

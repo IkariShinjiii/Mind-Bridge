@@ -5,7 +5,7 @@ import { dateTimeString, optionalText, requiredText } from "./fields";
 export const bookingSlotSchema = z
   .object({
     id: z.string().min(1, "Pick a time slot."),
-    counselorId: z.string().min(1, "That slot has no counselor."),
+    counselorId: z.string().min(1, "That slot has no peer facilitator."),
     counselorName: z.string().optional(),
     start: dateTimeString("That slot has no start time."),
     end: dateTimeString("That slot has no end time."),
@@ -18,7 +18,7 @@ export const bookingSlotSchema = z
 export type BookingSlotInput = z.infer<typeof bookingSlotSchema>;
 
 /**
- * A time window typed into two datetime-local inputs (counselor availability, reschedule).
+ * A time window typed into two datetime-local inputs (peer facilitator availability, reschedule).
  * `now` is injectable so tests do not depend on the clock.
  */
 export const timeWindowSchema = (now: Date = new Date()) =>

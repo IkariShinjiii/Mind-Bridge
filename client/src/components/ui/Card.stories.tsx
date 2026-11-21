@@ -81,7 +81,7 @@ export const Empty: Story = {
         <CalendarX className="h-8 w-8 text-[color:var(--mb-muted)]" aria-hidden="true" />
         <h3 className="text-xl font-bold">No sessions booked</h3>
         <p className="max-w-[40ch] text-[color:var(--mb-muted)]">
-          Book a time with a counselor whenever you are ready.
+          Book a time with a peer facilitator whenever you are ready.
         </p>
         <Button>Book a session</Button>
       </div>

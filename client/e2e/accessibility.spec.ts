@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import type { AxeResults } from "axe-core";
 import { createRequire } from "node:module";
-import { seed, logIn, completeCheckIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, completeCheckIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 const axePath = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
 
@@ -88,7 +88,7 @@ for (const theme of ["light", "dark"]) {
     });
 
     test("staff pages: dashboard and the case inspector dialog", async ({ page }) => {
-      await logIn(page, COUNSELOR);
+      await logIn(page, PEER_FACILITATOR);
       await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
       await expectNoViolations(page, "staff dashboard");
 

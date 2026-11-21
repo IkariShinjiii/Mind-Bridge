@@ -2,7 +2,7 @@ import { z } from "zod";
 import { FOLLOW_UP_PATTERN } from "../../utils/followUp";
 import { optionalText } from "./fields";
 
-/** Case status values a counselor can set. */
+/** Case status values a peer facilitator can set. */
 export const caseStatusSchema = z.enum(["open", "reviewed", "escalated"]);
 
 /** Notes plus status on a student check-in. */
@@ -15,13 +15,13 @@ export const caseReviewSchema = z.object({
 });
 export type CaseReviewInput = z.infer<typeof caseReviewSchema>;
 
-/** Assigning (or clearing, with null) a counselor for a student. */
-export const counselorAssignmentSchema = z.object({
+/** Assigning (or clearing, with null) a peer facilitator for a student. */
+export const peerFacilitatorAssignmentSchema = z.object({
   studentId: z.string().min(1, "No student selected."),
   counselorId: z.string().min(1).nullable(),
   counselorName: z.string().nullable(),
 });
-export type CounselorAssignmentInput = z.infer<typeof counselorAssignmentSchema>;
+export type PeerFacilitatorAssignmentInput = z.infer<typeof peerFacilitatorAssignmentSchema>;
 
 /** Approve / reject / deactivate / reactivate an account. */
 export const accountActionSchema = z.object({ userId: z.string().min(1, "No account selected.") });

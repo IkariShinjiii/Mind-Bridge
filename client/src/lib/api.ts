@@ -26,6 +26,8 @@ import type {
   Assessment,
   AvailabilitySlot,
   CaseStatus,
+  AuditAction,
+  AuditEntry,
   ChatMessage,
   MessageSenderRole,
   UserProfile,
@@ -70,6 +72,50 @@ async function loadUsersById(): Promise<Record<string, UserProfile>> {
   return byId;
 }
 
+// --- AUDIT LOG ---
+
+/**
+ * Records that the signed-in staff member looked at or changed a case. Best effort: a failure is only logged to the
+ * console, so a logging problem never blocks someone from doing their work.
+ */
+export const logAudit = (action: AuditAction, targetId: string, detail: string): Promise<void> => {
+  const user = getAuth().currentUser;
+  if (!user) return Promise.resolve();
+  // With VITE_AUDIT_SERVER=true the server writes the entry, so it cannot be skipped or forged from the browser.
+  if (import.meta.env.VITE_AUDIT_SERVER === "true") {
+    return user
+      .getIdToken()
+      .then((token) =>
+        fetch("/api/audit-log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ action, targetId, detail: detail.slice(0, 300) }),
+          keepalive: true,
+        }),
+      )
+      .then(
+        () => undefined,
+        (err: unknown) => console.warn("Could not write the audit log", err),
+      );
+  }
+  return addDoc(collection(db, "auditLog"), {
+    actorId: user.uid,
+    actorName: (user.displayName || user.email || "Staff").slice(0, 200),
+    action,
+    targetId,
+    detail: detail.slice(0, 300),
+    at: new Date().toISOString(),
+  }).then(
+    () => undefined,
+    (err: unknown) => console.warn("Could not write the audit log", err),
+  );
+};
+
+/** Newest audit entries first (admin only; the rules enforce it). */
+// shortcut: reads the whole collection and trims to 200 here; add an orderBy/limit query and an index once the log is large.
+export const getAuditLog = (): Promise<AuditEntry[]> =>
+  guard(async () => newestFirstBy(mapDocs<AuditEntry>(await getDocs(collection(db, "auditLog"))), "at").slice(0, 200));
+
 // --- USERS (ADMIN PANEL) ---
 
 /** Lists every user profile (admin panel only; Firestore rules enforce who may read this). */
@@ -77,10 +123,10 @@ export const getAdminUsers = (): Promise<Array<UserProfile & { id: string }>> =>
   guard(async () => mapDocs<UserProfile & { id: string }>(await getDocs(collection(db, "users"))));
 
 /** Marks a staff account as approved. */
-export const approveCounselor = (id: string): Promise<void> =>
+export const approvePeerFacilitator = (id: string): Promise<void> =>
   guard(() => updateDoc(doc(db, "users", id), { approved: true }));
 /** Marks a staff account as not approved. */
-export const rejectCounselor = (id: string): Promise<void> =>
+export const rejectPeerFacilitator = (id: string): Promise<void> =>
   guard(() => updateDoc(doc(db, "users", id), { approved: false }));
 /** Blocks an account from logging in. */
 export const deactivateUser = (id: string): Promise<void> =>
@@ -185,6 +231,9 @@ export const getAssessments = (): Promise<Assessment[]> =>
     }
   });
 
+const newestFirstBy = <T extends object>(items: T[], key: keyof T): T[] =>
+  items.sort((x, y) => new Date(String(y[key] || 0)).getTime() - new Date(String(x[key] || 0)).getTime());
+
 const newestFirst = <T extends { createdAt?: string }>(items: T[]): T[] =>
   items.sort((x, y) => new Date(y.createdAt || 0).getTime() - new Date(x.createdAt || 0).getTime());
 
@@ -237,7 +286,7 @@ export const getMyAssessments = (): Promise<Assessment[]> =>
   });
 
 /**
- * Updates a case status and, optionally, the counselor notes and the follow-up date.
+ * Updates a case status and, optionally, the peer facilitator notes and the follow-up date.
  * @param counselorNotes - left unchanged when undefined; an empty string clears the notes
  * @param followUpDate - "YYYY-MM-DD"; left unchanged when undefined; an empty string clears it
  */
@@ -251,7 +300,15 @@ export const updateAssessmentStatus = (
     const updates: Record<string, string> = { status, reviewedAt: new Date().toISOString() };
     if (counselorNotes !== undefined) updates["counselorNotes"] = counselorNotes;
     if (followUpDate !== undefined) updates["followUpDate"] = followUpDate;
-    return updateDoc(doc(db, "assessments", id), updates);
+    return updateDoc(doc(db, "assessments", id), updates).then(() =>
+      logAudit(
+        "case_updated",
+        id,
+        [`status ${status}`, counselorNotes !== undefined && "notes saved", followUpDate !== undefined && "follow-up set"]
+          .filter(Boolean)
+          .join(", "),
+      ),
+    );
   });
 
 // --- APPOINTMENTS ---
@@ -308,7 +365,7 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
       studentEmail,
       slotId: slot.id || null,
       counselorId: slot.counselorId,
-      counselorName: slot.counselorName || "Assigned Counselor",
+      counselorName: slot.counselorName || "Assigned Peer Facilitator",
       title: `Session with ${slot.counselorName || "Counselor"}`,
       start: slot.start,
       end: slot.end,
@@ -390,7 +447,7 @@ export const updateAppointmentStatus = (
     const updates = { status, updatedAt: new Date().toISOString(), ...extraData };
 
     // Refuse a stale click: the screen may be showing a session someone else has already closed, such as a
-    // counselor confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
+    // peer facilitator confirming a booking the student cancelled a moment ago. If the read fails, the write goes ahead.
     const current = await getDoc(doc(db, "appointments", id)).catch(() => null);
     if (current?.exists() && !canMove(appointmentPhase(current.data()?.["status"]), status)) {
       throw new AppError(
@@ -419,15 +476,16 @@ export const updateAppointmentStatus = (
     }
 
     await updateDoc(doc(db, "appointments", id), updates);
+    await logAudit("appointment_updated", id, `status ${status}`);
   });
 
-// --- COUNSELOR AVAILABILITY ---
+// --- PEER FACILITATOR AVAILABILITY ---
 
-/** Lists every published counselor slot, booked or not. */
+/** Lists every published peer facilitator slot, booked or not. */
 export const getAvailability = (): Promise<AvailabilitySlot[]> =>
   guard(async () => mapDocs<AvailabilitySlot>(await getDocs(collection(db, "availability"))));
 
-/** Lists the signed-in counselor's own slots. */
+/** Lists the signed-in peer facilitator's own slots. */
 export const getMyAvailability = (): Promise<AvailabilitySlot[]> =>
   guard(async () => {
     const uid = getCurrentUserId();
@@ -437,7 +495,7 @@ export const getMyAvailability = (): Promise<AvailabilitySlot[]> =>
   });
 
 /**
- * Publishes an open slot for the signed-in counselor.
+ * Publishes an open slot for the signed-in peer facilitator.
  * @param start - ISO or datetime-local string
  * @param end - ISO or datetime-local string
  */
@@ -484,10 +542,10 @@ export const saveUserSettings = (uid: string | undefined, data: Partial<UserProf
     await updateDoc(doc(db, "users", targetUid), { ...data });
   });
 
-// --- COUNSELOR-STUDENT ASSIGNMENT ---
+// --- PEER-FACILITATOR-STUDENT ASSIGNMENT ---
 
-/** Assigns (or, with a falsy counselorId, clears) the counselor for a student. */
-export const assignCounselorToStudent = (
+/** Assigns (or, with a falsy counselorId, clears) the peer facilitator for a student. */
+export const assignPeerFacilitatorToStudent = (
   studentId: string,
   counselorId: string | null | undefined,
   counselorName: string | null | undefined,
@@ -497,7 +555,9 @@ export const assignCounselorToStudent = (
       assignedCounselorId: counselorId || null,
       assignedCounselorName: counselorName || null,
       assignedAt: counselorId ? new Date().toISOString() : null,
-    }),
+    }).then(() =>
+      logAudit("assignment_changed", studentId, counselorId ? `assigned to ${counselorName ?? counselorId}` : "assignment removed"),
+    ),
   );
 
 // --- CONFIDENTIAL IN-APP MESSAGING / NOTES ---

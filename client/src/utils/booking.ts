@@ -3,7 +3,7 @@ import { validate } from "../lib/validate";
 import type { AvailabilitySlot, Result } from "../types";
 
 /**
- * Checks that a slot has what a booking needs (id, counselor, a readable start and a later end) before it is sent.
+ * Checks that a slot has what a booking needs (id, peer facilitator, a readable start and a later end) before it is sent.
  * Older slots stored their times under `date`/`time`/`to`; those names are honoured.
  */
 export function validateSlotForBooking(slot: AvailabilitySlot): Result<unknown> {

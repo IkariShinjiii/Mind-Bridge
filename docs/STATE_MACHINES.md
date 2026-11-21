@@ -10,7 +10,7 @@ and the data layer ask it, and never compare status strings themselves.
 ### Appointment lifecycle: [`client/src/utils/appointmentLifecycle.ts`](../client/src/utils/appointmentLifecycle.ts)
 
 Before, six screens each read the free-text `status` their own way (substring checks in four different spellings), and
-what a counselor or student could do was decided by which buttons an `if` chain happened to render. Now there is one
+what a peer facilitator or student could do was decided by which buttons an `if` chain happened to render. Now there is one
 reader (`appointmentPhase`), one table of who can do what (`actionsFor`), one rule for when a slot is freed
 (`releasesSlot`) and one rule for which moves are legal (`canMove`).
 
@@ -34,12 +34,12 @@ stateDiagram-v2
 
 | Who | From | Can do |
 |---|---|---|
-| Counselor | pending | Confirm, Reschedule, Decline |
-| Counselor | confirmed, rescheduled | Mark completed, Reschedule, Cancel session |
+| Peer Facilitator | pending | Confirm, Reschedule, Decline |
+| Peer Facilitator | confirmed, rescheduled | Mark completed, Reschedule, Cancel session |
 | Student | pending, confirmed, rescheduled | Cancel booking (the only thing `firestore.rules` lets a student write) |
 | Anyone | completed, declined, cancelled | nothing |
 
-- **Stale clicks are refused.** `updateAppointmentStatus` reads the current status first. If a counselor presses
+- **Stale clicks are refused.** `updateAppointmentStatus` reads the current status first. If a peer facilitator presses
   Confirm on a booking the student cancelled a moment ago, they get "This appointment was just changed by someone
   else" and nothing is overwritten. If the read fails, or the stored status is unrecognised, the write goes ahead.
 - **Unknown status text** (hand-written legacy rows) reads as `other`: shown as written, offered no actions, never blocked.
@@ -62,7 +62,7 @@ stateDiagram-v2
 |---|---|---|---|
 | Case status | open, reviewed, escalated | `types/models.ts`, rules | Any move between them is allowed and intended, so there is no rule to centralise |
 | Availability slot | open ⇄ booked (`isBooked`) | `api.ts` `bookAppointment`, `releasesSlot` | Coupled to the appointment lifecycle above: booking sets it, decline or cancel clears it. Known race on double booking is documented in `bookAppointment` and `ARCHITECTURE.md` |
-| Booking steps | pick counselor → pick time | `components/appointments/BookingFlow.tsx` | The step is derived from two values and cannot be in an impossible state |
+| Booking steps | pick peer facilitator → pick time | `components/appointments/BookingFlow.tsx` | The step is derived from two values and cannot be in an impossible state |
 | Cookie notice, offline banner, service worker | shown / hidden | `CookieConsent`, `OfflineBanner`, `registerServiceWorker` | One boolean each |
 
 ## Implicit and deliberately not touched yet

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, readCollection, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, readCollection, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 async function answerAll(page: import("@playwright/test").Page, label: string) {
   const card = page.getByRole("region", { name: "Wellbeing" });
@@ -46,7 +46,7 @@ test.describe("WHO-5 wellbeing", () => {
     expect(await readCollection(page, "wellbeing")).toHaveLength(0);
   });
 
-  test("a counselor sees the student's latest score in the case view", async ({ page }) => {
+  test("a peer facilitator sees the student's latest score in the case view", async ({ page }) => {
     await seed(page, {
       docs: {
         wellbeing: {
@@ -75,7 +75,7 @@ test.describe("WHO-5 wellbeing", () => {
         },
       },
     });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await page.getByRole("button", { name: "Inspect case" }).click();
     const dialog = page.getByRole("dialog", { name: STUDENT.name });
     await expect(dialog).toContainText("Wellbeing (WHO-5) 40 of 100, low (under 50)");

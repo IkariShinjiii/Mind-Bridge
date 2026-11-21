@@ -42,6 +42,7 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import ReferralCard from "../../components/student/ReferralCard";
+import StudentOnboarding from "../../components/student/StudentOnboarding";
 import FourPillars from "../../components/student/FourPillars";
 import RelaxationLibrary from "../../components/student/RelaxationLibrary";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
@@ -395,7 +396,7 @@ export default function StudentDashboard() {
     })
     .sort((a, b) => new Date(a.start || a.date || 0).getTime() - new Date(b.start || b.date || 0).getTime())[0];
 
-  // Assigned Counselor info
+  // Assigned Peer Facilitator info
   const assignedCounselorName =
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Peer Facilitator";
 
@@ -418,6 +419,10 @@ export default function StudentDashboard() {
       )}
 
       <SessionReminder appointments={appointments} role="student" />
+      <StudentOnboarding
+        uid={currentUser?.uid}
+        onStart={() => document.getElementById("checkin-h")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
 
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">
@@ -502,7 +507,7 @@ export default function StudentDashboard() {
               )}
             </div>
 
-            {/* Wellness takes a full row (the ring needs room); appointment and counselor share the next one from sm up. */}
+            {/* Wellness takes a full row (the ring needs room); appointment and peer facilitator share the next one from sm up. */}
             <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
@@ -1287,7 +1292,7 @@ export default function StudentDashboard() {
         </aside>
       </div>
 
-      {/* BOOKING: counselor, time, confirm */}
+      {/* BOOKING: peer facilitator, time, confirm */}
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -1309,7 +1314,7 @@ export default function StudentDashboard() {
         />
       </Modal>
 
-      {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED COUNSELOR) */}
+      {/* CONFIDENTIAL CHAT MODAL (STUDENT TO ASSIGNED PEER FACILITATOR) */}
       {chatOpen && (
         <Suspense fallback={null}>
           <ConfidentialChatModal

@@ -13,7 +13,7 @@ const timeLabel = (d: Date | null): string =>
 const slotStart = (slot: AvailabilitySlot): Date | null => parseDate(slot.start || slot.date || slot.time);
 const slotEnd = (slot: AvailabilitySlot): Date | null => parseDate(slot.end || slot.to);
 
-interface CounselorGroup {
+interface PeerFacilitatorGroup {
   key: string;
   name: string;
   slots: AvailabilitySlot[];
@@ -30,10 +30,10 @@ export interface BookingFlowProps {
 
 const STEPS = ["Peer Facilitator", "Time", "Confirm"];
 
-// Three stops: pick a counselor, pick a time, confirm. Skips the first stop when only one counselor has open times.
+// Three stops: pick a peer facilitator, pick a time, confirm. Skips the first stop when only one peer facilitator has open times.
 export default function BookingFlow({ slots, loading, bookingId, onBook, onCancel }: BookingFlowProps) {
-  const counselors = useMemo<CounselorGroup[]>(() => {
-    const map = new Map<string, CounselorGroup>();
+  const peerFacilitators = useMemo<PeerFacilitatorGroup[]>(() => {
+    const map = new Map<string, PeerFacilitatorGroup>();
     slots.forEach((slot) => {
       const key = slot.counselorId || slot.counselorName || "unassigned";
       if (!map.has(key)) map.set(key, { key, name: slot.counselorName || "Assigned peer facilitator", slots: [] });
@@ -45,7 +45,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
     }));
   }, [slots]);
 
-  const [counselorKey, setCounselorKey] = useState<string | null>(null);
+  const [peerFacilitatorKey, setPeerFacilitatorKey] = useState<string | null>(null);
   const [chosen, setChosen] = useState<AvailabilitySlot | null>(null);
   // 1 slides the next step in from the right, -1 brings the previous one back from the left
   const [dir, setDir] = useState<1 | -1>(1);
@@ -57,21 +57,21 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
   const listMotion = noMotion ? {} : ({ variants: staggerParent, initial: "hidden", animate: "show" } as const);
   const itemMotion = noMotion ? {} : { variants: staggerChild };
 
-  const single = counselors.length === 1;
-  const counselor = counselors.find((c) => c.key === counselorKey) || (single ? counselors[0] : null);
-  const step = chosen ? 3 : counselor ? 2 : 1;
+  const single = peerFacilitators.length === 1;
+  const peerFacilitator = peerFacilitators.find((c) => c.key === peerFacilitatorKey) || (single ? peerFacilitators[0] : null);
+  const step = chosen ? 3 : peerFacilitator ? 2 : 1;
 
   const days = useMemo(() => {
-    if (!counselor) return [];
+    if (!peerFacilitator) return [];
     const groups: Array<{ label: string; slots: AvailabilitySlot[] }> = [];
-    counselor.slots.forEach((slot) => {
+    peerFacilitator.slots.forEach((slot) => {
       const label = dayLabel(slotStart(slot));
       const last = groups[groups.length - 1];
       if (last && last.label === label) last.slots.push(slot);
       else groups.push({ label, slots: [slot] });
     });
     return groups;
-  }, [counselor]);
+  }, [peerFacilitator]);
 
   // Loading, empty and the flow itself crossfade through one AnimatePresence
   const view = (key: string, node: ReactNode) => (
@@ -104,7 +104,7 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
     setDir(-1);
     if (n === 1) {
       setChosen(null);
-      setCounselorKey(null);
+      setPeerFacilitatorKey(null);
     } else if (n === 2) {
       setChosen(null);
     }
@@ -155,14 +155,14 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
           <m.div key="counselor" {...stepMotion}>
             <m.div {...listMotion} className="space-y-3">
               <p className="mb-sign text-2xl font-bold">Who would you like to see?</p>
-              {counselors.map((c) => {
+              {peerFacilitators.map((c) => {
                 const first = slotStart(c.slots[0]);
                 return (
                   <m.button
                     key={c.key}
                     type="button"
                     {...itemMotion}
-                    onClick={() => forward(() => setCounselorKey(c.key))}
+                    onClick={() => forward(() => setPeerFacilitatorKey(c.key))}
                     className="flex w-full items-center justify-between gap-4 rounded-md border border-[color:var(--mb-ink)] bg-[color:var(--mb-surface)] p-4 text-left hover:bg-[color:var(--mb-panel)] hover:text-[color:var(--mb-panel-ink)]"
                   >
                     <span>
@@ -179,9 +179,9 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
           </m.div>
         )}
 
-        {step === 2 && counselor && (
+        {step === 2 && peerFacilitator && (
           <m.div key="time" {...stepMotion} className="space-y-4">
-            <p className="mb-sign text-2xl font-bold">Pick a time with {counselor.name}</p>
+            <p className="mb-sign text-2xl font-bold">Pick a time with {peerFacilitator.name}</p>
             {/* Stagger by day, not by slot, so a long list still settles quickly */}
             <m.div {...listMotion} className="max-h-72 space-y-4 overflow-y-auto pr-1">
               {days.map((day) => (
@@ -215,11 +215,11 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
           </m.div>
         )}
 
-        {step === 3 && chosen && counselor && (
+        {step === 3 && chosen && peerFacilitator && (
           <m.div key="confirm" {...stepMotion} className="space-y-4">
             <div className="mb-plate p-6">
               <p className="mb-sign text-lg font-bold opacity-90">Please check your booking</p>
-              <p className="mb-sign mt-1 text-3xl font-bold leading-tight">{counselor.name}</p>
+              <p className="mb-sign mt-1 text-3xl font-bold leading-tight">{peerFacilitator.name}</p>
               <p className="mb-sign text-2xl font-bold">
                 {dayLabel(start)}, {timeLabel(start)}
                 {end ? ` to ${timeLabel(end)}` : ""}

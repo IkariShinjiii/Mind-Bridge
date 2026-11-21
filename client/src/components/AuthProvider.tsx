@@ -15,7 +15,7 @@ async function loadProfile(uid: string, emailVerified: boolean): Promise<Loaded 
   const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) return null;
   const data = snap.data() as UserProfile;
-  // The status is read from the stored role: `normalizeRole` folds counselor into admin and would hide it.
+  // The status is read from the stored role: `normalizeRole` folds peer facilitator into admin and would hide it.
   return { profile: { ...data, role: normalizeRole(data.role) }, status: statusOf(data, emailVerified) };
 }
 

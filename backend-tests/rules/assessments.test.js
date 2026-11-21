@@ -90,18 +90,18 @@ describe("assessments - READ (getMyAssessments, getAssessments)", () => {
   it("student reads own doc by id", () => assertSucceeds(getDoc(doc(as(env, "student"), "assessments/a1"))));
   it("student cannot read someone else's doc", () => assertFails(getDoc(doc(as(env, "student"), "assessments/a2"))));
   it("student cannot run the unfiltered list used by getAssessments", () => assertFails(getDocs(collection(as(env, "student"), "assessments"))));
-  it("approved counselor lists everything", () => assertSucceeds(getDocs(collection(as(env, "counselor"), "assessments"))));
+  it("approved peer facilitator lists everything", () => assertSucceeds(getDocs(collection(as(env, "counselor"), "assessments"))));
   it("admin lists everything", () => assertSucceeds(getDocs(collection(as(env, "admin"), "assessments"))));
-  it("unapproved counselor cannot list", () => assertFails(getDocs(collection(as(env, "pendingCounselor"), "assessments"))));
+  it("unapproved peer facilitator cannot list", () => assertFails(getDocs(collection(as(env, "pendingPeerFacilitator"), "assessments"))));
   it("unauthenticated list is rejected", () => assertFails(getDocs(collection(anon(env), "assessments"))));
 });
 
 describe("assessments - UPDATE (updateAssessmentStatus)", () => {
   const patch = { status: "reviewed", reviewedAt: "2026-10-02T00:00:00.000Z", counselorNotes: "followed up" };
-  it("counselor reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), patch)));
+  it("peer facilitator reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), patch)));
   it("admin reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "admin"), "assessments/a1"), patch)));
   it("student cannot edit even their own assessment", () => assertFails(updateDoc(doc(as(env, "student"), "assessments/a1"), { riskLevel: "low", counselorNotes: "x" })));
-  it("unapproved counselor cannot review", () => assertFails(updateDoc(doc(as(env, "pendingCounselor"), "assessments/a1"), patch)));
+  it("unapproved peer facilitator cannot review", () => assertFails(updateDoc(doc(as(env, "pendingPeerFacilitator"), "assessments/a1"), patch)));
 
   it("staff can move a case through every status", async () => {
     for (const status of ["reviewed", "escalated", "open"]) {

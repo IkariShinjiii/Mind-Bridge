@@ -123,7 +123,7 @@ export interface Appointment {
   counselorNote?: string;
 }
 
-/** Document in `availability/{id}`: a slot a counselor has published. */
+/** Document in `availability/{id}`: a slot a peer facilitator has published. */
 export interface AvailabilitySlot {
   id: string;
   counselorId: string | undefined;
@@ -152,4 +152,23 @@ export interface ChatMessage {
   senderRole: MessageSenderRole;
   text: string;
   timestamp: string;
+}
+
+export type AuditAction =
+  | "case_viewed"
+  | "case_updated"
+  | "assignment_changed"
+  | "appointment_updated"
+  | "report_exported";
+
+/** Document in `auditLog/{id}`: one staff action on a case or a student assignment. */
+export interface AuditEntry {
+  id: string;
+  actorId: string;
+  actorName: string;
+  action: AuditAction;
+  /** The check-in or student the action was about. */
+  targetId: string;
+  detail: string;
+  at: string;
 }

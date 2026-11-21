@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 /** A floating local time like the booking flow stores, `hours` from now. */
 const inHours = (hours: number): string => {
@@ -13,9 +13,9 @@ const session = (status: string, start: string) => ({
   studentName: STUDENT.name,
   studentEmail: STUDENT.email,
   slotId: null,
-  counselorId: COUNSELOR.uid,
-  counselorName: COUNSELOR.name,
-  title: `Session with ${COUNSELOR.name}`,
+  counselorId: PEER_FACILITATOR.uid,
+  counselorName: PEER_FACILITATOR.name,
+  title: `Session with ${PEER_FACILITATOR.name}`,
   start,
   status,
   createdAt: "2026-10-01T00:00:00.000Z",
@@ -43,9 +43,9 @@ test.describe("Session reminders", () => {
     await expect(page.getByText(/Reminder:/)).toHaveCount(0);
   });
 
-  test("the counselor sees a reminder naming the student", async ({ page }) => {
+  test("the peer facilitator sees a reminder naming the student", async ({ page }) => {
     await seed(page, { docs: { appointments: { a1: session("Confirmed", inHours(3)) } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await page.goto("/admin/dashboard");
     await expect(page.getByRole("status").filter({ hasText: /Reminder: your session with \S+ is/ })).toBeVisible();
   });

@@ -15,13 +15,13 @@ const slot = (over: Partial<AvailabilitySlot> = {}): AvailabilitySlot =>
 describe("validateSlotForBooking", () => {
   it("accepts a complete slot", () => expect(validateSlotForBooking(slot()).ok).toBe(true));
 
-  it("rejects a slot with no id or counselor, naming the problem", () => {
+  it("rejects a slot with no id or peer facilitator, naming the problem", () => {
     const r1 = validateSlotForBooking(slot({ id: "" }));
     expect(r1.ok).toBe(false);
     if (!r1.ok) expect(r1.error.fieldErrors?.id).toBe("Pick a time slot.");
     const r2 = validateSlotForBooking(slot({ counselorId: "" }));
     expect(r2.ok).toBe(false);
-    if (!r2.ok) expect(r2.error.fieldErrors?.counselorId).toBe("That slot has no counselor.");
+    if (!r2.ok) expect(r2.error.fieldErrors?.counselorId).toBe("That slot has no peer facilitator.");
   });
 
   it("rejects an end that is not after the start", () => {

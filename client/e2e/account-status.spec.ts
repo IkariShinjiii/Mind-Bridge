@@ -1,19 +1,19 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, COUNSELOR, STUDENT } from "./helpers";
+import { seed, logIn, PEER_FACILITATOR, STUDENT } from "./helpers";
 
-const unapprovedCounselor = {
-  name: COUNSELOR.name,
-  email: COUNSELOR.email,
+const unapprovedPeerFacilitator = {
+  name: PEER_FACILITATOR.name,
+  email: PEER_FACILITATOR.email,
   role: "counselor",
   approved: false,
   active: true,
   emailVerified: true,
 };
 
-test.describe("A counselor who is not approved yet", () => {
+test.describe("A peer facilitator who is not approved yet", () => {
   test.beforeEach(async ({ page }) => {
-    await seed(page, { docs: { users: { [COUNSELOR.uid]: unapprovedCounselor } } });
-    await logIn(page, COUNSELOR);
+    await seed(page, { docs: { users: { [PEER_FACILITATOR.uid]: unapprovedPeerFacilitator } } });
+    await logIn(page, PEER_FACILITATOR);
   });
 
   test("sees why they cannot get in, not a dashboard full of errors", async ({ page }) => {
@@ -32,9 +32,9 @@ test.describe("A counselor who is not approved yet", () => {
   });
 });
 
-test("a counselor who has been approved goes straight to the dashboard", async ({ page }) => {
+test("a peer facilitator who has been approved goes straight to the dashboard", async ({ page }) => {
   await seed(page);
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();
   await expect(page.getByText("waiting for approval")).toHaveCount(0);
 });

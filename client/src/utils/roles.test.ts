@@ -3,7 +3,7 @@ import { normalizeRole } from "./roles";
 
 describe("normalizeRole", () => {
   it("keeps students as students", () => expect(normalizeRole("student")).toBe("student"));
-  it("treats a counselor as an admin", () => expect(normalizeRole("counselor")).toBe("admin"));
+  it("treats a peer facilitator as an admin", () => expect(normalizeRole("counselor")).toBe("admin"));
   it("keeps admins as admins", () => expect(normalizeRole("admin")).toBe("admin"));
   it("ignores case", () => {
     expect(normalizeRole("ADMIN")).toBe("admin");

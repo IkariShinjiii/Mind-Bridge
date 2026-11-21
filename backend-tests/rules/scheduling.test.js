@@ -19,7 +19,7 @@ beforeEach(async () => {
 
 describe("availability - READ (getAvailability, getMyAvailability)", () => {
   it("student lists all slots", () => assertSucceeds(getDocs(collection(as(env, "student"), "availability"))));
-  it("counselor lists own slots", () =>
+  it("peer facilitator lists own slots", () =>
     assertSucceeds(getDocs(query(collection(as(env, "counselor"), "availability"), where("counselorId", "==", "cou1")))));
   it("deactivated student cannot list", () => assertFails(getDocs(collection(as(env, "deactivated"), "availability"))));
   it("unauthenticated cannot list", () => assertFails(getDocs(collection(anon(env), "availability"))));
@@ -40,11 +40,11 @@ describe("availability - CREATE (addAvailability)", () => {
     await assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Ana Student" })));
     await assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message({ senderName: "Student" })));
   });
-  it("counselor creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "counselor"), "availability"), slot())));
+  it("peer facilitator creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "counselor"), "availability"), slot())));
   it("admin creates a slot for themselves", () => assertSucceeds(addDoc(collection(as(env, "admin"), "availability"), slot({ counselorId: "adm1" }))));
-  it("counselor cannot create a slot under another counselor's id", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ counselorId: "adm1" }))));
+  it("peer facilitator cannot create a slot under another peer facilitator's id", () => assertFails(addDoc(collection(as(env, "counselor"), "availability"), slot({ counselorId: "adm1" }))));
   it("student cannot create slots", () => assertFails(addDoc(collection(as(env, "student"), "availability"), slot({ counselorId: "stu1" }))));
-  it("unapproved counselor cannot create slots", () => assertFails(addDoc(collection(as(env, "pendingCounselor"), "availability"), slot({ counselorId: "cou2" }))));
+  it("unapproved peer facilitator cannot create slots", () => assertFails(addDoc(collection(as(env, "pendingPeerFacilitator"), "availability"), slot({ counselorId: "cou2" }))));
 });
 
 /** The client booking: one batch creating the appointment and claiming the slot. */
@@ -105,12 +105,12 @@ describe("availability - UPDATE (booking and releasing a slot)", () => {
   it("student cannot set isBooked to a non-boolean", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { isBooked: "yes" })));
   it("student cannot alter times", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { start: "2030-01-01T00:00:00.000Z" })));
   it("student cannot reassign a slot to themselves", () => assertFails(updateDoc(doc(as(env, "student"), "availability/slot1"), { counselorId: "stu1" })));
-  it("counselor can update a slot", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "availability/slot1"), { isBooked: true })));
+  it("peer facilitator can update a slot", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "availability/slot1"), { isBooked: true })));
 });
 
 describe("availability - DELETE (removeAvailability)", () => {
-  it("owner counselor deletes own slot", () => assertSucceeds(deleteDoc(doc(as(env, "counselor"), "availability/slot1"))));
-  it("counselor cannot delete another counselor's slot", () => assertFails(deleteDoc(doc(as(env, "counselor"), "availability/slot2"))));
+  it("owner peer facilitator deletes own slot", () => assertSucceeds(deleteDoc(doc(as(env, "counselor"), "availability/slot1"))));
+  it("peer facilitator cannot delete another peer facilitator's slot", () => assertFails(deleteDoc(doc(as(env, "counselor"), "availability/slot2"))));
   it("student cannot delete a slot", () => assertFails(deleteDoc(doc(as(env, "student"), "availability/slot1"))));
 });
 
@@ -153,17 +153,17 @@ describe("appointments - READ (getAppointments, getAllAppointments)", () => {
     assertSucceeds(getDocs(query(collection(as(env, "student"), "appointments"), where("studentId", "==", "stu1")))));
   it("student cannot read another student's appointment", () => assertFails(getDoc(doc(as(env, "student"), "appointments/ap2"))));
   it("student cannot run the unfiltered staff list", () => assertFails(getDocs(collection(as(env, "student"), "appointments"))));
-  it("counselor lists all appointments", () => assertSucceeds(getDocs(collection(as(env, "counselor"), "appointments"))));
-  it("unapproved counselor cannot list", () => assertFails(getDocs(collection(as(env, "pendingCounselor"), "appointments"))));
+  it("peer facilitator lists all appointments", () => assertSucceeds(getDocs(collection(as(env, "counselor"), "appointments"))));
+  it("unapproved peer facilitator cannot list", () => assertFails(getDocs(collection(as(env, "pendingPeerFacilitator"), "appointments"))));
 });
 
 describe("appointments - UPDATE (updateAppointmentStatus)", () => {
-  it("counselor confirms", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Confirmed", updatedAt: "x" })));
-  it("counselor declines", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Declined", updatedAt: "x" })));
+  it("peer facilitator confirms", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Confirmed", updatedAt: "x" })));
+  it("peer facilitator declines", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Declined", updatedAt: "x" })));
   it("student cancels own with a reason", () =>
     assertSucceeds(updateDoc(doc(as(env, "student"), "appointments/ap1"), { status: "Cancelled", updatedAt: "x", cancellationReason: "sick", cancelledBy: "student" })));
-  it("counselor cannot rewrite who the appointment is for", () => assertFails(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { studentId: "stu2" })));
-  it("counselor can save the details a status change carries", () =>
+  it("peer facilitator cannot rewrite who the appointment is for", () => assertFails(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { studentId: "stu2" })));
+  it("peer facilitator can save the details a status change carries", () =>
     assertSucceeds(updateDoc(doc(as(env, "counselor"), "appointments/ap1"), { status: "Rescheduled", updatedAt: "x", start: "s", end: "e", rescheduleReason: "r", counselorNote: "n" })));
   it("student cannot self-confirm", () => assertFails(updateDoc(doc(as(env, "student"), "appointments/ap1"), { status: "Confirmed", updatedAt: "x" })));
   it("student cannot cancel and also change other fields", () =>
@@ -179,9 +179,9 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   it("student reads own thread", () =>
     assertSucceeds(getDocs(query(collection(as(env, "student"), "messages"), where("studentId", "==", "stu1")))));
   it("student cannot read another student's thread", () => assertFails(getDoc(doc(as(env, "student"), "messages/m2"))));
-  it("counselor reads any thread", () =>
+  it("peer facilitator reads any thread", () =>
     assertSucceeds(getDocs(query(collection(as(env, "counselor"), "messages"), where("studentId", "==", "stu2")))));
-  it("unapproved counselor cannot read threads", () => assertFails(getDoc(doc(as(env, "pendingCounselor"), "messages/m1"))));
+  it("unapproved peer facilitator cannot read threads", () => assertFails(getDoc(doc(as(env, "pendingPeerFacilitator"), "messages/m1"))));
 
   it("student posts to own thread", () => assertSucceeds(addDoc(collection(as(env, "student"), "messages"), message())));
   it("a message must have text, and at most 2000 characters (the chat form's own limit)", async () => {
@@ -192,7 +192,7 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   });
   it("a message cannot carry extra fields", () =>
     assertFails(addDoc(collection(as(env, "student"), "messages"), message({ pinned: true }))));
-  it("student cannot post as a counselor or admin", async () => {
+  it("student cannot post as a peer facilitator or admin", async () => {
     await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "counselor" })));
     await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "admin" })));
     await assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderRole: "anything" })));
@@ -205,11 +205,11 @@ describe("messages - confidential chat (listenToStudentMessages, sendStudentMess
   });
   it("student cannot post into another student's thread", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ studentId: "stu2" }))));
   it("student cannot forge senderId", () => assertFails(addDoc(collection(as(env, "student"), "messages"), message({ senderId: "cou1" }))));
-  it("counselor replies in a student's thread", () =>
+  it("peer facilitator replies in a student's thread", () =>
     assertSucceeds(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "cou1", senderRole: "counselor", senderName: "Dr. Cruz" }))));
-  it("counselor cannot forge senderId", () => assertFails(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "stu1" }))));
-  it("unapproved counselor cannot reply", () =>
-    assertFails(addDoc(collection(as(env, "pendingCounselor"), "messages"), message({ senderId: "cou2", senderRole: "counselor" }))));
+  it("peer facilitator cannot forge senderId", () => assertFails(addDoc(collection(as(env, "counselor"), "messages"), message({ senderId: "stu1" }))));
+  it("unapproved peer facilitator cannot reply", () =>
+    assertFails(addDoc(collection(as(env, "pendingPeerFacilitator"), "messages"), message({ senderId: "cou2", senderRole: "counselor" }))));
 
   it("messages are immutable", async () => {
     await assertFails(updateDoc(doc(as(env, "student"), "messages/m1"), { text: "edited" }));

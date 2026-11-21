@@ -1,4 +1,7 @@
 ---
+
+> **Terminology (2026-11-20).** Licensed guidance counselors are not users of Mind Bridge; students reach them only through a peer-facilitator referral to PATNUBAY. The staff role is called **Peer Facilitator** in the product, the docs and the code (functions, components, tests). Only the data already stored in Firebase keeps the old name, so no migration is needed: the role value `counselor`, and the fields `counselorId`, `counselorName`, `counselorNote(s)` and `assignedCounselorId/Name`. Where this file says `counselor` in data, read it as the Peer Facilitator role.
+
 title: Mind Bridge Security Audit Report
 ---
 

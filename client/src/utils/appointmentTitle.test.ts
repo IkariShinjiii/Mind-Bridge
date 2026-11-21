@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { appointmentTitle } from "./appointmentTitle";
 
 describe("appointmentTitle", () => {
-  it("replaces legacy counselor titles and empty values", () => {
+  it("replaces legacy peer facilitator titles and empty values", () => {
     for (const t of ["Counseling Session", "counselling session", "Session with Counselor", undefined, null, " "]) {
       expect(appointmentTitle(t)).toBe("Peer support session");
     }

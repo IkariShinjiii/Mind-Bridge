@@ -1,5 +1,7 @@
 # Mind Bridge backend API
 
+> **Terminology (2026-11-20).** Licensed guidance counselors are not users of Mind Bridge; students reach them only through a peer-facilitator referral to PATNUBAY. The staff role is called **Peer Facilitator** in the product, the docs and the code (functions, components, tests). Only the data already stored in Firebase keeps the old name, so no migration is needed: the role value `counselor`, and the fields `counselorId`, `counselorName`, `counselorNote(s)` and `assignedCounselorId/Name`. Where this file says `counselor` in data, read it as the Peer Facilitator role.
+
 Mind Bridge has **no REST server**. The browser talks straight to Firebase, and
 `firestore.rules` is the only server-side gate. So an "endpoint" here is one of:
 
@@ -72,9 +74,9 @@ Role routing: `admin`/`counselor` → `/admin/dashboard`, otherwise `/student/da
 | `getUserSettings(uid?)` | get | own | any | any |
 | `saveUserSettings(uid?, data)` | update | own, **not** `role, approved, active, assignedCounselorId, assignedCounselorName, assignedAt` | – | any field |
 | `getAdminUsers()` | list | 403 | 200 | 200 |
-| `approveCounselor(id)` / `rejectCounselor(id)` | update `approved` | 403 | 403 | 200 |
+| `approvePeerFacilitator(id)` / `rejectPeerFacilitator(id)` | update `approved` | 403 | 403 | 200 |
 | `deactivateUser(id)` / `reactivateUser(id)` | update `active` | 403 | 403 | 200 |
-| `assignCounselorToStudent(studentId, counselorId, counselorName)` | update assignment fields only | 403 | 200 | 200 |
+| `assignPeerFacilitatorToStudent(studentId, counselorId, counselorName)` | update assignment fields only | 403 | 200 | 200 |
 | – | delete | 403 | 403 | 403 (nobody) |
 
 ```js
@@ -86,9 +88,9 @@ await saveUserSettings(undefined, { name: "Ana B." });
 await saveUserSettings("stu1", { role: "admin" });   // rejects: permission-denied
 await saveUserSettings();               // no user → throws Error("No authenticated user")
 
-await assignCounselorToStudent("stu1", "cou1", "Dr. Cruz");
+await assignPeerFacilitatorToStudent("stu1", "cou1", "Dr. Cruz");
 // users/stu1 → { assignedCounselorId: "cou1", assignedCounselorName: "Dr. Cruz", assignedAt: "<ISO>" }
-await assignCounselorToStudent("stu1", null);       // clears all three to null
+await assignPeerFacilitatorToStudent("stu1", null);       // clears all three to null
 ```
 
 ---
@@ -317,12 +319,12 @@ curl -s -X PATCH "$DB/users/$UID_?updateMask.fieldPaths=name" \
 # getAdminUsers: list all profiles (staff only)
 curl -s "$DB/users?pageSize=100" -H "Authorization: Bearer $ADMIN_TOKEN"
 
-# approveCounselor / rejectCounselor (admin only); deactivate/reactivate are the same with "active"
+# approvePeerFacilitator / rejectPeerFacilitator (admin only); deactivate/reactivate are the same with "active"
 curl -s -X PATCH "$DB/users/$COUNSELOR_UID?updateMask.fieldPaths=approved" \
   -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" \
   -d '{"fields":{"approved":{"booleanValue":true}}}'
 
-# assignCounselorToStudent (staff): only these three fields are allowed
+# assignPeerFacilitatorToStudent (staff): only these three fields are allowed
 curl -s -X PATCH "$DB/users/$STUDENT_UID?updateMask.fieldPaths=assignedCounselorId&updateMask.fieldPaths=assignedCounselorName&updateMask.fieldPaths=assignedAt" \
   -H "Authorization: Bearer $STAFF_TOKEN" -H "Content-Type: application/json" \
   -d '{"fields":{"assignedCounselorId":{"stringValue":"cou1"},

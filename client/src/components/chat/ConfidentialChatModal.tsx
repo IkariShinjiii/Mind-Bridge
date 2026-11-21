@@ -170,7 +170,7 @@ export default function ConfidentialChatModal({
   }
 
   const grouped = groupByDay(messages);
-  const isCounselorView = userRole === "admin";
+  const isPeerFacilitatorView = userRole === "admin";
 
   const quickRepliesStudent = [
     "Thank you for reviewing my check-in.",
@@ -179,14 +179,14 @@ export default function ConfidentialChatModal({
     "I'm feeling much better, thank you!",
   ];
 
-  const quickRepliesCounselor = [
+  const quickRepliesPeerFacilitator = [
     "I've reviewed your check-in. How are you feeling today?",
     "Feel free to drop by the Guidance Office anytime.",
     "Please book a follow-up peer support slot.",
     "You're doing great — keep up the daily check-ins!",
   ];
 
-  const quickReplies = isCounselorView ? quickRepliesCounselor : quickRepliesStudent;
+  const quickReplies = isPeerFacilitatorView ? quickRepliesPeerFacilitator : quickRepliesStudent;
 
   const backdropMotion = useMotionPreset(fadePreset);
   const dialogMotion = useMotionPreset(dialogPreset);
@@ -204,7 +204,7 @@ export default function ConfidentialChatModal({
               ref={dialogRef}
               role="dialog"
               aria-modal="true"
-              aria-label={`Confidential chat with ${recipientName || (isCounselorView ? "student" : "your peer facilitator")}`}
+              aria-label={`Confidential chat with ${recipientName || (isPeerFacilitatorView ? "student" : "your peer facilitator")}`}
               {...dialogMotion}
               className="relative z-10 flex flex-col w-full max-w-lg h-[90dvh] max-h-[640px] rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-sm overflow-hidden"
             >
@@ -221,7 +221,7 @@ export default function ConfidentialChatModal({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-[color:var(--mb-ink)] truncate">
-                      {recipientName || (isCounselorView ? "Student" : "Your Peer Facilitator")}
+                      {recipientName || (isPeerFacilitatorView ? "Student" : "Your Peer Facilitator")}
                     </span>
                     <span className="shrink-0 rounded-full bg-[color:var(--mb-brand-bg)] px-2 py-1 text-xs font-bold uppercase text-[color:var(--mb-brand)] border-2 border-[color:var(--mb-brand)]">
                       {recipientRole === "counselor"
@@ -248,7 +248,7 @@ export default function ConfidentialChatModal({
                 </button>
               </div>
 
-              {!isCounselorView && (
+              {!isPeerFacilitatorView && (
                 <div className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] px-4 py-2 text-xs text-[color:var(--mb-ink)]">
                   Peer facilitators offer support, not professional counseling. For formal counseling, book with the{" "}
                   <a
@@ -290,7 +290,7 @@ export default function ConfidentialChatModal({
                     <div>
                       <p className="text-lg font-bold text-[color:var(--mb-ink)]">Confidential support thread</p>
                       <p className="text-[color:var(--mb-muted)] mt-1 max-w-xs">
-                        {isCounselorView
+                        {isPeerFacilitatorView
                           ? "Send a private message to this student. Only you and the student have access to this conversation."
                           : "Send a secure message to your peer facilitator. This conversation is completely confidential."}
                       </p>

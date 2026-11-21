@@ -14,10 +14,10 @@ objective is implemented.
 
 | Stage | Question it answers | In Mind Bridge |
 |---|---|---|
-| **Input** | What goes in? | Student identity (`@usa.edu.ph` account), seven check-in answers scored 0 to 3, counselor availability, appointment requests, chat messages |
+| **Input** | What goes in? | Student identity (`@usa.edu.ph` account), seven check-in answers scored 0 to 3, peer facilitator availability, appointment requests, chat messages |
 | **Process** | What do we do with it? | Validate, score against the risk rules, store under role-based rules, flag and prioritize, alert staff, match to appointments |
-| **Output** | What comes out? | A risk level with guidance for the student, a prioritized case queue for counselors, booked appointments, an email alert, anonymized reports |
-| **Outcome** | What changes for people? | Students reach support sooner and privately; high-risk cases are not missed; counselors triage faster; the campus sees aggregate wellness trends |
+| **Output** | What comes out? | A risk level with guidance for the student, a prioritized case queue for peer facilitators, booked appointments, an email alert, anonymized reports |
+| **Outcome** | What changes for people? | Students reach support sooner and privately; high-risk cases are not missed; peer facilitators triage faster; the campus sees aggregate wellness trends |
 
 ## 2. System architecture and data flow
 
@@ -26,7 +26,7 @@ flowchart LR
     subgraph INPUT["INPUT"]
         I1["Sign-up / sign-in<br/>@usa.edu.ph"]
         I2["Check-in answers<br/>7 items, 0-3 each"]
-        I3["Counselor availability"]
+        I3["Peer facilitator availability"]
         I4["Booking request"]
         I5["Chat message"]
     end
@@ -42,7 +42,7 @@ flowchart LR
 
     subgraph OUTPUT["OUTPUT"]
         O1["Risk result + guidance<br/>StudentDashboard.tsx"]
-        O2["Priority-sorted case queue<br/>+ counselor notes"]
+        O2["Priority-sorted case queue<br/>+ peer facilitator notes"]
         O3["Confirmed appointment"]
         O4["Email alert to staff"]
         O5["Anonymized CSV + risk chart"]
@@ -85,7 +85,7 @@ INPUT                PROCESS                                   OUTPUT           
 7 answers (0-3) ──▶ validate ─▶ scoreAnswers() ─▶ rules gate ─▶ risk level + guidance ───▶ student gets help
                                      │                │         crisis resources             sooner, privately
                                      ▼                ▼
-                              riskLevel, total   Firestore ──▶ priority-sorted case queue ─▶ counselors triage
+                              riskLevel, total   Firestore ──▶ priority-sorted case queue ─▶ peer facilitators triage
                               flaggedForImmediate     │                                      the urgent first
                               Review                  └──────▶ Cloud Function re-scores ───▶ high-risk email ─▶ no case missed
                                                       └──────▶ anonymized CSV / chart ─────▶ campus planning
@@ -199,8 +199,8 @@ in `scoring.test.ts` and `scoring.edge.test.ts` would then need new boundary cas
 | Concern | Measure | Where |
 |---|---|---|
 | **Who can read what** | Role-based rules: students read only their own assessments, appointments and messages; staff read all; everything else is denied by default | `firestore.rules` |
-| **Privilege escalation** | Users cannot change their own `role`, `approved`, `active` or counselor assignment. Admin is set only by hand in the console | `firestore.rules` (`users` update rule) |
-| **Counselor vetting** | Counselors have no staff access until an admin sets `approved: true` | `isStaff()` in the rules |
+| **Privilege escalation** | Users cannot change their own `role`, `approved`, `active` or peer facilitator assignment. Admin is set only by hand in the console | `firestore.rules` (`users` update rule) |
+| **Peer Facilitator vetting** | Peer Facilitators have no staff access until an admin sets `approved: true` | `isStaff()` in the rules |
 | **Account shutdown** | `active: false` blocks every collection immediately | `isActive()` in the rules |
 | **Impersonation** | Create rules require `studentId` / `senderId` to equal the caller's uid | `firestore.rules` |
 | **Tampering with records** | No deletes (except availability slots); assessments updatable by staff only; messages immutable; students may only cancel their own appointment | `firestore.rules` |
@@ -220,16 +220,16 @@ in `scoring.test.ts` and `scoring.edge.test.ts` would then need new boundary cas
 |---|---|---|
 | Email domain is enforced in the UI only, not in the rules | A direct API caller could register a non-school account | Domain check in the `users` create rule or a blocking Auth function |
 | Students can read their own whole assessment document, including `counselorNotes` | A student could see clinical notes the UI hides from them | Move notes to a staff-only subcollection or collection |
-| Staff can read every student's data, with no assignment scoping | Any approved counselor sees all students | Restrict reads to the assigned counselor, using `assignedCounselorId` |
+| Staff can read every student's data, with no assignment scoping | Any approved peer facilitator sees all students | Restrict reads to the assigned peer facilitator, using `assignedCounselorId` |
 | The assessment stores `studentEmail` and `studentName` next to the answers | More identifying data than reporting needs | Keep identity in `users` and join on read |
 | A student can create an appointment already marked `Confirmed`, free another student's slot, or post a message labelled `senderRole: "counselor"` | Students can write fields that should be server-controlled (asserted in `known-gaps.test.js`) | Constrain these fields in the create and update rules, or move booking into a callable function |
 | `firestore.rules` is marked DRAFT | Needs a review against production data | Review, then remove the DRAFT header |
-| No audit log of who viewed a case | Cannot answer "who accessed this record" | Cloud Function or Firestore audit logging |
+| Audit log is best-effort and client-written | A hand-built request could skip it; a failed write is only logged to the console | Write entries from a Cloud Function or callable so they cannot be skipped |
 | No data-retention schedule | Records are kept indefinitely | Define retention and scheduled deletion with the counseling office |
 | The privacy policy says "encrypted at rest" | True of the platform defaults, but this app adds no field-level encryption | Keep the wording tied to the platform, or add field-level encryption for notes |
 | `PRODUCT.md` mentions "bcrypt session security" | Firebase uses its own hashing and tokens, not bcrypt | Update the wording to "Firebase Authentication" |
 
-The email-domain, counselor-notes and staff-scoping gaps are the most relevant to confidentiality and would be the priority before a real
+The email-domain, peer facilitator-notes and staff-scoping gaps are the most relevant to confidentiality and would be the priority before a real
 launch.
 
 ## 5. Objectives mapped to implementation
@@ -242,11 +242,11 @@ code stays the same.
 | 1 | Provide a **safe, private self-assessment** of mood, stress, sleep, focus and safety | Input | `StudentDashboard.tsx` (7-item form, crisis item), `validation.js` | `scoring*.test.js`, `e2e/assessment.spec.js` |
 | 2 | **Evaluate risk** objectively with a multi-tier result | Process | `utils/scoring.ts`, `api.ts` `submitResponse()` | `scoring.test.js`, `scoring.edge.test.js`, `api.test.js` |
 | 3 | Give **immediate, actionable guidance** and crisis resources | Output | Result card in `StudentDashboard.tsx`, `CrisisResources.tsx` | `e2e/results.spec.js`, `e2e/crisis-resources.spec.js` |
-| 4 | Let counselors **triage flagged cases first** and record notes | Process / Output | `AdminPanel.tsx` (filters, priority sort, status, notes) | `e2e/counselor.spec.js` |
+| 4 | Let peer facilitators **triage flagged cases first** and record notes | Process / Output | `AdminPanel.tsx` (filters, priority sort, status, notes) | `e2e/peerFacilitator.spec.js` |
 | 5 | **Notify staff** when a high-risk check-in arrives | Output | `client/api/alert-high-risk.ts` and `alert-sweep.ts` (free Vercel routes; `functions/index.js` is the unused paid alternative) | `backend-tests/functions/alertOnHighRisk.test.js` |
-| 6 | **Book and manage appointments** with counselors | Process / Output | `BookingFlow.jsx`, `Appointments.jsx`, `ManageAvailability.jsx`, `api.ts` | `backend-tests/api/api.test.js` |
-| 7 | **Confidential communication** between student and counselor | Input / Output | `ConfidentialChatModal.jsx`, `api.ts` (`listenToStudentMessages`, `sendStudentMessage`), `messages` rules | `backend-tests/rules/scheduling.test.js`, `known-gaps.test.js` (partial) |
-| 8 | **Role-based access and governance** (approve counselors, deactivate users) | Process | `AuthContext.jsx`, `AdminPanel.tsx`, `firestore.rules` | `backend-tests/rules/users.test.js` |
+| 6 | **Book and manage appointments** with peer facilitators | Process / Output | `BookingFlow.jsx`, `Appointments.jsx`, `ManageAvailability.jsx`, `api.ts` | `backend-tests/api/api.test.js` |
+| 7 | **Confidential communication** between student and peer facilitator | Input / Output | `ConfidentialChatModal.jsx`, `api.ts` (`listenToStudentMessages`, `sendStudentMessage`), `messages` rules | `backend-tests/rules/scheduling.test.js`, `known-gaps.test.js` (partial) |
+| 8 | **Role-based access and governance** (approve peer facilitators, deactivate users) | Process | `AuthContext.jsx`, `AdminPanel.tsx`, `firestore.rules` | `backend-tests/rules/users.test.js` |
 | 9 | **Protect privacy** of sensitive data | Process | Section 4 above | `backend-tests/rules/assessments.test.js`, `users.test.js` |
 | 10 | **Aggregate insight** for wellness planning | Output / Outcome | Analytics tab and anonymized CSV in `AdminPanel.tsx`, `adminUtils.js` | No automated test yet |
 | 11 | **Accessible, calm** experience under stress | Output | `theme.css` tokens, `Modal`, `useFocusTrap`, 44px targets, reduced motion | Storybook a11y addon, `DESIGN.md` |
@@ -263,19 +263,19 @@ code stays the same.
 3. **Process, gate.** `firestore.rules` checks the caller is active, that `studentId` equals their
    uid, and that `status` is `"open"`. Otherwise the write is rejected.
 4. **Output, student.** The student immediately sees "Priority support suggested", the explanation
-   that guidance staff will review in confidence, and the crisis hotlines. They can book a counselor.
+   that guidance staff will review in confidence, and the crisis hotlines. They can book a peer facilitator.
 5. **Process, server.** The `assessments` create event triggers `alertOnHighRisk`, which recomputes
    risk from the raw scores (not the stored level), finds active, approved staff, and emails them
    the name, score and flag, with a dashboard link.
 6. **Output, staff.** In the admin panel the case sits at the top of the queue with a "Safety
-   question flagged" badge. The counselor opens it, reads the responses, adds notes, and sets the
+   question flagged" badge. The peer facilitator opens it, reads the responses, adds notes, and sets the
    status to `reviewed` or `escalated`.
-7. **Outcome.** The student is connected to a counselor quickly and privately, and the case was not
+7. **Outcome.** The student is connected to a peer facilitator quickly and privately, and the case was not
    dependent on someone happening to check a dashboard. In aggregate, the anonymized export and risk
    chart show how many students fall in each tier over time.
 
 **Feedback loop.** Outcomes feed back into Input: the trend line compares each new check-in with the
-previous one ("improving", "higher distress", "unchanged"), and counselor status changes update what
+previous one ("improving", "higher distress", "unchanged"), and peer facilitator status changes update what
 the next staff member sees.
 
 ## 7. Suggested measures for the Outcome stage

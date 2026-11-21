@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 const checkIn = {
   studentId: STUDENT.uid,
@@ -29,7 +29,7 @@ const appointment = {
 const messages = {
   m1: {
     studentId: STUDENT.uid,
-    senderId: COUNSELOR.uid,
+    senderId: PEER_FACILITATOR.uid,
     senderName: "Dr. Reyes",
     senderRole: "admin",
     text: "See you on Friday",
@@ -88,14 +88,14 @@ test.describe("Download my data", () => {
 
 test("staff can download their own data too", async ({ page }) => {
   await seed(page, { docs: { messages } });
-  await logIn(page, COUNSELOR);
+  await logIn(page, PEER_FACILITATOR);
   await page.goto("/settings");
   await page.getByRole("button", { name: "Privacy", exact: true }).click();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download my data" }).click();
   const download = await downloadPromise;
   const file = JSON.parse((await import("node:fs")).readFileSync((await download.path())!, "utf8"));
-  expect(file.profile).toMatchObject({ email: COUNSELOR.email });
+  expect(file.profile).toMatchObject({ email: PEER_FACILITATOR.email });
   expect(file.checkIns).toEqual([]);
   expect(file.messages).toEqual([]);
 });

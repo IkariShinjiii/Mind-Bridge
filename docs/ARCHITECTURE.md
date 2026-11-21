@@ -1,5 +1,7 @@
 # Mind Bridge architecture
 
+> **Terminology (2026-11-20).** Licensed guidance counselors are not users of Mind Bridge; students reach them only through a peer-facilitator referral to PATNUBAY. The staff role is called **Peer Facilitator** in the product, the docs and the code (functions, components, tests). Only the data already stored in Firebase keeps the old name, so no migration is needed: the role value `counselor`, and the fields `counselorId`, `counselorName`, `counselorNote(s)` and `assignedCounselorId/Name`. Where this file says `counselor` in data, read it as the Peer Facilitator role.
+
 This document explains how the system is put together, how data and access flow through it, and
 where it will strain as usage grows. For setup and release steps see
 [`DEPLOYMENT.md`](DEPLOYMENT.md). For the operation-by-operation reference see [`API.md`](API.md).
@@ -28,7 +30,7 @@ flowchart LR
     end
 
     SMTP["SMTP provider"]
-    Staff["Counselors / admins<br/>(email inbox)"]
+    Staff["Peer facilitators / admins<br/>(email inbox)"]
 
     SPA -- "1. load app" --> Static
     SPA -- "2. sign in" --> Auth
@@ -59,7 +61,7 @@ The same picture as plain text:
 | No custom backend | Smallest surface to run and secure for a student project; Firebase handles auth, storage and scaling | Business rules live in client code and in `firestore.rules` |
 | Firestore rules as the access layer | Enforced server-side regardless of what the client does | Rules are hard to unit test, so there is a dedicated emulator suite in `backend-tests/` |
 | Lazy-loaded routes and vendor chunks | Initial JS is about 82 kB; Firebase and Recharts load on demand | Slightly more build configuration (`vite.config.ts`) |
-| Rule-based risk scoring | Transparent and explainable to counselors | Needs clinical validation; see the README notes |
+| Rule-based risk scoring | Transparent and explainable to peer facilitators | Needs clinical validation; see the README notes |
 | Function recomputes risk server-side | The email never trusts the client-supplied `riskLevel` | Scoring logic exists in two places (`scoring.ts` and `functions/index.js`) and must be kept in sync |
 
 ## 2. Frontend architecture
@@ -95,7 +97,7 @@ erDiagram
     USERS {
         string uid PK
         string role "student | counselor | admin"
-        bool approved "counselors need admin approval"
+        bool approved "peer facilitators (role counselor) need admin approval"
         bool active "false = treated as signed out"
         string assignedCounselorId
     }
@@ -129,13 +131,13 @@ Field lists are abbreviated to those the rules and function depend on. The full 
 
 ### Access matrix (enforced by `firestore.rules`)
 
-| Collection | Student | Counselor (approved) | Admin |
+| Collection | Student | Peer Facilitator (approved) | Admin |
 |---|---|---|---|
 | `users` | Read and edit own profile (not role, approval, active, assignment) | Read all; set student assignment fields | Read and update all |
-| `assessments` | Create own (`status: "open"`), read own | Read and update all | Same as counselor |
-| `appointments` | Create own, read own, cancel own | Read and update all | Same as counselor |
-| `availability` | Read all; book or free a slot only together with their own appointment (one batch) | Create and delete own, update | Same as counselor |
-| `messages` | Create and read own thread | Create and read all | Same as counselor |
+| `assessments` | Create own (`status: "open"`), read own | Read and update all | Same as peer facilitator |
+| `appointments` | Create own, read own, cancel own | Read and update all | Same as peer facilitator |
+| `availability` | Read all; book or free a slot only together with their own appointment (one batch) | Create and delete own, update | Same as peer facilitator |
+| `messages` | Create and read own thread | Create and read all | Same as peer facilitator |
 | anything else | Denied | Denied | Denied |
 
 Deletes are denied everywhere except availability slots. Deactivated users (`active: false`) are

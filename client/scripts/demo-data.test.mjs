@@ -19,7 +19,7 @@ describe("demo data", () => {
     for (const rows of Object.values(data)) expect(new Set(ids(rows)).size).toBe(rows.length);
   });
 
-  it("covers every role, a pending counselor and every appointment status the app shows", () => {
+  it("covers every role, a pending peer facilitator and every appointment status the app shows", () => {
     expect(data.users.filter((u) => u.role === "student")).toHaveLength(6);
     expect(data.users.some((u) => u.role === "admin")).toBe(true);
     expect(data.users.some((u) => u.role === "counselor" && u.approved)).toBe(true);
@@ -60,7 +60,7 @@ describe("demo data", () => {
     }
   });
 
-  it("follows the check-in rules in firestore.rules (risk never below the score; counselor notes only after review)", () => {
+  it("follows the check-in rules in firestore.rules (risk never below the score; peer facilitator notes only after review)", () => {
     for (const a of data.assessments) {
       expect(a.total * 10 < a.maxScore * 6 || a.riskLevel === "high").toBe(true);
       expect(a.total * 10 < a.maxScore * 3 || a.riskLevel !== "low").toBe(true);

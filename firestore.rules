@@ -10,7 +10,7 @@ service cloud.firestore {
     function hasProfile() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function isActive() { return signedIn() && hasProfile() && me().get('active', true) != false; }
     function isAdmin() { return isActive() && me().get('role', 'student') == 'admin'; }
-    // counselors must be approved by an admin before they get staff access
+    // peer facilitators must be approved by an admin before they get staff access
     function isStaff() {
       return isActive() && (me().get('role', 'student') == 'admin' || (me().get('role', 'student') == 'counselor' && me().get('approved', false) == true));
     }
@@ -237,6 +237,24 @@ service cloud.firestore {
         // The name shown on a message is the sender's own profile name (or the app's generic fallback when it has none).
         && (request.resource.data.senderName == me().get('name', '')
             || request.resource.data.senderName in ['Student', 'Counselor', 'Staff Counselor']);
+      allow update, delete: if false;
+    }
+
+    // Audit log: who looked at or changed a case. Staff append entries about themselves; only an admin can read
+    // them; nobody can edit or delete one. The client writes these on a best-effort basis (Firestore cannot fire a
+    // trigger on a read), so the log shows what the app did, not what a hand-built request might do.
+    // Once /api/audit-log is deployed (docs/DEPLOYMENT.md 4.6), change `allow create` below to `if false`: the server
+    // then writes every entry with the Admin SDK and nothing can be skipped or forged from the browser.
+    match /auditLog/{id} {
+      allow create: if isStaff()
+        && request.resource.data.keys().hasOnly(['actorId', 'actorName', 'action', 'targetId', 'detail', 'at'])
+        && request.resource.data.actorId == request.auth.uid
+        && request.resource.data.action in ['case_viewed', 'case_updated', 'assignment_changed', 'appointment_updated', 'report_exported']
+        && shortText(request.resource.data.actorName, 200)
+        && shortText(request.resource.data.targetId, 100)
+        && shortText(request.resource.data.detail, 300)
+        && plausibleTime(request.resource.data.at);
+      allow read: if isAdmin();
       allow update, delete: if false;
     }
 

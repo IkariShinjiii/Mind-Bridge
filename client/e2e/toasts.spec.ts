@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT, COUNSELOR } from "./helpers";
+import { seed, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
 
 const openCase = {
   studentId: STUDENT.uid,
@@ -19,7 +19,7 @@ const openCase = {
 test.describe("Toast notifications", () => {
   test("a successful action shows a polite status toast that can be dismissed", async ({ page }) => {
     await seed(page, { docs: { assessments: { c1: openCase } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
 
     await page.getByRole("button", { name: "Mark reviewed" }).click();
 
@@ -41,7 +41,7 @@ test.describe("Toast notifications", () => {
 
   test("a failing action shows an assertive error toast that stays until read", async ({ page }) => {
     await seed(page, { docs: { assessments: { c1: openCase } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await expect(page.getByRole("button", { name: "Mark reviewed" })).toBeVisible();
     // Break the write path: the next status update targets a case that no longer exists.
     await page.evaluate(() => {
@@ -62,7 +62,7 @@ test.describe("Toast notifications", () => {
 
   test("hovering a toast keeps it open past its normal time", async ({ page }) => {
     await seed(page, { docs: { assessments: { c1: openCase } } });
-    await logIn(page, COUNSELOR);
+    await logIn(page, PEER_FACILITATOR);
     await page.getByRole("button", { name: "Mark reviewed" }).click();
     const toast = page.getByRole("status").filter({ hasText: "Case marked reviewed." });
     await expect(toast).toBeVisible();

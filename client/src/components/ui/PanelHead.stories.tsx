@@ -34,7 +34,7 @@ export const LongDescription: Story = {
   args: {
     title: "Emergency contact",
     children:
-      "Counselors see this only when one of your check-ins is flagged for immediate review. Add someone who can be reached quickly, and tell them they are listed. The line stops at a readable measure instead of running the full width.",
+      "Peer Facilitators see this only when one of your check-ins is flagged for immediate review. Add someone who can be reached quickly, and tell them they are listed. The line stops at a readable measure instead of running the full width.",
   },
 };
 
@@ -42,7 +42,7 @@ export const InsideCard: Story = {
   name: "Inside a settings card",
   render: () => (
     <section className="max-w-xl mb-card">
-      <PanelHead title="Profile">Your name appears on appointments and in messages to your counselor.</PanelHead>
+      <PanelHead title="Profile">Your name appears on appointments and in messages to your peer facilitator.</PanelHead>
       <label htmlFor="ph-name" className="mb-1 block font-bold">
         Full name
       </label>

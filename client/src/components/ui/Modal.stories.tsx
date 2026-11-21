@@ -61,7 +61,7 @@ export const Default: Story = {
       description="Tuesday, 14 October at 10:00 with Ms. Reyes."
       footer={confirmFooter}
     >
-      <p>Your counselor will be told right away. You can book another time afterwards.</p>
+      <p>Your peer facilitator will be told right away. You can book another time afterwards.</p>
     </Host>
   ),
 };
@@ -152,7 +152,7 @@ export const Wide: Story = {
       )}
     >
       {Array.from({ length: 12 }, (_, i) => (
-        <p key={i}>Session {i + 1}: notes are kept private to your counselor.</p>
+        <p key={i}>Session {i + 1}: notes are kept private to your peer facilitator.</p>
       ))}
     </Host>
   ),
@@ -189,7 +189,7 @@ export const LongTitle: Story = {
     <Host
       {...args}
       title="Reschedule your session with Dr. Maria Concepcion Villanueva-Santos"
-      description="Pick a new time. Your counselor is told as soon as you confirm."
+      description="Pick a new time. Your peer facilitator is told as soon as you confirm."
       footer={confirmFooter}
     >
       <p>The header wraps instead of pushing the close button out of view.</p>

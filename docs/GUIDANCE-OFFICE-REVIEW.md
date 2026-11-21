@@ -12,7 +12,7 @@ Full detail is in [SCORING.md](SCORING.md).
 3. **Students can choose a full check-in.** 16 standard questions (full PHQ-9, then full GAD-7), scored out of 48.
    Staff see each scale's score and its published band (minimal, mild, moderate, moderately severe, severe).
 4. **A separate wellbeing card (WHO-5).** Five positive statements, scored 0 to 100. Below 50 is the published prompt to
-   look further. It is only shown to the student (gently, with an offer to talk to a counselor) and to staff as extra
+   look further. It is only shown to the student (gently, with an offer to reach the Guidance Center) and to staff as extra
    information. **It never changes a risk level and never sends an alert.**
 
 ## Risk levels now

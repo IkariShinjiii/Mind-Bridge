@@ -2,7 +2,7 @@
  * The appointment lifecycle, in one place. Every screen, the data layer and the tests read it from here, so "what
  * can happen to this session next?" has one answer. Diagram and rationale: docs/STATE_MACHINES.md.
  *
- *   pending                  → confirmed, rescheduled (counselor), declined (counselor), cancelled
+ *   pending                  → confirmed, rescheduled (peer facilitator), declined (peer facilitator), cancelled
  *   confirmed / rescheduled  → completed, rescheduled, cancelled   (rescheduling again keeps it rescheduled)
  *   completed, declined, cancelled: final
  *
@@ -81,7 +81,7 @@ export function isClosed(phase: AppointmentPhase): boolean {
   return phase === "completed" || phase === "declined" || phase === "cancelled";
 }
 
-/** True once a counselor has agreed to the time: the session shows in calendars and gets a reminder. */
+/** True once a peer facilitator has agreed to the time: the session shows in calendars and gets a reminder. */
 export function isScheduled(phase: AppointmentPhase): boolean {
   return phase === "confirmed" || phase === "rescheduled";
 }

@@ -22,7 +22,7 @@ export function pageTitle(pathname: string): string {
 }
 
 const DEFAULT_DESCRIPTION =
-  "A private wellness check-in for University of San Agustin students: see what your answers suggest, find crisis support, and book a time with a campus guidance counselor.";
+  "A private wellness check-in for University of San Agustin students: see what your answers suggest, find crisis support, and book a time with a peer facilitator.";
 
 const DESCRIPTIONS: Readonly<Record<string, string>> = {
   "/login": "Log in to Mind Bridge with your University of San Agustin account.",

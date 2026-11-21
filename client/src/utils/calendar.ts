@@ -79,7 +79,7 @@ export function buildIcs(apt: Appointment, now: Date = new Date()): string | nul
     `SUMMARY:${escapeText(appointmentTitle(apt.title))}`,
     `LOCATION:${escapeText(LOCATION)}`,
     `DESCRIPTION:${escapeText(
-      `Confidential session with ${apt.counselorName || "your counselor"} through Mind Bridge. If you need to change it, use the Appointments page.`,
+      `Confidential session with ${apt.counselorName || "your peer facilitator"} through Mind Bridge. If you need to change it, use the Appointments page.`,
     )}`,
     "STATUS:CONFIRMED",
     "BEGIN:VALARM",
