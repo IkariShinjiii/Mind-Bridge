@@ -42,6 +42,7 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import ReferralCard from "../../components/student/ReferralCard";
+import StudentOnboarding from "../../components/student/StudentOnboarding";
 import FourPillars from "../../components/student/FourPillars";
 import RelaxationLibrary from "../../components/student/RelaxationLibrary";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
@@ -418,6 +419,10 @@ export default function StudentDashboard() {
       )}
 
       <SessionReminder appointments={appointments} role="student" />
+      <StudentOnboarding
+        uid={currentUser?.uid}
+        onStart={() => document.getElementById("checkin-h")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
 
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">

@@ -35,7 +35,7 @@ export type StoredDoc = { id: string } & Record<string, unknown>;
  */
 export async function seed(
   page: Page,
-  { docs = {}, accounts = [] }: { docs?: Docs; accounts?: TestPerson[] } = {},
+  { docs = {}, accounts = [], tour = false }: { docs?: Docs; accounts?: TestPerson[]; tour?: boolean } = {},
 ): Promise<void> {
   const { users: extraUsers = {}, ...otherCollections } = docs;
   const state = {
@@ -71,11 +71,17 @@ export async function seed(
     },
   };
   await page.addInitScript(
-    ([key, value]: [string, string]) => {
+    ([key, value, skipTourFor]: [string, string, string[]]) => {
       if (!localStorage.getItem(key)) localStorage.setItem(key, value);
       localStorage.setItem("mindbridge_cookie_consent", "accepted");
+      // The first-visit student tour would cover the page under test; `tour: true` leaves it on.
+      for (const uid of skipTourFor) localStorage.setItem(`mindbridge_onboarded_${uid}`, "1");
     },
-    [STORAGE_KEY, JSON.stringify(state)] as [string, string],
+    [
+      STORAGE_KEY,
+      JSON.stringify(state),
+      tour ? [] : [STUDENT, PEER_FACILITATOR, ...accounts].map((u) => u.uid),
+    ] as [string, string, string[]],
   );
 }
 
