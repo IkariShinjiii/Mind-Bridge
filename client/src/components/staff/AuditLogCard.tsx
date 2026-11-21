@@ -11,6 +11,10 @@ const LABEL: Record<AuditAction, string> = {
   assignment_changed: "Changed assignment",
   appointment_updated: "Updated session",
   report_exported: "Exported report",
+  checkin_abandoned: "Student left check-in unfinished",
+  checkin_submitted: "Student submitted check-in",
+  appointment_booked: "Student booked a session",
+  appointment_cancelled: "Student cancelled a session",
 };
 
 /** Admin-only list of the most recent staff actions on cases and assignments. */
@@ -30,7 +34,7 @@ export default function AuditLogCard() {
         Audit log
       </h2>
       <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-        Who viewed or changed a case, a session or a student assignment, and who exported the report. The 200 most recent entries; entries cannot be edited or
+        What staff did with cases, sessions and assignments, and what students did with check-ins and bookings (progress only, never their answers). The 200 most recent entries; entries cannot be edited or
         deleted.
       </p>
       {failed ? (

@@ -1,5 +1,5 @@
 import { appointmentTitle } from "../../utils/appointmentTitle";
-import { lazy, Suspense, useEffect, useState, useMemo } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useMemo, type MutableRefObject } from "react";
 import { Link } from "react-router-dom";
 import {
   HeartPulse,
@@ -27,7 +27,14 @@ import {
   useNoMotion,
 } from "../../lib/motion";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from "recharts";
-import { getAppointments, bookAppointment, submitResponse, getAvailability, getMyAssessments } from "../../lib/api";
+import {
+  getAppointments,
+  bookAppointment,
+  submitResponse,
+  getAvailability,
+  getMyAssessments,
+  logAudit,
+} from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
 import { LoadError } from "../../components/ui/LoadError";
@@ -112,6 +119,26 @@ const QUICK_QUESTIONS: ScreeningQuestion[] = [
     isCrisisItem: true,
   },
 ];
+
+interface CheckInProgress {
+  uid: string | undefined;
+  answered: number;
+  total: number;
+  mode: CheckInMode;
+  done: boolean;
+  reported: boolean;
+}
+
+/**
+ * Admin-visible activity log: records that a student started a check-in and left it unfinished (for example to book a
+ * session instead). It carries the progress only, never the answers, and is sent at most once per stretch of answering.
+ */
+function reportUnfinished(ref: MutableRefObject<CheckInProgress>): void {
+  const p = ref.current;
+  if (!p.uid || p.answered === 0 || p.done || p.reported) return;
+  p.reported = true;
+  void logAudit("checkin_abandoned", p.uid, `answered ${p.answered} of ${p.total} (${p.mode} check-in), not finished`);
+}
 
 /** A fresh, unanswered check-in. */
 const emptyAnswers = (count: number): Array<number | null> => Array.from({ length: count }, () => null);
@@ -216,6 +243,7 @@ export default function StudentDashboard() {
     }
     setBookingId(slot.id);
     setBookingError("");
+    reportUnfinished(progress); // booking straight from a half-finished check-in
     try {
       await bookAppointment(slot);
       const fresh = await getAppointments();
@@ -297,6 +325,33 @@ export default function StudentDashboard() {
   }
 
   const answeredCount = answers.filter((a) => a !== null).length;
+
+  const progress = useRef<CheckInProgress>({
+    uid: undefined,
+    answered: 0,
+    total: 0,
+    mode: "quick",
+    done: false,
+    reported: false,
+  });
+  Object.assign(progress.current, {
+    uid: currentUser?.uid,
+    answered: answeredCount,
+    total: SCREENING_QUESTIONS.length,
+    mode,
+    done: surveyCompleted,
+  });
+  useEffect(() => {
+    progress.current.reported = false; // more answers (or a restart) means a later stop is worth reporting again
+  }, [answeredCount, surveyCompleted]);
+  useEffect(() => {
+    const onHide = () => reportUnfinished(progress);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      reportUnfinished(progress); // leaving the page mid-check-in
+    };
+  }, []);
   const progressPct = Math.round((answeredCount / SCREENING_QUESTIONS.length) * 100);
 
   const currentQ = SCREENING_QUESTIONS[qIndex];

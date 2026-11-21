@@ -32,8 +32,23 @@ describe("handleAudit", () => {
   it("accepts an admin", async () => {
     expect((await handleAudit(req(), deps({ role: "admin" }).d)).status).toBe(200);
   });
+  it("lets a student record their own activity, but not a staff action", async () => {
+    const { d, added } = deps({ role: "student", name: "Ana" });
+    const ok = await handleAudit(
+      req({ body: { action: "checkin_abandoned", targetId: "u1", detail: "answered 3 of 7 (quick check-in), not finished" } }),
+      d,
+    );
+    expect(ok.status).toBe(200);
+    expect(added[0]).toMatchObject({ actorId: "u1", actorName: "Ana", action: "checkin_abandoned" });
+    const staffAction = { action: "case_viewed", targetId: "a1", detail: "x" };
+    expect((await handleAudit(req({ body: staffAction }), deps({ role: "student" }).d)).status).toBe(400);
+  });
+  it("stops staff from writing student entries", async () => {
+    const body = { action: "checkin_submitted", targetId: "a", detail: "d" };
+    expect((await handleAudit(req({ body }), deps(peer).d)).status).toBe(400);
+  });
   it.each([
-    ["a student", { role: "student" }],
+    ["a deactivated student", { role: "student", active: false }],
     ["an unapproved peer facilitator", { role: "counselor", approved: false }],
     ["a deactivated admin", { role: "admin", active: false }],
     ["no profile", null],
