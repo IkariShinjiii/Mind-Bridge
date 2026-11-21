@@ -151,7 +151,12 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export type AuditAction = "case_viewed" | "case_updated" | "assignment_changed";
+export type AuditAction =
+  | "case_viewed"
+  | "case_updated"
+  | "assignment_changed"
+  | "appointment_updated"
+  | "report_exported";
 
 /** Document in `auditLog/{id}`: one staff action on a case or a student assignment. */
 export interface AuditEntry {

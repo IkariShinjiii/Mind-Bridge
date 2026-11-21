@@ -544,6 +544,7 @@ export default function AdminPanel() {
     setExportingCsv(true);
     try {
       downloadAssessmentsCsv(assessments);
+      void logAudit("report_exported", "check-ins", `${assessments.length} check-ins exported as CSV`);
     } finally {
       setExportingCsv(false);
     }

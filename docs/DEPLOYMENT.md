@@ -188,6 +188,17 @@ Before enforcing the full policy, open a deployed preview with DevTools open, si
 and book a slot. If no `[Report Only]` messages appear, rename the header to `Content-Security-Policy`.
 If some do, add only the origin the message names. See `SECURITY_AUDIT.md` F-05 and section 12.
 
+### 4.6 Audit log route on Vercel (makes the audit log tamper-resistant)
+
+By default the app writes audit entries from the browser, which a hand-built request could skip. To have the server
+write them instead:
+
+1. Set `FIREBASE_SERVICE_ACCOUNT` on the Vercel project (the same variable the alert route uses, section 4.4).
+2. Set `VITE_AUDIT_SERVER=true` on the Vercel project and redeploy the client. The app then calls `POST /api/audit-log`.
+3. Check the Reports tab as an admin: open a case as a peer facilitator and confirm a "Viewed case" entry appears.
+4. Only then, in `firestore.rules`, change `allow create` in `match /auditLog/{id}` to `if false` and deploy the rules (section 4.2).
+   Do this last: with the rule flipped and the route not working, no entries are written.
+
 ## 5. Environment configuration
 
 | Variable | Where | Required | Description |

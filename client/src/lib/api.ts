@@ -80,6 +80,23 @@ async function loadUsersById(): Promise<Record<string, UserProfile>> {
 export const logAudit = (action: AuditAction, targetId: string, detail: string): Promise<void> => {
   const user = getAuth().currentUser;
   if (!user) return Promise.resolve();
+  // With VITE_AUDIT_SERVER=true the server writes the entry, so it cannot be skipped or forged from the browser.
+  if (import.meta.env.VITE_AUDIT_SERVER === "true") {
+    return user
+      .getIdToken()
+      .then((token) =>
+        fetch("/api/audit-log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ action, targetId, detail: detail.slice(0, 300) }),
+          keepalive: true,
+        }),
+      )
+      .then(
+        () => undefined,
+        (err: unknown) => console.warn("Could not write the audit log", err),
+      );
+  }
   return addDoc(collection(db, "auditLog"), {
     actorId: user.uid,
     actorName: (user.displayName || user.email || "Staff").slice(0, 200),
@@ -461,6 +478,7 @@ export const updateAppointmentStatus = (
     }
 
     await updateDoc(doc(db, "appointments", id), updates);
+    await logAudit("appointment_updated", id, `status ${status}`);
   });
 
 // --- PEER FACILITATOR AVAILABILITY ---
