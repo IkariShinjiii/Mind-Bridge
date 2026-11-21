@@ -63,3 +63,32 @@ test("a peer facilitator does not see the audit log", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Export report" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Audit log" })).toHaveCount(0);
 });
+
+test("a half-finished check-in is logged as progress only, and an admin sees it", async ({ page }) => {
+  await seed(page, {
+    accounts: [ADMIN],
+    docs: { users: { [ADMIN.uid]: { name: ADMIN.name, email: ADMIN.email, role: "admin", approved: true, active: true } } },
+  });
+
+  await logIn(page, STUDENT);
+  const checkIn = page.getByRole("region", { name: "Check-in" });
+  for (const score of [1, 2]) {
+    await checkIn.locator(`input[type=radio][value="${score}"]`).check({ force: true });
+    await checkIn.getByRole("button", { name: /^Next/ }).click();
+  }
+  // Change of mind: leave for the appointments page instead of finishing.
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Appointments" }).click();
+  await expect(page).toHaveURL(/\/appointments$/);
+
+  await expect.poll(async () => (await readCollection(page, "auditLog")).length).toBe(1); // the write is asynchronous
+  const log = await readCollection(page, "auditLog");
+  expect(log[0]).toMatchObject({ action: "checkin_abandoned", actorId: STUDENT.uid, detail: "answered 2 of 7 (quick check-in), not finished" });
+  expect(JSON.stringify(log)).not.toContain('"answers"');
+  await signOut(page);
+
+  await logIn(page, ADMIN);
+  await page.goto("/admin/dashboard?tab=analytics");
+  const audit = page.getByRole("region", { name: "Audit log" });
+  await expect(audit).toContainText("Student left check-in unfinished");
+  await expect(audit).toContainText("answered 2 of 7");
+});

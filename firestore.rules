@@ -240,20 +240,12 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Audit log: who looked at or changed a case. Staff append entries about themselves; only an admin can read
-    // them; nobody can edit or delete one. The client writes these on a best-effort basis (Firestore cannot fire a
-    // trigger on a read), so the log shows what the app did, not what a hand-built request might do.
-    // Once /api/audit-log is deployed (docs/DEPLOYMENT.md 4.6), change `allow create` below to `if false`: the server
-    // then writes every entry with the Admin SDK and nothing can be skipped or forged from the browser.
+    // Audit log: who looked at or changed a case. Only the server writes entries (the app calls /api/audit-log, which
+    // checks the caller is staff and sets the actor and time itself); only an admin can read them; nobody can edit or
+    // delete one. Entries come from the app's own calls, so a hand-built request to Firestore cannot forge one.
     match /auditLog/{id} {
-      allow create: if isStaff()
-        && request.resource.data.keys().hasOnly(['actorId', 'actorName', 'action', 'targetId', 'detail', 'at'])
-        && request.resource.data.actorId == request.auth.uid
-        && request.resource.data.action in ['case_viewed', 'case_updated', 'assignment_changed', 'appointment_updated', 'report_exported']
-        && shortText(request.resource.data.actorName, 200)
-        && shortText(request.resource.data.targetId, 100)
-        && shortText(request.resource.data.detail, 300)
-        && plausibleTime(request.resource.data.at);
+      // Written only by the server (/api/audit-log, Admin SDK), which bypasses these rules.
+      allow create: if false;
       allow read: if isAdmin();
       allow update, delete: if false;
     }

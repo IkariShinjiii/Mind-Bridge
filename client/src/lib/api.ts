@@ -200,6 +200,7 @@ export const submitResponse = (
     };
 
     const docRef = await addDoc(collection(db, "assessments"), payload);
+    void logAudit("checkin_submitted", docRef.id, `${answers.length}-question check-in, ${riskLevel} risk`);
     if (riskLevel === "high" || flaggedForImmediateReview) void notifyHighRisk(docRef.id);
     return { id: docRef.id, ...payload };
   });
@@ -320,7 +321,7 @@ export type BookingSlot = Partial<Pick<AvailabilitySlot, "id" | "counselorId" | 
  * Books an availability slot for the signed-in student and marks the slot as taken, in one batched write.
  * If the slot was taken in the meantime, the whole write is rejected and nothing is created.
  */
-export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<DocumentData>> =>
+const createAppointment = (slot?: BookingSlot): Promise<DocumentReference<DocumentData>> =>
   guard(async () => {
     const uid = getCurrentUserId();
     if (!uid) throw new AppError("unauthenticated", "Log in to continue.", { message: "No authenticated user" });
@@ -385,6 +386,12 @@ export const bookAppointment = (slot?: BookingSlot): Promise<DocumentReference<D
     await batch.commit();
     return appointmentRef;
   });
+
+export const bookAppointment = async (slot?: BookingSlot): Promise<DocumentReference<DocumentData>> => {
+  const ref = await createAppointment(slot);
+  void logAudit("appointment_booked", ref.id, "session requested");
+  return ref;
+};
 
 /** Lists the signed-in student's appointments. Empty when nobody is signed in. */
 export const getAppointments = (): Promise<Appointment[]> =>
@@ -476,7 +483,11 @@ export const updateAppointmentStatus = (
     }
 
     await updateDoc(doc(db, "appointments", id), updates);
-    await logAudit("appointment_updated", id, `status ${status}`);
+    await logAudit(
+      extraData.cancelledBy === "student" ? "appointment_cancelled" : "appointment_updated",
+      id,
+      `status ${status}`,
+    );
   });
 
 // --- PEER FACILITATOR AVAILABILITY ---

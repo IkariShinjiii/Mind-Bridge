@@ -190,7 +190,7 @@ If some do, add only the origin the message names. See `SECURITY_AUDIT.md` F-05 
 
 ### 4.6 Audit log route on Vercel (makes the audit log tamper-resistant)
 
-By default the app writes audit entries from the browser, which a hand-built request could skip. To have the server
+By default the app writes audit entries from the browser (used in development and tests). To have the server
 write them instead:
 
 1. Set `FIREBASE_SERVICE_ACCOUNT` on the Vercel project (the same variable the alert route uses, section 4.4).

@@ -18,24 +18,12 @@ beforeEach(async () => {
   await seed(env, "auditLog/e1", entry("cou1"));
 });
 
-describe("audit log", () => {
-  it("an approved peer facilitator records their own action", () =>
-    assertSucceeds(addDoc(collection(as(env, "counselor"), "auditLog"), entry("cou1"))));
-  it("an admin records their own action", () =>
-    assertSucceeds(addDoc(collection(as(env, "admin"), "auditLog"), entry("adm1", { action: "case_updated" }))));
-  it("cannot record an action as someone else", () =>
-    assertFails(addDoc(collection(as(env, "counselor"), "auditLog"), entry("adm1"))));
-  it("students cannot write", () =>
-    assertFails(addDoc(collection(as(env, "student"), "auditLog"), entry("stu1"))));
-  it("an unapproved peer facilitator cannot write", () =>
-    assertFails(addDoc(collection(as(env, "pendingPeerFacilitator"), "auditLog"), entry("cou2"))));
-  it("unauthenticated cannot write", () =>
-    assertFails(addDoc(collection(anon(env), "auditLog"), entry("cou1"))));
-  it("rejects an unknown action, an extra field and a far-future time", async () => {
-    const db = as(env, "counselor");
-    await assertFails(addDoc(collection(db, "auditLog"), entry("cou1", { action: "deleted_everything" })));
-    await assertFails(addDoc(collection(db, "auditLog"), entry("cou1", { extra: 1 })));
-    await assertFails(addDoc(collection(db, "auditLog"), entry("cou1", { at: "9999-12-31T00:00:00.000Z" })));
+describe("audit log (written only by the server)", () => {
+  it("no browser user can create an entry, not even as themselves", async () => {
+    await assertFails(addDoc(collection(as(env, "counselor"), "auditLog"), entry("cou1")));
+    await assertFails(addDoc(collection(as(env, "admin"), "auditLog"), entry("adm1", { action: "case_updated" })));
+    await assertFails(addDoc(collection(as(env, "student"), "auditLog"), entry("stu1")));
+    await assertFails(addDoc(collection(anon(env), "auditLog"), entry("cou1")));
   });
   it("entries cannot be edited or deleted, even by an admin", async () => {
     const db = as(env, "admin");
