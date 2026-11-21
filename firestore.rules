@@ -170,7 +170,11 @@ service cloud.firestore {
         && plausibleTime(request.resource.data.createdAt)
         && (!('start' in request.resource.data) || shortText(request.resource.data.start, 40))
         && (!('end' in request.resource.data) || shortText(request.resource.data.end, 40))
-        && (!('date' in request.resource.data) || shortText(request.resource.data.date, 40));
+        && (!('date' in request.resource.data) || shortText(request.resource.data.date, 40))
+        // A booking with a slot must claim that slot in the same batch (see the availability rule), so an
+        // appointment cannot exist for a slot someone else holds.
+        && (request.resource.data.slotId == null
+            || getAfter(/databases/$(database)/documents/availability/$(request.resource.data.slotId)).data.get('bookedAppointmentId', null) == id);
       allow read: if isActive() && (resource.data.studentId == request.auth.uid || isStaff());
       // Staff change the status and the details the dashboard saves with it; the student, owner and booking details stay put.
       allow update: if (isStaff()
@@ -188,11 +192,32 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['counselorId', 'counselorName', 'start', 'end', 'isBooked', 'createdAt'])
         && request.resource.data.isBooked == false
         && shortText(request.resource.data.start, 40) && shortText(request.resource.data.end, 40);
-      // Students may only flip isBooked, and cannot book a slot that is already taken (no double booking).
-      // They can still set it back to false, because they free their own slot when they cancel.
+      // Students touch only isBooked/bookedBy/bookedAppointmentId, and only as part of a booking or a cancellation:
+      //  - booking: the slot is free, and the same batch creates the student's appointment pointing at this slot;
+      //  - release: the student who booked it frees it in a batch that also cancels their own appointment.
+      //    Slots booked before these fields existed can only be freed by staff.
       allow update: if isStaff()
-        || (isActive() && touchesOnly(['isBooked']) && request.resource.data.isBooked is bool
-            && (request.resource.data.isBooked == false || resource.data.isBooked == false));
+        || (isActive()
+            && touchesOnly(['isBooked', 'bookedBy', 'bookedAppointmentId'])
+            && request.resource.data.isBooked is bool
+            && (
+              (resource.data.isBooked == false
+                && request.resource.data.isBooked == true
+                && request.resource.data.get('bookedBy', null) == request.auth.uid
+                && request.resource.data.get('bookedAppointmentId', null) is string
+                && getAfter(/databases/$(database)/documents/appointments/$(request.resource.data.bookedAppointmentId)).data.studentId == request.auth.uid
+                && getAfter(/databases/$(database)/documents/appointments/$(request.resource.data.bookedAppointmentId)).data.slotId == id
+                && getAfter(/databases/$(database)/documents/appointments/$(request.resource.data.bookedAppointmentId)).data.status == 'Pending Review')
+              ||
+              (resource.data.isBooked == true
+                && request.resource.data.isBooked == false
+                && request.resource.data.get('bookedBy', null) == null
+                && request.resource.data.get('bookedAppointmentId', null) == null
+                && resource.data.get('bookedBy', null) == request.auth.uid
+                && resource.data.get('bookedAppointmentId', null) is string
+                && getAfter(/databases/$(database)/documents/appointments/$(resource.data.bookedAppointmentId)).data.studentId == request.auth.uid
+                && getAfter(/databases/$(database)/documents/appointments/$(resource.data.bookedAppointmentId)).data.status == 'Cancelled')
+            ));
       allow delete: if isStaff() && resource.data.counselorId == request.auth.uid;
     }
 

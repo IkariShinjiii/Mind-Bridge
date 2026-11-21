@@ -134,7 +134,7 @@ Field lists are abbreviated to those the rules and function depend on. The full 
 | `users` | Read and edit own profile (not role, approval, active, assignment) | Read all; set student assignment fields | Read and update all |
 | `assessments` | Create own (`status: "open"`), read own | Read and update all | Same as counselor |
 | `appointments` | Create own, read own, cancel own | Read and update all | Same as counselor |
-| `availability` | Read all, flip `isBooked` only | Create and delete own, update | Same as counselor |
+| `availability` | Read all; book or free a slot only together with their own appointment (one batch) | Create and delete own, update | Same as counselor |
 | `messages` | Create and read own thread | Create and read all | Same as counselor |
 | anything else | Denied | Denied | Denied |
 
@@ -192,7 +192,7 @@ order they are likely to matter.
 | **Staff dashboards** | `getAssessments`, `getAllAppointments`, `getAdminUsers` fetch whole collections and join users in the browser | Read cost and load time grow linearly with total records; every dashboard open re-reads everything | Paginate with `limit()` and cursors, filter server-side by `status`, and cache the user lookup |
 | **Firestore reads** | Billed per document read, and rules that call `get()` add a read per request | Cost grows with traffic; each rule check on `users/{uid}` is an extra read | Keep rules' `me()` lookups minimal; consider custom claims for role so rules need no extra read |
 | **Hot documents** | Writes are spread across many documents | None expected; the 1 write/second/document soft limit is not approached | Avoid counters on a single document if metrics are added; use sharded counters |
-| **Booking race** | A slot is booked by flipping `isBooked`; two students could attempt the same slot at once | Double booking | Move booking into a Firestore transaction or a callable function that checks and sets atomically |
+| **Booking race** (fixed) | A slot is claimed with `isBooked`, `bookedBy`, `bookedAppointmentId` in the same batch that creates the appointment; the rules check both sides with `getAfter()` | Slots booked before these fields existed can only be freed by staff | None open |
 | **Chat** | One `onSnapshot` listener per open chat | Listener count equals concurrent chats; Firestore supports this well but each update is a read | Limit history with `limit()`; detach listeners on close (already done on unmount) |
 | **Alerts** | One email per high-risk assessment, sent synchronously from the trigger | Burst of submissions could hit SMTP rate limits; a failure is silently lost | Enable function retries, batch into a digest, or use a transactional email API |
 | **Function cold start** | Node 20 function scales to zero | First alert after idle is slower by a second or two | Acceptable for alerts; set `minInstances: 1` only if latency matters |

@@ -166,7 +166,7 @@ describe("appointments and availability", () => {
     await seed(env, "availability/s1", slot());
     login("student");
     const ref = await api.bookAppointment({ id: "s1", ...slot() });
-    expect(await raw("availability/s1")).toMatchObject({ isBooked: true });
+    expect(await raw("availability/s1")).toMatchObject({ isBooked: true, bookedBy: "stu1", bookedAppointmentId: ref.id });
     expect(await raw(`appointments/${ref.id}`)).toMatchObject({
       studentId: "stu1", studentName: "Ana Student", studentEmail: "ana@usa.edu.ph", slotId: "s1",
       counselorId: "cou1", counselorName: "Dr. Cruz", title: "Session with Dr. Cruz", status: "Pending Review",
@@ -214,7 +214,7 @@ describe("appointments and availability", () => {
   });
 
   it("updateAppointmentStatus Declined frees the linked slot", async () => {
-    await seed(env, "availability/slot1", slot({ isBooked: true }));
+    await seed(env, "availability/slot1", slot({ isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ap1" }));
     await seed(env, "appointments/ap1", appointment());
     login("counselor");
     await api.updateAppointmentStatus("ap1", "Declined", { slotId: "slot1" });
@@ -222,8 +222,17 @@ describe("appointments and availability", () => {
     expect((await raw("appointments/ap1")).status).toBe("Declined");
   });
 
-  it("student cancels own appointment, slot is freed, reason is stored", async () => {
+  it("student cancels a slot booked before bookedBy existed: appointment closes, slot stays for staff to free", async () => {
     await seed(env, "availability/slot1", slot({ isBooked: true }));
+    await seed(env, "appointments/ap1", appointment());
+    login("student");
+    await api.updateAppointmentStatus("ap1", "Cancelled", { slotId: "slot1" });
+    expect((await raw("appointments/ap1")).status).toBe("Cancelled");
+    expect((await raw("availability/slot1")).isBooked).toBe(true);
+  });
+
+  it("student cancels own appointment, slot is freed, reason is stored", async () => {
+    await seed(env, "availability/slot1", slot({ isBooked: true, bookedBy: "stu1", bookedAppointmentId: "ap1" }));
     await seed(env, "appointments/ap1", appointment());
     login("student");
     await api.updateAppointmentStatus("ap1", "Cancelled", { slotId: "slot1", cancellationReason: "sick", cancelledBy: "student" });

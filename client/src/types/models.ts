@@ -131,6 +131,9 @@ export interface AvailabilitySlot {
   start: string;
   end: string;
   isBooked: boolean;
+  /** Set together with `isBooked`; absent on slots booked before these fields existed. */
+  bookedBy?: string | null;
+  bookedAppointmentId?: string | null;
   createdAt: string;
   /** Older documents used these names. */
   date?: string;
