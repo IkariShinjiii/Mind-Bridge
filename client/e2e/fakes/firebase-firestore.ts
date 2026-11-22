@@ -52,6 +52,9 @@ function clean(data: FakeDoc): FakeDoc {
   return JSON.parse(JSON.stringify(data)) as FakeDoc;
 }
 
+/** Stands in for the SDK sentinel; updateDoc removes any field set to it. */
+export const deleteField = (): string => "__E2E_DELETE_FIELD__";
+
 export function getFirestore(): Record<string, never> {
   return {};
 }
@@ -122,7 +125,9 @@ export async function updateDoc(ref: DocRef, patch: FakeDoc): Promise<void> {
   const state = load();
   const existing = state.docs[ref.name]?.[ref.id];
   if (!existing) throw new Error(`No document to update: ${ref.name}/${ref.id}`);
-  (state.docs[ref.name] ||= {})[ref.id] = { ...existing, ...clean(patch) };
+  const merged: FakeDoc = { ...existing, ...clean(patch) };
+  for (const k of Object.keys(merged)) if (merged[k] === "__E2E_DELETE_FIELD__") delete merged[k];
+  (state.docs[ref.name] ||= {})[ref.id] = merged;
   save(state);
   changed();
 }

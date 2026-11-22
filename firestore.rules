@@ -1,7 +1,5 @@
 rules_version = '2';
-// DRAFT - review against your data, then test in the Firebase Rules Playground
-// before deploying. Derived from the reads/writes in client/src/api.js,
-// Signup.jsx and Login.jsx.
+// Reviewed against the app's reads and writes and covered by backend-tests/rules (Firestore emulator).
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -55,7 +53,7 @@ service cloud.firestore {
         && d.maxScore > 0 && d.maxScore <= 60 && d.total >= 0 && d.total <= d.maxScore
         && d.riskLevel in ['low', 'medium', 'high']
         && d.flaggedForImmediateReview is bool
-        && d.counselorNotes == ''
+        && (!('counselorNotes' in d) || d.counselorNotes == '')
         && (d.total * 10 < d.maxScore * 6 || d.riskLevel == 'high')
         && (d.total * 10 < d.maxScore * 3 || d.riskLevel != 'low');
     }
@@ -142,7 +140,22 @@ service cloud.firestore {
       allow update: if isStaff()
         && touchesOnly(['status', 'reviewedAt', 'counselorNotes', 'followUpDate'])
         && request.resource.data.status in ['open', 'reviewed', 'escalated']
+        // Notes now go to /caseNotes; the old field on a check-in can only be removed, not written.
+        && (!('counselorNotes' in request.resource.data)
+            || request.resource.data.get('counselorNotes', null) == resource.data.get('counselorNotes', null))
         && validFollowUp(request.resource.data);
+      allow delete: if false;
+    }
+
+    // Staff notes on a check-in live apart from the assessment, so a student (who can read their own check-in)
+    // never reads them. The document id is the assessment id. Staff only; nobody deletes one.
+    match /caseNotes/{id} {
+      allow read: if isStaff();
+      allow create, update: if isStaff()
+        && request.resource.data.keys().hasOnly(['text', 'updatedAt', 'updatedBy'])
+        && textOk(request.resource.data.text, 2000)
+        && request.resource.data.updatedBy == request.auth.uid
+        && plausibleTime(request.resource.data.updatedAt);
       allow delete: if false;
     }
 

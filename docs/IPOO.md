@@ -216,21 +216,18 @@ in `scoring.test.ts` and `scoring.edge.test.ts` would then need new boundary cas
 
 ### 4.2 Known gaps (stated plainly)
 
-| Gap | Impact | Suggested fix |
+| Gap | Impact | Status / suggested fix |
 |---|---|---|
-| Email domain is enforced in the UI only, not in the rules | A direct API caller could register a non-school account | Domain check in the `users` create rule or a blocking Auth function |
-| Students can read their own whole assessment document, including `counselorNotes` | A student could see clinical notes the UI hides from them | Move notes to a staff-only subcollection or collection |
-| Staff can read every student's data, with no assignment scoping | Any approved peer facilitator sees all students | Restrict reads to the assigned peer facilitator, using `assignedCounselorId` |
-| The assessment stores `studentEmail` and `studentName` next to the answers | More identifying data than reporting needs | Keep identity in `users` and join on read |
-| A student can create an appointment already marked `Confirmed`, free another student's slot, or post a message labelled `senderRole: "counselor"` | Students can write fields that should be server-controlled (asserted in `known-gaps.test.js`) | Constrain these fields in the create and update rules, or move booking into a callable function |
-| `firestore.rules` is marked DRAFT | Needs a review against production data | Review, then remove the DRAFT header |
-| Audit log is best-effort and client-written | A hand-built request could skip it; a failed write is only logged to the console | Write entries from a Cloud Function or callable so they cannot be skipped |
-| No data-retention schedule | Records are kept indefinitely | Define retention and scheduled deletion with the counseling office |
-| The privacy policy says "encrypted at rest" | True of the platform defaults, but this app adds no field-level encryption | Keep the wording tied to the platform, or add field-level encryption for notes |
-| `PRODUCT.md` mentions "bcrypt session security" | Firebase uses its own hashing and tokens, not bcrypt | Update the wording to "Firebase Authentication" |
-
-The email-domain, peer facilitator-notes and staff-scoping gaps are the most relevant to confidentiality and would be the priority before a real
-launch.
+| Email domain is enforced in the sign-up UI and, for new profiles, in the rules | The rule checks the Auth token's email, but password sign-up does not prove the address is owned | Fixed for outside addresses. Require `email_verified` in the rules to close the rest |
+| Staff notes were readable by the student on their own check-in | A student could see notes the UI hides | **Fixed:** notes live in `caseNotes/{id}`, readable by staff only |
+| Staff can read every student's data, with no assignment scoping | Any approved peer facilitator sees all students | **Accepted by design:** the triage queue is shared so an urgent case is never stuck behind an absent facilitator. Scoping would need the assignee copied onto each check-in |
+| The assessment stores `studentEmail` and `studentName` next to the answers | More identifying data than reporting needs | Kept on purpose: the high-risk alert email reads the name from the check-in |
+| A student could create a `Confirmed` appointment, free another student's slot, or post as staff | Server-controlled fields were client-writable | **Fixed** (see `scheduling.test.js`) |
+| The safety flag and the crisis answer are taken on trust by the rules | The rules cannot read which answer is the crisis item, so a hand-built check-in could clear the flag | Open. The alert function and the staff dashboard recompute it, so staff still see the case |
+| Audit log was client-written | A hand-built request could skip it | **Fixed:** written by `/api/audit-log` only; the rules refuse client writes |
+| `firestore.rules` was marked DRAFT | Needed a review | **Done:** header removed; covered by the emulator suite |
+| No data-retention schedule | Records are kept indefinitely | Open policy decision: agree a retention period with the counseling office, then add a scheduled deletion |
+| Privacy wording "encrypted at rest" and "bcrypt" in the product doc | Overstated or wrong | **Fixed:** wording is tied to the platform and Firebase Authentication
 
 ## 5. Objectives mapped to implementation
 

@@ -104,7 +104,7 @@ test.describe("case follow-up dates", () => {
     await expect(page.getByText("Case notes saved.")).toBeVisible();
 
     const saved = (await readCollection(page, "assessments")).find((a) => a.studentName === "Nora");
-    expect(saved).toMatchObject({ counselorNotes: "Checked in by phone." });
+    expect((await readCollection(page, "caseNotes"))[0]).toMatchObject({ text: "Checked in by phone." });
     expect(saved).not.toHaveProperty("followUpDate");
   });
 

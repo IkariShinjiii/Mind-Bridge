@@ -54,7 +54,7 @@ describe("assessments", () => {
     const r = await api.submitResponse([0, 1, 0, 1, 0, 0, 0], { questions });
     expect(r).toMatchObject({
       id: expect.any(String), studentId: "stu1", studentName: "Ana Student", studentEmail: "ana@usa.edu.ph",
-      total: 2, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false, status: "open", counselorNotes: "",
+      total: 2, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false, status: "open",
     });
     expect(r.questionSummary).toHaveLength(7);
     expect(r.questionSummary[6]).toEqual({ id: "q7", text: "Safety", score: 0, isCrisisItem: true });
@@ -112,7 +112,8 @@ describe("assessments", () => {
     await seed(env, "assessments/a1", assessment());
     login("counselor");
     await api.updateAssessmentStatus("a1", "reviewed", "called student");
-    expect(await raw("assessments/a1")).toMatchObject({ status: "reviewed", counselorNotes: "called student", reviewedAt: expect.any(String) });
+    expect(await raw("assessments/a1")).toMatchObject({ status: "reviewed", reviewedAt: expect.any(String) });
+    expect(await raw("caseNotes/a1")).toMatchObject({ text: "called student", updatedBy: "cou1" });
   });
 
   it("updateAssessmentStatus leaves notes alone when omitted", async () => {
