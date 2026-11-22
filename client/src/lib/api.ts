@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   writeBatch,
+  deleteField,
   query,
   where,
   onSnapshot,
@@ -195,7 +196,6 @@ export const submitResponse = (
       riskLevel,
       flaggedForImmediateReview: !!flaggedForImmediateReview,
       status: "open",
-      counselorNotes: "",
       createdAt: new Date().toISOString(),
     };
 
@@ -209,6 +209,14 @@ export const submitResponse = (
 export const getAssessments = (): Promise<Assessment[]> =>
   guard(async () => {
     const assessments = mapDocs<Assessment>(await getDocs(collection(db, "assessments")));
+    // Staff notes live in /caseNotes (students cannot read that); an old check-in may still carry the notes inline.
+    const notes = new Map<string, string>();
+    try {
+      (await getDocs(collection(db, "caseNotes"))).forEach((d) => notes.set(d.id, String(d.data().text ?? "")));
+    } catch (err) {
+      console.warn("Could not load case notes", err);
+    }
+    for (const a of assessments) a.counselorNotes = notes.get(a.id) ?? a.counselorNotes ?? "";
 
     try {
       const usersMap = await loadUsersById();
@@ -298,10 +306,19 @@ export const updateAssessmentStatus = (
   followUpDate?: string,
 ): Promise<void> =>
   guard(() => {
-    const updates: Record<string, string> = { status, reviewedAt: new Date().toISOString() };
-    if (counselorNotes !== undefined) updates["counselorNotes"] = counselorNotes;
+    const updates: Record<string, unknown> = { status, reviewedAt: new Date().toISOString() };
     if (followUpDate !== undefined) updates["followUpDate"] = followUpDate;
-    return updateDoc(doc(db, "assessments", id), updates).then(() =>
+    const batch = writeBatch(db);
+    if (counselorNotes !== undefined) {
+      batch.set(doc(db, "caseNotes", id), {
+        text: counselorNotes,
+        updatedAt: new Date().toISOString(),
+        updatedBy: getAuth().currentUser?.uid,
+      });
+      updates["counselorNotes"] = deleteField(); // drops any note an older version stored on the check-in itself
+    }
+    batch.update(doc(db, "assessments", id), updates);
+    return batch.commit().then(() =>
       logAudit(
         "case_updated",
         id,

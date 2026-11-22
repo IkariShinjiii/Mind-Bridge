@@ -1,6 +1,6 @@
 import { describe, it, beforeAll, afterAll, beforeEach } from "vitest";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
-import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, where } from "firebase/firestore";
+import { doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where } from "firebase/firestore";
 import { createEnv, seedUsers, seed, as, anon, noProfile, assessment } from "../helpers/env.js";
 
 let env;
@@ -97,7 +97,7 @@ describe("assessments - READ (getMyAssessments, getAssessments)", () => {
 });
 
 describe("assessments - UPDATE (updateAssessmentStatus)", () => {
-  const patch = { status: "reviewed", reviewedAt: "2026-10-02T00:00:00.000Z", counselorNotes: "followed up" };
+  const patch = { status: "reviewed", reviewedAt: "2026-10-02T00:00:00.000Z" };
   it("peer facilitator reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), patch)));
   it("admin reviews an assessment", () => assertSucceeds(updateDoc(doc(as(env, "admin"), "assessments/a1"), patch)));
   it("student cannot edit even their own assessment", () => assertFails(updateDoc(doc(as(env, "student"), "assessments/a1"), { riskLevel: "low", counselorNotes: "x" })));
@@ -143,4 +143,26 @@ describe("assessments - DELETE", () => {
     await assertFails(deleteDoc(doc(as(env, "admin"), "assessments/a1")));
     await assertFails(deleteDoc(doc(as(env, "student"), "assessments/a1")));
   });
+});
+
+describe("caseNotes (staff notes, hidden from students)", () => {
+  const note = (uid = "cou1") => ({ text: "called the student", updatedAt: "2026-10-02T00:00:00.000Z", updatedBy: uid });
+  beforeEach(() => seed(env, "caseNotes/a1", note()));
+  it("approved staff can read and write notes", async () => {
+    await assertSucceeds(getDoc(doc(as(env, "counselor"), "caseNotes/a1")));
+    await assertSucceeds(setDoc(doc(as(env, "counselor"), "caseNotes/a1"), note()));
+    await assertSucceeds(setDoc(doc(as(env, "admin"), "caseNotes/a2"), note("adm1")));
+  });
+  it("the student the note is about cannot read it", () => assertFails(getDoc(doc(as(env, "student"), "caseNotes/a1"))));
+  it("a student cannot write a note", () => assertFails(setDoc(doc(as(env, "student"), "caseNotes/a1"), note("stu1"))));
+  it("an unapproved peer facilitator cannot read or write", async () => {
+    await assertFails(getDoc(doc(as(env, "pendingPeerFacilitator"), "caseNotes/a1")));
+    await assertFails(setDoc(doc(as(env, "pendingPeerFacilitator"), "caseNotes/a1"), note("cou2")));
+  });
+  it("a note must be stamped by its writer, be short and have no extra fields", async () => {
+    await assertFails(setDoc(doc(as(env, "counselor"), "caseNotes/a1"), note("adm1")));
+    await assertFails(setDoc(doc(as(env, "counselor"), "caseNotes/a1"), { ...note(), text: "x".repeat(2001) }));
+    await assertFails(setDoc(doc(as(env, "counselor"), "caseNotes/a1"), { ...note(), extra: 1 }));
+  });
+  it("nobody deletes a note", () => assertFails(deleteDoc(doc(as(env, "admin"), "caseNotes/a1"))));
 });

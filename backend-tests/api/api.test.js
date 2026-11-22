@@ -112,7 +112,8 @@ describe("assessments", () => {
     await seed(env, "assessments/a1", assessment());
     login("counselor");
     await api.updateAssessmentStatus("a1", "reviewed", "called student");
-    expect(await raw("assessments/a1")).toMatchObject({ status: "reviewed", counselorNotes: "called student", reviewedAt: expect.any(String) });
+    expect(await raw("assessments/a1")).toMatchObject({ status: "reviewed", reviewedAt: expect.any(String) });
+    expect(await raw("caseNotes/a1")).toMatchObject({ text: "called student", updatedBy: "cou1" });
   });
 
   it("updateAssessmentStatus leaves notes alone when omitted", async () => {

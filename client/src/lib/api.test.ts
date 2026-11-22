@@ -35,6 +35,7 @@ vi.mock("firebase/firestore", () => ({
   addDoc: vi.fn(),
   updateDoc: vi.fn(),
   deleteDoc: vi.fn(),
+  deleteField: () => "__DELETE__",
   onSnapshot: vi.fn(),
 }));
 vi.mock("firebase/auth", () => ({ getAuth: () => ({ currentUser: h.user }) }));
@@ -145,7 +146,6 @@ describe("submitResponse", () => {
       riskLevel: "medium",
       flaggedForImmediateReview: false,
       status: "open",
-      counselorNotes: "",
       createdAt: NOW.toISOString(),
       answers: [1, 2, 0],
     });
@@ -248,8 +248,13 @@ describe("submitResponse", () => {
 
 describe("getAssessments (staff list with name enrichment)", () => {
   const profiles = snap([["stu1", { name: "Ana Real", email: "ana@usa.edu.ph" }]]);
-  const run = async (assessments: Array<[string, Row]>, users: ReturnType<typeof snap> = profiles) => {
-    fs.getDocs.mockResolvedValueOnce(snap(assessments)).mockResolvedValueOnce(users);
+  const run = async (
+    assessments: Array<[string, Row]>,
+    users: ReturnType<typeof snap> = profiles,
+    notes: Array<[string, Row]> = [],
+  ) => {
+    // Read order: check-ins, then staff notes, then user profiles.
+    fs.getDocs.mockResolvedValueOnce(snap(assessments)).mockResolvedValueOnce(snap(notes)).mockResolvedValueOnce(users);
     return api.getAssessments();
   };
 
@@ -265,6 +270,19 @@ describe("getAssessments (staff list with name enrichment)", () => {
       expect(a.studentEmail).toBe("ana@usa.edu.ph");
     },
   );
+
+  it("merges notes from caseNotes, falling back to a legacy inline note", async () => {
+    const out = await run(
+      [
+        ["a1", { studentId: "stu1", studentName: "N", studentEmail: "e", counselorNotes: "old" }],
+        ["a2", { studentId: "stu1", studentName: "N", studentEmail: "e", counselorNotes: "legacy" }],
+        ["a3", { studentId: "stu1", studentName: "N", studentEmail: "e" }],
+      ],
+      profiles,
+      [["a1", { text: "new" }]],
+    );
+    expect(out.map((a) => a.counselorNotes)).toEqual(["new", "legacy", ""]);
+  });
 
   it("keeps real stored values over the profile", async () => {
     const [a] = await run([["a1", { studentId: "stu1", studentName: "Typed Name", studentEmail: "typed@x.ph" }]]);
@@ -285,8 +303,9 @@ describe("getAssessments (staff list with name enrichment)", () => {
   it("returns the raw assessments (and warns) when the profile lookup fails", async () => {
     fs.getDocs
       .mockResolvedValueOnce(snap([["a1", { studentName: "Student" }]]))
+      .mockResolvedValueOnce(snap([]))
       .mockRejectedValueOnce(new Error("denied"));
-    expect(await api.getAssessments()).toEqual([{ id: "a1", studentName: "Student" }]);
+    expect(await api.getAssessments()).toEqual([{ id: "a1", studentName: "Student", counselorNotes: "" }]);
     expect(console.warn).toHaveBeenCalled();
   });
 
@@ -374,19 +393,25 @@ describe("wellbeing (WHO-5)", () => {
 });
 
 describe("updateAssessmentStatus", () => {
-  it("writes status and reviewedAt, plus notes when given", async () => {
+  it("writes status and reviewedAt, and puts notes in caseNotes (not on the check-in)", async () => {
     await api.updateAssessmentStatus("a1", "reviewed", "called");
-    expect(lastWrite(fs.updateDoc)).toEqual([
+    const b = h.batches[h.batches.length - 1];
+    expect(b.updates[0]).toEqual([
       { kind: "doc", col: "assessments", id: "a1" },
-      { status: "reviewed", reviewedAt: NOW.toISOString(), counselorNotes: "called" },
+      { status: "reviewed", reviewedAt: NOW.toISOString(), counselorNotes: "__DELETE__" },
     ]);
+    expect(b.sets[0][0]).toEqual({ kind: "doc", col: "caseNotes", id: "a1" });
+    expect(b.sets[0][1]).toMatchObject({ text: "called", updatedAt: NOW.toISOString() });
   });
 
-  it("leaves notes out when undefined, but allows clearing them with an empty string", async () => {
+  it("leaves notes alone when undefined, but allows clearing them with an empty string", async () => {
     await api.updateAssessmentStatus("a1", "closed");
-    expect(lastWrite(fs.updateDoc)[1]).not.toHaveProperty("counselorNotes");
+    let b = h.batches[h.batches.length - 1];
+    expect(b.sets).toHaveLength(0);
+    expect(b.updates[0][1]).not.toHaveProperty("counselorNotes");
     await api.updateAssessmentStatus("a1", "closed", "");
-    expect(lastWrite(fs.updateDoc)[1]).toHaveProperty("counselorNotes", "");
+    b = h.batches[h.batches.length - 1];
+    expect(b.sets[0][1]).toHaveProperty("text", "");
   });
 });
 

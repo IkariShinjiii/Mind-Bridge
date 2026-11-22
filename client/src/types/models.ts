@@ -72,7 +72,8 @@ export interface Assessment {
   riskLevel: RiskLevel;
   flaggedForImmediateReview: boolean;
   status: CaseStatus;
-  counselorNotes: string;
+  /** Staff notes. Stored in `caseNotes/{id}` (students cannot read it) and merged in for staff views. */
+  counselorNotes?: string;
   /** Staff-set day to check back on this case, "YYYY-MM-DD"; empty or missing when none is set. */
   followUpDate?: string;
   createdAt: string;

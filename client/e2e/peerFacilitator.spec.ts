@@ -126,9 +126,9 @@ test.describe("Peer Facilitator accessing student data", () => {
       await expect(page.getByText("Case notes saved.")).toBeVisible();
 
       const saved = (await readCollection(page, "assessments")).find((a) => a.id === "c1");
-      expect(saved).toMatchObject({
-        counselorNotes: "Called student, booked a session for Friday.",
-        status: "escalated",
+      expect(saved).toMatchObject({ status: "escalated" });
+      expect((await readCollection(page, "caseNotes")).find((n) => n.id === "c1")).toMatchObject({
+        text: "Called student, booked a session for Friday.",
       });
     });
 
