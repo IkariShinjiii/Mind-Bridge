@@ -497,16 +497,11 @@ submissions per student) would need a server route or a rule that compares times
 
 ## Known gaps (verified by `rules/known-gaps.test.js`)
 
-These writes **succeed today**. They are rule-level gaps, not test failures:
+Four of the five original gaps are fixed (see `scheduling.test.js`). One write still succeeds today:
 
-1. A student can create an appointment already `Confirmed`.
-2. A student can book any `slotId`/`counselorId`, even a slot already booked (no double-booking guard).
-3. A student can set any slot's `isBooked` back to `false`, un-booking another student's slot.
-4. `riskLevel` / `flaggedForImmediateReview` are client-supplied, so a max-score check-in can be filed as `low`.
-   (The Cloud Function recomputes, but the dashboards display the stored value.)
-5. A student can post a message with `senderRole: "counselor"` and any `senderName`.
+1. `flaggedForImmediateReview` is client-supplied, because the rules cannot read which answer is the crisis item. A score can no longer be filed under-reported, and the alert function and staff dashboard recompute the flag.
 
-When one is fixed in `firestore.rules`, its test fails; flip it to `assertFails`.
+When it is fixed in `firestore.rules`, its test fails; flip it to `assertFails`.
 
 Smaller note: `submitResponse` passes `question.text` straight through, so a question with no `text`
 makes Firestore reject the write (`invalid-argument`, unsupported `undefined`). `bookAppointment`

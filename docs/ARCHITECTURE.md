@@ -156,8 +156,7 @@ denied on every collection.
   by the seed script with the Admin SDK, so they never go through this rule.
 - **Firebase web config is public by design.** `VITE_FIREBASE_*` values ship in the bundle. They
   identify the project; they do not grant access. The rules do.
-- **The rules file is headed "DRAFT".** It is covered by the emulator tests but should be reviewed
-  against real data before a production launch.
+- **Staff notes are stored apart from the check-in** (`caseNotes/{id}`, staff-only), because a student can read their own check-in document.
 - **Alert emails contain no answers.** Only the student name, score and flag are sent; detail stays
   in the app.
 
