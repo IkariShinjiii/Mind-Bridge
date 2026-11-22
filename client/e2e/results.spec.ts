@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, completeCheckIn, STUDENT } from "./helpers";
+import { seed, logIn, completeCheckIn, STUDENT, expandAll } from "./helpers";
 
 const past = (
   id: string,
@@ -27,6 +27,7 @@ test.describe("Viewing assessment results", () => {
   test("a student with no check-ins sees an empty state instead of a score", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await expect(page.getByText("Your latest check-in").locator("..")).toContainText("No check-in");
     await expect(page.getByText("No check-ins yet")).toBeVisible();
@@ -36,6 +37,7 @@ test.describe("Viewing assessment results", () => {
   test("right after submitting, the wellness index card shows the new score and risk label", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await completeCheckIn(page, [2, 1, 1, 1, 1, 1, 0]); // 7 of 21 is the medium band
 
@@ -50,6 +52,7 @@ test.describe("Viewing assessment results", () => {
   test("a medium result offers a short breathing reset and a low result does not", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await completeCheckIn(page, [2, 1, 1, 1, 1, 1, 0]);
     const reset = page.getByRole("region", { name: "Breathing exercise" });
@@ -65,6 +68,7 @@ test.describe("Viewing assessment results", () => {
   test("the result lists what is going well, but not for a high result", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await completeCheckIn(page, [2, 1, 0, 1, 1, 0, 0]); // 5 of 21 is low
     await expect(page.getByText("What's going well")).toBeVisible();
@@ -80,6 +84,7 @@ test.describe("Viewing assessment results", () => {
   test("the result can be printed or saved as a summary", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await completeCheckIn(page, [2, 1, 0, 1, 1, 0, 0]);
     await page.getByRole("button", { name: "Save or print my summary" }).click();
@@ -95,6 +100,7 @@ test.describe("Viewing assessment results", () => {
       docs: { assessments: { ...past("a1", "2026-09-01T09:00:00.000Z", 12, "medium") } },
     });
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await expect(page.getByText("12 / 21")).toBeVisible();
     await expect(page.getByRole("img", { name: /Line chart of 1 check-in scores, latest 12 out of 21/ })).toBeVisible();
@@ -110,6 +116,7 @@ test.describe("Viewing assessment results", () => {
       },
     });
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await expect(page.getByText("4 / 21")).toBeVisible();
     await expect(page.getByRole("img", { name: /Line chart of 1 check-in scores/ })).toBeVisible();
@@ -121,6 +128,7 @@ test.describe("Viewing assessment results", () => {
       docs: { assessments: { ...past("a1", "2026-09-01T09:00:00.000Z", 10, "medium") } },
     });
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     await completeCheckIn(page, [1, 0, 0, 0, 0, 0, 0]);
 
@@ -138,6 +146,7 @@ test.describe("Viewing assessment results", () => {
       },
     });
     await logIn(page, STUDENT);
+    await expandAll(page);
 
     const trend = page.getByRole("group", { name: "Trend view" });
     await trend.getByRole("button", { name: "History" }).click();

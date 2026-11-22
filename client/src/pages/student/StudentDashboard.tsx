@@ -50,6 +50,8 @@ import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import ReferralCard from "../../components/student/ReferralCard";
 import StudentOnboarding from "../../components/student/StudentOnboarding";
+import FirstSteps from "../../components/student/FirstSteps";
+import Disclosure from "../../components/ui/Disclosure";
 import FourPillars from "../../components/student/FourPillars";
 import RelaxationLibrary from "../../components/student/RelaxationLibrary";
 import { fullAnswersOf, scoreFull } from "../../utils/clinical";
@@ -151,6 +153,13 @@ const SCALE_OPTIONS = [
   { value: 2, label: "2 - More than half the days", desc: "Frequent" },
   { value: 3, label: "3 - Nearly every day", desc: "Almost daily" },
 ];
+
+/** Opens one of the collapsed sections below the check-in and brings it into view. */
+function openSection(id: string): void {
+  const el = document.getElementById(id);
+  if (el instanceof HTMLDetailsElement) el.open = true;
+  el?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 export default function StudentDashboard() {
   const { currentUser, userData } = useAuth();
@@ -490,7 +499,7 @@ export default function StudentDashboard() {
         </div>
         {/* Below lg the bottom bar already carries both, so they would only push the check-in off the first screen. */}
         <div className="hidden gap-3 lg:flex">
-          <Link to="/appointments" className="mb-btn mb-btn-solid">
+          <Link to="/appointments" className="mb-btn mb-btn-line">
             <Calendar className="h-5 w-5" aria-hidden="true" />
             My appointments
           </Link>
@@ -504,84 +513,16 @@ export default function StudentDashboard() {
       {/* Main 2-Column Dashboard Grid */}
       <div className="flex flex-col gap-6 xl:flex-row items-start">
         <section className="xl:w-2/3 flex flex-col gap-6 w-full">
-          {/* Quick Info Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            {/* Gauge / Status Card */}
-            <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden sm:col-span-2">
-              <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
-              <div>
-                <div className="text-sm text-[color:var(--mb-muted)] font-bold">Your latest check-in</div>
-                <div className="mt-2 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
-                      {latestScore !== null ? `${latestScore} / ${maxScore}` : "No check-in"}
-                    </div>
-                    <div className="mt-2">
-                      <span className={`mb-badge ${riskBadge}`}>
-                        {latestScore === null
-                          ? "Not taken yet"
-                          : latestRisk === "high"
-                            ? "Needs Attention"
-                            : latestRisk === "medium"
-                              ? "Elevated Stress"
-                              : "Balanced / Stable"}
-                      </span>
-                    </div>
-                    {latestScore !== null && (
-                      <p className="mt-2 text-sm text-[color:var(--mb-muted)]">A lower score means less strain.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {trendInsight && (
-                <div className={`mt-2 text-sm font-medium ${trendInsight.color}`}>{trendInsight.text}</div>
-              )}
-            </div>
-
-            {/* Next Appointment Card */}
-            <div className="mb-card mb-card-sm flex flex-col justify-between">
-              <div>
-                <div className="text-sm text-[color:var(--mb-muted)] font-bold">Next Appointment</div>
-                <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">
-                  {nextAppointment ? formatDateTime(nextAppointment.start || nextAppointment.date) : "None scheduled"}
-                </div>
-              </div>
-              {nextAppointment ? (
-                <div className="mt-2 flex items-center justify-between text-sm text-[color:var(--mb-muted)]">
-                  <span>Status</span>
-                  <span className="font-bold text-[color:var(--mb-brand)] capitalize">{nextAppointment.status}</span>
-                </div>
-              ) : (
-                <Link
-                  to="/appointments"
-                  className="mt-2 inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
-                >
-                  Book a session
-                </Link>
-              )}
-            </div>
-
-            {/* Wellness takes a full row (the ring needs room); appointment and peer facilitator share the next one from sm up. */}
-            <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
-                  <span>Peer Facilitator</span>
-                  <span className="mb-badge mb-badge-brand uppercase">Assigned</span>
-                </div>
-                <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">{assignedCounselorName}</div>
-                <div className="mt-1 text-sm text-[color:var(--mb-muted)]">100% confidential student channel</div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setChatOpen(true)}
-                className="mb-btn mb-btn-line mt-3 w-full !min-h-[44px] !px-4 text-sm"
-              >
-                <MessageSquare className="h-4 w-4" aria-hidden="true" />
-                Message peer facilitator
-              </button>
-            </div>
-          </div>
+          {!loadingHistory && pastAssessments.length === 0 && (
+            <FirstSteps
+              uid={currentUser?.uid}
+              onCheckIn={() =>
+                document.getElementById("checkin-h")?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              onRelax={() => openSection("more-relax")}
+              onMessage={() => setChatOpen(true)}
+            />
+          )}
 
           {/* CHECK-IN: one question per screen, shown as stops on a route (Calm Wayfinding) */}
           <section className="mb-card" aria-labelledby="checkin-h">
@@ -978,245 +919,364 @@ export default function StudentDashboard() {
             </AnimatePresence>
           </section>
 
-          {/* WELLNESS TREND LINE CHART & HISTORY SECTION */}
-          <div className="mb-card">
-            <div className="mb-6 flex flex-col gap-3 border-b border-[color:var(--mb-line)] pb-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)]">
-                    <TrendingUp className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
-                  </span>
-                  <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">My wellness trend</h2>
-                </div>
-                <p className="mt-1 text-[color:var(--mb-muted)]">Your check-in scores over time.</p>
-              </div>
-
-              {pastAssessments.length > 0 && (
-                <div
-                  role="group"
-                  aria-label="Trend view"
-                  className="flex items-center gap-1 self-start rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setTrendView("chart")}
-                    aria-pressed={trendView === "chart"}
-                    className={`min-h-[44px] px-4 font-bold rounded-md transition ${
-                      trendView === "chart"
-                        ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                        : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
-                    }`}
-                  >
-                    Chart
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTrendView("table")}
-                    aria-pressed={trendView === "table"}
-                    className={`min-h-[44px] px-4 font-bold rounded-md transition ${
-                      trendView === "table"
-                        ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
-                        : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
-                    }`}
-                  >
-                    History
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {trendSummary && !loadingHistory && (
-              <div className="mb-5">
-                <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    ["Latest", `${trendSummary.latest} of ${trendSummary.max}`],
-                    ["Average", `${trendSummary.average}`],
-                    ["Lowest so far", `${trendSummary.lowest}`],
-                    [
-                      "Last check-in",
-                      trendSummary.daysAgo === null
-                        ? "Date unknown"
-                        : trendSummary.daysAgo === 0
-                          ? "Today"
-                          : `${trendSummary.daysAgo} ${trendSummary.daysAgo === 1 ? "day" : "days"} ago`,
-                    ],
-                  ].map(([label, value]) => (
-                    <div key={label} className="mb-tile mb-tile-sm">
-                      <dt className="text-sm text-[color:var(--mb-muted)]">{label}</dt>
-                      <dd className="mb-sign text-xl font-bold text-[color:var(--mb-ink)]">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <p className="mt-3 text-[color:var(--mb-ink)]">{describeChange(trendSummary)}</p>
-                <p className="text-sm text-[color:var(--mb-muted)]">
-                  A lower score means fewer or less frequent difficulties. This is a guide, not a diagnosis.
-                </p>
-              </div>
-            )}
-
-            {/* Skeleton, empty state, chart and history crossfade; the chart/history toggle uses the same swap */}
-            <AnimatePresence mode="wait" initial={false}>
-              {loadingHistory ? (
-                <m.div key="loading" {...fade} role="status" aria-label="Loading your trend" className="space-y-3">
-                  <span className="mb-skeleton h-6 w-1/3" />
-                  <span className="mb-skeleton h-48 w-full" />
-                </m.div>
-              ) : chartData.length === 0 ? (
-                <m.div
-                  key="empty"
-                  {...fade}
-                  className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]"
-                >
-                  <BarChart2 className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
-                  <p className="text-lg font-bold text-[color:var(--mb-ink)]">No check-ins yet</p>
-                  <p className="mx-auto mt-1 max-w-sm">
-                    Complete your first one-minute check-in above and your scores will show up here over time.
-                  </p>
-                </m.div>
-              ) : trendView === "chart" ? (
-                <m.div key="chart" {...fade}>
-                  {/* Score Benchmark Legend */}
-                  <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-low)]" />
-                      <span>0 to {limits.lowTop}: balanced</span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-medium)]" />
-                      <span>
-                        {limits.lowTop + 1} to {limits.mediumTop}: moderate
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-high)]" />
-                      <span>
-                        {limits.mediumTop + 1} to {trendSummary?.max ?? 21}: priority
-                      </span>
-                    </span>
-                  </div>
-
-                  {chartData.length === 1 && (
-                    <p className="mb-3 text-[color:var(--mb-muted)]">
-                      One check-in so far. Your trend line appears after the next one.
-                    </p>
-                  )}
-
-                  {/* Area Line Chart */}
-                  <div
-                    className="h-60 sm:h-64 w-full"
-                    role="img"
-                    aria-label={`Line chart of ${chartData.length} check-in scores, latest ${chartData[chartData.length - 1].score} out of ${chartData[chartData.length - 1].max}. Switch to History for a text list.`}
-                  >
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--mb-brand)" stopOpacity={0.35} />
-                            <stop offset="95%" stopColor="var(--mb-brand)" stopOpacity={0.0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
-                        <XAxis
-                          dataKey="formattedDate"
-                          stroke="var(--mb-muted)"
-                          tick={{ fontSize: 12 }}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis
-                          domain={[0, trendSummary?.max ?? 21]}
-                          stroke="var(--mb-muted)"
-                          tick={{ fontSize: 12 }}
-                          tickLine={false}
-                          axisLine={false}
-                          allowDecimals={false}
-                        />
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              const data = payload[0].payload;
-                              return (
-                                <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
-                                  <div className="font-bold text-[color:var(--mb-ink)]">
-                                    {data.fullDate || data.formattedDate}
-                                  </div>
-                                  <div className="mt-1 flex items-center gap-2">
-                                    <span className="text-[color:var(--mb-brand)] font-bold">
-                                      Score: {data.score} / {data.max}
-                                    </span>
-                                    <span
-                                      className={`mb-badge capitalize ${
-                                        data.riskLevel === "high"
-                                          ? "mb-badge-urgent"
-                                          : data.riskLevel === "medium"
-                                            ? "mb-badge-warn"
-                                            : "mb-badge-safe"
-                                      }`}
-                                    >
-                                      {data.riskLevel}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <ReferenceLine y={limits.lowTop} stroke="var(--mb-safe)" strokeDasharray="3 3" opacity={0.6} />
-                        <ReferenceLine
-                          y={limits.mediumTop}
-                          stroke="var(--mb-warn)"
-                          strokeDasharray="3 3"
-                          opacity={0.6}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="score"
-                          stroke="var(--mb-brand)"
-                          strokeWidth={2.5}
-                          fillOpacity={1}
-                          fill="url(#scoreGradient)"
-                          activeDot={{ r: 6, fill: "var(--mb-brand)", stroke: "var(--mb-surface)", strokeWidth: 2 }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </m.div>
-              ) : (
-                /* Table History View */
-                <m.div key="table" {...fade} className="space-y-2">
-                  {pastAssessments.slice(0, 6).map((item) => (
-                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 mb-tile mb-tile-sm">
-                      <div>
-                        <span className="font-bold text-[color:var(--mb-ink)]">{formatDateTime(item.createdAt)}</span>
-                        <span className="ml-2 text-[color:var(--mb-muted)]">
-                          Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> /{" "}
-                          {item.maxScore || 21}
-                        </span>
+          {/* Everything beyond the check-in sits behind a one-line heading, so the page opens on one calm choice. */}
+          <div className="space-y-3">
+            <h2 className="sr-only">More for you</h2>
+            <Disclosure
+              id="more-overview"
+              title="My overview"
+              hint="Latest check-in, next session, your peer facilitator"
+            >
+              {/* Quick Info Cards */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                {/* Gauge / Status Card */}
+                <div className="mb-card mb-card-sm relative flex flex-col justify-between overflow-hidden sm:col-span-2">
+                  <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${riskBar}`} />
+                  <div>
+                    <div className="text-sm text-[color:var(--mb-muted)] font-bold">Your latest check-in</div>
+                    <div className="mt-2 flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="text-2xl font-bold text-[color:var(--mb-ink)]">
+                          {latestScore !== null ? `${latestScore} / ${maxScore}` : "No check-in"}
+                        </div>
+                        <div className="mt-2">
+                          <span className={`mb-badge ${riskBadge}`}>
+                            {latestScore === null
+                              ? "Not taken yet"
+                              : latestRisk === "high"
+                                ? "Needs Attention"
+                                : latestRisk === "medium"
+                                  ? "Elevated Stress"
+                                  : "Balanced / Stable"}
+                          </span>
+                        </div>
+                        {latestScore !== null && (
+                          <p className="mt-2 text-sm text-[color:var(--mb-muted)]">A lower score means less strain.</p>
+                        )}
                       </div>
-                      <span
-                        className={`mb-badge capitalize ${
-                          item.riskLevel === "high"
-                            ? "mb-badge-urgent"
-                            : item.riskLevel === "medium"
-                              ? "mb-badge-warn"
-                              : "mb-badge-safe"
+                    </div>
+                  </div>
+
+                  {trendInsight && (
+                    <div className={`mt-2 text-sm font-medium ${trendInsight.color}`}>{trendInsight.text}</div>
+                  )}
+                </div>
+
+                {/* Next Appointment Card */}
+                <div className="mb-card mb-card-sm flex flex-col justify-between">
+                  <div>
+                    <div className="text-sm text-[color:var(--mb-muted)] font-bold">Next Appointment</div>
+                    <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">
+                      {nextAppointment
+                        ? formatDateTime(nextAppointment.start || nextAppointment.date)
+                        : "None scheduled"}
+                    </div>
+                  </div>
+                  {nextAppointment ? (
+                    <div className="mt-2 flex items-center justify-between text-sm text-[color:var(--mb-muted)]">
+                      <span>Status</span>
+                      <span className="font-bold text-[color:var(--mb-brand)] capitalize">
+                        {nextAppointment.status}
+                      </span>
+                    </div>
+                  ) : (
+                    <Link
+                      to="/appointments"
+                      className="mt-2 inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                    >
+                      Book a session
+                    </Link>
+                  )}
+                </div>
+
+                {/* Wellness takes a full row (the ring needs room); appointment and peer facilitator share the next one from sm up. */}
+                <div className="mb-card mb-card-sm flex min-w-0 flex-col justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-[color:var(--mb-muted)]">
+                      <span>Peer Facilitator</span>
+                      <span className="mb-badge mb-badge-brand uppercase">Assigned</span>
+                    </div>
+                    <div className="mt-2 text-lg font-bold text-[color:var(--mb-ink)]">{assignedCounselorName}</div>
+                    <div className="mt-1 text-sm text-[color:var(--mb-muted)]">100% confidential student channel</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setChatOpen(true)}
+                    className="mb-btn mb-btn-line mt-3 w-full !min-h-[44px] !px-4 text-sm"
+                  >
+                    <MessageSquare className="h-4 w-4" aria-hidden="true" />
+                    Message peer facilitator
+                  </button>
+                </div>
+              </div>
+            </Disclosure>
+            <Disclosure id="more-trend" title="My wellness trend" hint="Your past check-ins over time">
+              <div className="mb-card">
+                <div className="mb-6 flex flex-col gap-3 border-b border-[color:var(--mb-line)] pb-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[color:var(--mb-brand)] bg-[color:var(--mb-brand-bg)]">
+                        <TrendingUp className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                      </span>
+                      <h2 className="text-2xl font-bold text-[color:var(--mb-ink)]">My wellness trend</h2>
+                    </div>
+                    <p className="mt-1 text-[color:var(--mb-muted)]">Your check-in scores over time.</p>
+                  </div>
+
+                  {pastAssessments.length > 0 && (
+                    <div
+                      role="group"
+                      aria-label="Trend view"
+                      className="flex items-center gap-1 self-start rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-ground)] p-1"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setTrendView("chart")}
+                        aria-pressed={trendView === "chart"}
+                        className={`min-h-[44px] px-4 font-bold rounded-md transition ${
+                          trendView === "chart"
+                            ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                            : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
                         }`}
                       >
-                        {item.riskLevel} risk
-                      </span>
+                        Chart
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTrendView("table")}
+                        aria-pressed={trendView === "table"}
+                        className={`min-h-[44px] px-4 font-bold rounded-md transition ${
+                          trendView === "table"
+                            ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
+                            : "text-[color:var(--mb-muted)] hover:text-[color:var(--mb-ink)]"
+                        }`}
+                      >
+                        History
+                      </button>
                     </div>
-                  ))}
-                </m.div>
-              )}
-            </AnimatePresence>
+                  )}
+                </div>
+
+                {trendSummary && !loadingHistory && (
+                  <div className="mb-5">
+                    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {[
+                        ["Latest", `${trendSummary.latest} of ${trendSummary.max}`],
+                        ["Average", `${trendSummary.average}`],
+                        ["Lowest so far", `${trendSummary.lowest}`],
+                        [
+                          "Last check-in",
+                          trendSummary.daysAgo === null
+                            ? "Date unknown"
+                            : trendSummary.daysAgo === 0
+                              ? "Today"
+                              : `${trendSummary.daysAgo} ${trendSummary.daysAgo === 1 ? "day" : "days"} ago`,
+                        ],
+                      ].map(([label, value]) => (
+                        <div key={label} className="mb-tile mb-tile-sm">
+                          <dt className="text-sm text-[color:var(--mb-muted)]">{label}</dt>
+                          <dd className="mb-sign text-xl font-bold text-[color:var(--mb-ink)]">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    <p className="mt-3 text-[color:var(--mb-ink)]">{describeChange(trendSummary)}</p>
+                    <p className="text-sm text-[color:var(--mb-muted)]">
+                      A lower score means fewer or less frequent difficulties. This is a guide, not a diagnosis.
+                    </p>
+                  </div>
+                )}
+
+                {/* Skeleton, empty state, chart and history crossfade; the chart/history toggle uses the same swap */}
+                <AnimatePresence mode="wait" initial={false}>
+                  {loadingHistory ? (
+                    <m.div key="loading" {...fade} role="status" aria-label="Loading your trend" className="space-y-3">
+                      <span className="mb-skeleton h-6 w-1/3" />
+                      <span className="mb-skeleton h-48 w-full" />
+                    </m.div>
+                  ) : chartData.length === 0 ? (
+                    <m.div
+                      key="empty"
+                      {...fade}
+                      className="rounded-md border border-dashed border-[color:var(--mb-line)] p-8 text-center text-[color:var(--mb-muted)]"
+                    >
+                      <BarChart2 className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
+                      <p className="text-lg font-bold text-[color:var(--mb-ink)]">No check-ins yet</p>
+                      <p className="mx-auto mt-1 max-w-sm">
+                        Complete your first one-minute check-in above and your scores will show up here over time.
+                      </p>
+                    </m.div>
+                  ) : trendView === "chart" ? (
+                    <m.div key="chart" {...fade}>
+                      {/* Score Benchmark Legend */}
+                      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[color:var(--mb-muted)]">
+                        <span className="flex items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-low)]"
+                          />
+                          <span>0 to {limits.lowTop}: balanced</span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-medium)]"
+                          />
+                          <span>
+                            {limits.lowTop + 1} to {limits.mediumTop}: moderate
+                          </span>
+                        </span>
+                        <span className="flex items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="h-2.5 w-2.5 rounded-full bg-[color:var(--mb-chart-high)]"
+                          />
+                          <span>
+                            {limits.mediumTop + 1} to {trendSummary?.max ?? 21}: priority
+                          </span>
+                        </span>
+                      </div>
+
+                      {chartData.length === 1 && (
+                        <p className="mb-3 text-[color:var(--mb-muted)]">
+                          One check-in so far. Your trend line appears after the next one.
+                        </p>
+                      )}
+
+                      {/* Area Line Chart */}
+                      <div
+                        className="h-60 sm:h-64 w-full"
+                        role="img"
+                        aria-label={`Line chart of ${chartData.length} check-in scores, latest ${chartData[chartData.length - 1].score} out of ${chartData[chartData.length - 1].max}. Switch to History for a text list.`}
+                      >
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="var(--mb-brand)" stopOpacity={0.35} />
+                                <stop offset="95%" stopColor="var(--mb-brand)" stopOpacity={0.0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--mb-line)" vertical={false} />
+                            <XAxis
+                              dataKey="formattedDate"
+                              stroke="var(--mb-muted)"
+                              tick={{ fontSize: 12 }}
+                              tickLine={false}
+                              axisLine={false}
+                            />
+                            <YAxis
+                              domain={[0, trendSummary?.max ?? 21]}
+                              stroke="var(--mb-muted)"
+                              tick={{ fontSize: 12 }}
+                              tickLine={false}
+                              axisLine={false}
+                              allowDecimals={false}
+                            />
+                            <Tooltip
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <div className="rounded-md border border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] p-3 text-sm">
+                                      <div className="font-bold text-[color:var(--mb-ink)]">
+                                        {data.fullDate || data.formattedDate}
+                                      </div>
+                                      <div className="mt-1 flex items-center gap-2">
+                                        <span className="text-[color:var(--mb-brand)] font-bold">
+                                          Score: {data.score} / {data.max}
+                                        </span>
+                                        <span
+                                          className={`mb-badge capitalize ${
+                                            data.riskLevel === "high"
+                                              ? "mb-badge-urgent"
+                                              : data.riskLevel === "medium"
+                                                ? "mb-badge-warn"
+                                                : "mb-badge-safe"
+                                          }`}
+                                        >
+                                          {data.riskLevel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <ReferenceLine
+                              y={limits.lowTop}
+                              stroke="var(--mb-safe)"
+                              strokeDasharray="3 3"
+                              opacity={0.6}
+                            />
+                            <ReferenceLine
+                              y={limits.mediumTop}
+                              stroke="var(--mb-warn)"
+                              strokeDasharray="3 3"
+                              opacity={0.6}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="score"
+                              stroke="var(--mb-brand)"
+                              strokeWidth={2.5}
+                              fillOpacity={1}
+                              fill="url(#scoreGradient)"
+                              activeDot={{ r: 6, fill: "var(--mb-brand)", stroke: "var(--mb-surface)", strokeWidth: 2 }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </m.div>
+                  ) : (
+                    /* Table History View */
+                    <m.div key="table" {...fade} className="space-y-2">
+                      {pastAssessments.slice(0, 6).map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex flex-wrap items-center justify-between gap-2 mb-tile mb-tile-sm"
+                        >
+                          <div>
+                            <span className="font-bold text-[color:var(--mb-ink)]">
+                              {formatDateTime(item.createdAt)}
+                            </span>
+                            <span className="ml-2 text-[color:var(--mb-muted)]">
+                              Score: <strong className="text-[color:var(--mb-brand)]">{item.total}</strong> /{" "}
+                              {item.maxScore || 21}
+                            </span>
+                          </div>
+                          <span
+                            className={`mb-badge capitalize ${
+                              item.riskLevel === "high"
+                                ? "mb-badge-urgent"
+                                : item.riskLevel === "medium"
+                                  ? "mb-badge-warn"
+                                  : "mb-badge-safe"
+                            }`}
+                          >
+                            {item.riskLevel} risk
+                          </span>
+                        </div>
+                      ))}
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </Disclosure>
+            <Disclosure
+              id="more-wellbeing"
+              title="Wellbeing check"
+              hint="Five quick statements about the last two weeks"
+            >
+              <WellbeingCheck />
+            </Disclosure>
+            <Disclosure id="more-relax" title="Calm and sleep tools" hint="A breathing exercise and sleep tips">
+              <RelaxationLibrary />
+            </Disclosure>
+            <Disclosure id="more-pillars" title="Four pillars of wellness" hint="Simple habits that support your mood">
+              <FourPillars />
+            </Disclosure>
           </div>
-
-          <WellbeingCheck />
-
-          <FourPillars />
-
-          <RelaxationLibrary />
         </section>
 
         {/* ASIDE: UPCOMING APPOINTMENTS & GOALS */}
@@ -1239,111 +1299,115 @@ export default function StudentDashboard() {
             </Link>
           </section>
 
-          <div className="mb-card">
-            <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
-              <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
-                <Calendar className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
-                <span>Sessions</span>
-              </h2>
-              <Link
-                to="/appointments"
-                className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
-              >
-                View all
-              </Link>
-            </div>
-
-            <AnimatePresence mode="wait" initial={false}>
-              {loadingAppointments ? (
-                <m.div key="loading" {...fade} role="status" aria-label="Loading sessions" className="space-y-3">
-                  <span className="mb-skeleton h-16 w-full" />
-                  <span className="mb-skeleton h-16 w-full" />
-                </m.div>
-              ) : appointments.length === 0 ? (
-                <m.div
-                  key="empty"
-                  {...fade}
-                  className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]"
-                >
-                  No sessions yet. Book one whenever you feel ready.
-                </m.div>
-              ) : (
-                <m.div key="list" {...listMotion} exit={fade.exit} className="space-y-3">
-                  {appointments.slice(0, 3).map((apt) => (
-                    <m.div key={apt.id} {...itemMotion} className="mb-tile mb-tile-sm">
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="font-bold text-[color:var(--mb-ink)]">{appointmentTitle(apt.title)}</div>
-                        <span
-                          className={`mb-badge shrink-0 capitalize ${
-                            appointmentPhase(apt.status) === "confirmed"
-                              ? "mb-badge-safe"
-                              : appointmentPhase(apt.status) === "pending"
-                                ? "mb-badge-warn"
-                                : ""
-                          }`}
-                        >
-                          {apt.status || "Pending"}
-                        </span>
-                      </div>
-                      <div className="mt-1 text-[color:var(--mb-muted)]">
-                        {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
-                      </div>
-                      {apt.counselorName && (
-                        <div className="mt-1 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
-                      )}
-                    </m.div>
-                  ))}
-                </m.div>
-              )}
-            </AnimatePresence>
-
-            <button
-              type="button"
-              onClick={openBookingModal}
-              disabled={loadingSlots}
-              className="mb-btn mb-btn-solid mt-4 w-full"
-            >
-              {loadingSlots ? <Spinner size={16} /> : <Calendar className="h-5 w-5" aria-hidden="true" />}
-              Book a session
-            </button>
-          </div>
-
-          {/* My Wellness Focus Goals */}
-          <div className="mb-card">
-            <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
-              <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
-                <Target className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
-                <span>My goals</span>
-              </h2>
-              <Link
-                to="/settings"
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-end font-bold text-[color:var(--mb-brand)] underline"
-              >
-                Edit
-              </Link>
-            </div>
-
-            {Array.isArray(userData?.wellnessGoals) && userData.wellnessGoals.length > 0 ? (
-              <ul className="space-y-2">
-                {userData.wellnessGoals.map((goal) => (
-                  <li key={goal} className="flex items-center gap-2 mb-tile mb-tile-sm text-[color:var(--mb-ink)]">
-                    <Check className="h-4 w-4 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
-                    <span>{goal}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
-                <p>No goals chosen yet.</p>
+          <Disclosure id="more-sessions" title="My sessions" hint="Upcoming appointments and booking">
+            <div className="mb-card">
+              <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
+                <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
+                  <Calendar className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                  <span>Sessions</span>
+                </h2>
                 <Link
-                  to="/settings"
+                  to="/appointments"
                   className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
                 >
-                  Pick your goals
+                  View all
                 </Link>
               </div>
-            )}
-          </div>
+
+              <AnimatePresence mode="wait" initial={false}>
+                {loadingAppointments ? (
+                  <m.div key="loading" {...fade} role="status" aria-label="Loading sessions" className="space-y-3">
+                    <span className="mb-skeleton h-16 w-full" />
+                    <span className="mb-skeleton h-16 w-full" />
+                  </m.div>
+                ) : appointments.length === 0 ? (
+                  <m.div
+                    key="empty"
+                    {...fade}
+                    className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]"
+                  >
+                    No sessions yet. Book one whenever you feel ready.
+                  </m.div>
+                ) : (
+                  <m.div key="list" {...listMotion} exit={fade.exit} className="space-y-3">
+                    {appointments.slice(0, 3).map((apt) => (
+                      <m.div key={apt.id} {...itemMotion} className="mb-tile mb-tile-sm">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="font-bold text-[color:var(--mb-ink)]">{appointmentTitle(apt.title)}</div>
+                          <span
+                            className={`mb-badge shrink-0 capitalize ${
+                              appointmentPhase(apt.status) === "confirmed"
+                                ? "mb-badge-safe"
+                                : appointmentPhase(apt.status) === "pending"
+                                  ? "mb-badge-warn"
+                                  : ""
+                            }`}
+                          >
+                            {apt.status || "Pending"}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-[color:var(--mb-muted)]">
+                          {formatDateTime(apt.start || apt.date, "") || "Scheduled"}
+                        </div>
+                        {apt.counselorName && (
+                          <div className="mt-1 text-[color:var(--mb-brand)] font-bold">With {apt.counselorName}</div>
+                        )}
+                      </m.div>
+                    ))}
+                  </m.div>
+                )}
+              </AnimatePresence>
+
+              <button
+                type="button"
+                onClick={openBookingModal}
+                disabled={loadingSlots}
+                className="mb-btn mb-btn-solid mt-4 w-full"
+              >
+                {loadingSlots ? <Spinner size={16} /> : <Calendar className="h-5 w-5" aria-hidden="true" />}
+                Book a session
+              </button>
+            </div>
+          </Disclosure>
+
+          <Disclosure id="more-goals" title="My goals" hint="The things you want to focus on">
+            {/* My Wellness Focus Goals */}
+            <div className="mb-card">
+              <div className="mb-4 flex items-center justify-between gap-2 border-b border-[color:var(--mb-line)] pb-3">
+                <h2 className="flex items-center gap-2 text-2xl font-bold text-[color:var(--mb-ink)]">
+                  <Target className="h-5 w-5 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                  <span>My goals</span>
+                </h2>
+                <Link
+                  to="/settings"
+                  className="inline-flex min-h-[44px] min-w-[44px] items-center justify-end font-bold text-[color:var(--mb-brand)] underline"
+                >
+                  Edit
+                </Link>
+              </div>
+
+              {Array.isArray(userData?.wellnessGoals) && userData.wellnessGoals.length > 0 ? (
+                <ul className="space-y-2">
+                  {userData.wellnessGoals.map((goal) => (
+                    <li key={goal} className="flex items-center gap-2 mb-tile mb-tile-sm text-[color:var(--mb-ink)]">
+                      <Check className="h-4 w-4 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                      <span>{goal}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="rounded-md border border-dashed border-[color:var(--mb-line)] p-4 text-center text-[color:var(--mb-muted)]">
+                  <p>No goals chosen yet.</p>
+                  <Link
+                    to="/settings"
+                    className="inline-flex min-h-[44px] items-center font-bold text-[color:var(--mb-brand)] underline"
+                  >
+                    Pick your goals
+                  </Link>
+                </div>
+              )}
+            </div>
+          </Disclosure>
         </aside>
       </div>
 

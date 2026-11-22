@@ -121,3 +121,9 @@ export async function completeCheckIn(page: Page, scores: number[]): Promise<voi
     await checkIn.getByRole("button", { name: last ? "Submit check-in" : /^Next/ }).click();
   }
 }
+
+/** Opens every collapsed "More for you" section on the student dashboard, so tests can reach what is inside. */
+export async function expandAll(page: Page): Promise<void> {
+  await page.locator("details").first().waitFor({ state: "attached" });
+  await page.locator("details").evaluateAll((els) => els.forEach((el) => ((el as HTMLDetailsElement).open = true)));
+}
