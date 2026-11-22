@@ -47,17 +47,7 @@ import type { Appointment, EmergencyContact, FieldErrors } from "../../types";
 import { formatDateTime } from "../../utils/dates";
 import { appointmentPhase } from "../../utils/appointmentLifecycle";
 import { pagePreset, useMotionPreset } from "../../lib/motion";
-
-const PRESET_GOALS = [
-  "Manage academic stress and burnout",
-  "Improve sleep quality and habits",
-  "Build daily mindfulness and focus",
-  "Overcome social anxiety and isolation",
-  "Keep a healthy work-life balance",
-  "Boost self-esteem and confidence",
-  "Develop healthy ways to cope with emotions",
-  "Improve how I communicate with others",
-];
+import { PRESET_GOALS } from "../../lib/goals";
 
 type TabId = "profile" | "appearance" | "password" | "privacy" | "emergency" | "goals" | "sessions";
 
