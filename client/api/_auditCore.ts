@@ -1,12 +1,15 @@
 /** Logic of POST /api/audit-log, with every outside call injected so it can be tested without Firebase. */
 
-export const AUDIT_ACTIONS = [
+export const STAFF_ACTIONS = [
   "case_viewed",
   "case_updated",
   "assignment_changed",
   "appointment_updated",
   "report_exported",
 ] as const;
+
+/** What a student's own activity can record. `detail` carries progress only, never the answers. */
+export const STUDENT_ACTIONS = ["checkin_abandoned", "checkin_submitted", "appointment_booked", "appointment_cancelled"] as const;
 
 export interface AuditUser {
   role?: string;
@@ -39,8 +42,8 @@ const respond = (status: number, error?: string): AuditResult => ({
 });
 
 /** Same staff test as firestore.rules: an active admin, or an approved peer facilitator (stored role "counselor"). */
-const isStaff = (u: AuditUser | null): u is AuditUser =>
-  !!u && u.active !== false && (u.role === "admin" || (u.role === "counselor" && u.approved === true));
+const isStaff = (u: AuditUser): boolean =>
+  u.active !== false && (u.role === "admin" || (u.role === "counselor" && u.approved === true));
 
 const text = (v: unknown, max: number): string | null => (typeof v === "string" && v.length <= max ? v : null);
 
@@ -57,13 +60,20 @@ export async function handleAudit(req: AuditRequest, deps: AuditDeps): Promise<A
   }
 
   const user = await deps.getUser(uid);
-  if (!isStaff(user)) return respond(403, "Not allowed");
+  if (!user || user.active === false) return respond(403, "Not allowed");
+  // Staff record what they did to a case; a student records only their own activity. Anyone else is refused.
+  const allowed: readonly string[] = isStaff(user)
+    ? STAFF_ACTIONS
+    : user.role === undefined || user.role === "student"
+      ? STUDENT_ACTIONS
+      : [];
+  if (allowed.length === 0) return respond(403, "Not allowed");
 
   const body = (req.body ?? {}) as Record<string, unknown>;
   const action = typeof body["action"] === "string" ? body["action"] : "";
   const targetId = text(body["targetId"], 100);
   const detail = text(body["detail"], 300);
-  if (!(AUDIT_ACTIONS as readonly string[]).includes(action) || targetId === null || detail === null) {
+  if (!allowed.includes(action) || targetId === null || detail === null) {
     return respond(400, "action, targetId and detail are required");
   }
 

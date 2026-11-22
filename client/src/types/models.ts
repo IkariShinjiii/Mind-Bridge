@@ -159,7 +159,11 @@ export type AuditAction =
   | "case_updated"
   | "assignment_changed"
   | "appointment_updated"
-  | "report_exported";
+  | "report_exported"
+  | "checkin_abandoned"
+  | "checkin_submitted"
+  | "appointment_booked"
+  | "appointment_cancelled";
 
 /** Document in `auditLog/{id}`: one staff action on a case or a student assignment. */
 export interface AuditEntry {

@@ -56,7 +56,7 @@ const snap = (rows: Array<[string, Row]>) => {
   return { docs, forEach: (fn: (d: (typeof docs)[number]) => void) => docs.forEach(fn) };
 };
 const signIn = (user: Row | null) => {
-  h.user = user;
+  h.user = user && { getIdToken: async () => "tok", ...user };
 };
 const ana = { uid: "stu1", displayName: "Ana Student", email: "ana@usa.edu.ph" };
 const lastWrite = (fn: Mock<AnyFn>) => fn.mock.calls.at(-1)!;
@@ -73,10 +73,15 @@ beforeEach(() => {
   fs.updateDoc.mockResolvedValue(undefined);
   fs.deleteDoc.mockResolvedValue(undefined);
   signIn(ana);
+  // Activity is logged through the server route; stub it so these tests only see the writes they are about.
+  vi.stubEnv("VITE_AUDIT_SERVER", "true");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({}));
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -167,6 +172,7 @@ describe("submitResponse", () => {
     beforeEach(() => {
       fetchMock.mockReset().mockResolvedValue({ ok: true });
       vi.stubGlobal("fetch", fetchMock);
+      vi.stubEnv("VITE_AUDIT_SERVER", "false"); // keep the activity log out of the fetch calls counted below
       signIn({ ...ana, getIdToken: async () => "tok" });
     });
     afterEach(() => {
@@ -823,5 +829,20 @@ describe("messages", () => {
       expect(unsub()).toBeUndefined();
       expect(console.error).toHaveBeenCalled();
     });
+  });
+});
+
+describe("activity log", () => {
+  const sent = () =>
+    (fetch as unknown as Mock<AnyFn>).mock.calls.map(([url, init]) => ({
+      url,
+      body: JSON.parse((init as { body: string }).body) as Record<string, string>,
+    }));
+
+  it("a booking is logged through the server route, without writing to Firestore from the browser", async () => {
+    await api.bookAppointment({ id: "s1", counselorId: "c1", start: "2026-10-03T09:00", end: "2026-10-03T10:00" });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sent()).toEqual([{ url: "/api/audit-log", body: { action: "appointment_booked", targetId: "newDoc1", detail: "session requested" } }]);
+    expect(fs.addDoc).not.toHaveBeenCalled();
   });
 });
