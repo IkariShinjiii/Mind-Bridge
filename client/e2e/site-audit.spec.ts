@@ -12,6 +12,8 @@ const STAFF_PAGES = ["/admin/dashboard", "/appointments", "/settings"];
 async function audit(page: Page, path: string) {
   await page.goto(path);
   await expect(page.getByRole("main")).toBeVisible();
+  // Content inside a closed <details> has no rendered text, so open them to audit what a student can reach.
+  await page.locator("details").evaluateAll((els) => els.forEach((el) => ((el as HTMLDetailsElement).open = true)));
   const found = await page.evaluate(() => {
     const doc = document.documentElement;
     const unnamed = [...document.querySelectorAll("a, button, [role=button]")]

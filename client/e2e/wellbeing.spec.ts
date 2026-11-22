@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, readCollection, logIn, STUDENT, PEER_FACILITATOR } from "./helpers";
+import { seed, readCollection, logIn, STUDENT, PEER_FACILITATOR, expandAll } from "./helpers";
 
 async function answerAll(page: import("@playwright/test").Page, label: string) {
   const card = page.getByRole("region", { name: "Wellbeing" });
@@ -17,6 +17,7 @@ test.describe("WHO-5 wellbeing", () => {
   }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
     const card = await answerAll(page, "More than half of the time"); // 3 each: raw 15, score 60
 
     await expect(card.getByText("60", { exact: false }).first()).toBeVisible();
@@ -31,6 +32,7 @@ test.describe("WHO-5 wellbeing", () => {
   test("a low score says so gently and offers a peer facilitator, without calling it a diagnosis", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
     const card = await answerAll(page, "Some of the time"); // 1 each: score 20
     await expect(card.getByText(/under 50 suggests things have felt low/)).toBeVisible();
     await expect(card.getByRole("link", { name: "Book a peer facilitator" })).toBeVisible();
@@ -39,6 +41,7 @@ test.describe("WHO-5 wellbeing", () => {
   test("it will not save until every statement is answered", async ({ page }) => {
     await seed(page);
     await logIn(page, STUDENT);
+    await expandAll(page);
     const card = page.getByRole("region", { name: "Wellbeing" });
     await card.getByRole("button", { name: /Answer/ }).click();
     await card.getByRole("button", { name: "Save my wellbeing score" }).click();

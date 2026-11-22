@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { seed, logIn, STUDENT } from "./helpers";
+import { seed, logIn, STUDENT, expandAll } from "./helpers";
 
 const checkIn = (total: number, riskLevel: string, createdAt: string) => ({
   studentId: STUDENT.uid,
@@ -33,6 +33,7 @@ test("the dashboard treats the newest check-in as the latest, and the trend card
   });
   await logIn(page, STUDENT);
   await page.goto("/student/dashboard");
+  await expandAll(page);
 
   await expect(page.getByText("14 / 21")).toBeVisible();
 
@@ -50,6 +51,7 @@ test("an old latest check-in gets a gentle nudge in the welcome text", async ({ 
   await seed(page, { docs: { assessments: { a1: checkIn(5, "low", days(30)) } } });
   await logIn(page, STUDENT);
   await page.goto("/student/dashboard");
+  await expandAll(page);
   await expect(page.getByText(/Your last check-in was 4 weeks ago/)).toBeVisible();
 });
 
@@ -58,6 +60,7 @@ test("a recent check-in keeps the usual welcome text", async ({ page }) => {
   await seed(page, { docs: { assessments: { a1: checkIn(5, "low", days(3)) } } });
   await logIn(page, STUDENT);
   await page.goto("/student/dashboard");
+  await expandAll(page);
   await expect(page.getByText(/How are you feeling today/)).toBeVisible();
   await expect(page.getByText(/Your last check-in was/)).toHaveCount(0);
 });
