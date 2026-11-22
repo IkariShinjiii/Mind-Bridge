@@ -1,6 +1,6 @@
 import { describe, it, beforeAll, afterAll, beforeEach } from "vitest";
 import { assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
-import { doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where } from "firebase/firestore";
+import { doc, getDoc, getDocs, addDoc, setDoc, deleteField, updateDoc, deleteDoc, collection, query, where } from "firebase/firestore";
 import { createEnv, seedUsers, seed, as, anon, noProfile, assessment } from "../helpers/env.js";
 
 let env;
@@ -108,8 +108,12 @@ describe("assessments - UPDATE (updateAssessmentStatus)", () => {
       await assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { status, reviewedAt: "2026-10-02T00:00:00.000Z" }));
     }
   });
-  it("staff can save notes on their own", () =>
-    assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { counselorNotes: "called the student" })));
+  it("staff can no longer write notes onto the check-in itself (they go to /caseNotes)", () =>
+    assertFails(updateDoc(doc(as(env, "counselor"), "assessments/a1"), { counselorNotes: "called the student" })));
+  it("staff can remove a legacy notes field from a check-in", async () => {
+    await seed(env, "assessments/a3", assessment({ counselorNotes: "old note" }));
+    await assertSucceeds(updateDoc(doc(as(env, "counselor"), "assessments/a3"), { counselorNotes: deleteField() }));
+  });
   it("staff can set, change and clear a follow-up date", async () => {
     const ref = () => doc(as(env, "counselor"), "assessments/a1");
     await assertSucceeds(updateDoc(ref(), { followUpDate: "2026-11-03" }));

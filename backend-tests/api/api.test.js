@@ -54,7 +54,7 @@ describe("assessments", () => {
     const r = await api.submitResponse([0, 1, 0, 1, 0, 0, 0], { questions });
     expect(r).toMatchObject({
       id: expect.any(String), studentId: "stu1", studentName: "Ana Student", studentEmail: "ana@usa.edu.ph",
-      total: 2, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false, status: "open", counselorNotes: "",
+      total: 2, maxScore: 21, riskLevel: "low", flaggedForImmediateReview: false, status: "open",
     });
     expect(r.questionSummary).toHaveLength(7);
     expect(r.questionSummary[6]).toEqual({ id: "q7", text: "Safety", score: 0, isCrisisItem: true });
