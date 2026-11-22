@@ -14,6 +14,7 @@ import {
   Check,
   LifeBuoy,
   Phone,
+  Wind,
   Printer,
 } from "lucide-react";
 import { m, AnimatePresence } from "framer-motion";
@@ -34,6 +35,7 @@ import {
   getAvailability,
   getMyAssessments,
   logAudit,
+  saveUserSettings,
 } from "../../lib/api";
 import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../../components/ui/Spinner";
@@ -49,8 +51,8 @@ import { FULL_QUESTIONS } from "../../lib/fullQuestions";
 import WellbeingCheck from "../../components/student/WellbeingCheck";
 import BreathingPacer from "../../components/student/BreathingPacer";
 import ReferralCard from "../../components/student/ReferralCard";
-import StudentOnboarding from "../../components/student/StudentOnboarding";
-import FirstSteps from "../../components/student/FirstSteps";
+import OnboardingGuide, { guideHiddenKey, readFlag, tourSeenKey } from "../../components/student/OnboardingGuide";
+import { guideMode, returningOrder } from "../../lib/onboardingScript";
 import Disclosure from "../../components/ui/Disclosure";
 import FourPillars from "../../components/student/FourPillars";
 import RelaxationLibrary from "../../components/student/RelaxationLibrary";
@@ -162,7 +164,7 @@ function openSection(id: string): void {
 }
 
 export default function StudentDashboard() {
-  const { currentUser, userData } = useAuth();
+  const { currentUser, userData, refreshUserData } = useAuth();
   const userName = userData?.name || currentUser?.displayName || "Student";
   const displayName = firstName(userName, "Student");
 
@@ -461,6 +463,15 @@ export default function StudentDashboard() {
     .sort((a, b) => new Date(a.start || a.date || 0).getTime() - new Date(b.start || b.date || 0).getTime())[0];
 
   // Assigned Peer Facilitator info
+  const returning = !loadingHistory && pastAssessments.length > 0;
+  const guide = currentUser
+    ? guideMode({
+        loading: loadingHistory,
+        checkIns: pastAssessments.length,
+        tourSeen: readFlag(tourSeenKey(currentUser.uid)),
+        hidden: readFlag(guideHiddenKey(currentUser.uid)),
+      })
+    : "none";
   const assignedCounselorName =
     userData?.assignedCounselorName || appointments[0]?.counselorName || "USA Peer Facilitator";
 
@@ -483,10 +494,6 @@ export default function StudentDashboard() {
       )}
 
       <SessionReminder appointments={appointments} role="student" />
-      <StudentOnboarding
-        uid={currentUser?.uid}
-        onStart={() => document.getElementById("checkin-h")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-      />
 
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 rounded-xl border border-[color:var(--mb-line)] bg-[color:var(--mb-brand-bg)] p-5 sm:p-6 xl:flex-row xl:items-end xl:justify-between">
@@ -498,12 +505,27 @@ export default function StudentDashboard() {
           </p>
         </div>
         {/* Below lg the bottom bar already carries both, so they would only push the check-in off the first screen. */}
-        <div className="hidden gap-3 lg:flex">
-          <Link to="/appointments" className="mb-btn mb-btn-line">
-            <Calendar className="h-5 w-5" aria-hidden="true" />
-            My appointments
-          </Link>
-          <Link to="/resources" className="mb-btn mb-btn-line">
+        <div className="flex flex-wrap gap-3">
+          {returning ? (
+            returningOrder(latestRisk).map((k) =>
+              k === "talk" ? (
+                <button key={k} type="button" className="mb-btn mb-btn-line" onClick={() => setChatOpen(true)}>
+                  <MessageSquare className="h-5 w-5" aria-hidden="true" />
+                  Talk to someone
+                </button>
+              ) : (
+                <button key={k} type="button" className="mb-btn mb-btn-line" onClick={() => openSection("more-relax")}>
+                  <Wind className="h-5 w-5" aria-hidden="true" />A calm moment
+                </button>
+              ),
+            )
+          ) : (
+            <Link to="/appointments" className="mb-btn mb-btn-line hidden lg:inline-flex">
+              <Calendar className="h-5 w-5" aria-hidden="true" />
+              My appointments
+            </Link>
+          )}
+          <Link to="/resources" className="mb-btn mb-btn-line hidden lg:inline-flex">
             <LifeBuoy className="h-5 w-5" aria-hidden="true" />
             Crisis resources
           </Link>
@@ -513,14 +535,21 @@ export default function StudentDashboard() {
       {/* Main 2-Column Dashboard Grid */}
       <div className="flex flex-col gap-6 xl:flex-row items-start">
         <section className="xl:w-2/3 flex flex-col gap-6 w-full">
-          {!loadingHistory && pastAssessments.length === 0 && (
-            <FirstSteps
-              uid={currentUser?.uid}
+          {currentUser && guide !== "none" && !surveyCompleted && (
+            <OnboardingGuide
+              uid={currentUser.uid}
+              name={displayName}
+              facilitator={assignedCounselorName}
+              mode={guide}
+              hasGoals={Array.isArray(userData?.wellnessGoals) && userData.wellnessGoals.length > 0}
               onCheckIn={() =>
                 document.getElementById("checkin-h")?.scrollIntoView({ behavior: "smooth", block: "start" })
               }
-              onRelax={() => openSection("more-relax")}
               onMessage={() => setChatOpen(true)}
+              onSaveGoals={async (goals) => {
+                await saveUserSettings(undefined, { wellnessGoals: goals, updatedAt: new Date().toISOString() });
+                await refreshUserData();
+              }}
             />
           )}
 
