@@ -136,7 +136,7 @@ export default function DashboardLayout({ children }: { children?: ReactNode }) 
           <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
             <Link
               to="/"
-              className="flex min-h-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
+              className="flex min-h-[44px] min-w-[44px] shrink-0 items-center gap-3 text-[color:var(--mb-ink)] no-underline"
             >
               <Logo className="h-8 w-8 rounded-md" />
               <span className="mb-sign whitespace-nowrap text-2xl font-bold max-[379px]:sr-only">Mind Bridge</span>
