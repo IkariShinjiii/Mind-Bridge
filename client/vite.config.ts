@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
   server: { port: 5173 },
   resolve: {
     alias:
-      mode === "e2e"
+      mode === "e2e" || mode === "devtools"
         ? [
             { find: /^firebase\/app$/, replacement: fake("firebase-app") },
             { find: /^firebase\/auth$/, replacement: fake("firebase-auth") },

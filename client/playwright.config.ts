@@ -6,6 +6,7 @@ const PORT = 5174;
 // (see e2e/fakes). Nothing here talks to the real Firebase project.
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: "devtools.spec.ts", // needs `npm run dev:tools`, run separately
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

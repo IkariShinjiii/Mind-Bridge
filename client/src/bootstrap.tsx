@@ -38,3 +38,11 @@ ReactDOM.createRoot(container).render(
 );
 
 registerServiceWorker();
+
+if (import.meta.env.MODE === "devtools") {
+  void import("./devtools/DevPanel").then(({ default: DevPanel }) => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    ReactDOM.createRoot(host).render(<DevPanel />);
+  });
+}

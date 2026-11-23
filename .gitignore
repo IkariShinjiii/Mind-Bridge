@@ -38,3 +38,6 @@ client/.preview/
 .env.*
 !.env.example
 graphify-out/
+
+# Dummy values for the dev-tools build (fake Firebase, no secrets)
+!.env.devtools
