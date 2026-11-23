@@ -9,7 +9,12 @@ export const STAFF_ACTIONS = [
 ] as const;
 
 /** What a student's own activity can record. `detail` carries progress only, never the answers. */
-export const STUDENT_ACTIONS = ["checkin_abandoned", "checkin_submitted", "appointment_booked", "appointment_cancelled"] as const;
+export const STUDENT_ACTIONS = [
+  "checkin_abandoned",
+  "checkin_submitted",
+  "appointment_booked",
+  "appointment_cancelled",
+] as const;
 
 export interface AuditUser {
   role?: string;

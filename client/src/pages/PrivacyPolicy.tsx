@@ -57,8 +57,8 @@ export default function PrivacyPolicy() {
                 </li>
                 <li>
                   <strong>Activity log:</strong> A record, visible only to administrators, of when you submit a
-                  check-in, leave one unfinished (how many questions you had answered, never what you answered), or
-                  book or cancel a session, and of what staff do with cases and assignments.
+                  check-in, leave one unfinished (how many questions you had answered, never what you answered), or book
+                  or cancel a session, and of what staff do with cases and assignments.
                 </li>
               </ul>
             </section>

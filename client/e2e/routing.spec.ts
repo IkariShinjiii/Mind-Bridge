@@ -11,7 +11,9 @@ test.describe("Routing", () => {
     await expect(page.getByText(/not found|404|can.t find/i).first()).toBeVisible();
   });
 
-  test("the old /peer-facilitator/dashboard address lands peer facilitators on the staff dashboard", async ({ page }) => {
+  test("the old /peer-facilitator/dashboard address lands peer facilitators on the staff dashboard", async ({
+    page,
+  }) => {
     await seed(page);
     await logIn(page, PEER_FACILITATOR);
     await expect(page.getByRole("heading", { name: "Staff dashboard" })).toBeVisible();

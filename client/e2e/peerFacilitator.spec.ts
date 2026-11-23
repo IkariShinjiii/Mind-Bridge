@@ -41,7 +41,9 @@ const lowCase = {
 };
 
 test.describe("Peer Facilitator accessing student data", () => {
-  test("a check-in submitted by a student shows up for the peer facilitator with the student's details", async ({ page }) => {
+  test("a check-in submitted by a student shows up for the peer facilitator with the student's details", async ({
+    page,
+  }) => {
     await seed(page);
 
     await logIn(page, STUDENT);

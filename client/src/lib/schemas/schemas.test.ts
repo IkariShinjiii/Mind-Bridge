@@ -131,9 +131,9 @@ describe("peer facilitator forms", () => {
     );
   });
   it("assignment allows clearing the peer facilitator with null", () => {
-    expect(validate(peerFacilitatorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok).toBe(
-      true,
-    );
+    expect(
+      validate(peerFacilitatorAssignmentSchema, { studentId: "s1", counselorId: null, counselorName: null }).ok,
+    ).toBe(true);
     expect(validate(peerFacilitatorAssignmentSchema, { studentId: "", counselorId: "c1", counselorName: "A" }).ok).toBe(
       false,
     );

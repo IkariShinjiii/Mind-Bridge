@@ -425,7 +425,10 @@ describe("bookAppointment", () => {
     expect(fs.updateDoc).not.toHaveBeenCalled();
     const [batch] = h.batches;
     expect(batch!.updates).toEqual([
-      [{ kind: "doc", col: "availability", id: "s1" }, { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "newDoc1" }],
+      [
+        { kind: "doc", col: "availability", id: "s1" },
+        { isBooked: true, bookedBy: "stu1", bookedAppointmentId: "newDoc1" },
+      ],
     ]);
     expect(batch!.sets[0]![0]).toEqual({ kind: "doc", col: "appointments", id: "newDoc1" });
     expect(batch!.sets[0]![1]).toEqual({
@@ -708,14 +711,17 @@ describe("user settings and assignment", () => {
     ]);
   });
 
-  it.each([[null], [undefined], [""]])("assignPeerFacilitatorToStudent clears everything for counselorId %j", async (id) => {
-    await api.assignPeerFacilitatorToStudent("stu1", id, "ignored name");
-    expect(lastWrite(fs.updateDoc)[1]).toEqual({
-      assignedCounselorId: null,
-      assignedCounselorName: "ignored name",
-      assignedAt: null,
-    });
-  });
+  it.each([[null], [undefined], [""]])(
+    "assignPeerFacilitatorToStudent clears everything for counselorId %j",
+    async (id) => {
+      await api.assignPeerFacilitatorToStudent("stu1", id, "ignored name");
+      expect(lastWrite(fs.updateDoc)[1]).toEqual({
+        assignedCounselorId: null,
+        assignedCounselorName: "ignored name",
+        assignedAt: null,
+      });
+    },
+  );
 });
 
 describe("messages", () => {
@@ -867,7 +873,12 @@ describe("activity log", () => {
   it("a booking is logged through the server route, without writing to Firestore from the browser", async () => {
     await api.bookAppointment({ id: "s1", counselorId: "c1", start: "2026-10-03T09:00", end: "2026-10-03T10:00" });
     await vi.advanceTimersByTimeAsync(0);
-    expect(sent()).toEqual([{ url: "/api/audit-log", body: { action: "appointment_booked", targetId: "newDoc1", detail: "session requested" } }]);
+    expect(sent()).toEqual([
+      {
+        url: "/api/audit-log",
+        body: { action: "appointment_booked", targetId: "newDoc1", detail: "session requested" },
+      },
+    ]);
     expect(fs.addDoc).not.toHaveBeenCalled();
   });
 });
