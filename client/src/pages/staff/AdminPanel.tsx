@@ -188,7 +188,7 @@ function ScheduleCard({ appointments }: { appointments: Appointment[] }) {
               aria-pressed={active}
               // WCAG 2.5.3: the name starts with the visible text ("Mon 12") so voice control matches it.
               aria-label={`${d.toLocaleDateString([], { weekday: "short" })} ${d.getDate()}, ${d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}`}
-              className={`flex min-h-[44px] flex-col items-center justify-center rounded-lg text-sm font-bold transition-colors ${
+              className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-lg text-sm font-bold transition-colors ${
                 active
                   ? "bg-[color:var(--mb-panel)] text-[color:var(--mb-panel-ink)]"
                   : "text-[color:var(--mb-ink)] hover:bg-[color:var(--mb-brand-bg)]"

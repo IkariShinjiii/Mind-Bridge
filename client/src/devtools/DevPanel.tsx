@@ -58,7 +58,7 @@ export default function DevPanel() {
   const btn = "block w-full rounded border border-neutral-500 px-2 py-1 text-left text-xs hover:bg-neutral-200";
   return (
     <div
-      style={{ position: "fixed", left: 8, bottom: 8, zIndex: 99999, font: "12px system-ui" }}
+      style={{ position: "fixed", left: 8, bottom: 88, zIndex: 99999, font: "12px system-ui" }}
       data-testid="dev-panel"
     >
       <button onClick={() => setOpen(!open)} className="rounded bg-black px-2 py-1 text-white" aria-expanded={open}>
