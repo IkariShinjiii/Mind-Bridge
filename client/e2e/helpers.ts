@@ -77,11 +77,11 @@ export async function seed(
       // The first-visit student tour would cover the page under test; `tour: true` leaves it on.
       for (const uid of skipTourFor) localStorage.setItem(`mindbridge_onboarded_${uid}`, "1");
     },
-    [
-      STORAGE_KEY,
-      JSON.stringify(state),
-      tour ? [] : [STUDENT, PEER_FACILITATOR, ...accounts].map((u) => u.uid),
-    ] as [string, string, string[]],
+    [STORAGE_KEY, JSON.stringify(state), tour ? [] : [STUDENT, PEER_FACILITATOR, ...accounts].map((u) => u.uid)] as [
+      string,
+      string,
+      string[],
+    ],
   );
 }
 

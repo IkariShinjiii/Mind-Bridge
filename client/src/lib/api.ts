@@ -318,15 +318,21 @@ export const updateAssessmentStatus = (
       updates["counselorNotes"] = deleteField(); // drops any note an older version stored on the check-in itself
     }
     batch.update(doc(db, "assessments", id), updates);
-    return batch.commit().then(() =>
-      logAudit(
-        "case_updated",
-        id,
-        [`status ${status}`, counselorNotes !== undefined && "notes saved", followUpDate !== undefined && "follow-up set"]
-          .filter(Boolean)
-          .join(", "),
-      ),
-    );
+    return batch
+      .commit()
+      .then(() =>
+        logAudit(
+          "case_updated",
+          id,
+          [
+            `status ${status}`,
+            counselorNotes !== undefined && "notes saved",
+            followUpDate !== undefined && "follow-up set",
+          ]
+            .filter(Boolean)
+            .join(", "),
+        ),
+      );
   });
 
 // --- APPOINTMENTS ---
@@ -399,7 +405,11 @@ const createAppointment = (slot?: BookingSlot): Promise<DocumentReference<Docume
     const appointmentRef = doc(collection(db, "appointments"));
     const batch = writeBatch(db);
     batch.set(appointmentRef, appointmentData);
-    batch.update(doc(db, "availability", slot.id), { isBooked: true, bookedBy: uid, bookedAppointmentId: appointmentRef.id });
+    batch.update(doc(db, "availability", slot.id), {
+      isBooked: true,
+      bookedBy: uid,
+      bookedAppointmentId: appointmentRef.id,
+    });
     await batch.commit();
     return appointmentRef;
   });
@@ -487,7 +497,11 @@ export const updateAppointmentStatus = (
       // Freeing the slot and closing the appointment are one batch; the rules let a student free a slot only
       // together with cancelling their own appointment for it.
       const batch = writeBatch(db);
-      batch.update(doc(db, "availability", extraData.slotId), { isBooked: false, bookedBy: null, bookedAppointmentId: null });
+      batch.update(doc(db, "availability", extraData.slotId), {
+        isBooked: false,
+        bookedBy: null,
+        bookedAppointmentId: null,
+      });
       batch.update(doc(db, "appointments", id), updates);
       try {
         await batch.commit();
@@ -584,7 +598,11 @@ export const assignPeerFacilitatorToStudent = (
       assignedCounselorName: counselorName || null,
       assignedAt: counselorId ? new Date().toISOString() : null,
     }).then(() =>
-      logAudit("assignment_changed", studentId, counselorId ? `assigned to ${counselorName ?? counselorId}` : "assignment removed"),
+      logAudit(
+        "assignment_changed",
+        studentId,
+        counselorId ? `assigned to ${counselorName ?? counselorId}` : "assignment removed",
+      ),
     ),
   );
 

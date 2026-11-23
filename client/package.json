@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tools": "vite --mode devtools --port 5175 --strictPort",
     "build": "node scripts/check-firebase-env.mjs && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",

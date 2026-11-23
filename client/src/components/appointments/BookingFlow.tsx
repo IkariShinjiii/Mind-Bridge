@@ -58,7 +58,8 @@ export default function BookingFlow({ slots, loading, bookingId, onBook, onCance
   const itemMotion = noMotion ? {} : { variants: staggerChild };
 
   const single = peerFacilitators.length === 1;
-  const peerFacilitator = peerFacilitators.find((c) => c.key === peerFacilitatorKey) || (single ? peerFacilitators[0] : null);
+  const peerFacilitator =
+    peerFacilitators.find((c) => c.key === peerFacilitatorKey) || (single ? peerFacilitators[0] : null);
   const step = chosen ? 3 : peerFacilitator ? 2 : 1;
 
   const days = useMemo(() => {

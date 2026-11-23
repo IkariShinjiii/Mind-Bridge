@@ -24,7 +24,10 @@ const peer = { role: "counselor", approved: true, active: true, name: "Dr. Cruz"
 describe("handleAudit", () => {
   it("records the entry with the actor and time taken from the server", async () => {
     const { d, added } = deps(peer);
-    const r = await handleAudit(req({ body: { action: "case_viewed", targetId: "a1", detail: "Ana", actorId: "evil", at: "x" } }), d);
+    const r = await handleAudit(
+      req({ body: { action: "case_viewed", targetId: "a1", detail: "Ana", actorId: "evil", at: "x" } }),
+      d,
+    );
     expect(r).toEqual({ status: 200, body: { logged: true } });
     expect(added[0]).toMatchObject({ actorId: "u1", actorName: "Dr. Cruz", action: "case_viewed", targetId: "a1" });
     expect(added[0]?.["at"]).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -35,7 +38,9 @@ describe("handleAudit", () => {
   it("lets a student record their own activity, but not a staff action", async () => {
     const { d, added } = deps({ role: "student", name: "Ana" });
     const ok = await handleAudit(
-      req({ body: { action: "checkin_abandoned", targetId: "u1", detail: "answered 3 of 7 (quick check-in), not finished" } }),
+      req({
+        body: { action: "checkin_abandoned", targetId: "u1", detail: "answered 3 of 7 (quick check-in), not finished" },
+      }),
       d,
     );
     expect(ok.status).toBe(200);

@@ -34,8 +34,8 @@ export default function AuditLogCard() {
         Audit log
       </h2>
       <p className="mt-1 max-w-[65ch] text-[color:var(--mb-muted)]">
-        What staff did with cases, sessions and assignments, and what students did with check-ins and bookings (progress only, never their answers). The 200 most recent entries; entries cannot be edited or
-        deleted.
+        What staff did with cases, sessions and assignments, and what students did with check-ins and bookings (progress
+        only, never their answers). The 200 most recent entries; entries cannot be edited or deleted.
       </p>
       {failed ? (
         <LoadError message="The audit log could not load." onRetry={load} />
@@ -51,10 +51,18 @@ export default function AuditLogCard() {
             <caption className="sr-only">Recent staff actions on cases</caption>
             <thead>
               <tr className="border-b border-[color:var(--mb-line)]">
-                <th scope="col" className="py-2 pr-4">When</th>
-                <th scope="col" className="py-2 pr-4">Who</th>
-                <th scope="col" className="py-2 pr-4">Action</th>
-                <th scope="col" className="py-2">Detail</th>
+                <th scope="col" className="py-2 pr-4">
+                  When
+                </th>
+                <th scope="col" className="py-2 pr-4">
+                  Who
+                </th>
+                <th scope="col" className="py-2 pr-4">
+                  Action
+                </th>
+                <th scope="col" className="py-2">
+                  Detail
+                </th>
               </tr>
             </thead>
             <tbody>
