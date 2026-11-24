@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../AuthProvider";
-import PublicShell, { Brand, CrisisStrip } from "./PublicShell";
+import PublicShell, { Brand, CrisisLink } from "./PublicShell";
 
-/** Header, crisis strip and footer around every public page. Rendered signed-out. */
+/** Header (with the crisis line) and footer around every public page. Rendered signed-out. */
 const meta = {
   title: "Layout/PublicShell",
   component: PublicShell,
@@ -57,7 +57,7 @@ export const BrandSizes: Story = {
   parameters: { layout: "padded" },
 };
 
-export const CrisisBanner: Story = {
-  render: () => <CrisisStrip />,
+export const CrisisLinkInHeader: Story = {
+  render: () => <CrisisLink />,
   parameters: { layout: "padded" },
 };
