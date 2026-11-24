@@ -69,7 +69,7 @@ export default function HomePage() {
   return (
     <PublicShell>
       {/* THESIS: a first-time visitor sees the route to help as a signposted path, not a pitch.
-          OWN-WORLD: hospital-style wayfinding; teal signage plates, amber for urgent exits only, Barlow numerals.
+          OWN-WORLD: hospital-style wayfinding; crimson signage numbers on quiet plates, amber for the crisis line only, Barlow numerals.
           STORY: you are here, four stops to a peer facilitator, and the crisis line is always one tap away.
           FIRST VIEWPORT: amber crisis strip, headline and two actions left, four-stop route board right.
           FORM: calm wayfinding (assigned roll, seed ea2f1600). */}
@@ -105,7 +105,7 @@ export default function HomePage() {
               y1="0"
               x2="2"
               y2="100"
-              stroke="var(--mb-amber)"
+              stroke="var(--mb-accent)"
               strokeWidth="4"
               vectorEffect="non-scaling-stroke"
               initial={noMotion ? false : { pathLength: 0 }}
@@ -116,22 +116,23 @@ export default function HomePage() {
           {STOPS.map(({ n, icon: Icon, title, body }, i) => (
             <m.li
               key={n}
-              className="mb-stop mb-plate relative flex items-start gap-4 p-4"
+              className="mb-stop mb-card mb-card-sm relative flex items-start gap-4"
               initial={noMotion ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease, delay: 0.15 + i * 0.3 }}
             >
               <span
-                className="mb-sign grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel-ink)] text-3xl font-bold text-[color:var(--mb-panel)]"
+                className="mb-sign grid h-12 w-12 shrink-0 place-items-center rounded bg-[color:var(--mb-panel)] text-3xl font-bold text-[color:var(--mb-panel-ink)]"
                 aria-hidden="true"
               >
                 {n}
               </span>
               <div className="min-w-0">
                 <h2 className="mb-sign text-2xl font-bold">
-                  {title} <Icon className="inline h-5 w-5 align-[-0.1em] opacity-80" aria-hidden="true" />
+                  {title}{" "}
+                  <Icon className="inline h-5 w-5 align-[-0.1em] text-[color:var(--mb-brand)]" aria-hidden="true" />
                 </h2>
-                <p className="text-[color:var(--mb-panel-soft)]">{body}</p>
+                <p className="text-[color:var(--mb-muted)]">{body}</p>
               </div>
             </m.li>
           ))}

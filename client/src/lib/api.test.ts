@@ -39,7 +39,7 @@ vi.mock("firebase/firestore", () => ({
   onSnapshot: vi.fn(),
 }));
 vi.mock("firebase/auth", () => ({ getAuth: () => ({ currentUser: h.user }) }));
-vi.mock("./firebase", () => ({ db: { fake: true } }));
+vi.mock("./db", () => ({ db: { fake: true } }));
 
 type FirestoreMocks = Record<
   "getDocs" | "getDoc" | "setDoc" | "addDoc" | "updateDoc" | "deleteDoc" | "onSnapshot",

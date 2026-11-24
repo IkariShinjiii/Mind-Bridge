@@ -184,7 +184,7 @@
 
 /* ── Surfaces ─────────────────────────────────────────────────────────────── */
 
-/* Signage plate: the teal statement panel. Soft corners, a faint light wash for depth. */
+/* Signage plate: the crimson statement panel. Soft corners, a faint light wash for depth. */
 .mb-plate {
   position: relative;
   background:
@@ -275,7 +275,7 @@
   color: var(--mb-brand);
 }
 
-/* Filter / choice pill (aria-pressed). Selected is a filled teal pill. */
+/* Filter / choice pill (aria-pressed). Selected is a filled crimson pill. */
 .mb-chip {
   display: inline-flex;
   align-items: center;
@@ -375,7 +375,7 @@
   transform: none;
 }
 
-/* Primary: filled teal */
+/* Primary: filled crimson */
 .mb-btn-solid {
   background: var(--mb-panel);
   color: var(--mb-panel-ink);
