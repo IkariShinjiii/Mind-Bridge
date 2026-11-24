@@ -75,14 +75,14 @@ export default function HomePage() {
           FORM: calm wayfinding (assigned roll, seed ea2f1600). */}
       <section className="grid w-full gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-16">
         <div>
-          <h1 className="mb-sign text-5xl font-bold leading-[1.05] sm:text-6xl lg:text-7xl [text-wrap:balance]">
+          <h1 className="mb-sign text-[2.5rem] font-bold leading-[1.05] sm:text-6xl lg:text-7xl [text-wrap:balance]">
             Ask for help quietly. Reach a peer facilitator sooner.
           </h1>
           <p className="mt-6 max-w-[60ch] text-lg text-[color:var(--mb-muted)]">
             Mind Bridge is the University of San Agustin check-in for student wellbeing. Answer a short private
             screening, see what it suggests, and book a time with a campus peer facilitator.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
             <Link to="/login" className="mb-btn mb-btn-line">
               Log in to check in <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </Link>
@@ -128,8 +128,8 @@ export default function HomePage() {
                 {n}
               </span>
               <div className="min-w-0">
-                <h2 className="mb-sign flex items-center gap-2 text-2xl font-bold">
-                  {title} <Icon className="h-5 w-5 opacity-80" aria-hidden="true" />
+                <h2 className="mb-sign text-2xl font-bold">
+                  {title} <Icon className="inline h-5 w-5 align-[-0.1em] opacity-80" aria-hidden="true" />
                 </h2>
                 <p className="text-[color:var(--mb-panel-soft)]">{body}</p>
               </div>
@@ -150,11 +150,11 @@ export default function HomePage() {
               className="mb-card mb-card-interactive group flex flex-col justify-between gap-6 text-[color:var(--mb-ink)] no-underline"
             >
               <div>
-                <span className="grid h-12 w-12 place-items-center rounded-md bg-[color:var(--mb-brand-bg)] text-[color:var(--mb-brand)]">
-                  <Icon className="h-6 w-6" aria-hidden="true" />
-                </span>
-                <h3 className="mb-sign mt-3 text-2xl font-bold">{who}</h3>
-                <p className="mt-1 text-[color:var(--mb-muted)]">{what}</p>
+                <h3 className="mb-sign flex items-center gap-3 text-2xl font-bold">
+                  <Icon className="h-6 w-6 shrink-0 text-[color:var(--mb-brand)]" aria-hidden="true" />
+                  {who}
+                </h3>
+                <p className="mt-2 text-[color:var(--mb-muted)]">{what}</p>
               </div>
               <span className="mb-sign inline-flex items-center gap-2 text-lg font-bold text-[color:var(--mb-brand)]">
                 {cta}{" "}

@@ -4,11 +4,11 @@ import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 /** Port of the "Web Preload" Framer layout: name, a cycling slogan, two blurred colour glows, then the panel lifts away. */
 const SLOGANS = ["Support that meets you where you are", "A bridge to the help you need"];
 const NAME = "MIND BRIDGE";
-const HOLD_MS = 2700;
+const HOLD_MS = 1700;
 const SLOGAN_MS = 1700;
 const STORAGE_KEY = "mb-preloaded";
 const spring = { type: "spring", damping: 40, stiffness: 400, mass: 1 } as const;
-const lift = { duration: 1, ease: [1, 0.01, 0.38, 1.01] } as const;
+const lift = { duration: 0.7, ease: [1, 0.01, 0.38, 1.01] } as const;
 
 function skipIntro(): boolean {
   try {

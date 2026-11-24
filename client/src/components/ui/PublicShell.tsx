@@ -5,14 +5,18 @@ import { useTheme } from "../../hooks/useTheme";
 import { Moon, Sun, Phone } from "lucide-react";
 import Logo from "./Logo";
 
-export function Brand({ small = false }) {
+export function Brand({ small = false, hideNameOnPhone = false }) {
   return (
     <Link to="/" className="inline-flex min-h-[44px] items-center gap-3 no-underline text-[color:var(--mb-ink)]">
       <Logo className={small ? "h-8 w-8 rounded" : "h-10 w-10 rounded"} />
-      <span className="leading-tight">
-        <span className="mb-sign block whitespace-nowrap text-2xl font-bold">Mind Bridge</span>
+      <span className="leading-tight max-[379px]:sr-only">
+        <span
+          className={`mb-sign block whitespace-nowrap text-2xl font-bold${hideNameOnPhone ? " max-sm:sr-only" : ""}`}
+        >
+          Mind Bridge
+        </span>
         {!small && (
-          <span className="hidden text-sm text-[color:var(--mb-muted)] sm:block">
+          <span className="hidden text-sm text-[color:var(--mb-muted)] lg:block">
             University of San Agustin Guidance Services
           </span>
         )}
@@ -21,23 +25,24 @@ export function Brand({ small = false }) {
   );
 }
 
-export function CrisisStrip() {
+/** The crisis line, in the header on every public page so it is one tap away without scrolling. */
+export function CrisisLink() {
   return (
-    <aside aria-label="Crisis support" className="mb-plate-amber !rounded-none">
-      <div className="flex w-full flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 sm:px-6">
-        <p className="font-semibold">In crisis right now? The NCMH hotline is free and open 24/7.</p>
-        <a
-          href="tel:1553"
-          className="mb-sign inline-flex min-h-[44px] items-center gap-2 text-xl font-bold no-underline hover:underline"
-          style={{ color: "inherit" }}
-        >
-          <Phone className="h-5 w-5" aria-hidden="true" />
-          Call 1553
-        </a>
-      </div>
-    </aside>
+    <a
+      href="tel:1553"
+      title="National Center for Mental Health crisis hotline. Free, open 24/7."
+      className="mb-plate-amber mb-sign inline-flex min-h-[44px] items-center gap-2 px-3 text-lg font-bold no-underline"
+      style={{ color: "var(--mb-amber-ink)" }}
+    >
+      <Phone className="h-4 w-4" aria-hidden="true" />
+      <span className="max-sm:sr-only">Crisis </span>1553
+      <span className="hidden text-base font-semibold lg:inline">· free, 24/7</span>
+    </a>
   );
 }
+
+const quietLink =
+  "inline-flex min-h-[44px] items-center whitespace-nowrap rounded-lg px-3 font-bold text-[color:var(--mb-ink)] no-underline transition-colors hover:bg-[color:var(--mb-brand-bg)]";
 
 export interface PublicShellProps {
   children?: ReactNode;
@@ -57,16 +62,42 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
       <a href="#main-content" className="mb-skip">
         Skip to main content
       </a>
-      <CrisisStrip />
-      <header className="border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)] shadow-mb-sm">
-        <div className="flex w-full flex-wrap items-center justify-between gap-x-2 gap-y-2 px-4 py-4 sm:gap-4 sm:px-6">
-          <Brand />
-          <nav className="ml-auto flex items-center gap-2 sm:gap-3" aria-label="Account">
+      {/* One bar, kept in view: the brand, the crisis line, then the account actions with a single solid button.
+          Phones show only the crisis line, the theme switch and (when signed in) Dashboard; the page itself carries
+          the sign-up and log-in buttons right under the headline. */}
+      <header className="sticky top-0 z-30 border-b border-[color:var(--mb-line)] bg-[color:var(--mb-surface)]">
+        <div className="flex h-16 w-full items-center gap-3 px-4 sm:px-6">
+          <Brand hideNameOnPhone={Boolean(currentUser && showAuthLinks)} />
+          <nav className="ml-auto flex items-center gap-1 sm:gap-2" aria-label="Account">
+            <CrisisLink />
+            {currentUser ? (
+              <>
+                <button type="button" onClick={logout} className={`${quietLink} max-sm:hidden`}>
+                  Log out
+                </button>
+                {showAuthLinks && (
+                  <Link to={dashboard} className="mb-btn mb-btn-solid whitespace-nowrap">
+                    Dashboard
+                  </Link>
+                )}
+              </>
+            ) : (
+              showAuthLinks && (
+                <>
+                  <Link to="/login" className={`${quietLink} max-md:hidden`}>
+                    Log in
+                  </Link>
+                  <Link to="/signup" className="mb-btn mb-btn-solid whitespace-nowrap max-sm:hidden">
+                    Create account
+                  </Link>
+                </>
+              )
+            )}
             <button
               type="button"
               onClick={toggle}
               aria-label={`Switch to ${next} mode`}
-              className="mb-btn mb-btn-line !min-h-[44px] !px-3"
+              className={`${quietLink} w-11 justify-center !px-0`}
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5" aria-hidden="true" />
@@ -74,30 +105,6 @@ export default function PublicShell({ children, showAuthLinks = true, calm = fal
                 <Moon className="h-5 w-5" aria-hidden="true" />
               )}
             </button>
-            {currentUser ? (
-              <>
-                {showAuthLinks && (
-                  <Link to={dashboard} className="mb-btn mb-btn-solid whitespace-nowrap">
-                    Dashboard
-                  </Link>
-                )}
-                <button type="button" onClick={logout} className="mb-btn mb-btn-line whitespace-nowrap">
-                  Log out
-                </button>
-              </>
-            ) : (
-              showAuthLinks && (
-                <>
-                  <Link to="/login" className="mb-btn mb-btn-line hidden sm:inline-flex">
-                    Log in
-                  </Link>
-                  <Link to="/signup" className="mb-btn mb-btn-solid whitespace-nowrap">
-                    <span className="sm:hidden">Sign up</span>
-                    <span className="hidden sm:inline">Create account</span>
-                  </Link>
-                </>
-              )
-            )}
           </nav>
         </div>
       </header>

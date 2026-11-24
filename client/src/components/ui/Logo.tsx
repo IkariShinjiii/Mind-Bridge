@@ -1,6 +1,6 @@
 import logo from "../../assets/usa-logo.webp";
 
-/** The University of San Agustin crest. Dark theme seats it on a white tile so its black outlines stay readable. */
+/** The University of San Agustin crest. Its background is transparent, so it sits directly on either theme. */
 export default function Logo({ className = "" }: { className?: string }) {
   return <img src={logo} alt="" className={`mb-logo object-contain ${className}`} />;
 }
