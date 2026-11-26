@@ -45,7 +45,7 @@ Unlike clinical electronic health record (EHR) systems that feel cold and bureau
 
 - **Tone & Voice**: Compassionate, reassuring, steady, transparent, and dignified. Never clinical jargon, never dismissive, never cheerful toxic positivity.
 - **Identity & Name**: Mind Bridge — connecting students to care with warmth, security, and clarity.
-- **Visual Personality**: Calming, grounding, intentional, and high-trust. Deep teal as the primary colour, a brighter teal for decoration, amber reserved for the crisis line, crisp legible typography, and zero jarring neon distractions.
+- **Visual Personality**: Calming, grounding, intentional, and high-trust. Deep crimson from the University of San Agustin crest as the primary colour, a brighter red for decoration only, amber reserved for the crisis line, crisp legible typography, and zero jarring neon distractions.
 
 ## Evidence on Hand
 

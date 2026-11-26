@@ -5,8 +5,10 @@ import { doc, getDoc } from "firebase/firestore";
 import { createEnv, seedUsers, seed, USERS, slot, assessment, appointment, message } from "../helpers/env.js";
 
 const session = vi.hoisted(() => ({ db: null, user: null }));
-vi.mock("../../client/src/lib/firebase.ts", () => ({
+vi.mock("../../client/src/lib/db.ts", () => ({
   get db() { return session.db; },
+}));
+vi.mock("../../client/src/lib/firebase.ts", () => ({
   get auth() { return {}; },
   provider: {},
 }));

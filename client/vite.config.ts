@@ -46,7 +46,8 @@ export default defineConfig(({ mode }) => ({
             /\/node_modules\/(recharts|d3-[^/]+|victory-vendor|es-toolkit|decimal\.js-light|react-smooth)\//.test(path)
           )
             return "charts";
-          if (/\/node_modules\/(@firebase|firebase|re2js)\//.test(path)) return "firebase";
+          if (/\/node_modules\/(@firebase\/firestore|firebase\/firestore|re2js)\//.test(path)) return "firestore";
+          if (/\/node_modules\/(@firebase|firebase)\//.test(path)) return "firebase";
           // React is shared by the entry and by Recharts. Without its own chunk Rollup folds it into "charts",
           // and every page, including the landing page, then downloads the charting library up front.
           if (

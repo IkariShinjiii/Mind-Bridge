@@ -65,7 +65,7 @@ const GROUPS: Array<{ title: string; note: string; rows: TokenRow[] }> = [
   },
   {
     title: "Signage plate",
-    note: "The teal plate carries the one key statement on a page.",
+    note: "The crimson plate carries the one key statement on a page.",
     rows: [
       ["panel-ink", "Text on the plate", "panel", 4.5],
       ["panel-soft", "Supporting text on the plate", "panel", 4.5],

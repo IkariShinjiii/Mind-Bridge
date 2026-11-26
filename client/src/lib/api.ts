@@ -16,7 +16,7 @@ import {
   type QuerySnapshot,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { db } from "./firebase";
+import { db } from "./db";
 import { scoreAnswers, type QuestionLike } from "../utils/scoring";
 import { scoreWho5 } from "../utils/clinical";
 import { AppError, toAppError } from "../utils/errors";

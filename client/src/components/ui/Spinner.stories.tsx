@@ -61,7 +61,7 @@ export const LoadingRegion: Story = {
 };
 
 export const OnBrandPanel: Story = {
-  name: "On a teal panel",
+  name: "On a crimson panel",
   parameters: { layout: "padded" },
   render: () => (
     <div className="mb-plate flex items-center gap-3 p-6">

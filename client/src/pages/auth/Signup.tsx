@@ -9,7 +9,8 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, provider } from "../../lib/firebase";
+import { auth, provider } from "../../lib/firebase";
+import { db } from "../../lib/db";
 import AuthFrame, { GoogleIcon, Spinner, Field } from "../../components/ui/AuthFrame";
 import { validateSignup, passwordStrength, SCHOOL_EMAIL_DOMAIN } from "../../utils/validation";
 import { friendlyError, isPopupDismissed } from "../../utils/errors";

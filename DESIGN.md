@@ -2,34 +2,36 @@
 name: Mind Bridge Design System
 description: Calm Wayfinding, softened. A University of San Agustin crimson-and-white, high-contrast system for a student mental wellness service, light by default with a dark option.
 colors:
-  ground: "#f5f7f6"
+  ground: "#f0f2f7"
   surface: "#ffffff"
-  surface-2: "#edf2f0"
-  panel: "#2a5861"
-  panel-ink: "#f6faf9"
-  panel-soft: "#eef5f3"
-  ink: "#22343a"
-  muted: "#3e5157"
-  line: "#dde5e3"
-  field-line: "#74898f"
+  surface-2: "#e6e9f0"
+  panel: "#a60000"
+  panel-ink: "#ffffff"
+  panel-soft: "#fff8f8"
+  ink: "#111111"
+  muted: "#474c57"
+  line: "#dce0e9"
+  field-line: "#767c89"
   link: "#09509a"
   focus: "#0b6bcb"
-  brand-bg: "#eef5f4"
-  accent: "#7fb5b0"
-  amber: "#f1d9a6"
-  amber-ink: "#40300c"
+  brand: "#a60000"
+  brand-bg: "#fdeeee"
+  accent: "#e03a3a"
+  amber: "#ffcc1a"
+  amber-ink: "#2e2300"
   safe: "#265643"
   safe-bg: "#e4efe9"
   warn: "#5c4510"
   warn-bg: "#f7efdc"
-  urgent: "#7d2f27"
-  urgent-bg: "#f6e4e0"
+  urgent: "#7d2d05"
+  urgent-bg: "#fbe8da"
   violet: "#4d3490"
-  dark-ground: "#0b171b"
-  dark-surface: "#112127"
-  dark-panel: "#134853"
-  dark-ink: "#e9f2f0"
-  dark-muted: "#b4c8cc"
+  dark-ground: "#0a0a0a"
+  dark-surface: "#171717"
+  dark-panel: "#a60000"
+  dark-ink: "#f8eeec"
+  dark-muted: "#d4bec0"
+  dark-brand: "#ffffff"
   dark-focus: "#ffc857"
 typography:
   display:
@@ -49,13 +51,13 @@ rounded:
 
 ## Overview
 
-**Creative North Star: "Calm Wayfinding."** The product is a route to help, so the interface is plain, high-contrast and legible at a glance, and always shows where you are and what comes next. The look is soft and trustworthy rather than clinical: rounded corners, hairline borders, gentle sage-tinted shadows. Emotion is carried by clarity and steadiness, not decoration.
+**Creative North Star: "Calm Wayfinding."** The product is a route to help, so the interface is plain, high-contrast and legible at a glance, and always shows where you are and what comes next. The look is soft and trustworthy rather than clinical: rounded corners, hairline borders, gentle neutral shadows. Emotion is carried by clarity and steadiness, not decoration.
 
 Light is the default (daytime use on campus), with a dark theme for late-night check-ins. The theme is switched by `data-theme` on the `.mb` wrapper and remembered in `localStorage` under `mindbridge_theme`.
 
 ## Colour
 
-- **Primary: deep crimson** (`panel`, `brand`, from the USA crest). Filled for the main action, outlined for the secondary one, and used for navigation's active state. `accent` (bright red) is decorative only: gradients and progress fills, never text.
+- **Primary: deep crimson** (`panel`, `brand`, from the USA crest; in the dark theme `brand` text is white and `panel` stays crimson). Filled for the main action, outlined for the secondary one, and used for navigation's active state. `accent` (bright red) is decorative only: gradients and progress fills, never text.
 - **Neutrals:** `ground` for the page, `surface` for cards, `surface-2` for inset and disabled areas, `ink` for text, `muted` for supporting text, `line` for dividers.
 - **Status:** green = steady (`safe`), amber-brown = moderate (`warn`), red = priority or error (`urgent`). Risk is always also stated in words, never by colour alone.
 - **Amber is for the crisis line only.** The NCMH number (1553) is always one tap away, in amber.
@@ -84,18 +86,20 @@ The scale lives in `tailwind.config.js` (`text-xs` to `text-4xl`), and bare `h1`
 
 ## Components
 
-- **Buttons** (`mb-btn`): primary is solid teal with a shadow and 1px lift on hover; secondary (`mb-btn-line`) is outlined; danger (`mb-btn-danger`) is red. Disabled is flat grey with no hover response. 48px minimum height.
+- **Buttons** (`mb-btn`): primary is solid crimson with a shadow and 1px lift on hover; secondary (`mb-btn-line`) is outlined; danger (`mb-btn-danger`) is red. Disabled is flat grey with no hover response. 48px minimum height.
 - **Cards** (`mb-card`, `Card`): surface, hairline border, `shadow-mb-sm`, 24px padding. `mb-tile` is the quiet inset block inside a card.
 - **Inputs** (`mb-field`, `Input`): 12px radius, 2px `field-line` border, a soft 4px focus halo, red border plus an icon and message on error (the message fades in), grey and read-only look when disabled.
-- **Badges and chips:** `mb-badge` (+ `-safe`, `-warn`, `-urgent`, `-brand`) are tinted status labels. `mb-chip` is the filter pill; `aria-pressed` or `aria-current="page"` makes it a filled teal pill.
+- **Badges and chips:** `mb-badge` (+ `-safe`, `-warn`, `-urgent`, `-brand`) are tinted status labels. `mb-chip` is the filter pill; `aria-pressed` or `aria-current="page"` makes it a filled crimson pill.
 - **Dialogs:** blurred dark scrim (`--mb-scrim`, near-black in dark mode so a dialog never brightens the screen), 16px radius, `shadow-mb-lg`, a 300ms scale-and-fade entrance. Escape and focus trapping are unchanged.
-- **Navigation:** active item is a filled teal pill, hover is a light teal wash. The bottom bar (phones and tablets) uses the same pill.
+- **Navigation (signed in):** active item is a filled crimson pill, hover is a light crimson wash. The bottom bar (phones and tablets) uses the same pill.
+- **Navigation (public pages):** one sticky 64px bar in `PublicShell`. Brand on the left; on the right the amber crisis pill (always visible, "Crisis 1553", with "free, 24/7" from `lg`), a quiet text Log in (from `md`), one solid Create account (from `sm`) and an icon-only theme switch. Phones keep only the crisis number and the switch; the landing hero carries Log in and Create account, solid first. There is no separate crisis strip.
+- **Logo:** the University crest (`Logo`) has a transparent background and sits directly on both themes, with no tile behind it.
 - **Toasts:** slide in from the right in 240ms, slide out in 180ms, with a coloured left edge. Errors stay up longer than successes.
 - **Loading:** `mb-skeleton` shimmer blocks for content areas, `Spinner` for buttons and fields.
 
 ## Motion
 
-All transitions are 300ms or less: page change 260ms fade and 8px rise, button and chip colour 150ms, card lift 220ms, check-in question 240ms slide. The only long moments are the route line on the landing page and the once-per-session preloader (`components/ui/Preloader.tsx`, about 2.7s, skipped entirely for reduced motion). Everything respects `prefers-reduced-motion` (animations and transitions are removed, not shortened).
+All transitions are 300ms or less: page change 260ms fade and 8px rise, button and chip colour 150ms, card lift 220ms, check-in question 240ms slide. The only long moments are the route line on the landing page and the once-per-session preloader (`components/ui/Preloader.tsx`, about 1.7s plus a 0.7s lift, skipped entirely for reduced motion). Everything respects `prefers-reduced-motion` (animations and transitions are removed, not shortened).
 
 Entrances and exits are Framer Motion, not CSS keyframes. Every duration, curve and preset lives in `client/src/lib/motion.ts` (`pagePreset`, `fadePreset`, `dialogPreset`, `toastPreset`, `stepVariants`, `staggerParent`/`staggerChild`); use those rather than inline numbers. One `MotionConfig` and one `LazyMotion` wrap the app in `main.tsx` (and the Storybook preview), so components import `m`, not `motion`. Pass presets through `useMotionPreset` so reduced motion renders the final state with no animation. Route changes use `AnimatePresence mode="wait"` in `App.tsx`, so pages don't add their own entrance. Never leave a transform on an ancestor of a `position: fixed` element. The skeleton shimmer is the only animation still in CSS.
 

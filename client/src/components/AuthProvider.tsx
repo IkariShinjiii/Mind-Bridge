@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 import { AuthContext } from "../lib/auth-context";
 import { normalizeRole } from "../utils/roles";
 import { accountStatus as statusOf, type AccountStatus } from "../utils/accountStatus";
@@ -12,6 +11,8 @@ type Loaded = { profile: LoadedProfile; status: AccountStatus };
 
 /** Reads `users/{uid}` and normalises the role. Returns null when the document does not exist. */
 async function loadProfile(uid: string, emailVerified: boolean): Promise<Loaded | null> {
+  // Loaded on demand: a signed-out visitor never needs Firestore, so it stays out of the first download.
+  const [{ doc, getDoc }, { db }] = await Promise.all([import("firebase/firestore"), import("../lib/db")]);
   const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) return null;
   const data = snap.data() as UserProfile;
@@ -34,7 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       void (async () => {
         if (user) {
-          setCurrentUser(user);
+          // The user is published together with their role (below), never before it: a route that sees a signed-in
+          // user with no role yet would send a staff member to the student dashboard while the profile loads.
           try {
             const loaded = await loadProfile(user.uid, user.emailVerified);
             if (loaded) {
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUserData(null);
             setAccountStatus("unavailable");
           }
+          setCurrentUser(user);
         } else {
           setCurrentUser(null);
           setUserRole(null);
