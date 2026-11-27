@@ -6,6 +6,11 @@ appointments.
 
 > Live app: <https://mind-bridge-omega.vercel.app>
 
+**Project status.** Mind Bridge is a capstone project for the University of San Agustin, defended
+on November 27, 2026. It was built to fulfil a class requirement and is not a live deployment:
+no office or institution has adopted it, and it is not clinically validated. It is a screening and
+triage aid, not a diagnosis.
+
 ## Table of contents
 
 1. [Overview](#overview)
